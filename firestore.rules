@@ -3,22 +3,27 @@
 // (request.auth.token.role), nunca de un campo en users/{uid} editable por
 // el cliente.
 //
-// ESTADO ACTUAL (bootstrap, ver .agent/STATUS.md §Bloqueos): Firebase Admin
-// todavía no tiene credenciales de service account, así que no hay forma de
-// asignar custom claims (role/canViewMargin) todavía. Mientras tanto, estas
-// reglas solo exigen sesión autenticada — CUALQUIER usuario que pueda hacer
-// login con Google (el proyecto de Firebase no es público, hay que estar
-// invitado) puede leer y escribir. Es deliberadamente más permisivo que la
-// matriz final. Reemplazar cada bloque "bootstrap" por la versión comentada
-// debajo apenas existan custom claims reales — no antes, o nadie puede
-// escribir nada.
+// ESTADO ACTUAL (bootstrap, ver .agent/STATUS.md §Bloqueos): todavía no se
+// diferencia por rol (admin/buyer/viewer) — ambos usuarios del equipo son
+// admin de hecho. Mientras tanto, `isAllowedEmail()` es el único borde real:
+// cualquier cuenta de Google fuera de esa lista queda afuera aunque logre
+// autenticarse. Reemplazar cada bloque "bootstrap" por la versión comentada
+// debajo apenas la matriz de roles importe (más de 2 usuarios) — no antes.
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Allowlist temporal — mientras no hay custom claims, esto es lo único
+    // que impide que cualquier cuenta de Google entre y escriba. Mantener
+    // sincronizado a mano con src/constants/allowedEmails.js.
+    function isAllowedEmail() {
+      return request.auth.token.email in
+        ['matiastapia91@gmail.com', 'dmezastange@gmail.com'];
+    }
+
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null && isAllowedEmail();
     }
 
     // --- Versión final (activar cuando haya custom claims — hoy sin usar) ---

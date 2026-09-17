@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@contexts/AuthContext'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
-import CategoryIcon from '@mui/icons-material/Category'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
 import BuildIcon from '@mui/icons-material/Build'
 import FactoryIcon from '@mui/icons-material/Factory'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
@@ -29,7 +29,7 @@ import { RAIL_WIDTH } from '@constants/layout'
 const ICONS = {
   Dashboard: DashboardIcon,
   DirectionsCar: DirectionsCarIcon,
-  Category: CategoryIcon,
+  Category: Inventory2Icon,
   Build: BuildIcon,
   Factory: FactoryIcon,
   RequestQuote: RequestQuoteIcon,
@@ -65,7 +65,9 @@ export default function AppRail() {
         alignItems: 'center',
         py: 2,
         gap: 0.5,
-        minHeight: '100vh',
+        height: '100vh',
+        position: 'sticky',
+        top: 0,
       }}
     >
       {RAIL_ITEMS.filter((item) => item.implemented).map((item) => {

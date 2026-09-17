@@ -8,18 +8,30 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import SearchIcon from '@mui/icons-material/Search'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import Tooltip from '@mui/material/Tooltip'
 import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
-import Pill from '@components/common/Pill'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
 import { LIST_GAP, px } from '@constants/layout'
 import { useCatalog } from './hooks/useCatalog'
 
-const CODE_STATUS_TONE = { confirmed: 'success', provisional: 'warning', missing: 'error' }
+const CODE_STATUS_ICON = {
+  confirmed: CheckCircleIcon,
+  provisional: HelpOutlineIcon,
+  missing: ErrorOutlineIcon,
+}
+const CODE_STATUS_COLOR = {
+  confirmed: 'success.main',
+  provisional: 'warning.main',
+  missing: 'error.main',
+}
 
 export default function CatalogPage() {
   const {
@@ -158,98 +170,95 @@ export default function CatalogPage() {
               Sin resultados.
             </Typography>
           ) : (
-            rows.map((r) => (
-              <Box
-                key={r.id}
-                component={Link}
-                href={`/parts/${r.id}`}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  height: 44,
-                  px: 1.5,
-                  borderRadius: `${RADIUS.inputSmall}px`,
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  bgcolor: 'brand.bodyBg',
-                  '&:hover': { bgcolor: 'action.hover' },
-                }}
-              >
-                <Typography
-                  variant="body2"
+            rows.map((r) => {
+              const StatusIcon = CODE_STATUS_ICON[r.codeStatus]
+              return (
+                <Box
+                  key={r.id}
+                  component={Link}
+                  href={`/parts/${r.id}`}
                   sx={{
-                    fontWeight: 600,
-                    flex: 1.6,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    height: 44,
+                    px: 1.5,
+                    borderRadius: `${RADIUS.inputSmall}px`,
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    bgcolor: 'brand.bodyBg',
+                    '&:hover': { bgcolor: 'action.hover' },
                   }}
                 >
-                  {r.nameEs}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}
-                >
-                  {r.vehicleLabel}
-                </Typography>
-                <Box sx={{ flex: 0.8, minWidth: 0, display: { xs: 'none', md: 'block' } }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                    {r.categoryLabel}
-                  </Typography>
-                  {r.subcategoryLabel ? (
-                    <Typography
-                      variant="caption"
-                      color="text.disabled"
-                      sx={{ display: 'block', fontSize: 11, lineHeight: 1.2 }}
-                    >
-                      {r.subcategoryLabel}
-                    </Typography>
-                  ) : null}
-                </Box>
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flex: 0.9, minWidth: 0 }}
-                >
-                  <Box
-                    component="span"
+                  <Typography
+                    variant="body2"
                     sx={{
-                      fontFamily: '"Roboto Mono", monospace',
-                      fontSize: 12,
-                      color: 'text.secondary',
+                      fontWeight: 600,
+                      flex: 1.6,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {r.code || '—'}
-                  </Box>
-                  <Pill
-                    label={CODE_STATUS_LABELS_ES[r.codeStatus]}
-                    tone={CODE_STATUS_TONE[r.codeStatus]}
-                  />
-                </Box>
-                <MoneyValue
-                  money={r.baselinePrice}
-                  sx={{ flex: 0.7, textAlign: 'right', fontSize: 13 }}
-                />
-                <Box sx={{ flex: 0.7, textAlign: 'right' }}>
-                  {r.bestQuoteUsd !== null ? (
-                    <MoneyValue
-                      money={{
-                        amount: Math.round(r.bestQuoteUsd * 100),
-                        currency: 'USD',
-                        scale: 2,
+                    {r.nameEs}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}
+                  >
+                    {r.vehicleLabel}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ flex: 0.8, minWidth: 0, display: { xs: 'none', md: 'block' } }}
+                  >
+                    {r.categoryLabel}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      flex: 0.9,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        fontFamily: '"Roboto Mono", monospace',
+                        fontSize: 12,
+                        color: 'text.secondary',
                       }}
-                      sx={{ fontSize: 13, color: 'success.main', fontWeight: 600 }}
-                    />
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      —
-                    </Typography>
-                  )}
+                    >
+                      {r.code || '—'}
+                    </Box>
+                    <Tooltip title={CODE_STATUS_LABELS_ES[r.codeStatus]}>
+                      <StatusIcon sx={{ fontSize: 16, color: CODE_STATUS_COLOR[r.codeStatus] }} />
+                    </Tooltip>
+                  </Box>
+                  <MoneyValue
+                    money={r.baselinePriceUsd}
+                    sx={{ flex: 0.7, textAlign: 'right', fontSize: 13 }}
+                  />
+                  <Box sx={{ flex: 0.7, textAlign: 'right' }}>
+                    {r.bestQuotePriceUsd !== null ? (
+                      <MoneyValue
+                        money={r.bestQuotePriceUsd}
+                        sx={{ fontSize: 13, color: 'success.main', fontWeight: 600 }}
+                      />
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">
+                        —
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            ))
+              )
+            })
           )}
         </Box>
       </Card>

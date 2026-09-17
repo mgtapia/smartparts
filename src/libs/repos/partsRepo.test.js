@@ -37,19 +37,17 @@ function toShapedPartForSavings(p) {
 describe('partsRepo — auditoría de anomalías (reporta, no corrige)', () => {
   const anomalies = computeAnomalies(PARTS.map(toRawPart))
 
-  it('detecta los 3 códigos faltantes reales de la planilla', () => {
+  it('detecta las 60 filas "SIN CODIGO" reales de la planilla completa (4 marcas)', () => {
     const missing = anomalies.filter((a) => a.type === 'missing_code')
-    expect(missing).toHaveLength(3)
+    expect(missing).toHaveLength(60)
   })
 
   it('detecta el conflicto de precio real (B013771 a dos precios)', () => {
     const conflict = anomalies.find(
-      (a) => a.type === 'price_conflict' && a.partIds.includes('part_b013771_der'),
+      (a) => a.type === 'price_conflict' && a.partIds.includes('part_b013771'),
     )
     expect(conflict).toBeTruthy()
-    expect(conflict.partIds).toEqual(
-      expect.arrayContaining(['part_b013771_der', 'part_b013771_izq']),
-    )
+    expect(conflict.partIds).toEqual(expect.arrayContaining(['part_b013771', 'part_b013771_2']))
   })
 
   it('detecta el código repetido en 3 bisagras distintas (5705001)', () => {

@@ -11,7 +11,7 @@ import { useAuth } from '@contexts/AuthContext'
 import { DEFAULT_AUTHENTICATED_PATH } from '@constants/routes'
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth()
+  const { user, loading, unauthorized, signInWithGoogle } = useAuth()
   const router = useRouter()
   const [error, setError] = useState(null)
   const [signingIn, setSigningIn] = useState(false)
@@ -58,6 +58,11 @@ export default function LoginPage() {
       {error ? (
         <Typography variant="body2" color="error.main">
           {error}
+        </Typography>
+      ) : null}
+      {unauthorized ? (
+        <Typography variant="body2" color="error.main">
+          Esa cuenta no tiene acceso a SmartParts todavía.
         </Typography>
       ) : null}
     </Box>

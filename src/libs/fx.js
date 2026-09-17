@@ -39,4 +39,17 @@ export function usdToClp(usdMoney, fx) {
   return usdMicroToClp(toMicros(usdMoney), fx)
 }
 
+/**
+ * Inversa de `usdToClp` — para comparar un baseline en CLP contra
+ * cotizaciones en USD en la misma moneda (ver Catálogo).
+ * @param {import('./money').Money} clpMoney
+ * @param {import('../core/costing/types').FxSnapshot} fx
+ * @returns {import('./money').Money}
+ */
+export function clpToUsd(clpMoney, fx) {
+  if (clpMoney.currency !== 'CLP') throw new Error('clpToUsd: se esperaba un Money en CLP')
+  const usdMicro = roundHalfUp((toMicros(clpMoney) * 1e6) / fx.usdClp)
+  return fromMicros(usdMicro, 'USD')
+}
+
 export { money }

@@ -67,6 +67,8 @@ Hechos clave que la planilla ya fija (detalle en [[PRD]] y [[MODELO-DE-DATOS]]):
 - Catálogo dominado por piezas de carrocería (parachoques, puertas, ópticos, tapabarros), no por desgaste — consistente con ride-hailing urbano. El peso volumétrico domina el flete.
 - Anomalías reales encontradas: códigos `SIN CODIGO`, mismo código con dos precios distintos, mismo código para lado derecho/izquierdo. El importador debe **reportarlas, nunca corregirlas en silencio**.
 
+**Planilla completa importada (2026-09-17)**: `src/mocks/parts.js` pasó de un subconjunto curado de 22 filas a las **592 filas reales de las 4 marcas** (Dongfeng E70, Kia Niro EV, Nammi Básico+Full, Neta Aya — 1 fila se descartó por no traer precio neto). `weight_g`/`volume_cm3` para las filas nuevas son heurística por palabra clave en el nombre (ver comentario en `parts.js`), no medición — mismo criterio de "estimado, no inventado silenciosamente" que ya regía. Con el dataset completo, `computeAnomalies()` reporta **60 códigos faltantes** y **~70 `duplicate_position`** (la mayoría son pares DER/IZQ compartiendo un mismo código OEM — puede ser un error de la planilla o puede ser que el proveedor real use un solo código para la pieza simétrica; sin verificar). Pendiente de decisión del usuario: ¿el dashboard debe seguir mostrando cada par DER/IZQ como anomalía individual, o el volumen real ameritó separar "duplicado sin verificar" de "conflicto de precio" (esto sí, sin ambigüedad, es un error real) en la UI?
+
 ## Datos pendientes del usuario (no bloquean Fase 0/1, sí Fase 2)
 
 - Costo diario de inmovilización de un vehículo de la flota cliente (o arriendo diario como proxy) — variable central del comparador barco vs. avión.

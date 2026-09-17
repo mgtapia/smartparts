@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { listParts } from '@libs/repos/partsRepo'
 import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
+import { clpToUsd } from '@libs/fx'
+import { money } from '@libs/money'
+import { DEFAULT_FX } from '@mocks/costParams'
 
 export function useCatalog() {
   const [search, setSearch] = useState('')
@@ -20,26 +23,27 @@ export function useCatalog() {
         if (cancelled) return
         const rows = parts.map((p) => {
           const categoryTopPath = p.categoryPath.split('__')[0]
-          const isSubcategory = p.categoryPath !== categoryTopPath
+          const bestQuoteUsd =
+            [p.quoteRollup.original.minUsd, p.quoteRollup.alternative.minUsd]
+              .filter((v) => v !== null)
+              .sort((a, b) => a - b)[0] ?? null
           return {
             id: p.id,
             nameEs: p.nameEs,
             // Nivel superior — el mismo que usa el filtro, para que la fila
             // calce visualmente con la categoría elegida.
             categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
-            // Subcategoría (si la parte vive más abajo en el árbol) — se muestra
-            // como detalle secundario, no reemplaza a categoryLabel.
-            subcategoryLabel: isSubcategory ? p.category?.labelEs || null : null,
             categoryTopPath,
             vehicleId: p.vehicleId,
             vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
             code: p.oemCodes[0]?.code || null,
             codeStatus: p.codeStatus,
-            baselinePrice: p.baselinePrice,
-            bestQuoteUsd:
-              [p.quoteRollup.original.minUsd, p.quoteRollup.alternative.minUsd]
-                .filter((v) => v !== null)
-                .sort((a, b) => a - b)[0] ?? null,
+            // Baseline (CLP) convertido a USD para que sea comparable en la
+            // misma columna que la mejor cotización — nunca se comparan
+            // montos en monedas distintas a simple vista.
+            baselinePriceUsd: clpToUsd(p.baselinePrice, DEFAULT_FX),
+            bestQuotePriceUsd:
+              bestQuoteUsd === null ? null : money(Math.round(bestQuoteUsd * 100), 'USD'),
           }
         })
         setAllRows(rows)

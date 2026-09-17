@@ -2,12 +2,17 @@
 
 // Sesión de usuario — Google Auth vía Firebase (ver docs/SEGURIDAD-Y-ROLES.md).
 // `role`/`canViewMargin` salen del custom claim del ID token, nunca de un campo
-// de Firestore editable por el cliente. Hasta que Firebase Admin tenga
-// credenciales (ver .agent/STATUS.md §Bloqueos) no hay claims asignados
-// todavía: quedan en `null` y el rail no filtra por permiso aún.
+// de Firestore editable por el cliente.
+//
+// `ALLOWED_EMAILS` es el borde real hoy (ver src/constants/allowedEmails.js y
+// firestore.rules): el proyecto es privado al equipo mientras no hay más
+// usuarios que ameriten diferenciar por rol. Se refuerza acá (UX: no dejar
+// pasar a alguien que igual va a chocar contra las Security Rules) pero el
+// borde de verdad es Firestore — nunca confiar solo en este chequeo cliente.
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { getFirebaseAuth, getGoogleProvider } from '@libs/firebase/client'
+import { ALLOWED_EMAILS } from '@constants/allowedEmails'
 
 const AuthContext = createContext(null)
 
@@ -16,9 +21,20 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null)
   const [canViewMargin, setCanViewMargin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [unauthorized, setUnauthorized] = useState(false)
 
   useEffect(() => {
     return onAuthStateChanged(getFirebaseAuth(), async (nextUser) => {
+      if (nextUser && !ALLOWED_EMAILS.includes(nextUser.email)) {
+        await signOut(getFirebaseAuth())
+        setUser(null)
+        setRole(null)
+        setCanViewMargin(false)
+        setUnauthorized(true)
+        setLoading(false)
+        return
+      }
+      setUnauthorized(false)
       setUser(nextUser)
       if (nextUser) {
         const tokenResult = await nextUser.getIdTokenResult()
@@ -37,6 +53,7 @@ export function AuthProvider({ children }) {
     role,
     canViewMargin,
     loading,
+    unauthorized,
     signInWithGoogle: () => signInWithPopup(getFirebaseAuth(), getGoogleProvider()),
     signOutUser: () => signOut(getFirebaseAuth()),
   }

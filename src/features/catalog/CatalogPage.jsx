@@ -17,11 +17,11 @@ import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
-import { CODE_STATUS_LABELS_ES } from '@constants/enums'
+import { CODE_STATUS, CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
 import { LIST_GAP, px } from '@constants/layout'
-import { useCatalog } from './hooks/useCatalog'
+import { useCatalog, SORT_OPTIONS, SORT_LABELS_ES } from './hooks/useCatalog'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -50,6 +50,10 @@ export default function CatalogPage() {
     vehicleFilter,
     setVehicleFilter,
     vehicles,
+    codeStatusFilter,
+    setCodeStatusFilter,
+    sortBy,
+    setSortBy,
     loading,
     error,
   } = useCatalog()
@@ -116,6 +120,34 @@ export default function CatalogPage() {
           {vehicles.map((v) => (
             <MenuItem key={v.id} value={v.id}>
               {v.brand} {v.shortModel}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          size="small"
+          displayEmpty
+          value={codeStatusFilter ?? '__all__'}
+          onChange={(e) =>
+            setCodeStatusFilter(e.target.value === '__all__' ? null : e.target.value)
+          }
+          sx={{ minWidth: 180, height: 44 }}
+        >
+          <MenuItem value="__all__">Estado del código</MenuItem>
+          {Object.values(CODE_STATUS).map((s) => (
+            <MenuItem key={s} value={s}>
+              {CODE_STATUS_LABELS_ES[s]}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          size="small"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          sx={{ minWidth: 220, height: 44 }}
+        >
+          {Object.values(SORT_OPTIONS).map((s) => (
+            <MenuItem key={s} value={s}>
+              {SORT_LABELS_ES[s]}
             </MenuItem>
           ))}
         </Select>

@@ -6,10 +6,13 @@ import { clpToUsd } from '@libs/fx'
 import { money } from '@libs/money'
 import { DEFAULT_FX } from '@mocks/costParams'
 
+const PAGE_SIZE = 100
+
 export function useCatalog() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [vehicleFilter, setVehicleFilter] = useState(null)
+  const [page, setPage] = useState(1)
 
   const [allRows, setAllRows] = useState([])
   const [vehicles, setVehicles] = useState([])
@@ -61,7 +64,7 @@ export function useCatalog() {
     }
   }, [])
 
-  const rows = useMemo(() => {
+  const filteredRows = useMemo(() => {
     const term = search.trim().toLowerCase()
     return allRows.filter((r) => {
       if (categoryFilter && r.categoryTopPath !== categoryFilter) return false
@@ -71,9 +74,25 @@ export function useCatalog() {
     })
   }, [allRows, search, categoryFilter, vehicleFilter])
 
+  // Volver a la página 1 cada vez que cambia el resultado filtrado — evita
+  // quedar en una página vacía después de buscar/filtrar.
+  useEffect(() => {
+    setPage(1)
+  }, [search, categoryFilter, vehicleFilter])
+
+  const pageCount = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
+  const rows = useMemo(
+    () => filteredRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredRows, page],
+  )
+
   return {
     rows,
+    filteredCount: filteredRows.length,
     totalCount: allRows.length,
+    page,
+    setPage,
+    pageCount,
     search,
     setSearch,
     categoryFilter,

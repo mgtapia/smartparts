@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+import Pagination from '@mui/material/Pagination'
 import SearchIcon from '@mui/icons-material/Search'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
@@ -36,7 +37,11 @@ const CODE_STATUS_COLOR = {
 export default function CatalogPage() {
   const {
     rows,
+    filteredCount,
     totalCount,
+    page,
+    setPage,
+    pageCount,
     search,
     setSearch,
     categoryFilter,
@@ -67,7 +72,7 @@ export default function CatalogPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Catálogo" description={`${rows.length} de ${totalCount} repuestos.`} />
+      <PageHeader title="Catálogo" description={`${filteredCount} de ${totalCount} repuestos.`} />
 
       <Box sx={{ display: 'flex', gap: px(LIST_GAP), flexWrap: 'wrap', mb: 2 }}>
         <TextField
@@ -262,6 +267,18 @@ export default function CatalogPage() {
           )}
         </Box>
       </Card>
+
+      {pageCount > 1 ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            size="small"
+          />
+        </Box>
+      ) : null}
     </ContentWidth>
   )
 }

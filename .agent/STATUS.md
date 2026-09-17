@@ -43,19 +43,24 @@ Los tokens de `src/constants/layout.js` (`GRID_GAP`, `SECTION_MARGIN_BOTTOM`, et
 - **Etapa actual del negocio**: cotizar en China → landed cost real → margen → ofrecer precio al cliente (unitario y por volumen). Por eso `costing`+`pricing` son el corazón del MVP ahora, no el sourcing automatizado ni la ficha de vehículo.
 - Visión a futuro (no roadmapeada): compra vía API para el cliente, y una plataforma de e-commerce más amplia. Documentado en [[ROADMAP]] §Visión a futuro.
 
-## ⏳ En curso / siguiente inmediato
+## ⏳ En curso / siguiente inmediato — Fase 2 (arrancada 2026-09-17)
 
-1. Placeholders restantes (`vehicles`, `suppliers`, `sourcing`, `shipments`, `clients`, `pricing`, `imports`, `settings`) siguen sin feature real — las 5 pantallas estrella del MVP (dashboard, catálogo, ficha de repuesto, comparador de cotizaciones, costeo+precio) ya están wireadas y funcionando contra datos reales.
-2. `pricing` como módulo separado todavía no existe — hoy el margen/precio por volumen vive dentro de `costing` (`CostingCalculatorPage`). Evaluar si conviene separarlos o si `costing` YA es la pantalla de pricing que pidió el usuario.
-3. Firestore Google Drive: releer `Info app taller tucar` — **descartado**, no se hace (ver corrección de producto arriba).
+- **Rail de navegación**: ahora solo muestra los módulos con `implemented: true` en `src/constants/routes.js` (dashboard, catalog, parts, quotes, costing) — el resto son placeholders sin feature real y se ocultan de la navegación (la ruta sigue existiendo, no está en el rail). Pedido explícito del usuario.
+- **Firebase client + Auth Google**: `src/libs/firebase/client.js` (app/db/auth singleton), `src/contexts/AuthContext.js` (`AuthProvider`/`useAuth`), `RequireAuth` protege `app/(app)/**`, `app/login/page.js` con botón real de Google Sign-In, avatar+logout al pie de `AppRail`. `role`/`canViewMargin` ya se leen del ID token (custom claims) pero todavía nadie los tiene asignados — ver bloqueo de Admin abajo.
+- **Security Rules + índices**: `firestore.rules` (bootstrap: cualquier usuario autenticado puede leer/escribir; la matriz de roles real de `docs/SEGURIDAD-Y-ROLES.md` queda comentada lista para activar cuando haya custom claims), `firestore.indexes.json` (los 3 índices de `docs/MODELO-DE-DATOS.md`), `firebase.json`.
+- **Firebase Admin + seed**: `src/libs/admin/firebaseAdmin.js` (inicialización perezosa, nunca explota solo por importarse), `scripts/seed-firestore.mjs` (`npm run db:seed` / `db:seed:reset`) — puebla Firestore desde los mocks reales de Fase 1, respetando el ID opaco de `parts/` (autoID, nunca el código OEM) y generando `oem_index/` con las anomalías reales. **Sin correr todavía** — depende del bloqueo de credenciales de Admin, ver abajo.
+- **Pendiente, siguiente paso real**: una vez corrido el seed, migrar `src/libs/repos/*.js` de leer mocks a leer Firestore (client SDK) — hoy siguen leyendo `src/mocks/` sin cambios. Es un refactor async (los repos hoy son síncronos, los 5 hooks de feature los llaman dentro de `useMemo`) que conviene hacer con datos reales para verificar contra el emulador/proyecto real, no a ciegas.
+- Placeholders restantes (`vehicles`, `suppliers`, `sourcing`, `shipments`, `clients`, `pricing`, `imports`, `settings`) siguen sin feature real.
+- `pricing` como módulo separado todavía no existe — hoy el margen/precio por volumen vive dentro de `costing`.
 
 ## ⚠ Bloqueos / dependencias externas
 
-- **Firebase Admin**: falta el service account (`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`) para route handlers — no bloquea Fase 0/1 (mocks), sí Fase 2.
+- **Firebase Admin**: falta el service account (`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`) — bloquea correr `npm run db:seed`, cualquier route handler (`app/api/**`) y asignar custom claims de rol. Se consigue en Firebase Console → Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada (proyecto `smartdeal-parts`).
 - Ver [[MEMORY]] §Datos pendientes del usuario para la lista completa (costo de inmovilización diario, margen objetivo, proveedores ya contactados, API keys de sourcing, lockup oficial de marca, definición de crédito fiscal de IVA).
 
 ## Notas de verificación
 
 - `npm run test` → **36/36 verde** (28 motor de costos + 8 `partsRepo`, incluyendo detección de las 3 anomalías reales de la planilla). Verificado 2026-09-17.
-- `NEXT_DIST_DIR=.next-verify npm run build` → verde, 18 rutas, 5 con feature real (`dashboard`, `catalog`, `parts/[id]`, `quotes`, `costing`). Verificado 2026-09-17.
+- `NEXT_DIST_DIR=.next-verify npm run build` → verde, 18 rutas (5 con feature real: `dashboard`, `catalog`, `parts/[id]`, `quotes`, `costing`; `login` ahora con Auth real). Verificado 2026-09-17.
 - `npm run lint` y `npx prettier --check .` → limpios (verificado 2026-09-17).
+- Corrección al hook de convenciones (`.claude/hooks/check-conventions.mjs`): la regla de "tasa fiscal hardcodeada" matcheaba `/vat/i` sin límites de palabra, así que el import `Avatar` de MUI (contiene "vat") + cualquier decimal de espaciado (`0.5`, `0.65`) en el mismo archivo disparaba un falso positivo. Se agregó `\b...\b` a la regex.

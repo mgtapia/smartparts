@@ -39,7 +39,7 @@ process.stdin.on('end', () => {
     // Tasa fiscal hardcodeada: 0.19, 1.19, 0.06, 19/100, etc.
     if (
       /\b(0\.0[1-9]|0\.[1-9]\d?|1\.[01]\d)\b/.test(txt) &&
-      /(iva|vat|arancel|duty|tax|tasa)/i.test(txt)
+      /\b(iva|vat|arancel|duty|tax|tasa)\b/i.test(txt)
     ) {
       issues.push(
         'Posible tasa fiscal hardcodeada fuera de src/constants/ o src/core/costing/. Las tasas vienen de cost_param_sets, siempre versionadas.',

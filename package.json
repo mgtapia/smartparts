@@ -10,7 +10,9 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:seed": "node scripts/seed-firestore.mjs",
+    "db:seed:reset": "node scripts/seed-firestore.mjs --reset"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

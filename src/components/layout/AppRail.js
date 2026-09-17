@@ -2,8 +2,10 @@
 
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
+import Avatar from '@mui/material/Avatar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@contexts/AuthContext'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import CategoryIcon from '@mui/icons-material/Category'
@@ -41,12 +43,15 @@ const ICONS = {
 }
 
 /**
- * Rail vertical de 13 módulos planos — ver .agent/DESIGN.md §Navegación.
+ * Rail vertical de módulos — ver .agent/DESIGN.md §Navegación.
+ * Solo se muestran los `implemented: true` en @constants/routes (el resto son
+ * placeholders sin feature real, no forman parte de la navegación todavía).
  * `permission` filtra ítems según el rol del usuario (Fase 2, ver docs/SEGURIDAD-Y-ROLES.md);
- * en Fase 0/1 (sin Auth real) se muestran todos.
+ * hasta que Auth con custom claims esté conectado, se muestran todos los implementados.
  */
 export default function AppRail() {
   const pathname = usePathname()
+  const { user, signOutUser } = useAuth()
 
   return (
     <Box
@@ -63,7 +68,7 @@ export default function AppRail() {
         minHeight: '100vh',
       }}
     >
-      {RAIL_ITEMS.map((item) => {
+      {RAIL_ITEMS.filter((item) => item.implemented).map((item) => {
         const Icon = ICONS[item.icon]
         const active = pathname?.startsWith(item.path)
         return (
@@ -89,6 +94,31 @@ export default function AppRail() {
           </Tooltip>
         )
       })}
+
+      {user ? (
+        <Tooltip title={`${user.displayName || user.email} — cerrar sesión`} placement="right">
+          <Box
+            component="button"
+            onClick={() => signOutUser()}
+            sx={{
+              mt: 'auto',
+              width: 36,
+              height: 36,
+              p: 0,
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              bgcolor: 'transparent',
+            }}
+          >
+            <Avatar
+              src={user.photoURL || undefined}
+              alt={user.displayName || user.email || ''}
+              sx={{ width: 36, height: 36 }}
+            />
+          </Box>
+        </Tooltip>
+      ) : null}
     </Box>
   )
 }

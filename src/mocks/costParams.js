@@ -2,7 +2,9 @@
 // fiscal acá está verificada contra Aduana de Chile / SII todavía (ver
 // docs/MOTOR-DE-COSTOS.md §Regla dura: nada de tasas hardcodeadas). En
 // Firestore real esto es inmutable y versionado — acá es un único seed fijo.
-import { money } from '@libs/money'
+// Import relativo (no alias) a propósito: este mock lo importa también
+// scripts/seed-firestore.mjs, que corre en Node plano sin resolver @libs/*.
+import { money } from '../libs/money.js'
 
 export const DEFAULT_PARAM_SET = {
   id: 'seed-cl-2026-09-unverified',

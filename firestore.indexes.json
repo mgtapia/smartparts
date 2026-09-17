@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "parts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "vehicle_ids", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "quote_rollup.alternative.min_usd_micro", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "parts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category_path", "order": "ASCENDING" },
+        { "fieldPath": "demand_scale", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "quotes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "part_id", "order": "ASCENDING" },
+        { "fieldPath": "valid_until", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

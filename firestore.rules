@@ -1,0 +1,47 @@
+// Security Rules — SmartParts. Ver docs/SEGURIDAD-Y-ROLES.md para la matriz
+// completa y el razonamiento. El rol sale SIEMPRE del custom claim del token
+// (request.auth.token.role), nunca de un campo en users/{uid} editable por
+// el cliente.
+//
+// ESTADO ACTUAL (bootstrap, ver .agent/STATUS.md §Bloqueos): Firebase Admin
+// todavía no tiene credenciales de service account, así que no hay forma de
+// asignar custom claims (role/canViewMargin) todavía. Mientras tanto, estas
+// reglas solo exigen sesión autenticada — CUALQUIER usuario que pueda hacer
+// login con Google (el proyecto de Firebase no es público, hay que estar
+// invitado) puede leer y escribir. Es deliberadamente más permisivo que la
+// matriz final. Reemplazar cada bloque "bootstrap" por la versión comentada
+// debajo apenas existan custom claims reales — no antes, o nadie puede
+// escribir nada.
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // --- Versión final (activar cuando haya custom claims — hoy sin usar) ---
+    // function role() { return request.auth.token.role; }
+    // function isAdmin() { return signedIn() && role() == 'admin'; }
+    // function isBuyer() { return signedIn() && (role() == 'buyer' || isAdmin()); }
+    // function canViewMargin() { return signedIn() && (request.auth.token.canViewMargin == true || isAdmin()); }
+
+    // cost_param_sets: inmutable una vez creado — nunca se corrige, se versiona.
+    match /cost_param_sets/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    // Resto de colecciones de dominio — bootstrap: sesión alcanza.
+    match /{collection}/{docId} {
+      allow read, write: if signedIn();
+    }
+
+    // Subcolecciones (parts/{id}/baseline_prices, shipments/{id}/lines, etc.).
+    match /{path=**} {
+      allow read, write: if signedIn();
+    }
+  }
+}

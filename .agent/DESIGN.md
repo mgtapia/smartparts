@@ -22,7 +22,8 @@ Assets reales descargados en `public/assets/brand/`:
 | **Lima** (acento primario) | `#C5FF3E` | CTA principal, elementos activos, highlight — el color de marca |
 | Lima hover/press | `#3F5A17` (oscuro, para texto/ícono sobre lima) | — |
 | Ámbar (acento secundario) | `#FFC93C` | badges, destacados secundarios, ranking de ahorro |
-| Tinta / fondo oscuro | `#14200A` (verde-negro) · `#101418` · `#0F1114` | chrome, rail de navegación, headers — el "negro" de la marca es verdoso, no neutro |
+| **Chrome** (rail, header, drawer) | `#000000` (negro puro) | Corrección de UI (2026-09-17): `#14200A` (el "negro" real de la marca) se probó en el rail y se leía como verde musgo en una superficie grande — se usa negro puro para chrome, aunque no sea el hex exacto de smartdeal.cl. `COLORS.chrome` en `src/constants/colors.js`. |
+| Tinta (texto/detalle, NO superficies grandes) | `#14200A` (verde-negro) · `#101418` · `#0F1114` | el "negro" de marca real, uso puntual — nunca en un panel grande (ver Chrome arriba) |
 | Superficie oscura alterna | `#12171B` / `#1B2229` | cards sobre fondo oscuro |
 | Texto sobre claro | `#333333` (primario) · `#6d6d6d` (secundario) | — |
 | Fondo claro | `#FFFFFF` / `#F3F4EF` (cálido) / `#f8f8f8` | página, cards |

@@ -5,7 +5,11 @@ const liIonBattery = {
   unNumber: 'UN3480',
   hazardClass: '9',
   un383: { status: 'provided' },
-  airTransport: { allowed: false, reasonCode: 'forbidden_passenger_aircraft', reasonNote: 'Prohibido en avión de pasajeros' },
+  airTransport: {
+    allowed: false,
+    reasonCode: 'forbidden_passenger_aircraft',
+    reasonNote: 'Prohibido en avión de pasajeros',
+  },
   seaTransport: { allowed: true, lclAccepted: false },
 }
 
@@ -31,7 +35,11 @@ describe('checkDgBlockers — bloqueo, no advertencia', () => {
   })
 
   it('UN38.3 pendiente genera warning, no blocker', () => {
-    const profile = { ...liIonBattery, un383: { status: 'pending' }, airTransport: { allowed: true } }
+    const profile = {
+      ...liIonBattery,
+      un383: { status: 'pending' },
+      airTransport: { allowed: true },
+    }
     const { blockers, warnings } = checkDgBlockers('sea_fcl_20', profile)
     expect(blockers).toEqual([])
     expect(warnings.some((w) => w.includes('UN38.3'))).toBe(true)

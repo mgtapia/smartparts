@@ -31,7 +31,9 @@ export function seaRevenueTonsFromVolume(volumeCm3, kgPerCbm) {
 export function airChargeableWeight(grossWeightG, volumeCm3, divisor) {
   const realKg = grossWeightG / 1000
   const volKg = airVolumetricKg(volumeCm3, divisor)
-  return volKg > realKg ? { chargeableKg: volKg, basis: 'volumetric' } : { chargeableKg: realKg, basis: 'real' }
+  return volKg > realKg
+    ? { chargeableKg: volKg, basis: 'volumetric' }
+    : { chargeableKg: realKg, basis: 'real' }
 }
 
 /**

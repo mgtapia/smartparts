@@ -26,12 +26,17 @@ process.stdin.on('end', () => {
 
   // --- Reglas de dinero (aplican a TODO el código fuente, no solo vistas) ---
   const isSource = /\.(js|jsx)$/.test(norm) && !/\.test\.js$/.test(norm)
-  const isMoneyCore = /\/src\/libs\/money\.js$|\/src\/libs\/fx\.js$|\/src\/core\/costing\//.test(norm)
+  const isMoneyCore = /\/src\/libs\/money\.js$|\/src\/libs\/fx\.js$|\/src\/core\/costing\//.test(
+    norm,
+  )
   const isConstants = /\/src\/constants\//.test(norm)
 
   if (isSource && !isMoneyCore && !isConstants) {
     // Tasa fiscal hardcodeada: 0.19, 1.19, 0.06, 19/100, etc.
-    if (/\b(0\.0[1-9]|0\.[1-9]\d?|1\.[01]\d)\b/.test(txt) && /(iva|vat|arancel|duty|tax|tasa)/i.test(txt)) {
+    if (
+      /\b(0\.0[1-9]|0\.[1-9]\d?|1\.[01]\d)\b/.test(txt) &&
+      /(iva|vat|arancel|duty|tax|tasa)/i.test(txt)
+    ) {
       issues.push(
         'Posible tasa fiscal hardcodeada fuera de src/constants/ o src/core/costing/. Las tasas vienen de cost_param_sets, siempre versionadas.',
       )
@@ -52,10 +57,13 @@ process.stdin.on('end', () => {
   if (inScope && !exempt) {
     // Ancho de página inline.
     if (/maxWidth:\s*\d{3,4}\b/.test(txt) && !/ContentWidth/.test(txt)) {
-      issues.push('Ancho de página inline prohibido. Usá <ContentWidth> / MAX_WIDTH de @constants/layout.')
+      issues.push(
+        'Ancho de página inline prohibido. Usá <ContentWidth> / MAX_WIDTH de @constants/layout.',
+      )
     }
     // Naming: componentes/funciones en INGLÉS (el texto de UI sí va en español).
-    const SPANISH = 'Ficha|Catalogo|Catálogo|Repuesto|Cotizacion|Cotización|Proveedor|Embarque|Costeo|Cliente|Precio|Vista|Tarjeta|Boton|Botón|Encabezado|Cabecera'
+    const SPANISH =
+      'Ficha|Catalogo|Catálogo|Repuesto|Cotizacion|Cotización|Proveedor|Embarque|Costeo|Cliente|Precio|Vista|Tarjeta|Boton|Botón|Encabezado|Cabecera'
     const decl = new RegExp(`(?:function\\s+|const\\s+)(${SPANISH})\\b`)
     const m2 = txt.match(decl)
     if (m2) {

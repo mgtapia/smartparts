@@ -26,7 +26,8 @@ export function computeDuty(cifMicro, hsCode, originCert, duty) {
       ? `Form F presentado pero no hay tasa TLC registrada para la partida ${hsCode} — se aplicó el arancel general.`
       : 'Form F presentado pero la línea no tiene HS code — se aplicó el arancel general.'
   } else if (originCert === 'pending') {
-    warning = 'Certificado de Origen (Form F) pendiente — se aplicó el arancel general hasta confirmar.'
+    warning =
+      'Certificado de Origen (Form F) pendiente — se aplicó el arancel general hasta confirmar.'
   }
 
   const dutyMicro = Math.round((cifMicro * rateBp) / 10000)

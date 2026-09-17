@@ -65,11 +65,15 @@ describe('allocateByWeights — invariante de suma exacta', () => {
 describe('equalSplit — invariante de suma exacta', () => {
   it('property: la suma es siempre el total, para cualquier total y n', () => {
     fc.assert(
-      fc.property(fc.integer({ min: 0, max: 1_000_000_000 }), fc.integer({ min: 1, max: 50 }), (total, n) => {
-        const result = equalSplit(total, n)
-        expect(result.reduce((a, b) => a + b, 0)).toBe(total)
-        expect(result).toHaveLength(n)
-      }),
+      fc.property(
+        fc.integer({ min: 0, max: 1_000_000_000 }),
+        fc.integer({ min: 1, max: 50 }),
+        (total, n) => {
+          const result = equalSplit(total, n)
+          expect(result.reduce((a, b) => a + b, 0)).toBe(total)
+          expect(result).toHaveLength(n)
+        },
+      ),
     )
   })
 })

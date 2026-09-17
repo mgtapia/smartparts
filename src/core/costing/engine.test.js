@@ -186,7 +186,17 @@ describe('computeCosting — invariantes estructurales (property-based)', () => 
             fx,
           })
 
-          const fields = ['fob', 'freight', 'insurance', 'cif', 'duty', 'vat', 'localCosts', 'landedNet', 'cashOutlay']
+          const fields = [
+            'fob',
+            'freight',
+            'insurance',
+            'cif',
+            'duty',
+            'vat',
+            'localCosts',
+            'landedNet',
+            'cashOutlay',
+          ]
           fields.forEach((f) => {
             const sumOfLines = result.lines.reduce((acc, ln) => acc + ln[f].amount, 0)
             expect(sumOfLines).toBe(result.totals[f].amount)

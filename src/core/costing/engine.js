@@ -31,7 +31,11 @@ function chargeableUnitsForLine(grossWeightG, volumeCm3, mode, freightDefaults) 
     return { chargeableUnitsMicro: Math.round(chargeableKg * 1e6), chargeableBasis: basis }
   }
   // sea_lcl, sea_fcl_20, sea_fcl_40hq: W/M — el mayor entre peso real y CBM.
-  const { chargeableRt, basis } = seaLclChargeableRt(grossWeightG, volumeCm3, freightDefaults.seaLclWmKgPerCbm)
+  const { chargeableRt, basis } = seaLclChargeableRt(
+    grossWeightG,
+    volumeCm3,
+    freightDefaults.seaLclWmKgPerCbm,
+  )
   return { chargeableUnitsMicro: Math.round(chargeableRt * 1e6), chargeableBasis: basis }
 }
 
@@ -62,7 +66,14 @@ export function computeCosting(input) {
       params.freightDefaults,
     )
 
-    return { line, blocked: dg.blockers.length > 0, blockReasons: dg.blockers, fobMicro, chargeableUnitsMicro, chargeableBasis }
+    return {
+      line,
+      blocked: dg.blockers.length > 0,
+      blockReasons: dg.blockers,
+      fobMicro,
+      chargeableUnitsMicro,
+      chargeableBasis,
+    }
   })
 
   const active = prepared.filter((p) => !p.blocked)
@@ -92,7 +103,8 @@ export function computeCosting(input) {
   const insuranceSumMicro = insurancePerLine.reduce((a, b) => a + b, 0)
   const minPremiumMicro = insured ? toUsdMicro(params.insurance.minPremium, fx) : 0
   const insuranceShortfall = Math.max(0, minPremiumMicro - insuranceSumMicro)
-  const insuranceTopUp = insuranceShortfall > 0 ? allocateByWeights(insuranceShortfall, fobPerLine) : active.map(() => 0)
+  const insuranceTopUp =
+    insuranceShortfall > 0 ? allocateByWeights(insuranceShortfall, fobPerLine) : active.map(() => 0)
   const finalInsurancePerLine = insurancePerLine.map((v, i) => v + insuranceTopUp[i])
 
   // 4) CIF por línea.
@@ -102,7 +114,12 @@ export function computeCosting(input) {
   const dutyPerLine = []
   const vatPerLine = []
   active.forEach((p, i) => {
-    const { dutyMicro, warning } = computeDuty(cifPerLine[i], p.line.hsCode, p.line.originCert, params.duty)
+    const { dutyMicro, warning } = computeDuty(
+      cifPerLine[i],
+      p.line.hsCode,
+      p.line.originCert,
+      params.duty,
+    )
     if (warning) warnings.push(`${p.line.lineId}: ${warning}`)
     dutyPerLine.push(dutyMicro)
     vatPerLine.push(computeVat(cifPerLine[i], dutyMicro, params.vat.rateBp))
@@ -137,18 +154,28 @@ export function computeCosting(input) {
       if (s.type === 'fixed') amountMicro = s.fixed ? toUsdMicro(s.fixed, fx) : 0
       if (s.type === 'fixed_plus_per_kg') {
         const kgTotal = active.reduce((sum, p) => sum + p.line.grossWeightG / 1000, 0)
-        amountMicro = (s.fixed ? toUsdMicro(s.fixed, fx) : 0) + Math.round((s.perKg ? toUsdMicro(s.perKg, fx) : 0) * kgTotal)
+        amountMicro =
+          (s.fixed ? toUsdMicro(s.fixed, fx) : 0) +
+          Math.round((s.perKg ? toUsdMicro(s.perKg, fx) : 0) * kgTotal)
       }
       if (s.type === 'percent_uplift_on_insurance') {
         amountMicro = Math.round((insuranceSumMicro * (s.rateBp || 0)) / 10000)
       }
       if (amountMicro === 0 || !isDgTarget.some(Boolean)) return
-      const perLine = allocate(amountMicro, 'direct', { fobPerLine, cifPerLine, chargeableUnitsPerLine, volumePerLine, isTarget: isDgTarget })
+      const perLine = allocate(amountMicro, 'direct', {
+        fobPerLine,
+        cifPerLine,
+        chargeableUnitsPerLine,
+        volumePerLine,
+        isTarget: isDgTarget,
+      })
       perLine.forEach((v, i) => (localCostsPerLine[i] += v))
     })
 
   // 8) landedNet (sin IVA — recuperable) y cashOutlay (con IVA — plata que sale hoy).
-  const landedNetPerLine = active.map((p, i) => cifPerLine[i] + dutyPerLine[i] + localCostsPerLine[i])
+  const landedNetPerLine = active.map(
+    (p, i) => cifPerLine[i] + dutyPerLine[i] + localCostsPerLine[i],
+  )
   const cashOutlayPerLine = active.map((p, i) => landedNetPerLine[i] + vatPerLine[i])
 
   const activeLines = active.map((p, i) => ({
@@ -202,7 +229,12 @@ export function computeCosting(input) {
     localCosts: money(sumField(localCostsPerLine), 'USD'),
     landedNet: money(sumField(landedNetPerLine), 'USD'),
     cashOutlay: money(sumField(cashOutlayPerLine), 'USD'),
-    upliftBp: sumField(fobPerLine) > 0 ? Math.round(((sumField(landedNetPerLine) - sumField(fobPerLine)) / sumField(fobPerLine)) * 10000) : 0,
+    upliftBp:
+      sumField(fobPerLine) > 0
+        ? Math.round(
+            ((sumField(landedNetPerLine) - sumField(fobPerLine)) / sumField(fobPerLine)) * 10000,
+          )
+        : 0,
   }
 
   return {

@@ -5,6 +5,8 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 import SearchIcon from '@mui/icons-material/Search'
 import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
@@ -19,8 +21,18 @@ import { useCatalog } from './hooks/useCatalog'
 const CODE_STATUS_TONE = { confirmed: 'success', provisional: 'warning', missing: 'error' }
 
 export default function CatalogPage() {
-  const { rows, totalCount, search, setSearch, categoryFilter, setCategoryFilter, categories } =
-    useCatalog()
+  const {
+    rows,
+    totalCount,
+    search,
+    setSearch,
+    categoryFilter,
+    setCategoryFilter,
+    categories,
+    vehicleFilter,
+    setVehicleFilter,
+    vehicles,
+  } = useCatalog()
 
   return (
     <ContentWidth>
@@ -32,7 +44,7 @@ export default function CatalogPage() {
           placeholder="Buscar por nombre o código…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 260, flex: 1 }}
+          sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
           slotProps={{
             input: {
               startAdornment: (
@@ -43,24 +55,84 @@ export default function CatalogPage() {
             },
           }}
         />
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <FilterChip
-            label="Todas"
-            active={categoryFilter === null}
-            onClick={() => setCategoryFilter(null)}
-          />
+        <Select
+          size="small"
+          displayEmpty
+          value={categoryFilter ?? '__all__'}
+          onChange={(e) => setCategoryFilter(e.target.value === '__all__' ? null : e.target.value)}
+          sx={{ minWidth: 180, height: 44 }}
+        >
+          <MenuItem value="__all__">Categoría</MenuItem>
           {categories.map((c) => (
-            <FilterChip
-              key={c.path}
-              label={c.labelEs}
-              active={categoryFilter === c.path}
-              onClick={() => setCategoryFilter(c.path)}
-            />
+            <MenuItem key={c.path} value={c.path}>
+              {c.labelEs}
+            </MenuItem>
           ))}
-        </Box>
+        </Select>
+        <Select
+          size="small"
+          displayEmpty
+          value={vehicleFilter ?? '__all__'}
+          onChange={(e) => setVehicleFilter(e.target.value === '__all__' ? null : e.target.value)}
+          sx={{ minWidth: 200, height: 44 }}
+        >
+          <MenuItem value="__all__">Vehículo</MenuItem>
+          {vehicles.map((v) => (
+            <MenuItem key={v.id} value={v.id}>
+              {v.brand} {v.model}
+            </MenuItem>
+          ))}
+        </Select>
       </Box>
 
       <Card sx={{ p: 0.75, overflow: 'hidden' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            height: 36,
+            px: 1.5,
+            mb: 0.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography variant="overline" color="text.secondary" sx={{ flex: 1.6, lineHeight: 1 }}>
+            Repuesto
+          </Typography>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ flex: 1, lineHeight: 1, display: { xs: 'none', sm: 'block' } }}
+          >
+            Vehículo
+          </Typography>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ flex: 0.8, lineHeight: 1, display: { xs: 'none', md: 'block' } }}
+          >
+            Categoría
+          </Typography>
+          <Typography variant="overline" color="text.secondary" sx={{ flex: 0.9, lineHeight: 1 }}>
+            Código
+          </Typography>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
+          >
+            Baseline
+          </Typography>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
+          >
+            Mejor cotiz.
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {rows.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
@@ -156,30 +228,5 @@ export default function CatalogPage() {
         </Box>
       </Card>
     </ContentWidth>
-  )
-}
-
-function FilterChip({ label, active, onClick }) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        border: '1px solid',
-        borderColor: active ? 'secondary.main' : 'divider',
-        bgcolor: active ? 'secondary.main' : 'transparent',
-        color: active ? 'secondary.contrastText' : 'text.secondary',
-        borderRadius: `${RADIUS.pill}px`,
-        px: 1.5,
-        height: 32,
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: 'pointer',
-        fontFamily: 'inherit',
-      }}
-    >
-      {label}
-    </Box>
   )
 }

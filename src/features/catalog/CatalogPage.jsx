@@ -79,7 +79,7 @@ export default function CatalogPage() {
           <MenuItem value="__all__">Vehículo</MenuItem>
           {vehicles.map((v) => (
             <MenuItem key={v.id} value={v.id}>
-              {v.brand} {v.model}
+              {v.brand} {v.shortModel}
             </MenuItem>
           ))}
         </Select>
@@ -177,13 +177,20 @@ export default function CatalogPage() {
                 >
                   {r.vehicleLabel}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ flex: 0.8, display: { xs: 'none', md: 'block' } }}
-                >
-                  {r.categoryLabel}
-                </Typography>
+                <Box sx={{ flex: 0.8, minWidth: 0, display: { xs: 'none', md: 'block' } }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    {r.categoryLabel}
+                  </Typography>
+                  {r.subcategoryLabel ? (
+                    <Typography
+                      variant="caption"
+                      color="text.disabled"
+                      sx={{ display: 'block', fontSize: 11, lineHeight: 1.2 }}
+                    >
+                      {r.subcategoryLabel}
+                    </Typography>
+                  ) : null}
+                </Box>
                 <Box
                   sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flex: 0.9, minWidth: 0 }}
                 >

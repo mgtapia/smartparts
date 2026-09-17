@@ -96,7 +96,7 @@ export default function DashboardPage() {
                       {row.part.nameEs}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {row.part.vehicle?.brand} {row.part.vehicle?.model}
+                      {row.part.vehicle?.brand} {row.part.vehicle?.shortModel}
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: 'success.main' }}>

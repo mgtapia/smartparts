@@ -2,11 +2,15 @@
 // demandScale: umbrales de "Cantidad estimada" por nivel, definidos por el cliente
 // en su propia planilla (no inventados) — ver docs/MODELO-DE-DATOS.md.
 
+// `model` es el nombre técnico completo (ficha del vehículo); `shortModel` es
+// la forma corta para tabla/filtro/chips — evita celdas ilegibles con specs
+// de motor incluidas.
 export const VEHICLES = [
   {
     id: 'dongfeng_e70',
     brand: 'Dongfeng',
     model: 'E70 EV 47,5 kWh AUT',
+    shortModel: 'E70',
     origin: 'China',
     year: 2024,
     fleetSize: 470,
@@ -17,6 +21,7 @@ export const VEHICLES = [
     id: 'kia_niro_ev',
     brand: 'Kia',
     model: 'Niro EV 64.8 kWh AUT',
+    shortModel: 'Niro EV',
     origin: 'Corea',
     year: 2023,
     fleetSize: 150,
@@ -27,6 +32,7 @@ export const VEHICLES = [
     id: 'neta_aya',
     brand: 'Neta',
     model: 'Aya',
+    shortModel: 'Aya',
     origin: 'China',
     year: 2024,
     fleetSize: 150,
@@ -37,6 +43,7 @@ export const VEHICLES = [
     id: 'dongfeng_nammi',
     brand: 'Dongfeng',
     model: 'Nammi',
+    shortModel: 'Nammi',
     origin: 'China',
     year: 2024,
     fleetSize: 70,

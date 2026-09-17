@@ -1,10 +1,5 @@
-import Placeholder from '@components/common/Placeholder'
+import CatalogPage from '@features/catalog/CatalogPage'
 
-export default function CatalogPage() {
-  return (
-    <Placeholder
-      title="Catálogo"
-      description="Catálogo transversal por taxonomía: Carrocería, Mecánica, Electricidad."
-    />
-  )
+export default function Page() {
+  return <CatalogPage />
 }

@@ -20,8 +20,6 @@ Firestore + Auth Google + roles por custom claims + Security Rules (ver [[SEGURI
 
 **Importador de la planilla del cliente inicial**: una hoja por marca, mapeo de columnas, normalización de códigos, y **reporte de anomalías** (códigos faltantes, duplicados con precio distinto, mismo código en piezas de distinto lado — ver [[PRD]] §Importador). Carga manual de cotizaciones.
 
-Revisar el registro de taller del cliente para confirmar si reemplaza `demand_basis: 'estimated'` por consumo real.
-
 ## Fase 3 — Sourcing automatizado
 
 La capa de conectores, en orden de menor a mayor riesgo técnico (detalle y justificación en [[INTEGRACIONES-CHINA]]):
@@ -35,7 +33,14 @@ Jobs, caché, rate limiting, traducción y matching de códigos OEM.
 
 ## Fase 4 — Operación
 
-Embarques completos, gestión documental (Form F, MSDS/UN38.3), recepción y no conformidades, alertas, stock y punto de reorden por rotación de flota.
+Embarques completos, gestión documental (Form F, MSDS/UN38.3), recepción y no conformidades, alertas, stock y punto de reorden por rotación estimada de demanda (nunca gestión de flota o taller — ver [[MEMORY]] §Límite explícito).
+
+## Visión a futuro (mencionada por el usuario, no roadmapeada todavía)
+
+Dos direcciones que el usuario planteó el 2026-09-17, más allá de Fase 4 — quedan acá para no perderse, sin comprometer diseño todavía:
+
+- **Compra vía API**: que el cliente pueda generar órdenes de compra directo contra SmartParts por API, no solo mirar la UI. Implicancia de diseño a futuro: la capa `app/api/**` necesita un contrato pensado para consumo externo (auth de cliente, no solo de usuario interno), no solo route handlers internos para conectores/jobs.
+- **Plataforma de e-commerce**: una vitrina de venta más amplia, coherente con el origen retail de SmartDeal. Sin alcance definido todavía — no se diseña el modelo de datos para esto hasta que haya más claridad.
 
 ## Deuda conocida desde el día 1
 

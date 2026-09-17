@@ -6,7 +6,9 @@ Una plataforma donde el catálogo, las cotizaciones de proveedores chinos, el mo
 
 ## El problema
 
-Buscar en China originales y alternativos, juntar cotizaciones de varios proveedores y decidir qué comprar, a quién y por qué vía es hoy un ejercicio manual en planillas sueltas. El costo real puesto en Chile no es el precio FOB: flete, seguro, arancel, IVA, agente de aduanas y gastos locales reordenan por completo el ranking de proveedores (ver [[MOTOR-DE-COSTOS]]).
+Buscar originales y alternativos, juntar cotizaciones de varios proveedores y decidir qué comprar, a quién y por qué vía es hoy un ejercicio manual en planillas sueltas. El costo real puesto en Chile no es el precio FOB: flete, seguro, arancel, IVA, agente de aduanas y gastos locales reordenan por completo el ranking de proveedores (ver [[MOTOR-DE-COSTOS]]).
+
+**China es la fuente prioritaria** — 3 de 4 marcas de la flota inicial son chinas (ver [[MEMORY]]) — **pero no la única válida**. Dos razones para no cerrar el modelo a China: (1) para repuestos **originales**, el mejor proveedor suele estar en el país de origen del fabricante (Corea para Kia, por ejemplo), no en China; (2) si el catálogo de vehículos se **amplía más allá de los 4 modelos actuales**, cada marca nueva trae su propio país óptimo de sourcing. El modelo de datos y la capa de conectores son agnósticos de país desde el diseño — ver [[INTEGRACIONES-CHINA]].
 
 ## El factor distintivo: ride-hailing
 

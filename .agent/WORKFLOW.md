@@ -13,6 +13,7 @@ Cómo trabajar en este repo (para agentes y humanos).
 - **Dinero**: nunca un float. Todo pasa por `src/libs/money.js` (`money()`, `toMicros()`, `fromMicros()`, `allocateByWeights()`). El motor de costos calcula en USD; CLP es solo presentación (`src/libs/fx.js`). Ver CLAUDE.md.
 - **Tasas fiscales**: nunca hardcodeadas. Vienen de `cost_param_sets` (`src/core/costing/types.js` → `CostParamSet`). El hook de convenciones bloquea literales sospechosos (`0.19`, `1.19`, `0.06`, etc.) fuera de `src/constants/` o `src/core/costing/`.
 - **El motor de costos** (`src/core/costing/`) no importa nada fuera de sí mismo salvo `src/libs/money.js` — si necesitás algo de Firebase o de una feature ahí, la pieza va en otra capa.
+- **Acciones que todavía no existen (escrituras a Firestore, confirmar cotización, guardar escenario, exportar, etc.): el botón va deshabilitado (`disabled` + tooltip "Disponible en Fase 2"), nunca oculto.** Así la UI muestra el alcance completo del producto desde Fase 1 sin fingir que algo funciona cuando en realidad no hace nada (o peor, falla en silencio). Se habilita recién cuando la acción está realmente implementada.
 - Componentes y features en inglés (naming), copy de UI en español — igual que yonder.
 - Antes de un `sx` largo: ¿ya existe el componente en `@components/common`? (ver [[DESIGN]] §Patrones obligatorios).
 

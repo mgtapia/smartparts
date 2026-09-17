@@ -31,19 +31,31 @@ El `#14200A` (el "negro" real de smartdeal.cl, verde-negro) se probó como fondo
 
 `AppRail.js` importaba `@mui/icons-material` con `import * as Icons from ...` (barrel import) — eso fuerza a webpack a procesar los ~2500 íconos del paquete y estiraba el build a varios minutos sin dar error, solo colgado. Se reemplazó por imports puntuales de cada ícono usado. **Regla a futuro**: nunca `import * as Icons from '@mui/icons-material'` en este proyecto.
 
+### Nota técnica (bug evitado — espaciado en `sx`)
+
+Los tokens de `src/constants/layout.js` (`GRID_GAP`, `SECTION_MARGIN_BOTTOM`, etc.) son px literales, pero MUI multiplica ×8 cualquier número pelado en props de espaciado (`gap`, `m*`, `p*`) del `sx`. Pasar `gap: GRID_GAP` daba 128px en vez de 16px — gaps gigantes en pantalla. Se agregó el helper `px()` en `layout.js`: usar siempre `gap: px(GRID_GAP)` en esas props (`width`/`maxWidth`/`height` no llevan el helper, no se escalan).
+
+### Correcciones de producto (usuario, 2026-09-17) — ver [[MEMORY]] para el detalle completo
+
+- El producto gira en torno al **repuesto**, no a la flota del cliente — el dashboard ya no lidera con "vehículos en flota", lidera con ahorro/cobertura de cotizaciones/anomalías.
+- **SmartParts no gestiona flota ni taller.** `vehicles/` es dato de compatibilidad, no un módulo operativo. Se descartó revisar el registro de taller del cliente como fuente de datos.
+- **China es sourcing prioritario, no exclusivo** — `suppliers.country` es libre, `platform: 'other'` cubre otras fuentes. Importa para repuestos originales (mejor conseguidos en el país de origen del fabricante) y si se amplía el catálogo de vehículos.
+- **Etapa actual del negocio**: cotizar en China → landed cost real → margen → ofrecer precio al cliente (unitario y por volumen). Por eso `costing`+`pricing` son el corazón del MVP ahora, no el sourcing automatizado ni la ficha de vehículo.
+- Visión a futuro (no roadmapeada): compra vía API para el cliente, y una plataforma de e-commerce más amplia. Documentado en [[ROADMAP]] §Visión a futuro.
+
 ## ⏳ En curso / siguiente inmediato
 
-1. Mocks generados a partir de filas reales de la planilla del cliente inicial (ver [[MEMORY]] §Fuente de datos real — no releída todavía en esta sesión, el modelo de datos ya la incorporó en la sesión de planificación).
-2. `src/features/<módulo>/` con la anatomía completa (`<Feature>Page.jsx` + `hooks/` + `components/` + `constants.js`) — hoy los placeholders viven directo en `app/`, sin capa de feature todavía.
-3. Componentes comunes adicionales que `docs/`/`DESIGN.md` dan por hechos y todavía no existen: `StatCard`, `Pill`/`Tag`, `MoneyValue`, `PaperCard`.
+1. Placeholders restantes (`vehicles`, `suppliers`, `sourcing`, `shipments`, `clients`, `pricing`, `imports`, `settings`) siguen sin feature real — las 5 pantallas estrella del MVP (dashboard, catálogo, ficha de repuesto, comparador de cotizaciones, costeo+precio) ya están wireadas y funcionando contra datos reales.
+2. `pricing` como módulo separado todavía no existe — hoy el margen/precio por volumen vive dentro de `costing` (`CostingCalculatorPage`). Evaluar si conviene separarlos o si `costing` YA es la pantalla de pricing que pidió el usuario.
+3. Firestore Google Drive: releer `Info app taller tucar` — **descartado**, no se hace (ver corrección de producto arriba).
 
 ## ⚠ Bloqueos / dependencias externas
 
 - **Firebase Admin**: falta el service account (`FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`) para route handlers — no bloquea Fase 0/1 (mocks), sí Fase 2.
-- Ver [[MEMORY]] §Datos pendientes del usuario para la lista completa (costo de inmovilización diario, margen objetivo, registro de taller del cliente, proveedores ya contactados, API keys de sourcing, lockup oficial de marca, definición de crédito fiscal de IVA).
+- Ver [[MEMORY]] §Datos pendientes del usuario para la lista completa (costo de inmovilización diario, margen objetivo, proveedores ya contactados, API keys de sourcing, lockup oficial de marca, definición de crédito fiscal de IVA).
 
 ## Notas de verificación
 
-- `npm run test` → 28/28 verde (verificado 2026-09-17).
-- `NEXT_DIST_DIR=.next-verify npm run build` → verde, 18 rutas (verificado 2026-09-17).
+- `npm run test` → **36/36 verde** (28 motor de costos + 8 `partsRepo`, incluyendo detección de las 3 anomalías reales de la planilla). Verificado 2026-09-17.
+- `NEXT_DIST_DIR=.next-verify npm run build` → verde, 18 rutas, 5 con feature real (`dashboard`, `catalog`, `parts/[id]`, `quotes`, `costing`). Verificado 2026-09-17.
 - `npm run lint` y `npx prettier --check .` → limpios (verificado 2026-09-17).

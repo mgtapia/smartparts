@@ -5,7 +5,7 @@ export const RAIL_ITEMS = Object.freeze([
   { key: 'dashboard', path: '/dashboard', labelEs: 'Dashboard', icon: 'Dashboard' },
   { key: 'vehicles', path: '/vehicles', labelEs: 'Vehículos', icon: 'DirectionsCar' },
   { key: 'catalog', path: '/catalog', labelEs: 'Catálogo', icon: 'Category' },
-  { key: 'parts', path: '/parts', labelEs: 'Repuestos', icon: 'Settings' },
+  { key: 'parts', path: '/parts', labelEs: 'Repuestos', icon: 'Build' },
   { key: 'suppliers', path: '/suppliers', labelEs: 'Proveedores', icon: 'Factory' },
   { key: 'quotes', path: '/quotes', labelEs: 'Cotizaciones', icon: 'RequestQuote' },
   { key: 'sourcing', path: '/sourcing', labelEs: 'Sourcing', icon: 'Search' },

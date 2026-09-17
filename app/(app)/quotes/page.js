@@ -1,10 +1,5 @@
-import Placeholder from '@components/common/Placeholder'
+import QuoteComparatorPage from '@features/quotes/QuoteComparatorPage'
 
-export default function QuotesPage() {
-  return (
-    <Placeholder
-      title="Cotizaciones"
-      description="Bandeja de cotizaciones y comparador lado a lado."
-    />
-  )
+export default function Page() {
+  return <QuoteComparatorPage />
 }

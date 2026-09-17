@@ -1,10 +1,7 @@
-import Placeholder from '@components/common/Placeholder'
+import { redirect } from 'next/navigation'
 
+// "Repuestos" en el rail apunta al browse — el catálogo transversal (/catalog).
+// La ficha individual vive en /parts/[id] (ver src/features/parts/PartDetailPage.jsx).
 export default function PartsPage() {
-  return (
-    <Placeholder
-      title="Repuestos"
-      description="Ficha de repuesto: códigos, specs, cotizaciones y mejor landed cost."
-    />
-  )
+  redirect('/catalog')
 }

@@ -29,6 +29,7 @@ export const COLORS = Object.freeze({
   success: '#059669',
   successStrong: '#166534',
   warning: '#f97316',
+  warningBg: '#FFF4E5',
   error: '#dc2626',
   errorBg: '#FFF0F0',
   infoBg: '#F0F7FF',

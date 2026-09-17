@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import CategoryIcon from '@mui/icons-material/Category'
-import SettingsIcon from '@mui/icons-material/Settings'
+import BuildIcon from '@mui/icons-material/Build'
 import FactoryIcon from '@mui/icons-material/Factory'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import SearchIcon from '@mui/icons-material/Search'
@@ -28,7 +28,7 @@ const ICONS = {
   Dashboard: DashboardIcon,
   DirectionsCar: DirectionsCarIcon,
   Category: CategoryIcon,
-  Settings: SettingsIcon,
+  Build: BuildIcon,
   Factory: FactoryIcon,
   RequestQuote: RequestQuoteIcon,
   Search: SearchIcon,

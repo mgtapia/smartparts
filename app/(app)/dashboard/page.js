@@ -1,10 +1,5 @@
-import Placeholder from '@components/common/Placeholder'
+import DashboardPage from '@features/dashboard/DashboardPage'
 
-export default function DashboardPage() {
-  return (
-    <Placeholder
-      title="Dashboard"
-      description="Ahorro acumulado, gasto por vehículo y estado de embarques."
-    />
-  )
+export default function Page() {
+  return <DashboardPage />
 }

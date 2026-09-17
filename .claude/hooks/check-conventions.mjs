@@ -30,8 +30,12 @@ process.stdin.on('end', () => {
     norm,
   )
   const isConstants = /\/src\/constants\//.test(norm)
+  // src/mocks/ son seeds de documentos Firestore (p.ej. cost_param_sets) — es
+  // el lugar legítimo para que vivan tasas versionadas en Fase 1, igual que
+  // el documento real lo sería en Fase 2. No es "código de negocio disperso".
+  const isMocks = /\/src\/mocks\//.test(norm)
 
-  if (isSource && !isMoneyCore && !isConstants) {
+  if (isSource && !isMoneyCore && !isConstants && !isMocks) {
     // Tasa fiscal hardcodeada: 0.19, 1.19, 0.06, 19/100, etc.
     if (
       /\b(0\.0[1-9]|0\.[1-9]\d?|1\.[01]\d)\b/.test(txt) &&

@@ -12,7 +12,7 @@ parts/               ficha maestra — el documento central
   /media/            fotos y documentos
 part_vehicle/        puente M:N + posición (Frontal/Trasera/Conductor/Copiloto)
 oem_index/           centinela de unicidad de código OEM
-suppliers/           proveedores chinos (+ /contacts, /events)
+suppliers/           proveedores (China prioritario, no exclusivo — /contacts, /events)
 quotes/              cotizaciones (top-level, no subcolección)
 source_listings/     crudo de los conectores, pre-normalización
 connector_runs/      salud de los jobs de sourcing
@@ -43,6 +43,14 @@ La consulta que define el producto — *"repuestos del Dongfeng E70 con al menos
 
 Las líneas de embarque congelan un `part_snapshot` y un `quote_snapshot`; los escenarios de costeo congelan el `param_set_id`, el `fx_snapshot` completo y la versión del motor (`engineVersion`). Un precio histórico nunca se sobreescribe: una cotización nueva supersede a la anterior. El histórico de precios es un activo del negocio.
 
+## Regla dura: el ID del documento nunca sale del código OEM
+
+`partId` (y todo ID de documento en general) es el ID auto-generado de Firestore — opaco, estable, nunca derivado del código OEM ni de ningún otro campo de negocio. El código va **solo** como dato dentro de `oem_codes[]`.
+
+Por qué importa acá en particular: la planilla real trae códigos `SIN CODIGO`, códigos duplicados con precio distinto, y el mismo código en piezas físicas distintas (ver [[MEMORY]] §Fuente de datos real). Si el ID del repuesto fuera el código, esas anomalías reales romperían la identidad del documento — dos piezas distintas no podrían coexistir, o una corrección de código más adelante forzaría migrar el documento entero. Con ID opaco, el código es un campo más que se corrige sin tocar la identidad de la pieza; `oem_index/{normalizedCode}` (ver abajo) es lo que detecta la colisión, no la estructura del ID.
+
+Los IDs legibles que aparecen en los ejemplos de este documento y en `src/mocks/` (`part_b013771`, `q_puerta_del_der_alt`) son una conveniencia de desarrollo/mock — en Firestore real son autoIDs (`db.collection('parts').doc().id`).
+
 ## Documentos de referencia (forma real, no inventada)
 
 La forma de estos campos sale de la planilla real del cliente inicial (ver [[MEMORY]] §Fuente de datos real), columnas: `Pieza | Categoría | Lugar | Modelo | Código | Precio neto | Cantidad estimada | Total estimado`.
@@ -51,7 +59,7 @@ La forma de estos campos sale de la planilla real del cliente inicial (ver [[MEM
 
 ```json
 {
-  "id": "part_b013771",
+  "id": "aB3xK9pQr2mZ7vLtYdN1",
   "name_es": "Puerta delantera derecha",
   "name_en": "Front right door",
   "name_zh": null,

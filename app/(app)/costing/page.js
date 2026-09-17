@@ -1,10 +1,6 @@
-import Placeholder from '@components/common/Placeholder'
+import CostingCalculatorPage from '@features/costing/CostingCalculatorPage'
 
-export default function CostingPage() {
-  return (
-    <Placeholder
-      title="Costeo"
-      description="Calculadora de landed cost y comparador barco vs. avión."
-    />
-  )
+export default async function Page({ searchParams }) {
+  const { partId } = await searchParams
+  return <CostingCalculatorPage initialPartId={partId} />
 }

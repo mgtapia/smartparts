@@ -2,6 +2,8 @@
 
 Capa de conectores en `src/connectors/`. Solo se ejecutan desde `app/api/**` (ver [[ARCHITECTURE]] §6) — nunca desde el cliente.
 
+> **China es la fuente prioritaria, no exclusiva.** Este documento se llama "Integraciones China" porque es donde está el grueso del volumen hoy (3 de 4 marcas de la flota), pero ni el modelo de datos ni el contrato de conectores asumen China como único origen. `suppliers.country` es un campo libre y `platform: 'other'` cubre cualquier fuente fuera de las 4 plataformas priorizadas acá. Dos motivos concretos para que esto importe pronto: repuestos **originales** suelen conseguirse mejor en el país de origen del fabricante (Corea para Kia, no China), y **ampliar el catálogo de vehículos** más allá de los 4 modelos actuales trae marcas con su propio país óptimo de sourcing.
+
 ## El contrato
 
 Todos los conectores implementan la misma interfaz:

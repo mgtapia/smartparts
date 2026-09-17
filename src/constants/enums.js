@@ -66,10 +66,14 @@ export const USER_ROLES = Object.freeze({
   VIEWER: 'viewer',
 })
 
+// China es la fuente PRIORITARIA de sourcing (3 de 4 marcas de la flota son
+// chinas, ver docs/INTEGRACIONES-CHINA.md), no la única válida — un proveedor
+// competitivo de otro país entra igual, vía 'other' o 'manual'.
 export const SOURCE_PLATFORMS = Object.freeze({
   ALIEXPRESS: 'aliexpress',
   ALIBABA: 'alibaba',
   ALIBABA_1688: '1688',
   MADE_IN_CHINA: 'made_in_china',
   MANUAL: 'manual',
+  OTHER: 'other',
 })

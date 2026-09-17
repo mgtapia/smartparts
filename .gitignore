@@ -1,0 +1,16 @@
+node_modules
+.next
+.next-verify/
+out
+build
+coverage/
+
+.env
+.env.local
+.env*.local
+*.key
+serviceAccountKey.json
+.firebase/
+
+.DS_Store
+Thumbs.db

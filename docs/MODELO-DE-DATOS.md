@@ -1,0 +1,134 @@
+# MODELO DE DATOS — SmartParts
+
+Firestore. Convenciones generales del proyecto en [[ARCHITECTURE]] y CLAUDE.md.
+
+## Colecciones
+
+```
+vehicles/            los 4 EVs, con flota y escala de rotación
+categories/          taxonomía con materialized path (carroceria__frontal__opticos)
+parts/               ficha maestra — el documento central
+  /baseline_prices/  histórico de lo que se paga hoy
+  /media/            fotos y documentos
+part_vehicle/        puente M:N + posición (Frontal/Trasera/Conductor/Copiloto)
+oem_index/           centinela de unicidad de código OEM
+suppliers/           proveedores chinos (+ /contacts, /events)
+quotes/              cotizaciones (top-level, no subcolección)
+source_listings/     crudo de los conectores, pre-normalización
+connector_runs/      salud de los jobs de sourcing
+shipments/           embarques (+ /lines, /events, /documents)
+costing_scenarios/   escenarios guardados
+cost_param_sets/     parámetros aduaneros versionados e inmutables
+fx_rates/            tipos de cambio por fecha
+clients/             flotas cliente con su parque y lista de precios
+aggregates/          rollups del dashboard
+audit_log/ users/ translations/
+```
+
+## Las cuatro decisiones que sostienen el modelo
+
+### 1. El dinero
+
+Firestore **no tiene Decimal** — solo float64. Todo importe es un mapa `{ amount: entero, currency: 'CLP'|'USD'|'CNY', scale: 0|2 }`, nunca un float (ver `src/libs/money.js`). Los campos que además hay que **filtrar u ordenar** llevan un espejo entero `<campo>_usd_micro` calculado en escritura (Firestore no puede ordenar por un campo dentro de un mapa de forma eficiente con el resto de las queries típicas). Los porcentajes son enteros en basis points (`4120` = 41,20%). El motor calcula en micros enteros; `Number.MAX_SAFE_INTEGER` da margen de sobra para montos en CLP.
+
+### 2. La relación M:N repuesto ↔ vehículo
+
+Híbrida: `parts.vehicle_ids` (array) es la fuente de consulta — viable porque son 4 vehículos, no 400 — y `part_vehicle/` guarda la metadata de aplicación: la **posición** (columna `Lugar` de la planilla: Frontal/Trasera/Conductor/Copiloto/Piloto — es posición, **no** categoría), el rango de años fino y quién verificó el encaje. Ambas escrituras en la misma transacción, más un job nocturno de reconciliación.
+
+### 3. Firestore no tiene joins
+
+La consulta que define el producto — *"repuestos del Dongfeng E70 con al menos una cotización original bajo USD 50"* — es imposible como join, así que **se precalcula en el documento del repuesto**: `parts.quote_rollup` guarda, por tipo de parte, el mínimo vigente y su ID. La query queda con un solo `array-contains` y una desigualdad, exactamente lo que Firestore permite. El rollup se mantiene con tres redes: transacción en el camino caliente, job de recálculo cuando se borra el mínimo, y reconciliación nocturna que perdona cualquier bug de las dos anteriores.
+
+### 4. Inmutabilidad de lo que ya pasó
+
+Las líneas de embarque congelan un `part_snapshot` y un `quote_snapshot`; los escenarios de costeo congelan el `param_set_id`, el `fx_snapshot` completo y la versión del motor (`engineVersion`). Un precio histórico nunca se sobreescribe: una cotización nueva supersede a la anterior. El histórico de precios es un activo del negocio.
+
+## Documentos de referencia (forma real, no inventada)
+
+La forma de estos campos sale de la planilla real del cliente inicial (ver [[MEMORY]] §Fuente de datos real), columnas: `Pieza | Categoría | Lugar | Modelo | Código | Precio neto | Cantidad estimada | Total estimado`.
+
+### `parts/{partId}`
+
+```json
+{
+  "id": "part_b013771",
+  "name_es": "Puerta delantera derecha",
+  "name_en": "Front right door",
+  "name_zh": null,
+  "category_path": "carroceria__frontal__puertas",
+  "vehicle_ids": ["dongfeng_e70"],
+  "oem_codes": [{ "code": "B013771", "code_status": "confirmed", "source": "client_baseline" }],
+  "code_status": "confirmed",
+  "weight_g": 18500,
+  "volume_cm3": 210000,
+  "baseline_price": { "amount": 7390100, "currency": "CLP", "scale": 0, "includes_vat": false },
+  "demand_basis": "estimated",
+  "demand_scale": "a_veces",
+  "quote_rollup": { "original": { "min_usd_micro": null, "quote_id": null }, "alternative": { "min_usd_micro": 45000000, "quote_id": "q_123" } },
+  "sourcing_strategy": null,
+  "dg_profile": null,
+  "created_at": "2026-09-13T00:00:00Z",
+  "updated_at": "2026-09-17T00:00:00Z"
+}
+```
+
+Notas directas de la planilla real:
+- `code_status: 'missing'|'provisional'|'confirmed'` — porque hay filas `SIN CODIGO`. Nunca asumir código OEM obligatorio.
+- `demand_basis: 'estimated'|'historical'` — la "Cantidad estimada" de la planilla ya es la rotación de flota. Se reemplaza por consumo real cuando exista (registro de taller del cliente, pendiente de revisar — ver [[MEMORY]]).
+- `baseline_price.includes_vat: false` explícito — los precios del cliente inicial son netos, pero un baseline futuro de otra fuente puede venir con IVA.
+- `sourcing_strategy: 'local_only'` — para componentes donde importar directo no es viable a esta escala (packs de tracción completos), la app debe poder decirlo en vez de mostrar un número engañosamente atractivo.
+
+### `part_vehicle/{id}`
+
+```json
+{
+  "part_id": "part_b013771",
+  "vehicle_id": "dongfeng_e70",
+  "position": "conductor",
+  "year_range": [2024, 2025],
+  "verified_by": "uid_xxx",
+  "verified_at": "2026-09-10T00:00:00Z"
+}
+```
+
+### `oem_index/{normalizedCode}`
+
+Centinela de unicidad — detecta el caso real encontrado en la planilla: mismo código (`5705001`) usado en tres bisagras distintas de lado derecho/izquierdo, que debería tener códigos distintos.
+
+```json
+{ "code": "5705001", "part_ids": ["part_x", "part_y", "part_z"], "flagged_duplicate": true }
+```
+
+### `cost_param_sets/{id}` (resumen — contrato completo en `src/core/costing/types.js` → `CostParamSet`)
+
+Inmutable. Cada costeo guardado referencia su `id`, nunca "el vigente" — así uno de hace seis meses se reproduce idéntico.
+
+### `quotes/{quoteId}`
+
+```json
+{
+  "id": "q_123",
+  "part_id": "part_b013771",
+  "supplier_id": "sup_456",
+  "part_type": "alternative",
+  "price": { "amount": 4500, "currency": "USD", "scale": 2 },
+  "moq": 1,
+  "incoterm": "FOB",
+  "source_platform": "1688",
+  "captured_at": "2026-09-15T00:00:00Z",
+  "valid_until": "2026-10-15T00:00:00Z",
+  "match_score": 0.92,
+  "match_status": "confirmed"
+}
+```
+
+Regla dura: **nunca auto-confirmar `part_type: 'original'`.** Que un vendedor escriba 原厂 no significa nada — pasar a verificado requiere acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
+
+## Índices compuestos (`firestore.indexes.json`)
+
+Los que exige el rollup y el catálogo transversal:
+- `parts`: `vehicle_ids` (array-contains) + `quote_rollup.alternative.min_usd_micro` (asc).
+- `parts`: `category_path` (asc) + `demand_scale` (desc) — para el catálogo ordenado por rotación × ahorro.
+- `quotes`: `part_id` (asc) + `valid_until` (asc) — para detectar cotizaciones por vencer.
+
+Se declaran conforme se necesiten en Fase 2, no especulativamente.

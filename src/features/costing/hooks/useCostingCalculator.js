@@ -22,18 +22,41 @@ function suggestFreightUsd(mode, totalWeightG, totalVolumeCm3) {
 const DEFAULT_TIER_QUANTITIES = [10, 50, 100]
 
 export function useCostingCalculator(initialPartId) {
-  const partsWithQuotes = useMemo(() => listParts().filter((p) => p.quotes.length > 0), [])
+  const [partsWithQuotes, setPartsWithQuotes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const [partId, setPartId] = useState(initialPartId || partsWithQuotes[0]?.id || null)
+  const [partId, setPartId] = useState(initialPartId || null)
+  const [quoteId, setQuoteId] = useState(null)
+  const [mode, setMode] = useState(SHIPPING_MODES.SEA_LCL)
+  const [marginBp, setMarginBp] = useState(3500) // 35% por defecto — ajustable.
+  const [tierFreightUsd, setTierFreightUsd] = useState({})
+
+  useEffect(() => {
+    let cancelled = false
+    listParts()
+      .then((all) => {
+        if (cancelled) return
+        const withQuotes = all.filter((p) => p.quotes.length > 0)
+        setPartsWithQuotes(withQuotes)
+        setPartId((prev) => prev || withQuotes[0]?.id || null)
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err)
+          setLoading(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const part = useMemo(
     () => partsWithQuotes.find((p) => p.id === partId) || null,
     [partsWithQuotes, partId],
   )
-
-  const [quoteId, setQuoteId] = useState(part?.quotes[0]?.id || null)
-  const [mode, setMode] = useState(SHIPPING_MODES.SEA_LCL)
-  const [marginBp, setMarginBp] = useState(3500) // 35% por defecto — ajustable.
-  const [tierFreightUsd, setTierFreightUsd] = useState({})
 
   useEffect(() => {
     setQuoteId(part?.quotes[0]?.id || null)
@@ -101,5 +124,7 @@ export function useCostingCalculator(initialPartId) {
     setMarginBp,
     tiers,
     setFreightForTier,
+    loading,
+    error,
   }
 }

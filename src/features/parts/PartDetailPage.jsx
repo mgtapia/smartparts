@@ -12,6 +12,7 @@ import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
 import { CODE_STATUS_LABELS_ES, PART_TYPE, MATCH_STATUS } from '@constants/enums'
+import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, SECTION_MARGIN_BOTTOM, px } from '@constants/layout'
 import { usePartDetail } from './hooks/usePartDetail'
 
@@ -40,7 +41,23 @@ function DisabledAction({ label, reason }) {
 }
 
 export default function PartDetailPage({ partId }) {
-  const { part } = usePartDetail(partId)
+  const { part, loading, error } = usePartDetail(partId)
+
+  if (loading) {
+    return (
+      <ContentWidth>
+        <LoadingState />
+      </ContentWidth>
+    )
+  }
+
+  if (error) {
+    return (
+      <ContentWidth>
+        <ErrorState />
+      </ContentWidth>
+    )
+  }
 
   if (!part) {
     return (

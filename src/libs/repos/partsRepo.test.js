@@ -1,41 +1,41 @@
+// Prueba computeAnomalies/computeSavingsOpportunities — las funciones PURAS
+// de partsRepo.js, no listParts()/getPart() (esas hacen I/O a Firestore, ver
+// .agent/STATUS.md §Notas de verificación). Los fixtures acá abajo mapean los
+// mocks reales de la planilla del cliente inicial (src/mocks/parts.js,
+// src/mocks/quotes.js) a la forma cruda que devuelve Firestore, para seguir
+// probando contra las anomalías reales y no contra datos sintéticos.
 import { describe, it, expect } from 'vitest'
-import { listParts, getPart, listAnomalies, listSavingsOpportunities } from './partsRepo'
+import { computeAnomalies, computeSavingsOpportunities } from './partsRepo'
+import { PARTS } from '@mocks/parts'
+import { QUOTES } from '@mocks/quotes'
 
-describe('partsRepo — forma de datos', () => {
-  it('listParts() da la forma real del modelo, no el mock crudo', () => {
-    const parts = listParts()
-    expect(parts.length).toBeGreaterThan(0)
-    const p = parts[0]
-    expect(p.baselinePrice).toEqual(expect.objectContaining({ currency: 'CLP', scale: 0 }))
-    expect(Array.isArray(p.oemCodes)).toBe(true)
-    expect(p.quoteRollup).toEqual(
-      expect.objectContaining({ original: expect.any(Object), alternative: expect.any(Object) }),
-    )
-  })
+function toRawPart(p) {
+  return {
+    id: p.id,
+    name_es: p.nameEs,
+    oem_codes: p.oemCode ? [{ code: p.oemCode, code_status: p.codeStatus }] : [],
+    code_status: p.codeStatus,
+    baseline_price: { amount: p.baselinePriceClp, currency: 'CLP', scale: 0 },
+  }
+}
 
-  it('getPart() trae el vehículo y la categoría resueltos, no solo el id', () => {
-    const p = getPart('part_b004285') // Puerta DEL DER — tiene cotizaciones mock
-    expect(p.vehicle?.id).toBe('dongfeng_e70')
-    expect(p.category?.labelEs).toBeTruthy()
+function toShapedPartForSavings(p) {
+  const rollup = { original: { minUsd: null }, alternative: { minUsd: null } }
+  QUOTES.filter((q) => q.partId === p.id).forEach((q) => {
+    const bucket = rollup[q.partType]
+    if (!bucket) return
+    if (bucket.minUsd === null || q.unitPriceUsd < bucket.minUsd) bucket.minUsd = q.unitPriceUsd
   })
-})
-
-describe('partsRepo — quote_rollup', () => {
-  it('toma el mínimo por tipo (original vs. alternative), no cualquier cotización', () => {
-    const p = getPart('part_b004285') // tiene alt=310 y original=580 en el mock
-    expect(p.quoteRollup.alternative.minUsd).toBe(310)
-    expect(p.quoteRollup.original.minUsd).toBe(580)
-  })
-
-  it('parte sin cotizaciones tiene rollup nulo, no revienta', () => {
-    const p = getPart('part_sc_platina_del_izq')
-    expect(p.quoteRollup.original.minUsd).toBeNull()
-    expect(p.quoteRollup.alternative.minUsd).toBeNull()
-  })
-})
+  return {
+    id: p.id,
+    baselinePrice: { amount: p.baselinePriceClp },
+    quantityEstimated: p.quantityEstimated,
+    quoteRollup: rollup,
+  }
+}
 
 describe('partsRepo — auditoría de anomalías (reporta, no corrige)', () => {
-  const anomalies = listAnomalies()
+  const anomalies = computeAnomalies(PARTS.map(toRawPart))
 
   it('detecta los 3 códigos faltantes reales de la planilla', () => {
     const missing = anomalies.filter((a) => a.type === 'missing_code')
@@ -63,7 +63,7 @@ describe('partsRepo — auditoría de anomalías (reporta, no corrige)', () => {
 
 describe('partsRepo — ranking de oportunidades de ahorro', () => {
   it('ordena de mayor a menor ahorro total y excluye partes sin ahorro positivo', () => {
-    const opportunities = listSavingsOpportunities()
+    const opportunities = computeSavingsOpportunities(PARTS.map(toShapedPartForSavings))
     expect(opportunities.length).toBeGreaterThan(0)
     for (let i = 1; i < opportunities.length; i++) {
       expect(opportunities[i - 1].savingsTotalClp).toBeGreaterThanOrEqual(

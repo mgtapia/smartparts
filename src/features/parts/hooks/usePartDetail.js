@@ -1,7 +1,31 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { getPart } from '@libs/repos/partsRepo'
 
 export function usePartDetail(partId) {
-  const part = useMemo(() => getPart(partId), [partId])
-  return { part }
+  const [part, setPart] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    getPart(partId)
+      .then((p) => {
+        if (cancelled) return
+        setPart(p)
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err)
+          setLoading(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [partId])
+
+  return { part, loading, error }
 }

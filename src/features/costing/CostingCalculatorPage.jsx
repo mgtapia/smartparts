@@ -15,6 +15,7 @@ import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
 import { SHIPPING_MODE_LABELS_ES, SHIPPING_MODES } from '@constants/enums'
+import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, px } from '@constants/layout'
 import { useCostingCalculator } from './hooks/useCostingCalculator'
 
@@ -37,7 +38,25 @@ export default function CostingCalculatorPage({ initialPartId }) {
     setMarginBp,
     tiers,
     setFreightForTier,
+    loading,
+    error,
   } = useCostingCalculator(initialPartId)
+
+  if (loading) {
+    return (
+      <ContentWidth>
+        <LoadingState />
+      </ContentWidth>
+    )
+  }
+
+  if (error) {
+    return (
+      <ContentWidth>
+        <ErrorState />
+      </ContentWidth>
+    )
+  }
 
   if (partsWithQuotes.length === 0) {
     return (

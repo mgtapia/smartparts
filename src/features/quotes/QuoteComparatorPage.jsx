@@ -10,6 +10,7 @@ import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
 import { PART_TYPE, MATCH_STATUS } from '@constants/enums'
+import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, px } from '@constants/layout'
 import { useQuoteComparator } from './hooks/useQuoteComparator'
 
@@ -25,7 +26,24 @@ const MATCH_STATUS_TONE = {
 }
 
 export default function QuoteComparatorPage() {
-  const { partsWithQuotes, selectedPart, selectedId, setSelectedId } = useQuoteComparator()
+  const { partsWithQuotes, selectedPart, selectedId, setSelectedId, loading, error } =
+    useQuoteComparator()
+
+  if (loading) {
+    return (
+      <ContentWidth>
+        <LoadingState />
+      </ContentWidth>
+    )
+  }
+
+  if (error) {
+    return (
+      <ContentWidth>
+        <ErrorState />
+      </ContentWidth>
+    )
+  }
 
   if (partsWithQuotes.length === 0) {
     return (

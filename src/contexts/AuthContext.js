@@ -7,7 +7,7 @@
 // todavía: quedan en `null` y el rail no filtra por permiso aún.
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { auth, googleProvider } from '@libs/firebase/client'
+import { getFirebaseAuth, getGoogleProvider } from '@libs/firebase/client'
 
 const AuthContext = createContext(null)
 
@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (nextUser) => {
+    return onAuthStateChanged(getFirebaseAuth(), async (nextUser) => {
       setUser(nextUser)
       if (nextUser) {
         const tokenResult = await nextUser.getIdTokenResult()
@@ -37,8 +37,8 @@ export function AuthProvider({ children }) {
     role,
     canViewMargin,
     loading,
-    signInWithGoogle: () => signInWithPopup(auth, googleProvider),
-    signOutUser: () => signOut(auth),
+    signInWithGoogle: () => signInWithPopup(getFirebaseAuth(), getGoogleProvider()),
+    signOutUser: () => signOut(getFirebaseAuth()),
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

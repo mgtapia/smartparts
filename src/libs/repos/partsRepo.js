@@ -1,75 +1,106 @@
-// Repository ligero — Fase 1 lee de src/mocks/ (ver .agent/ARCHITECTURE.md §4).
-// Le da a los repuestos la forma real del modelo de datos (docs/MODELO-DE-DATOS.md):
-// oem_codes[] en vez de un código suelto, baseline_price como Money, quote_rollup
-// precalculado. Fase 2 reemplaza el cuerpo por Firestore sin cambiar estas firmas.
-import { PARTS, getPart as getPartMock } from '@mocks/parts'
-import { getVehicle } from '@mocks/vehicles'
+// Repository — Fase 2: lee Firestore (ver .agent/ARCHITECTURE.md §4).
+// `computeAnomalies`/`computeSavingsOpportunities` son funciones puras
+// (reciben datos, no hacen I/O) a propósito: partsRepo.test.js las prueba
+// directo contra los datos reales del cliente inicial sin necesitar Firestore
+// — el motor de costos ya sienta el precedente de separar cómputo puro de I/O.
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
+import { getDb } from '@libs/firebase/client'
 import { getCategory } from '@mocks/categories'
-import { listQuotesByPart } from './quotesRepo'
-import { money } from '@libs/money'
+import { getVehicle } from './vehiclesRepo'
+import { listQuotes, listQuotesByPart } from './quotesRepo'
 
-function shapePart(p) {
-  if (!p) return null
-  const quotes = listQuotesByPart(p.id)
+function shapeRollupBucket(bucket) {
+  if (!bucket || bucket.min_usd_micro === null || bucket.min_usd_micro === undefined) {
+    return { minUsd: null, quoteId: null }
+  }
+  return { minUsd: bucket.min_usd_micro / 1e6, quoteId: bucket.quote_id }
+}
+
+function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {}) {
+  if (!raw) return null
   return {
-    id: p.id,
-    nameEs: p.nameEs,
-    categoryPath: p.categoryPath,
-    category: getCategory(p.categoryPath),
-    vehicleId: p.vehicleId,
-    vehicle: getVehicle(p.vehicleId),
-    position: p.position,
+    id,
+    nameEs: raw.name_es,
+    categoryPath: raw.category_path,
+    category: getCategory(raw.category_path),
+    vehicleId: raw.vehicle_ids?.[0] ?? null,
+    vehicle,
+    position,
     // oem_codes[] — nunca un código suelto como identidad, ver docs/MODELO-DE-DATOS.md.
-    oemCodes: p.oemCode
-      ? [{ code: p.oemCode, codeStatus: p.codeStatus, source: 'client_baseline' }]
-      : [],
-    codeStatus: p.codeStatus,
-    weightG: p.weightG,
-    volumeCm3: p.volumeCm3,
-    baselinePrice: money(p.baselinePriceClp, 'CLP'),
-    includesVat: p.includesVat,
-    demandBasis: p.demandBasis,
-    demandScale: p.demandScale,
-    quantityEstimated: p.quantityEstimated,
-    sourcingStrategy: p.sourcingStrategy || null,
-    sourcingNote: p.sourcingNote || null,
-    quoteRollup: computeQuoteRollup(quotes),
+    oemCodes: raw.oem_codes || [],
+    codeStatus: raw.code_status,
+    weightG: raw.weight_g,
+    volumeCm3: raw.volume_cm3,
+    baselinePrice: raw.baseline_price,
+    includesVat: raw.includes_vat,
+    demandBasis: raw.demand_basis,
+    demandScale: raw.demand_scale,
+    quantityEstimated: raw.quantity_estimated,
+    sourcingStrategy: raw.sourcing_strategy || null,
+    sourcingNote: raw.sourcing_note || null,
+    quoteRollup: {
+      original: shapeRollupBucket(raw.quote_rollup?.original),
+      alternative: shapeRollupBucket(raw.quote_rollup?.alternative),
+    },
     quotes,
   }
 }
 
-function computeQuoteRollup(quotes) {
-  const rollup = {
-    original: { minUsd: null, quoteId: null },
-    alternative: { minUsd: null, quoteId: null },
-  }
+export async function listParts() {
+  const [partsSnap, quotes] = await Promise.all([
+    getDocs(collection(getDb(), 'parts')),
+    listQuotes(),
+  ])
+
+  const vehicleIds = [
+    ...new Set(partsSnap.docs.map((d) => d.data().vehicle_ids?.[0]).filter(Boolean)),
+  ]
+  const vehicles = await Promise.all(vehicleIds.map((id) => getVehicle(id)))
+  const vehiclesById = new Map(vehicles.filter(Boolean).map((v) => [v.id, v]))
+
+  const quotesByPart = new Map()
   quotes.forEach((q) => {
-    const bucket = rollup[q.partType]
-    if (!bucket) return
-    if (bucket.minUsd === null || q.unitPriceUsd < bucket.minUsd) {
-      bucket.minUsd = q.unitPriceUsd
-      bucket.quoteId = q.id
-    }
+    if (!quotesByPart.has(q.partId)) quotesByPart.set(q.partId, [])
+    quotesByPart.get(q.partId).push(q)
   })
-  return rollup
+
+  return partsSnap.docs.map((d) => {
+    const raw = d.data()
+    return shapePart(d.id, raw, {
+      vehicle: vehiclesById.get(raw.vehicle_ids?.[0]) || null,
+      quotes: quotesByPart.get(d.id) || [],
+    })
+  })
 }
 
-export function listParts() {
-  return PARTS.map(shapePart)
+export async function getPart(id) {
+  const snap = await getDoc(doc(getDb(), 'parts', id))
+  if (!snap.exists()) return null
+  const raw = snap.data()
+
+  const [vehicle, quotes, bridgeSnap] = await Promise.all([
+    getVehicle(raw.vehicle_ids?.[0]),
+    listQuotesByPart(id),
+    getDocs(query(collection(getDb(), 'part_vehicle'), where('part_id', '==', id))),
+  ])
+
+  return shapePart(id, raw, {
+    vehicle,
+    quotes,
+    position: bridgeSnap.docs[0]?.data()?.position ?? null,
+  })
 }
 
-export function getPart(id) {
-  return shapePart(getPartMock(id))
+export async function listPartsByVehicle(vehicleId) {
+  const parts = await listParts()
+  return parts.filter((p) => p.vehicleId === vehicleId)
 }
 
-export function listPartsByVehicle(vehicleId) {
-  return PARTS.filter((p) => p.vehicleId === vehicleId).map(shapePart)
-}
-
-export function listPartsByCategory(categoryPath) {
-  return PARTS.filter(
+export async function listPartsByCategory(categoryPath) {
+  const parts = await listParts()
+  return parts.filter(
     (p) => p.categoryPath === categoryPath || p.categoryPath.startsWith(`${categoryPath}__`),
-  ).map(shapePart)
+  )
 }
 
 /**
@@ -79,8 +110,8 @@ export function listPartsByCategory(categoryPath) {
  * (CLP) contra la cotización FOB (USD) convertida a CLP — una aproximación
  * declarada, no el landed cost real (eso es la calculadora de costeo).
  */
-export function listSavingsOpportunities(fx = { usdClp: 950 }) {
-  return listParts()
+export function computeSavingsOpportunities(parts, fx = { usdClp: 950 }) {
+  return parts
     .map((p) => {
       const bestUsd = [p.quoteRollup.original.minUsd, p.quoteRollup.alternative.minUsd]
         .filter((v) => v !== null)
@@ -99,31 +130,42 @@ export function listSavingsOpportunities(fx = { usdClp: 950 }) {
     .sort((a, b) => b.savingsTotalClp - a.savingsTotalClp)
 }
 
+export async function listSavingsOpportunities(fx = { usdClp: 950 }) {
+  const parts = await listParts()
+  return computeSavingsOpportunities(parts, fx)
+}
+
 /**
  * Auditoría de anomalías — la primera pantalla de valor del importador
  * (ver docs/PRD.md y .agent/MEMORY.md §Fuente de datos real): reporta,
- * nunca corrige en silencio.
+ * nunca corrige en silencio. `rawParts` son documentos crudos de Firestore
+ * (name_es, oem_codes[], code_status, baseline_price), no partes shapeadas.
  */
-export function listAnomalies() {
+export function computeAnomalies(rawParts) {
   const anomalies = []
 
-  PARTS.filter((p) => p.codeStatus === 'missing').forEach((p) => {
-    anomalies.push({
-      type: 'missing_code',
-      partIds: [p.id],
-      detail: `"${p.nameEs}" no tiene código OEM.`,
+  rawParts
+    .filter((p) => p.code_status === 'missing')
+    .forEach((p) => {
+      anomalies.push({
+        type: 'missing_code',
+        partIds: [p.id],
+        detail: `"${p.name_es}" no tiene código OEM.`,
+      })
     })
-  })
 
   const byCode = new Map()
-  PARTS.filter((p) => p.oemCode).forEach((p) => {
-    if (!byCode.has(p.oemCode)) byCode.set(p.oemCode, [])
-    byCode.get(p.oemCode).push(p)
-  })
+  rawParts
+    .filter((p) => p.oem_codes?.[0]?.code)
+    .forEach((p) => {
+      const code = p.oem_codes[0].code
+      if (!byCode.has(code)) byCode.set(code, [])
+      byCode.get(code).push(p)
+    })
 
   byCode.forEach((group, code) => {
     if (group.length < 2) return
-    const prices = new Set(group.map((p) => p.baselinePriceClp))
+    const prices = new Set(group.map((p) => p.baseline_price.amount))
     if (prices.size > 1) {
       anomalies.push({
         type: 'price_conflict',
@@ -137,11 +179,17 @@ export function listAnomalies() {
         type: 'duplicate_position',
         partIds: group.map((p) => p.id),
         detail: `Código ${code} se repite en ${group.length} piezas distintas (${group
-          .map((p) => p.nameEs)
+          .map((p) => p.name_es)
           .join(', ')}) — probablemente deberían tener códigos propios.`,
       })
     }
   })
 
   return anomalies
+}
+
+export async function listAnomalies() {
+  const snap = await getDocs(collection(getDb(), 'parts'))
+  const rawParts = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+  return computeAnomalies(rawParts)
 }

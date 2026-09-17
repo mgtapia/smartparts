@@ -1,45 +1,66 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { listParts, listSavingsOpportunities, listAnomalies } from '@libs/repos/partsRepo'
 import { listQuotes, isQuoteExpiringSoon } from '@libs/repos/quotesRepo'
 import { money } from '@libs/money'
 
+const EMPTY = {
+  partsCount: 0,
+  quoteCoveragePct: 0,
+  partsWithQuoteCount: 0,
+  savingsOpportunities: [],
+  totalSavings: money(0, 'CLP'),
+  anomalies: [],
+  expiringQuotes: [],
+}
+
 /**
- * Fase 1: lee de repos sobre mocks (síncrono). En Fase 2 estos repos pasan a
- * leer Firestore — este hook no cambia, ver .agent/ARCHITECTURE.md §4.
- *
  * El dashboard lidera con REPUESTOS (ahorro, cobertura de cotizaciones,
  * anomalías), no con la flota del cliente — la flota es dato de referencia
  * del módulo Vehículos, no el KPI principal (ver .agent/MEMORY.md).
  */
 export function useDashboard() {
-  const parts = useMemo(() => listParts(), [])
-  const savingsOpportunities = useMemo(() => listSavingsOpportunities(), [])
-  const anomalies = useMemo(() => listAnomalies(), [])
+  const [data, setData] = useState(EMPTY)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const expiringQuotes = useMemo(() => listQuotes().filter((q) => isQuoteExpiringSoon(q)), [])
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    Promise.all([listParts(), listSavingsOpportunities(), listAnomalies(), listQuotes()])
+      .then(([parts, savingsOpportunities, anomalies, quotes]) => {
+        if (cancelled) return
+        const expiringQuotes = quotes.filter((q) => isQuoteExpiringSoon(q))
+        const totalSavingsClp = savingsOpportunities.reduce(
+          (sum, row) => sum + row.savingsTotalClp,
+          0,
+        )
+        const partsWithQuote = parts.filter(
+          (p) =>
+            p.quoteRollup.original.minUsd !== null || p.quoteRollup.alternative.minUsd !== null,
+        )
+        setData({
+          partsCount: parts.length,
+          quoteCoveragePct:
+            parts.length > 0 ? Math.round((partsWithQuote.length / parts.length) * 100) : 0,
+          partsWithQuoteCount: partsWithQuote.length,
+          savingsOpportunities: savingsOpportunities.slice(0, 5),
+          totalSavings: money(totalSavingsClp, 'CLP'),
+          anomalies,
+          expiringQuotes,
+        })
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err)
+          setLoading(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const totalSavingsClp = useMemo(
-    () => savingsOpportunities.reduce((sum, row) => sum + row.savingsTotalClp, 0),
-    [savingsOpportunities],
-  )
-
-  const partsWithQuote = useMemo(
-    () =>
-      parts.filter(
-        (p) => p.quoteRollup.original.minUsd !== null || p.quoteRollup.alternative.minUsd !== null,
-      ),
-    [parts],
-  )
-  const quoteCoveragePct =
-    parts.length > 0 ? Math.round((partsWithQuote.length / parts.length) * 100) : 0
-
-  return {
-    partsCount: parts.length,
-    quoteCoveragePct,
-    partsWithQuoteCount: partsWithQuote.length,
-    savingsOpportunities: savingsOpportunities.slice(0, 5),
-    totalSavings: money(totalSavingsClp, 'CLP'),
-    anomalies,
-    expiringQuotes,
-  }
+  return { ...data, loading, error }
 }

@@ -1,9 +1,18 @@
-// Repository ligero — Fase 1 lee de src/mocks/, Fase 2 reemplaza el cuerpo por
-// Firestore sin cambiar la firma (ver .agent/ARCHITECTURE.md §4).
-import { VEHICLES, getVehicle } from '@mocks/vehicles'
+// Repository — Fase 2: lee Firestore (ver .agent/ARCHITECTURE.md §4).
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
+import { getDb } from '@libs/firebase/client'
 
-export function listVehicles() {
-  return VEHICLES
+function shapeVehicle(id, raw) {
+  return { id, ...raw }
 }
 
-export { getVehicle }
+export async function listVehicles() {
+  const snap = await getDocs(collection(getDb(), 'vehicles'))
+  return snap.docs.map((d) => shapeVehicle(d.id, d.data()))
+}
+
+export async function getVehicle(id) {
+  if (!id) return null
+  const snap = await getDoc(doc(getDb(), 'vehicles', id))
+  return snap.exists() ? shapeVehicle(snap.id, snap.data()) : null
+}

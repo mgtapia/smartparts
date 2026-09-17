@@ -14,6 +14,7 @@ import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
+import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
 import { LIST_GAP, px } from '@constants/layout'
 import { useCatalog } from './hooks/useCatalog'
@@ -32,7 +33,25 @@ export default function CatalogPage() {
     vehicleFilter,
     setVehicleFilter,
     vehicles,
+    loading,
+    error,
   } = useCatalog()
+
+  if (loading) {
+    return (
+      <ContentWidth>
+        <LoadingState />
+      </ContentWidth>
+    )
+  }
+
+  if (error) {
+    return (
+      <ContentWidth>
+        <ErrorState />
+      </ContentWidth>
+    )
+  }
 
   return (
     <ContentWidth>

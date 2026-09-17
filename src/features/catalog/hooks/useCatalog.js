@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { listParts } from '@libs/repos/partsRepo'
 import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
@@ -8,34 +8,54 @@ export function useCatalog() {
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [vehicleFilter, setVehicleFilter] = useState(null)
 
-  const allRows = useMemo(
-    () =>
-      listParts().map((p) => {
-        const categoryTopPath = p.categoryPath.split('__')[0]
-        const isSubcategory = p.categoryPath !== categoryTopPath
-        return {
-          id: p.id,
-          nameEs: p.nameEs,
-          // Nivel superior — el mismo que usa el filtro, para que la fila
-          // calce visualmente con la categoría elegida.
-          categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
-          // Subcategoría (si la parte vive más abajo en el árbol) — se muestra
-          // como detalle secundario, no reemplaza a categoryLabel.
-          subcategoryLabel: isSubcategory ? p.category?.labelEs || null : null,
-          categoryTopPath,
-          vehicleId: p.vehicleId,
-          vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
-          code: p.oemCodes[0]?.code || null,
-          codeStatus: p.codeStatus,
-          baselinePrice: p.baselinePrice,
-          bestQuoteUsd:
-            [p.quoteRollup.original.minUsd, p.quoteRollup.alternative.minUsd]
-              .filter((v) => v !== null)
-              .sort((a, b) => a - b)[0] ?? null,
+  const [allRows, setAllRows] = useState([])
+  const [vehicles, setVehicles] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([listParts(), listVehicles()])
+      .then(([parts, vehicleList]) => {
+        if (cancelled) return
+        const rows = parts.map((p) => {
+          const categoryTopPath = p.categoryPath.split('__')[0]
+          const isSubcategory = p.categoryPath !== categoryTopPath
+          return {
+            id: p.id,
+            nameEs: p.nameEs,
+            // Nivel superior — el mismo que usa el filtro, para que la fila
+            // calce visualmente con la categoría elegida.
+            categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
+            // Subcategoría (si la parte vive más abajo en el árbol) — se muestra
+            // como detalle secundario, no reemplaza a categoryLabel.
+            subcategoryLabel: isSubcategory ? p.category?.labelEs || null : null,
+            categoryTopPath,
+            vehicleId: p.vehicleId,
+            vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
+            code: p.oemCodes[0]?.code || null,
+            codeStatus: p.codeStatus,
+            baselinePrice: p.baselinePrice,
+            bestQuoteUsd:
+              [p.quoteRollup.original.minUsd, p.quoteRollup.alternative.minUsd]
+                .filter((v) => v !== null)
+                .sort((a, b) => a - b)[0] ?? null,
+          }
+        })
+        setAllRows(rows)
+        setVehicles(vehicleList)
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err)
+          setLoading(false)
         }
-      }),
-    [],
-  )
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const rows = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -57,6 +77,8 @@ export function useCatalog() {
     categories: getTopLevelCategories(),
     vehicleFilter,
     setVehicleFilter,
-    vehicles: listVehicles(),
+    vehicles,
+    loading,
+    error,
   }
 }

@@ -9,6 +9,7 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Pagination from '@mui/material/Pagination'
 import IconButton from '@mui/material/IconButton'
+import Chip from '@mui/material/Chip'
 import SearchIcon from '@mui/icons-material/Search'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
@@ -20,11 +21,12 @@ import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
-import { CODE_STATUS, CODE_STATUS_LABELS_ES } from '@constants/enums'
+import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
-import { LIST_GAP, px } from '@constants/layout'
+import { GRID_GAP, px } from '@constants/layout'
 import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES } from './hooks/useCatalog'
+import FilterPanel from './components/FilterPanel'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -47,14 +49,22 @@ export default function CatalogPage() {
     pageCount,
     search,
     setSearch,
-    categoryFilter,
-    setCategoryFilter,
     categories,
-    vehicleFilter,
-    setVehicleFilter,
+    categoryFilters,
+    toggleCategoryFilter,
     vehicles,
-    codeStatusFilter,
-    setCodeStatusFilter,
+    vehicleFilters,
+    toggleVehicleFilter,
+    codeStatuses,
+    codeStatusFilters,
+    toggleCodeStatusFilter,
+    quoteFilter,
+    setQuoteFilter,
+    priceBounds,
+    priceRange,
+    setPriceRange,
+    activeFilterChips,
+    clearAllFilters,
     sortField,
     setSortField,
     sortDir,
@@ -80,254 +90,277 @@ export default function CatalogPage() {
   }
 
   return (
-    <ContentWidth>
+    <ContentWidth full>
       <PageHeader title="Catálogo" description={`${filteredCount} de ${totalCount} repuestos.`} />
 
-      <Box sx={{ display: 'flex', gap: px(LIST_GAP), flexWrap: 'wrap', mb: 2 }}>
-        <TextField
-          size="small"
-          placeholder="Buscar por nombre o código…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
+      <Box sx={{ display: 'flex', gap: px(GRID_GAP), alignItems: 'flex-start' }}>
+        <FilterPanel
+          categories={categories}
+          categoryFilters={categoryFilters}
+          toggleCategoryFilter={toggleCategoryFilter}
+          vehicles={vehicles}
+          vehicleFilters={vehicleFilters}
+          toggleVehicleFilter={toggleVehicleFilter}
+          codeStatuses={codeStatuses}
+          codeStatusFilters={codeStatusFilters}
+          toggleCodeStatusFilter={toggleCodeStatusFilter}
+          quoteFilter={quoteFilter}
+          setQuoteFilter={setQuoteFilter}
+          priceBounds={priceBounds}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          hasActiveFilters={activeFilterChips.length > 0}
+          onClearAll={clearAllFilters}
         />
-        <Select
-          size="small"
-          displayEmpty
-          value={categoryFilter ?? '__all__'}
-          onChange={(e) => setCategoryFilter(e.target.value === '__all__' ? null : e.target.value)}
-          sx={{ minWidth: 180, height: 44 }}
-        >
-          <MenuItem value="__all__">Categoría</MenuItem>
-          {categories.map((c) => (
-            <MenuItem key={c.path} value={c.path}>
-              {c.labelEs}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          size="small"
-          displayEmpty
-          value={vehicleFilter ?? '__all__'}
-          onChange={(e) => setVehicleFilter(e.target.value === '__all__' ? null : e.target.value)}
-          sx={{ minWidth: 200, height: 44 }}
-        >
-          <MenuItem value="__all__">Vehículo</MenuItem>
-          {vehicles.map((v) => (
-            <MenuItem key={v.id} value={v.id}>
-              {v.brand} {v.shortModel}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          size="small"
-          displayEmpty
-          value={codeStatusFilter ?? '__all__'}
-          onChange={(e) =>
-            setCodeStatusFilter(e.target.value === '__all__' ? null : e.target.value)
-          }
-          sx={{ minWidth: 180, height: 44 }}
-        >
-          <MenuItem value="__all__">Estado del código</MenuItem>
-          {Object.values(CODE_STATUS).map((s) => (
-            <MenuItem key={s} value={s}>
-              {CODE_STATUS_LABELS_ES[s]}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          size="small"
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
-          sx={{ minWidth: 180, height: 44 }}
-        >
-          {Object.values(SORT_FIELDS).map((s) => (
-            <MenuItem key={s} value={s}>
-              {SORT_FIELD_LABELS_ES[s]}
-            </MenuItem>
-          ))}
-        </Select>
-        <Tooltip title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}>
-          <IconButton
-            onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-            sx={{ width: 44, height: 44, border: '1px solid', borderColor: 'divider' }}
-          >
-            {sortDir === 'asc' ? (
-              <ArrowUpwardIcon fontSize="small" />
-            ) : (
-              <ArrowDownwardIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-      </Box>
 
-      <Card sx={{ p: 0.75, overflow: 'hidden' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            height: 36,
-            px: 1.5,
-            mb: 0.5,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Typography variant="overline" color="text.secondary" sx={{ flex: 1.6, lineHeight: 1 }}>
-            Repuesto
-          </Typography>
-          <Typography
-            variant="overline"
-            color="text.secondary"
-            sx={{ flex: 1, lineHeight: 1, display: { xs: 'none', sm: 'block' } }}
-          >
-            Vehículo
-          </Typography>
-          <Typography
-            variant="overline"
-            color="text.secondary"
-            sx={{ flex: 0.8, lineHeight: 1, display: { xs: 'none', md: 'block' } }}
-          >
-            Categoría
-          </Typography>
-          <Typography variant="overline" color="text.secondary" sx={{ flex: 0.9, lineHeight: 1 }}>
-            Código
-          </Typography>
-          <Typography
-            variant="overline"
-            color="text.secondary"
-            sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
-          >
-            Precio actual
-          </Typography>
-          <Typography
-            variant="overline"
-            color="text.secondary"
-            sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
-          >
-            Mejor cotiz.
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {rows.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-              Sin resultados.
-            </Typography>
-          ) : (
-            rows.map((r) => {
-              const StatusIcon = CODE_STATUS_ICON[r.codeStatus]
-              return (
-                <Box
-                  key={r.id}
-                  component={Link}
-                  href={`/parts/${r.id}`}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    height: 44,
-                    px: 1.5,
-                    borderRadius: `${RADIUS.inputSmall}px`,
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    bgcolor: 'brand.bodyBg',
-                    '&:hover': { bgcolor: 'action.hover' },
-                  }}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', gap: px(GRID_GAP), alignItems: 'center', mb: 1.5 }}>
+            <TextField
+              size="small"
+              placeholder="Buscar por nombre o código…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+
+            {/* Orden — separado visualmente de los filtros (que viven en el
+                panel de la izquierda) con un borde propio, para que no se
+                confunda con un criterio que reduce filas. */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: `${RADIUS.inputSmall}px`,
+                px: 1,
+                height: 44,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                Ordenar por
+              </Typography>
+              <Select
+                size="small"
+                variant="standard"
+                disableUnderline
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+                sx={{ minWidth: 140, fontSize: 14 }}
+              >
+                {Object.values(SORT_FIELDS).map((s) => (
+                  <MenuItem key={s} value={s}>
+                    {SORT_FIELD_LABELS_ES[s]}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Tooltip title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}>
+                <IconButton
+                  size="small"
+                  onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
                 >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                      flex: 1.6,
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {r.nameEs}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}
-                  >
-                    {r.vehicleLabel}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ flex: 0.8, minWidth: 0, display: { xs: 'none', md: 'block' } }}
-                  >
-                    {r.categoryLabel}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.75,
-                      flex: 0.9,
-                      minWidth: 0,
-                    }}
-                  >
+                  {sortDir === 'asc' ? (
+                    <ArrowUpwardIcon fontSize="small" />
+                  ) : (
+                    <ArrowDownwardIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          {activeFilterChips.length > 0 ? (
+            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1.5 }}>
+              {activeFilterChips.map((chip) => (
+                <Chip key={chip.id} label={chip.label} size="small" onDelete={chip.onRemove} />
+              ))}
+            </Box>
+          ) : null}
+
+          <Card sx={{ p: 0.75, overflow: 'hidden' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                height: 36,
+                px: 1.5,
+                mb: 0.5,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 1.6, lineHeight: 1 }}
+              >
+                Repuesto
+              </Typography>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 1, lineHeight: 1, display: { xs: 'none', sm: 'block' } }}
+              >
+                Vehículo
+              </Typography>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 0.8, lineHeight: 1, display: { xs: 'none', md: 'block' } }}
+              >
+                Categoría
+              </Typography>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 0.9, lineHeight: 1 }}
+              >
+                Código
+              </Typography>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
+              >
+                Precio actual
+              </Typography>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
+              >
+                Mejor cotiz.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {rows.length === 0 ? (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ p: 3, textAlign: 'center' }}
+                >
+                  Sin resultados.
+                </Typography>
+              ) : (
+                rows.map((r) => {
+                  const StatusIcon = CODE_STATUS_ICON[r.codeStatus]
+                  return (
                     <Box
-                      component="span"
+                      key={r.id}
+                      component={Link}
+                      href={`/parts/${r.id}`}
                       sx={{
-                        fontFamily: '"Roboto Mono", monospace',
-                        fontSize: 12,
-                        color: 'text.secondary',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        height: 44,
+                        px: 1.5,
+                        borderRadius: `${RADIUS.inputSmall}px`,
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        bgcolor: 'brand.bodyBg',
+                        '&:hover': { bgcolor: 'action.hover' },
                       }}
                     >
-                      {r.code || '—'}
-                    </Box>
-                    <Tooltip title={CODE_STATUS_LABELS_ES[r.codeStatus]}>
-                      <StatusIcon sx={{ fontSize: 16, color: CODE_STATUS_COLOR[r.codeStatus] }} />
-                    </Tooltip>
-                  </Box>
-                  <MoneyValue
-                    money={r.baselinePriceUsd}
-                    sx={{ flex: 0.7, textAlign: 'right', fontSize: 13 }}
-                  />
-                  <Box sx={{ flex: 0.7, textAlign: 'right' }}>
-                    {r.bestQuotePriceUsd !== null ? (
-                      <MoneyValue
-                        money={r.bestQuotePriceUsd}
-                        sx={{ fontSize: 13, color: 'success.main', fontWeight: 600 }}
-                      />
-                    ) : (
-                      <Typography variant="caption" color="text.secondary">
-                        —
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          flex: 1.6,
+                          minWidth: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {r.nameEs}
                       </Typography>
-                    )}
-                  </Box>
-                </Box>
-              )
-            })
-          )}
-        </Box>
-      </Card>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}
+                      >
+                        {r.vehicleLabel}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ flex: 0.8, minWidth: 0, display: { xs: 'none', md: 'block' } }}
+                      >
+                        {r.categoryLabel}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.75,
+                          flex: 0.9,
+                          minWidth: 0,
+                        }}
+                      >
+                        <Box
+                          component="span"
+                          sx={{
+                            fontFamily: '"Roboto Mono", monospace',
+                            fontSize: 12,
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {r.code || '—'}
+                        </Box>
+                        <Tooltip title={CODE_STATUS_LABELS_ES[r.codeStatus]}>
+                          <StatusIcon
+                            sx={{ fontSize: 16, color: CODE_STATUS_COLOR[r.codeStatus] }}
+                          />
+                        </Tooltip>
+                      </Box>
+                      <MoneyValue
+                        money={r.baselinePriceUsd}
+                        sx={{ flex: 0.7, textAlign: 'right', fontSize: 13 }}
+                      />
+                      <Box sx={{ flex: 0.7, textAlign: 'right' }}>
+                        {r.bestQuotePriceUsd !== null ? (
+                          <MoneyValue
+                            money={r.bestQuotePriceUsd}
+                            sx={{ fontSize: 13, color: 'success.main', fontWeight: 600 }}
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  )
+                })
+              )}
+            </Box>
+          </Card>
 
-      {pageCount > 1 ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={(_, value) => setPage(value)}
-            color="primary"
-            size="small"
-          />
+          {pageCount > 1 ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <Pagination
+                count={pageCount}
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+                size="small"
+              />
+            </Box>
+          ) : null}
         </Box>
-      ) : null}
+      </Box>
     </ContentWidth>
   )
 }

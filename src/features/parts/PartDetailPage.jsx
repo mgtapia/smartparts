@@ -133,7 +133,7 @@ export default function PartDetailPage({ partId }) {
             Precio
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            <Row label="Baseline (lo que paga hoy)">
+            <Row label="Precio actual (lo que paga hoy)">
               <MoneyValue money={part.baselinePrice} sx={{ fontWeight: 700 }} />
               {part.includesVat ? null : (
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>

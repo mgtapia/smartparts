@@ -98,7 +98,7 @@ export default function QuoteComparatorPage() {
             {selectedPart?.nameEs}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-            Baseline: <MoneyValue money={selectedPart?.baselinePrice} />
+            Precio actual: <MoneyValue money={selectedPart?.baselinePrice} />
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

@@ -8,35 +8,38 @@ import { DEFAULT_FX } from '@mocks/costParams'
 
 const PAGE_SIZE = 100
 
-export const SORT_OPTIONS = Object.freeze({
-  NAME_ASC: 'name_asc',
-  BASELINE_DESC: 'baseline_desc',
-  QUOTE_DESC: 'quote_desc',
-  SAVINGS_DESC: 'savings_desc',
+export const SORT_FIELDS = Object.freeze({
+  NAME: 'name',
+  BASELINE: 'baseline',
+  QUOTE: 'quote',
+  SAVINGS: 'savings',
 })
 
-export const SORT_LABELS_ES = Object.freeze({
-  [SORT_OPTIONS.NAME_ASC]: 'Nombre (A-Z)',
-  [SORT_OPTIONS.BASELINE_DESC]: 'Baseline (mayor a menor)',
-  [SORT_OPTIONS.QUOTE_DESC]: 'Mejor cotización (mayor a menor)',
-  [SORT_OPTIONS.SAVINGS_DESC]: 'Ahorro estimado (mayor a menor)',
+export const SORT_FIELD_LABELS_ES = Object.freeze({
+  [SORT_FIELDS.NAME]: 'Nombre',
+  [SORT_FIELDS.BASELINE]: 'Precio actual',
+  [SORT_FIELDS.QUOTE]: 'Mejor cotización',
+  [SORT_FIELDS.SAVINGS]: 'Ahorro estimado',
 })
 
-const SORTERS = {
-  [SORT_OPTIONS.NAME_ASC]: (a, b) => a.nameEs.localeCompare(b.nameEs, 'es'),
-  [SORT_OPTIONS.BASELINE_DESC]: (a, b) => b.baselinePriceUsd.amount - a.baselinePriceUsd.amount,
-  [SORT_OPTIONS.QUOTE_DESC]: (a, b) => nullsLast(a.bestQuotePriceUsd, b.bestQuotePriceUsd),
-  [SORT_OPTIONS.SAVINGS_DESC]: (a, b) => nullsLast(a.savingsUsd, b.savingsUsd, true),
+const SORT_VALUE_GETTERS = {
+  [SORT_FIELDS.NAME]: (r) => r.nameEs,
+  [SORT_FIELDS.BASELINE]: (r) => r.baselinePriceUsd.amount,
+  [SORT_FIELDS.QUOTE]: (r) => r.bestQuotePriceUsd?.amount ?? null,
+  [SORT_FIELDS.SAVINGS]: (r) => r.savingsUsd,
 }
 
-// Filas sin cotización (o sin ahorro calculable) siempre al final,
-// cualquiera sea el criterio de orden elegido.
-function nullsLast(a, b, isPlainNumber = false) {
-  const av = isPlainNumber ? a : a?.amount
-  const bv = isPlainNumber ? b : b?.amount
+// Filas sin cotización (o sin ahorro calculable) siempre al final, tanto en
+// ascendente como en descendente — solo el orden entre las que sí tienen
+// valor se invierte con `sortDir`.
+function compareRows(a, b, field, sortDir) {
+  const getValue = SORT_VALUE_GETTERS[field]
+  const av = getValue(a)
+  const bv = getValue(b)
   if (av === null || av === undefined) return bv === null || bv === undefined ? 0 : 1
   if (bv === null || bv === undefined) return -1
-  return bv - av
+  const cmp = typeof av === 'string' ? av.localeCompare(bv, 'es') : av - bv
+  return sortDir === 'asc' ? cmp : -cmp
 }
 
 export function useCatalog() {
@@ -44,7 +47,8 @@ export function useCatalog() {
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [vehicleFilter, setVehicleFilter] = useState(null)
   const [codeStatusFilter, setCodeStatusFilter] = useState(null)
-  const [sortBy, setSortBy] = useState(SORT_OPTIONS.NAME_ASC)
+  const [sortField, setSortField] = useState(SORT_FIELDS.NAME)
+  const [sortDir, setSortDir] = useState('asc')
   const [page, setPage] = useState(1)
 
   const [allRows, setAllRows] = useState([])
@@ -118,14 +122,14 @@ export function useCatalog() {
       }
       return true
     })
-    return filtered.sort(SORTERS[sortBy])
-  }, [allRows, search, categoryFilter, vehicleFilter, codeStatusFilter, sortBy])
+    return filtered.sort((a, b) => compareRows(a, b, sortField, sortDir))
+  }, [allRows, search, categoryFilter, vehicleFilter, codeStatusFilter, sortField, sortDir])
 
   // Volver a la página 1 cada vez que cambia el resultado filtrado — evita
   // quedar en una página vacía después de buscar/filtrar.
   useEffect(() => {
     setPage(1)
-  }, [search, categoryFilter, vehicleFilter, codeStatusFilter, sortBy])
+  }, [search, categoryFilter, vehicleFilter, codeStatusFilter, sortField, sortDir])
 
   const pageCount = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const rows = useMemo(
@@ -150,8 +154,10 @@ export function useCatalog() {
     vehicles,
     codeStatusFilter,
     setCodeStatusFilter,
-    sortBy,
-    setSortBy,
+    sortField,
+    setSortField,
+    sortDir,
+    setSortDir,
     loading,
     error,
   }

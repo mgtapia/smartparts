@@ -10,7 +10,7 @@ const body = Inter({
 })
 
 export const metadata = {
-  title: 'SmartParts',
+  title: 'SmartDeal - Parts',
   description: 'Importación y reventa de repuestos de vehículos eléctricos — China → Chile.',
   icons: { icon: '/assets/brand/favicon-smartdeal.svg' },
 }

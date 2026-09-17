@@ -8,10 +8,13 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Pagination from '@mui/material/Pagination'
+import IconButton from '@mui/material/IconButton'
 import SearchIcon from '@mui/icons-material/Search'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import Tooltip from '@mui/material/Tooltip'
 import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
@@ -21,7 +24,7 @@ import { CODE_STATUS, CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
 import { LIST_GAP, px } from '@constants/layout'
-import { useCatalog, SORT_OPTIONS, SORT_LABELS_ES } from './hooks/useCatalog'
+import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES } from './hooks/useCatalog'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -52,8 +55,10 @@ export default function CatalogPage() {
     vehicles,
     codeStatusFilter,
     setCodeStatusFilter,
-    sortBy,
-    setSortBy,
+    sortField,
+    setSortField,
+    sortDir,
+    setSortDir,
     loading,
     error,
   } = useCatalog()
@@ -141,16 +146,28 @@ export default function CatalogPage() {
         </Select>
         <Select
           size="small"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          sx={{ minWidth: 220, height: 44 }}
+          value={sortField}
+          onChange={(e) => setSortField(e.target.value)}
+          sx={{ minWidth: 180, height: 44 }}
         >
-          {Object.values(SORT_OPTIONS).map((s) => (
+          {Object.values(SORT_FIELDS).map((s) => (
             <MenuItem key={s} value={s}>
-              {SORT_LABELS_ES[s]}
+              {SORT_FIELD_LABELS_ES[s]}
             </MenuItem>
           ))}
         </Select>
+        <Tooltip title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}>
+          <IconButton
+            onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+            sx={{ width: 44, height: 44, border: '1px solid', borderColor: 'divider' }}
+          >
+            {sortDir === 'asc' ? (
+              <ArrowUpwardIcon fontSize="small" />
+            ) : (
+              <ArrowDownwardIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       <Card sx={{ p: 0.75, overflow: 'hidden' }}>
@@ -191,7 +208,7 @@ export default function CatalogPage() {
             color="text.secondary"
             sx={{ flex: 0.7, lineHeight: 1, textAlign: 'right' }}
           >
-            Baseline
+            Precio actual
           </Typography>
           <Typography
             variant="overline"

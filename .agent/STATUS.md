@@ -1,7 +1,7 @@
 # STATUS — SmartParts
 
 > Estado vivo de la implementación. Actualizar al cerrar cada tanda de trabajo.
-> Última actualización: 2026-09-20.
+> Última actualización: 2026-09-21.
 
 ## ✅ Hecho
 
@@ -57,6 +57,7 @@ Los tokens de `src/constants/layout.js` (`GRID_GAP`, `SECTION_MARGIN_BOTTOM`, et
 - **Catálogo completo importado (2026-09-17)**: `src/mocks/parts.js` pasó de 22 filas curadas a las **592 filas reales de las 4 marcas de la flota** (Dongfeng E70, Kia Niro EV, Nammi Básico+Full, Neta Aya), extraídas de la planilla real vía Google Drive MCP y parseadas con un script ad hoc (no committeado, vivió en el scratchpad de la sesión). `weight_g`/`volume_cm3` de las filas nuevas son heurística por palabra clave en el nombre del repuesto (tabla en el comentario de `parts.js`), no medición. Firestore resembrado con `npm run db:seed -- --reset`: **592 repuestos** reales. Ver [[MEMORY]] §Fuente de datos real para el detalle y una decisión de producto pendiente (abajo).
 - Catálogo UI: se sacó la subcategoría de la fila (quedó solo la categoría de nivel superior, que es la que filtra), el baseline se muestra convertido a USD junto a la mejor cotización (antes CLP vs. USD, no comparables a simple vista — `clpToUsd()` nuevo en `src/libs/fx.js`), el estado del código pasó de `Pill` con texto a un ícono con tooltip (`CheckCircle`/`HelpOutline`/`ErrorOutline`, 16px), el ícono del módulo en el rail cambió a `Inventory2`, y el rail ahora es `position: sticky` (antes se scrolleaba con el contenido).
 - **Catálogo — panel de filtros colapsable + corrección de alineación (2026-09-20)**: `FilterPanel.jsx` ahora se puede ocultar (botón con ícono `FilterList`, muestra un punto si hay filtros activos mientras está colapsado) — libera ancho para la tabla cuando no se están usando filtros. El grupo "Ordenar por" (`CatalogPage.jsx`) tenía el texto y los íconos desalineados verticalmente por el padding por defecto de `MuiSelect-select`; se corrigió fijando `lineHeight`/`alignItems` explícitos en el `Select` y el `IconButton`.
+- **Escritura de sourcing habilitada en `/parts/[id]` (2026-09-21)**: surgió al investigar por qué proveedores chinos rechazaban códigos Dongfeng E70 ya "confirmados" (ver [[MEMORY]] §Fuente de datos real para el detalle de la investigación y el plan `C:\Users\User\.claude\plans\peppy-riding-meadow.md`). El botón "Confirmar código" (antes deshabilitado, "requiere escritura a Firestore") ahora abre `SourcingDialog` (`src/features/parts/components/SourcingDialog.jsx`) para editar código/estado/nota y guardarlos vía `updatePartSourcing()` (`src/libs/repos/partsRepo.js`) — `updateDoc` directo, `source` pasa a `'manual_verification'`. `usePartDetail` expone `refetch` para recargar después de guardar. `sourcing_note` ya se leía en la UI (`PartDetailPage.jsx:120-127`) pero nada lo escribía hasta ahora.
 - **Placeholders restantes** (`vehicles`, `suppliers`, `sourcing`, `shipments`, `clients`, `pricing`, `imports`, `settings`) siguen sin feature real ni repo propio.
 - `pricing` como módulo separado todavía no existe — hoy el margen/precio por volumen vive dentro de `costing`.
 

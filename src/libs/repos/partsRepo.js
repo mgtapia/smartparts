@@ -3,7 +3,16 @@
 // (reciben datos, no hacen I/O) a propósito: partsRepo.test.js las prueba
 // directo contra los datos reales del cliente inicial sin necesitar Firestore
 // — el motor de costos ya sienta el precedente de separar cómputo puro de I/O.
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { getDb } from '@libs/firebase/client'
 import { getCategory } from '@mocks/categories'
 import { getVehicle } from './vehiclesRepo'
@@ -88,6 +97,25 @@ export async function getPart(id) {
     vehicle,
     quotes,
     position: bridgeSnap.docs[0]?.data()?.position ?? null,
+  })
+}
+
+/**
+ * Escritura manual de sourcing — código verificado o rechazado a mano contra
+ * una fuente real (no otra IA sin cita), para que la conclusión quede en la
+ * ficha del repuesto en vez de perderse en un chat. `source` pasa a
+ * 'manual_verification': ya no es el dato tal cual vino de la planilla del
+ * cliente (ver docs/MODELO-DE-DATOS.md §oem_codes).
+ */
+export async function updatePartSourcing(partId, { code, codeStatus, sourcingNote }) {
+  const trimmedCode = code?.trim() || null
+  await updateDoc(doc(getDb(), 'parts', partId), {
+    oem_codes: trimmedCode
+      ? [{ code: trimmedCode, code_status: codeStatus, source: 'manual_verification' }]
+      : [],
+    code_status: codeStatus,
+    sourcing_note: sourcingNote?.trim() || null,
+    updated_at: serverTimestamp(),
   })
 }
 

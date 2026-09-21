@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
@@ -15,6 +16,7 @@ import { CODE_STATUS_LABELS_ES, PART_TYPE, MATCH_STATUS } from '@constants/enums
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, SECTION_MARGIN_BOTTOM, px } from '@constants/layout'
 import { usePartDetail } from './hooks/usePartDetail'
+import SourcingDialog from './components/SourcingDialog'
 
 const CODE_STATUS_TONE = { confirmed: 'success', provisional: 'warning', missing: 'error' }
 const MATCH_STATUS_LABELS_ES = {
@@ -41,7 +43,8 @@ function DisabledAction({ label, reason }) {
 }
 
 export default function PartDetailPage({ partId }) {
-  const { part, loading, error } = usePartDetail(partId)
+  const { part, loading, error, refetch } = usePartDetail(partId)
+  const [sourcingDialogOpen, setSourcingDialogOpen] = useState(false)
 
   if (loading) {
     return (
@@ -79,10 +82,9 @@ export default function PartDetailPage({ partId }) {
         description={`${part.vehicle?.brand} ${part.vehicle?.model} · ${part.category?.labelEs || part.categoryPath}`}
         actions={
           <>
-            <DisabledAction
-              label="Confirmar código"
-              reason="Disponible en Fase 2 — requiere escritura a Firestore"
-            />
+            <Button variant="outlined" size="small" onClick={() => setSourcingDialogOpen(true)}>
+              Confirmar código
+            </Button>
             <DisabledAction
               label="Cargar cotización"
               reason="Disponible en Fase 2 — requiere escritura a Firestore"
@@ -90,6 +92,18 @@ export default function PartDetailPage({ partId }) {
           </>
         }
       />
+
+      {sourcingDialogOpen ? (
+        <SourcingDialog
+          open={sourcingDialogOpen}
+          part={part}
+          onClose={() => setSourcingDialogOpen(false)}
+          onSaved={() => {
+            setSourcingDialogOpen(false)
+            refetch()
+          }}
+        />
+      ) : null}
 
       <Box sx={{ display: 'flex', gap: px(GRID_GAP), flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <Card sx={{ p: 2.5, flex: 1, minWidth: 300 }}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getPart } from '@libs/repos/partsRepo'
 
 export function usePartDetail(partId) {
@@ -6,7 +6,7 @@ export function usePartDetail(partId) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
     let cancelled = false
     setLoading(true)
     setError(null)
@@ -27,5 +27,7 @@ export function usePartDetail(partId) {
     }
   }, [partId])
 
-  return { part, loading, error }
+  useEffect(() => refetch(), [refetch])
+
+  return { part, loading, error, refetch }
 }

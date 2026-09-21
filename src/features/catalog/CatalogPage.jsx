@@ -147,7 +147,11 @@ export default function CatalogPage() {
                 height: 44,
               }}
             >
-              <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ whiteSpace: 'nowrap', lineHeight: 1 }}
+              >
                 Ordenar por
               </Typography>
               <Select
@@ -156,7 +160,16 @@ export default function CatalogPage() {
                 disableUnderline
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value)}
-                sx={{ minWidth: 140, fontSize: 14 }}
+                sx={{
+                  minWidth: 140,
+                  fontSize: 14,
+                  '& .MuiSelect-select': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    lineHeight: 1,
+                    py: 0,
+                  },
+                }}
               >
                 {Object.values(SORT_FIELDS).map((s) => (
                   <MenuItem key={s} value={s}>
@@ -168,6 +181,7 @@ export default function CatalogPage() {
                 <IconButton
                   size="small"
                   onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {sortDir === 'asc' ? (
                     <ArrowUpwardIcon fontSize="small" />

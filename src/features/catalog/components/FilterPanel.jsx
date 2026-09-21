@@ -11,6 +11,10 @@ import RadioGroup from '@mui/material/RadioGroup'
 import Slider from '@mui/material/Slider'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { SIDEBAR_GAP, px } from '@constants/layout'
 import { QUOTE_FILTERS, QUOTE_FILTER_LABELS_ES } from '../hooks/useCatalog'
@@ -59,6 +63,34 @@ export default function FilterPanel({
   const [localPriceRange, setLocalPriceRange] = useState(priceRange)
   useEffect(() => setLocalPriceRange(priceRange), [priceRange])
 
+  const [open, setOpen] = useState(true)
+
+  if (!open) {
+    return (
+      <Box sx={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Tooltip title="Mostrar filtros" placement="right">
+          <IconButton size="small" onClick={() => setOpen(true)} sx={{ position: 'relative' }}>
+            <FilterListIcon fontSize="small" />
+            {hasActiveFilters ? (
+              <Box
+                component="span"
+                sx={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  bgcolor: 'primary.main',
+                }}
+              />
+            ) : null}
+          </IconButton>
+        </Tooltip>
+      </Box>
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -73,11 +105,18 @@ export default function FilterPanel({
         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
           Filtros
         </Typography>
-        {hasActiveFilters ? (
-          <Button size="small" onClick={onClearAll} sx={{ minWidth: 0, fontSize: 12 }}>
-            Limpiar
-          </Button>
-        ) : null}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {hasActiveFilters ? (
+            <Button size="small" onClick={onClearAll} sx={{ minWidth: 0, fontSize: 12 }}>
+              Limpiar
+            </Button>
+          ) : null}
+          <Tooltip title="Ocultar filtros">
+            <IconButton size="small" onClick={() => setOpen(false)}>
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       <Divider />

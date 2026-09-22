@@ -67,15 +67,16 @@ async function main() {
     if (!hit?.found) continue
     if (raw.oem_codes[0].source === 'manual_verification') continue
 
+    const site = hit.site ?? 'tachka.ru'
     const reason = reserves.get(code)
     const status = reason ? 'provisional' : 'confirmed'
     const note = reason
-      ? `Existe como artículo Dongfeng en tachka.ru ("${hit.nameRu}", ${hit.url}) pero con reservas: ${reason}. ${CAVEAT}`
-      : `Verificado como artículo Dongfeng en tachka.ru ("${hit.nameRu}", ${hit.url}) — 2026-09-21. Ajuste al E70 no indicado en la ficha salvo modelos i-pro. ${CAVEAT}`
+      ? `Existe como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) pero con reservas: ${reason}. ${CAVEAT}`
+      : `Verificado como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) — 2026-09-21. Ajuste al E70 no indicado en la ficha salvo modelos i-pro/Evolute. ${CAVEAT}`
 
     batch.update(doc.ref, {
       code_status: status,
-      oem_codes: [{ code, code_status: status, source: 'tachka_ru' }],
+      oem_codes: [{ code, code_status: status, source: site.replace('.', '_') }],
       sourcing_note: note,
       updated_at: new Date(),
     })

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
@@ -16,6 +17,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import Tooltip from '@mui/material/Tooltip'
 import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
@@ -72,6 +74,8 @@ export default function CatalogPage() {
     loading,
     error,
   } = useCatalog()
+  const [filtersOpen, setFiltersOpen] = useState(true)
+  const hasActiveFilters = activeFilterChips.length > 0
 
   if (loading) {
     return (
@@ -94,25 +98,6 @@ export default function CatalogPage() {
       <PageHeader title="Catálogo" description={`${filteredCount} de ${totalCount} repuestos.`} />
 
       <Box sx={{ display: 'flex', gap: px(GRID_GAP), alignItems: 'flex-start' }}>
-        <FilterPanel
-          categories={categories}
-          categoryFilters={categoryFilters}
-          toggleCategoryFilter={toggleCategoryFilter}
-          vehicles={vehicles}
-          vehicleFilters={vehicleFilters}
-          toggleVehicleFilter={toggleVehicleFilter}
-          codeStatuses={codeStatuses}
-          codeStatusFilters={codeStatusFilters}
-          toggleCodeStatusFilter={toggleCodeStatusFilter}
-          quoteFilter={quoteFilter}
-          setQuoteFilter={setQuoteFilter}
-          priceBounds={priceBounds}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          hasActiveFilters={activeFilterChips.length > 0}
-          onClearAll={clearAllFilters}
-        />
-
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: 'flex', gap: px(GRID_GAP), alignItems: 'center', mb: 1.5 }}>
             <TextField
@@ -133,7 +118,7 @@ export default function CatalogPage() {
             />
 
             {/* Orden — separado visualmente de los filtros (que viven en el
-                panel de la izquierda) con un borde propio, para que no se
+                panel de la derecha) con un borde propio, para que no se
                 confunda con un criterio que reduce filas. */}
             <Box
               sx={{
@@ -191,6 +176,32 @@ export default function CatalogPage() {
                 </IconButton>
               </Tooltip>
             </Box>
+
+            {!filtersOpen ? (
+              <Tooltip title="Mostrar filtros">
+                <IconButton
+                  size="small"
+                  onClick={() => setFiltersOpen(true)}
+                  sx={{ position: 'relative', flexShrink: 0 }}
+                >
+                  <FilterListIcon fontSize="small" />
+                  {hasActiveFilters ? (
+                    <Box
+                      component="span"
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                      }}
+                    />
+                  ) : null}
+                </IconButton>
+              </Tooltip>
+            ) : null}
           </Box>
 
           {activeFilterChips.length > 0 ? (
@@ -374,6 +385,28 @@ export default function CatalogPage() {
             </Box>
           ) : null}
         </Box>
+
+        {filtersOpen ? (
+          <FilterPanel
+            categories={categories}
+            categoryFilters={categoryFilters}
+            toggleCategoryFilter={toggleCategoryFilter}
+            vehicles={vehicles}
+            vehicleFilters={vehicleFilters}
+            toggleVehicleFilter={toggleVehicleFilter}
+            codeStatuses={codeStatuses}
+            codeStatusFilters={codeStatusFilters}
+            toggleCodeStatusFilter={toggleCodeStatusFilter}
+            quoteFilter={quoteFilter}
+            setQuoteFilter={setQuoteFilter}
+            priceBounds={priceBounds}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            hasActiveFilters={hasActiveFilters}
+            onClearAll={clearAllFilters}
+            onCollapse={() => setFiltersOpen(false)}
+          />
+        ) : null}
       </Box>
     </ContentWidth>
   )

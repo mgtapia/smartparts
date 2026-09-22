@@ -1,0 +1,283 @@
+{
+  "Absorbedor Frontal plastico": {
+    "en": "Front bumper energy absorber (plastic)",
+    "zh": "前保险杠吸能块"
+  },
+  "Absorbedor TRAS DER": {
+    "en": "Rear bumper energy absorber, right",
+    "zh": "后保险杠吸能块（右）"
+  },
+  "Absorbedor TRAS IZQ": {
+    "en": "Rear bumper energy absorber, left",
+    "zh": "后保险杠吸能块（左）"
+  },
+  "Amortiguador DEL DER": { "en": "Front shock absorber, right", "zh": "前减震器（右）" },
+  "Amortiguador DEL IZQ": { "en": "Front shock absorber, left", "zh": "前减震器（左）" },
+  "Amortiguador TRAS DER": { "en": "Rear shock absorber, right", "zh": "后减震器（右）" },
+  "Amortiguador TRAS IZQ": { "en": "Rear shock absorber, left", "zh": "后减震器（左）" },
+  "Bandeja DEL DER": { "en": "Front lower control arm, right", "zh": "前下摆臂（右）" },
+  "Bandeja DEL IZQ": { "en": "Front lower control arm, left", "zh": "前下摆臂（左）" },
+  "Barra estabilizadora DEL": { "en": "Front stabilizer bar", "zh": "前稳定杆" },
+  "Bieleta DEL DER": { "en": "Front stabilizer link, right", "zh": "前稳定杆连杆（右）" },
+  "Bieleta DEL IZQ": { "en": "Front stabilizer link, left", "zh": "前稳定杆连杆（左）" },
+  "Bisagra superior puerta DEL DER": { "en": "Front right door upper hinge", "zh": "右前门上铰链" },
+  "Bisagra inferior puerta DEL DER": { "en": "Front right door lower hinge", "zh": "右前门下铰链" },
+  "Bisagra superior puerta DEL IZQ": { "en": "Front left door upper hinge", "zh": "左前门上铰链" },
+  "Bisagra inferior puerta DEL IZQ": { "en": "Front left door lower hinge", "zh": "左前门下铰链" },
+  "Bisagra superior puerta TRAS DER": { "en": "Rear right door upper hinge", "zh": "右后门上铰链" },
+  "Bisagra inferior puerta TRAS DER": { "en": "Rear right door lower hinge", "zh": "右后门下铰链" },
+  "Bisagra superior puerta TRAS IZQ": { "en": "Rear left door upper hinge", "zh": "左后门上铰链" },
+  "Bisagra inferior puerta TRAS IZQ": { "en": "Rear left door lower hinge", "zh": "左后门下铰链" },
+  "Bocina alerta movimiento": {
+    "en": "Acoustic Vehicle Alert System (AVAS) speaker",
+    "zh": "低速行人警示声发生器"
+  },
+  "Bocina vehículo": { "en": "Horn", "zh": "喇叭" },
+  "Caja Reductora": { "en": "Reduction gearbox", "zh": "减速箱" },
+  "Caliper DEL DER": { "en": "Front brake caliper, right", "zh": "前制动卡钳（右）" },
+  "Caliper DEL IZQ": { "en": "Front brake caliper, left", "zh": "前制动卡钳（左）" },
+  "Capó": { "en": "Hood / bonnet", "zh": "前机盖" },
+  "Capó bisagra DER": { "en": "Hood hinge, right", "zh": "机盖铰链（右）" },
+  "Capó bisagra IZQ": { "en": "Hood hinge, left", "zh": "机盖铰链（左）" },
+  "Careta Frontal puerto de carga": { "en": "Charging port front cover", "zh": "充电口前盖" },
+  "Cazoleta DER": { "en": "Front strut mount, right", "zh": "前减震器顶胶（右）" },
+  "Cazoleta IZQ": { "en": "Front strut mount, left", "zh": "前减震器顶胶（左）" },
+  "Chapa Cerradura Capo": { "en": "Hood lock latch", "zh": "机盖锁" },
+  "Chapa maleta (conjunto completo)": {
+    "en": "Trunk lock assembly (complete)",
+    "zh": "后备箱锁总成"
+  },
+  "Compresor": { "en": "AC compressor", "zh": "空调压缩机" },
+  "Condensador": { "en": "AC condenser", "zh": "空调冷凝器" },
+  "Deflector plastico A ACOND DEL DER": {
+    "en": "AC air deflector, front right (plastic)",
+    "zh": "前右空调风道导流板（塑料）"
+  },
+  "Deflector plastico A ACOND DEL IZQ": {
+    "en": "AC air deflector, front left (plastic)",
+    "zh": "前左空调风道导流板（塑料）"
+  },
+  "Depósito plastico limpia parabrisas": {
+    "en": "Windshield washer fluid reservoir (plastic)",
+    "zh": "雨刮水壶（塑料）"
+  },
+  "Disco freno DEL DER": { "en": "Front brake disc, right", "zh": "前制动盘（右）" },
+  "Disco freno DEL IZQ": { "en": "Front brake disc, left", "zh": "前制动盘（左）" },
+  "Disco freno TRAS DER": { "en": "Rear brake disc, right", "zh": "后制动盘（右）" },
+  "Disco freno TRAS IZQ": { "en": "Rear brake disc, left", "zh": "后制动盘（左）" },
+  "Eje Palier DEL DER": { "en": "Front drive axle (CV axle), right", "zh": "前半轴（右）" },
+  "Eje Palier DEL IZQ": { "en": "Front drive axle (CV axle), left", "zh": "前半轴（左）" },
+  "Eje Trasero": { "en": "Rear axle", "zh": "后桥" },
+  "Electroventilador": { "en": "Cooling fan (electric)", "zh": "电子散热风扇" },
+  "Estructura interior plastica parrilla puerto carga": {
+    "en": "Charging port grille inner structure (plastic)",
+    "zh": "充电口格栅内部结构（塑料）"
+  },
+  "Foco TRAS DER externo": { "en": "Rear tail light, right (outer)", "zh": "右后尾灯（外侧）" },
+  "Foco TRAS IZQ externo": { "en": "Rear tail light, left (outer)", "zh": "左后尾灯（外侧）" },
+  "Fuelle Axial DER": { "en": "CV joint boot, right", "zh": "等速节套（右）" },
+  "Fuelle Axial IZQ": { "en": "CV joint boot, left", "zh": "等速节套（左）" },
+  "Guardafango DEL DER": { "en": "Front fender, right", "zh": "前翼子板（右）" },
+  "Guardafango DEL IZQ": { "en": "Front fender, left", "zh": "前翼子板（左）" },
+  "Guardafango TRAS DER": { "en": "Rear fender, right", "zh": "后翼子板（右）" },
+  "Guardafango TRAS IZQ": { "en": "Rear fender, left", "zh": "后翼子板（左）" },
+  "Inferior metálico tapa de carga": {
+    "en": "Charging port lower metal cover",
+    "zh": "充电口下盖（金属）"
+  },
+  "Luneta espejo DER": { "en": "Side mirror glass, right", "zh": "右后视镜镜片" },
+  "Luneta espejo IZQ": { "en": "Side mirror glass, left", "zh": "左后视镜镜片" },
+  "Luneta TRAS central": { "en": "Rear window glass, center", "zh": "后风挡玻璃（中）" },
+  "Luneta TRAS DER": { "en": "Rear quarter window glass, right", "zh": "右后三角窗玻璃" },
+  "Luneta TRAS IZQ": { "en": "Rear quarter window glass, left", "zh": "左后三角窗玻璃" },
+  "Manilla DEL DER": { "en": "Front door handle, right", "zh": "右前门拉手" },
+  "Manilla DEL IZQ": { "en": "Front door handle, left", "zh": "左前门拉手" },
+  "Manilla TRAS DER": { "en": "Rear door handle, right", "zh": "右后门拉手" },
+  "Manilla TRAS IZQ": { "en": "Rear door handle, left", "zh": "左后门拉手" },
+  "Máscara o embellecedor frontal": { "en": "Front grille", "zh": "前进气格栅" },
+  "Ménsula DEL DER": { "en": "Front bumper bracket, right", "zh": "前保险杠支架（右）" },
+  "Ménsula DEL IZQ": { "en": "Front bumper bracket, left", "zh": "前保险杠支架（左）" },
+  "Ménsula TRAS DER": { "en": "Rear bumper bracket, right", "zh": "后保险杠支架（右）" },
+  "Ménsula TRAS IZQ": { "en": "Rear bumper bracket, left", "zh": "后保险杠支架（左）" },
+  "Moldura puerta DEL DER": { "en": "Front door molding, right", "zh": "右前门饰条" },
+  "Moldura puerta DEL IZQ": { "en": "Front door molding, left", "zh": "左前门饰条" },
+  "Moldura puerta TRAS DER": { "en": "Rear door molding, right", "zh": "右后门饰条" },
+  "Moldura puerta TRAS IZQ": { "en": "Rear door molding, left", "zh": "左后门饰条" },
+  "Óptico DEL DER": { "en": "Headlight, right", "zh": "右大灯" },
+  "Óptico DEL IZQ": { "en": "Headlight, left", "zh": "左大灯" },
+  "Parabrisas DEL": { "en": "Windshield", "zh": "前挡风玻璃" },
+  "Parachoque DEL rejilla Central": { "en": "Front bumper center grille", "zh": "前保险杠中格栅" },
+  "Parachoque DEL rejilla lateral DER": {
+    "en": "Front bumper side grille, right",
+    "zh": "前保险杠侧格栅（右）"
+  },
+  "Parachoque DEL rejilla lateral IZQ": {
+    "en": "Front bumper side grille, left",
+    "zh": "前保险杠侧格栅（左）"
+  },
+  "Parachoque TRAS reflector DER": {
+    "en": "Rear bumper reflector, right",
+    "zh": "后保险杠反光片（右）"
+  },
+  "Parachoque TRAS reflector IZQ": {
+    "en": "Rear bumper reflector, left",
+    "zh": "后保险杠反光片（左）"
+  },
+  "Parachoques DEL parte superior": { "en": "Front bumper, upper section", "zh": "前保险杠上部" },
+  "Parachoques TRAS parte superior": { "en": "Rear bumper, upper section", "zh": "后保险杠上部" },
+  "Platina superior puerta DEL DER": {
+    "en": "Front right door upper reinforcement plate",
+    "zh": "右前门上加强板"
+  },
+  "Platina superior puerta DEL IZQ": {
+    "en": "Front left door upper reinforcement plate",
+    "zh": "左前门上加强板"
+  },
+  "Platina superior puerta TRAS DER": {
+    "en": "Rear right door upper reinforcement plate",
+    "zh": "右后门上加强板"
+  },
+  "Platina superior puerta TRAS IZQ": {
+    "en": "Rear left door upper reinforcement plate",
+    "zh": "左后门上加强板"
+  },
+  "Reflector Portalón Central": { "en": "Tailgate reflector, center", "zh": "尾门反光片（中）" },
+  "Reflector Portalón DER interno": {
+    "en": "Tailgate reflector, right (inner)",
+    "zh": "尾门反光片（右内侧）"
+  },
+  "Reflector Portalón IZQ interno": {
+    "en": "Tailgate reflector, left (inner)",
+    "zh": "尾门反光片（左内侧）"
+  },
+  "Portalón y/o maleta": { "en": "Tailgate / trunk lid", "zh": "尾门/后备箱盖" },
+  "Puerta DEL DER": { "en": "Front door, right", "zh": "右前门" },
+  "Puerta DEL IZQ": { "en": "Front door, left", "zh": "左前门" },
+  "Puerta TRAS DER": { "en": "Rear door, right", "zh": "右后门" },
+  "Puerta TRAS IZQ": { "en": "Rear door, left", "zh": "左后门" },
+  "Radiador principal": { "en": "Main radiator", "zh": "主散热器" },
+  "Frontal metalico superior radiador": {
+    "en": "Radiator upper metal support",
+    "zh": "散热器上金属支架"
+  },
+  "Frontal metalico inferior radiador": {
+    "en": "Radiator lower metal support",
+    "zh": "散热器下金属支架"
+  },
+  "Soporte metalico superior Optico DER": {
+    "en": "Headlight upper metal support, right",
+    "zh": "右大灯上金属支架"
+  },
+  "Soporte metalico superior Optico IZQ": {
+    "en": "Headlight upper metal support, left",
+    "zh": "左大灯上金属支架"
+  },
+  "Refuerzo metalico Parachoque Del": {
+    "en": "Front bumper metal reinforcement",
+    "zh": "前保险杠金属加强件"
+  },
+  "Tapa cubremotor inferior": { "en": "Engine under cover", "zh": "发动机下护板" },
+  "Tapa cubre radiador inferior": { "en": "Radiator lower cover", "zh": "散热器下护板" },
+  "Refuerzo metalico interno Tapabarro DEL DER": {
+    "en": "Front fender inner metal reinforcement, right",
+    "zh": "右前翼子板内加强件"
+  },
+  "Refuerzo metalico interno Tapabarro DEL IZQ": {
+    "en": "Front fender inner metal reinforcement, left",
+    "zh": "左前翼子板内加强件"
+  },
+  "Retrovisor DER completo": {
+    "en": "Side mirror assembly, right (complete)",
+    "zh": "右后视镜总成"
+  },
+  "Retrovisor IZQ completo": {
+    "en": "Side mirror assembly, left (complete)",
+    "zh": "左后视镜总成"
+  },
+  "Rodamiento de maza DEL DER": {
+    "en": "Front wheel hub bearing, right",
+    "zh": "前轮毂轴承（右）"
+  },
+  "Rodamiento de maza DEL IZQ": { "en": "Front wheel hub bearing, left", "zh": "前轮毂轴承（左）" },
+  "Rodamiento de maza TRAS DER": {
+    "en": "Rear wheel hub bearing, right",
+    "zh": "后轮毂轴承（右）"
+  },
+  "Rodamiento de maza TRAS IZQ": { "en": "Rear wheel hub bearing, left", "zh": "后轮毂轴承（左）" },
+  "Sensores de acercamiento TRAS": { "en": "Rear parking sensors", "zh": "后泊车雷达传感器" },
+  "Sistema Sensor de freno DEL DER": {
+    "en": "Front ABS wheel speed sensor, right",
+    "zh": "前右ABS轮速传感器"
+  },
+  "Sistema Sensor de freno DEL IZQ": {
+    "en": "Front ABS wheel speed sensor, left",
+    "zh": "前左ABS轮速传感器"
+  },
+  "Sistema Sensor de freno TRAS DER": {
+    "en": "Rear ABS wheel speed sensor, right",
+    "zh": "后右ABS轮速传感器"
+  },
+  "Sistema Sensor de freno TRAS IZQ": {
+    "en": "Rear ABS wheel speed sensor, left",
+    "zh": "后左ABS轮速传感器"
+  },
+  "Soporte caja reductora": { "en": "Reduction gearbox mount", "zh": "减速箱支架" },
+  "Tapa DEL Gancho de remolque": { "en": "Front tow hook cover", "zh": "前拖车钩盖" },
+  "Tapabarro DER DEL": { "en": "Front wheel arch liner, right", "zh": "右前轮眉内衬" },
+  "Tapabarro IZQ DEL": { "en": "Front wheel arch liner, left", "zh": "左前轮眉内衬" },
+  "Tapiz Interior portalón y/o maleta": {
+    "en": "Tailgate/trunk interior trim panel",
+    "zh": "尾门/后备箱内饰板"
+  },
+  "Tapiz interior puerta DEL DER": {
+    "en": "Front right door interior trim panel",
+    "zh": "右前门内饰板"
+  },
+  "Tapiz interior puerta DEL IZQ": {
+    "en": "Front left door interior trim panel",
+    "zh": "左前门内饰板"
+  },
+  "Tapiz interior puerta TRAS DER": {
+    "en": "Rear right door interior trim panel",
+    "zh": "右后门内饰板"
+  },
+  "Tapiz interior puerta TRAS IZQ": {
+    "en": "Rear left door interior trim panel",
+    "zh": "左后门内饰板"
+  },
+  "Terminal Exterior DEL DER": {
+    "en": "Outer tie rod end, front right",
+    "zh": "右前转向拉杆外球头"
+  },
+  "Terminal Exterior DEL IZQ": {
+    "en": "Outer tie rod end, front left",
+    "zh": "左前转向拉杆外球头"
+  },
+  "Terminal Interior DEL DER (Axial)": {
+    "en": "Inner tie rod end (axial), front right",
+    "zh": "右前转向拉杆内球头（轴向）"
+  },
+  "Terminal Interior DEL IZQ (Axial)": {
+    "en": "Inner tie rod end (axial), front left",
+    "zh": "左前转向拉杆内球头（轴向）"
+  },
+  "Terminales enchufes puerto carga, incl. cableado": {
+    "en": "Charging port connector terminals, incl. wiring",
+    "zh": "充电口接线端子（含线束）"
+  },
+  "Varilla Capo": { "en": "Hood support rod", "zh": "机盖支撑杆" },
+  "Vidrio puerta DEL DER": { "en": "Front door window glass, right", "zh": "右前门玻璃" },
+  "Vidrio puerta DEL IZQ": { "en": "Front door window glass, left", "zh": "左前门玻璃" },
+  "Vidrio puerta TRAS DER": { "en": "Rear door window glass, right", "zh": "右后门玻璃" },
+  "Vidrio puerta TRAS IZQ": { "en": "Rear door window glass, left", "zh": "左后门玻璃" },
+  "Zocalo plastico costado DER": { "en": "Side sill plastic trim, right", "zh": "右侧裙塑料饰条" },
+  "Zocalo plastico costado IZQ": { "en": "Side sill plastic trim, left", "zh": "左侧裙塑料饰条" },
+  "Cerradura Electronica": { "en": "Electronic door lock", "zh": "电子门锁" },
+  "Pedal de Acelerador": { "en": "Accelerator pedal", "zh": "油门踏板" },
+  "Refuerzo metálico DEL IZQ": { "en": "Front metal reinforcement, left", "zh": "前左金属加强件" },
+  "Refuerzo metálico DEL DER": { "en": "Front metal reinforcement, right", "zh": "前右金属加强件" },
+  "Frontal plastico superior radiador": {
+    "en": "Radiator upper plastic cover",
+    "zh": "散热器上塑料护罩"
+  }
+}

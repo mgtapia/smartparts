@@ -46,6 +46,10 @@ function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {
   return {
     id,
     nameEs: raw.name_es,
+    // Traducciones directas del nombre en español, para comunicarse con
+    // proveedores — no son terminología oficial del fabricante verificada.
+    nameEn: raw.name_en || null,
+    nameZh: raw.name_zh || null,
     categoryPath: raw.category_path,
     category: getCategory(raw.category_path),
     vehicleId: raw.vehicle_ids?.[0] ?? null,

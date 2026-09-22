@@ -111,6 +111,21 @@ export default function PartDetailPage({ partId }) {
             Identidad
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+            {part.nameEn || part.nameZh ? (
+              <>
+                {part.nameEn ? (
+                  <Row label="Nombre (inglés)">
+                    <Typography variant="body2">{part.nameEn}</Typography>
+                  </Row>
+                ) : null}
+                {part.nameZh ? (
+                  <Row label="Nombre (chino)">
+                    <Typography variant="body2">{part.nameZh}</Typography>
+                  </Row>
+                ) : null}
+                <Divider />
+              </>
+            ) : null}
             <Row label="Código local (Chile)">
               {part.localCode?.code ? (
                 <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace' }}>

@@ -111,19 +111,28 @@ export default function PartDetailPage({ partId }) {
             Identidad
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            <Row label="Código OEM">
-              {part.oemCodes.length === 0 ? (
-                <Pill label="Sin código" tone="error" />
+            <Row label="Código local (Chile)">
+              {part.localCode?.code ? (
+                <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace' }}>
+                  {part.localCode.code}
+                </Box>
               ) : (
+                <Pill label="Sin código" tone="error" />
+              )}
+            </Row>
+            <Row label="Código de sourcing (China)">
+              {part.sourcingCode?.code ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace' }}>
-                    {part.oemCodes[0].code}
+                    {part.sourcingCode.code}
                   </Box>
                   <Pill
                     label={CODE_STATUS_LABELS_ES[part.codeStatus]}
                     tone={CODE_STATUS_TONE[part.codeStatus]}
                   />
                 </Box>
+              ) : (
+                <Pill label={CODE_STATUS_LABELS_ES[part.codeStatus]} tone="warning" />
               )}
             </Row>
             <Row label="Posición">{part.position || '—'}</Row>

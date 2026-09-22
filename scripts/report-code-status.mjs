@@ -40,16 +40,22 @@ async function main() {
   const db = getAdminDb()
   const snap = await db.collection('parts').where('vehicle_ids', 'array-contains', vehicleId).get()
   const byStatus = {}
-  const bySource = {}
+  const bySourcingSource = {}
   snap.docs.forEach((doc) => {
     const raw = doc.data()
     byStatus[raw.code_status] = (byStatus[raw.code_status] || 0) + 1
-    const source = raw.oem_codes?.[0]?.source || '(sin código)'
-    bySource[source] = (bySource[source] || 0) + 1
+    const codes = raw.oem_codes || []
+    const sourcingEntry = codes.find((c) => c.role === 'sourcing')
+    const source = sourcingEntry
+      ? sourcingEntry.source
+      : codes.length
+        ? '(sin verificar — solo local)'
+        : '(sin código)'
+    bySourcingSource[source] = (bySourcingSource[source] || 0) + 1
   })
   console.log(`${vehicleId}: ${snap.size} repuestos totales`)
   console.log('Por code_status:', byStatus)
-  console.log('Por source:', bySource)
+  console.log('Código de sourcing por fuente:', bySourcingSource)
 }
 
 main().then(() => process.exit(0))

@@ -65,7 +65,10 @@ La forma de estos campos sale de la planilla real del cliente inicial (ver [[MEM
   "name_zh": null,
   "category_path": "carroceria__frontal__puertas",
   "vehicle_ids": ["dongfeng_e70"],
-  "oem_codes": [{ "code": "B013771", "code_status": "confirmed", "source": "client_baseline" }],
+  "oem_codes": [
+    { "code": "B013771", "source": "client_baseline", "role": "local" },
+    { "code": "B013771", "code_status": "confirmed", "source": "tachka_ru", "role": "sourcing" }
+  ],
   "code_status": "confirmed",
   "weight_g": 18500,
   "volume_cm3": 210000,
@@ -82,6 +85,7 @@ La forma de estos campos sale de la planilla real del cliente inicial (ver [[MEM
 
 Notas directas de la planilla real:
 - `code_status: 'missing'|'provisional'|'confirmed'` — porque hay filas `SIN CODIGO`. Nunca asumir código OEM obligatorio.
+- `oem_codes[].role: 'local'|'sourcing'` (2026-09-21) — un repuesto puede tener dos códigos que son hechos distintos: el **local** es el que ya usa el comprador/importador en Chile (nunca se pisa, siempre `source: 'client_baseline'`), el **sourcing** es el que se verificó de forma independiente como reconocible por un proveedor/fábrica (China u otro origen) — puede coincidir en valor con el local o ser distinto. `code_status` a nivel del documento describe la confianza del código de *sourcing*, no del local (ese siempre es "el que tienen"). Ver `getLocalCode()`/`getSourcingCode()` en `src/libs/repos/partsRepo.js` y `.agent/MEMORY.md` §Fuente de datos real — surgió porque un proveedor chino rechazó códigos que sí eran reales en el circuito de exportación, y hacía falta poder decir "esto es lo que usamos acá" y "esto es lo que reconoce el proveedor" sin que uno borre al otro.
 - `demand_basis: 'estimated'|'historical'` — la "Cantidad estimada" de la planilla ya es la rotación de flota. Se reemplaza por consumo real cuando exista (registro de taller del cliente, pendiente de revisar — ver [[MEMORY]]).
 - `baseline_price.includes_vat: false` explícito — los precios del cliente inicial son netos, pero un baseline futuro de otra fuente puede venir con IVA.
 - `sourcing_strategy: 'local_only'` — para componentes donde importar directo no es viable a esta escala (packs de tracción completos), la app debe poder decirlo en vez de mostrar un número engañosamente atractivo.

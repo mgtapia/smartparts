@@ -62,10 +62,13 @@ async function main() {
 
   for (const doc of snap.docs) {
     const raw = doc.data()
-    const code = raw.oem_codes?.[0]?.code
+    const codes = raw.oem_codes || []
+    const localEntry = codes.find((c) => c.role === 'local') ?? codes[0]
+    const existingSourcing = codes.find((c) => c.role === 'sourcing')
+    const code = localEntry?.code
     const hit = code ? results[code] : null
     if (!hit?.found) continue
-    if (raw.oem_codes[0].source === 'manual_verification') continue
+    if (existingSourcing?.source === 'manual_verification') continue
 
     const site = hit.site ?? 'tachka.ru'
     const reason = reserves.get(code)
@@ -74,9 +77,14 @@ async function main() {
       ? `Existe como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) pero con reservas: ${reason}. ${CAVEAT}`
       : `Verificado como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) — 2026-09-21. Ajuste al E70 no indicado en la ficha salvo modelos i-pro/Evolute. ${CAVEAT}`
 
+    const newCodes = [
+      localEntry ?? { code, source: 'client_baseline', role: 'local' },
+      { code, code_status: status, source: site.replace('.', '_'), role: 'sourcing' },
+    ]
+
     batch.update(doc.ref, {
       code_status: status,
-      oem_codes: [{ code, code_status: status, source: site.replace('.', '_') }],
+      oem_codes: newCodes,
       sourcing_note: note,
       updated_at: new Date(),
     })

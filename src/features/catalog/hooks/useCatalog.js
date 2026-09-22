@@ -97,7 +97,9 @@ export function useCatalog() {
             categoryTopPath,
             vehicleId: p.vehicleId,
             vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
-            code: p.oemCodes[0]?.code || null,
+            // Código local (Chile) — el que reconoce el comprador local. El
+            // de sourcing (China/fábrica), cuando existe, se ve en la ficha.
+            code: p.localCode?.code || null,
             codeStatus: p.codeStatus,
             // Baseline (CLP) convertido a USD para que sea comparable en la
             // misma columna que la mejor cotización — nunca se comparan

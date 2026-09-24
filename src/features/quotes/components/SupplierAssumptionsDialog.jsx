@@ -8,6 +8,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
+import ModalActionButton from '@components/common/ModalActionButton'
 import ToolbarButton from '@components/common/ToolbarButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
@@ -72,7 +73,7 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <ToolbarButton label="Cerrar" onClick={() => setOpen(false)} />
+          <ModalActionButton kind="primary" label="Cerrar" onClick={() => setOpen(false)} />
         </DialogActions>
       </Dialog>
     </>

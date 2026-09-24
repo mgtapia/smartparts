@@ -1,0 +1,41 @@
+import { useCallback, useMemo } from 'react'
+import { usePersistentState } from '@hooks/usePersistentState'
+import { SHIPPING_MODES } from '@constants/enums'
+import { DEFAULT_UNIT_COST_ASSUMPTIONS } from '@mocks/costParams'
+
+const { defaultOriginCostBp, ...DEFAULT_RATES } = DEFAULT_UNIT_COST_ASSUMPTIONS
+
+/**
+ * Supuestos editables del costo unitario: modo de envío, tarifas, arancel TLC
+ * supuesto y, por proveedor, costo de origen y si emite Form F. Todo es una
+ * estimación del equipo (se muestra en rojo) y se guarda por navegador hasta
+ * que existan cotizaciones reales de forwarder y un set de parámetros
+ * verificado en Firestore.
+ */
+export function useCostAssumptions() {
+  const [mode, setMode] = usePersistentState('quotes.mode', SHIPPING_MODES.SEA_LCL)
+  const [storedRates, setRates] = usePersistentState('quotes.rates', DEFAULT_RATES)
+  const [supplierSettings, setSupplierSettings] = usePersistentState('quotes.supplierSettings', {})
+
+  // Un valor guardado de una versión anterior puede no tener claves nuevas.
+  const rates = useMemo(() => ({ ...DEFAULT_RATES, ...storedRates }), [storedRates])
+
+  const settingsFor = useCallback(
+    (supplierId) => ({
+      originCostBp: defaultOriginCostBp,
+      formF: 'unknown',
+      ...supplierSettings[supplierId],
+    }),
+    [supplierSettings],
+  )
+
+  const updateSupplier = (supplierId, patch) =>
+    setSupplierSettings((prev) => ({ ...prev, [supplierId]: { ...prev[supplierId], ...patch } }))
+
+  const reset = () => {
+    setRates(DEFAULT_RATES)
+    setSupplierSettings({})
+  }
+
+  return { mode, setMode, rates, setRates, settingsFor, updateSupplier, reset }
+}

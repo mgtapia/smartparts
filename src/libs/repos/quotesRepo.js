@@ -25,6 +25,8 @@ function shapeQuote(id, raw, suppliersById) {
     supplierId: raw.supplier_id,
     supplier: suppliersById.get(raw.supplier_id) || null,
     partType: raw.part_type,
+    // Money tal como se guardó (entero + moneda + scale); currency puede ser null.
+    price: { amount: raw.price.amount, currency, scale },
     priceAmount,
     currency,
     currencyConfirmed,
@@ -35,6 +37,11 @@ function shapeQuote(id, raw, suppliersById) {
     // Variante ofrecida cuando el proveedor cotiza algo que no calza 1:1 con
     // la ficha (ej. terminal 12 mm vs 14 mm) — sin confirmar hasta revisión humana.
     variant: raw.variant ?? null,
+    supplierItem: raw.supplier_item ?? null,
+    sourceFile: raw.source_file ?? null,
+    packaging: raw.packaging ?? null,
+    shippingIncluded: raw.shipping_included ?? null,
+    supplierDeclaration: raw.supplier_declaration ?? null,
     // Tramos por cantidad: [{ minQty, amount }] (mismo scale/moneda que price).
     priceTiers: (raw.price_tiers ?? []).map((t) => ({
       minQty: t.min_qty,

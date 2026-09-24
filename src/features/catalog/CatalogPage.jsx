@@ -143,9 +143,14 @@ function CatalogRow({ r, isColumnVisible, currency }) {
         >
           <Box
             component="span"
-            sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12, color: 'text.secondary' }}
+            sx={{
+              fontFamily: '"Roboto Mono", monospace',
+              fontSize: 12,
+              // Un código sin confirmar va en rojo, igual que en la ficha.
+              color: r.codeStatus === 'confirmed' ? 'text.secondary' : 'error.main',
+            }}
           >
-            {r.code || '—'}
+            {r.code || 'Sin código'}
           </Box>
           <Tooltip title={CODE_STATUS_LABELS_ES[r.codeStatus]}>
             <StatusIcon sx={{ fontSize: 16, color: CODE_STATUS_COLOR[r.codeStatus] }} />

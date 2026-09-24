@@ -16,7 +16,7 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
-import { MATRIX_HELP, supplierLabel } from './constants'
+import { MATRIX_HELP, formatDate, supplierLabel } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
 import {
@@ -183,7 +183,9 @@ const LIST_COLUMNS = [
     width: 90,
     render: (q) =>
       q.incoterms.length > 0 ? (
-        q.incoterms.join(', ')
+        <UncertainValue verified={q.incotermConfirmed} reason="Incoterm sin confirmar por escrito">
+          {q.incoterms.join(', ')}
+        </UncertainValue>
       ) : (
         <UncertainValue verified={false} reason="La cotización no indica Incoterm">
           Sin definir
@@ -197,7 +199,12 @@ const LIST_COLUMNS = [
     tooltip: 'Lugar nombrado del Incoterm (ej. EXW Guangzhou).',
     render: (q) =>
       q.incotermPlaces.length > 0 ? (
-        q.incotermPlaces.join(', ')
+        <UncertainValue
+          verified={q.incotermPlaceConfirmed}
+          reason="Lugar del Incoterm sin confirmar"
+        >
+          {q.incotermPlaces.join(', ')}
+        </UncertainValue>
       ) : (
         <UncertainValue verified={false} reason="La cotización no indica el lugar del Incoterm">
           Sin lugar
@@ -213,6 +220,12 @@ const LIST_COLUMNS = [
         {q.currencies.join(', ')}
       </UncertainValue>
     ),
+  },
+  {
+    id: 'date',
+    label: 'Fecha',
+    width: 100,
+    render: (q) => formatDate(q.capturedAt),
   },
   {
     id: 'parts',

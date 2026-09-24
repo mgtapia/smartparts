@@ -365,18 +365,6 @@ export default function PartDetailPage({ partId }) {
                 </UncertainValue>
               )}
             </InfoField>
-            <InfoField label="Mercancía peligrosa">
-              {part.dgProfile ? (
-                `UN ${part.dgProfile.unNumber}`
-              ) : (
-                <UncertainValue
-                  verified={false}
-                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
-                >
-                  Sin clasificar
-                </UncertainValue>
-              )}
-            </InfoField>
           </InfoGrid>
           {part.sourcingNote ? (
             <InfoGrid>
@@ -411,6 +399,18 @@ export default function PartDetailPage({ partId }) {
                   reason="Sin fuente: estimación por nombre de pieza"
                 >
                   Sin fuente
+                </UncertainValue>
+              )}
+            </InfoField>
+            <InfoField label="Mercancía peligrosa">
+              {part.dgProfile ? (
+                `UN ${part.dgProfile.unNumber}`
+              ) : (
+                <UncertainValue
+                  verified={false}
+                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
+                >
+                  Sin clasificar
                 </UncertainValue>
               )}
             </InfoField>

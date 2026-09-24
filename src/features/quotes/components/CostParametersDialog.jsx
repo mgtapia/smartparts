@@ -25,6 +25,8 @@ import NumberField from './NumberField'
  */
 export default function CostParametersDialog({ mode, setMode, rates, setRates, onReset }) {
   const [open, setOpen] = useState(false)
+  // Solo se piden los parámetros del modo elegido; los aranceles aplican a todos.
+  const isAir = mode === 'air' || mode === 'courier'
 
   return (
     <>
@@ -62,25 +64,31 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
               />
             </Box>
 
-            <NumberField
-              label="Tarifa aérea (US$/kg cobrable)"
-              adornment="US$"
-              value={rates.airUsdPerKgCents / 100}
-              onCommit={(n) => setRates({ ...rates, airUsdPerKgCents: Math.round(n * 100) })}
-            />
-            <NumberField
-              label="Factor volumétrico aéreo (cm³/kg)"
-              adornment="cm³"
-              value={rates.airVolumetricDivisor}
-              onCommit={(n) => n > 0 && setRates({ ...rates, airVolumetricDivisor: Math.round(n) })}
-            />
-            <NumberField
-              label="Tarifa marítima LCL (US$/W-M)"
-              adornment="US$"
-              value={rates.seaUsdPerRtCents / 100}
-              onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: Math.round(n * 100) })}
-            />
-            <Box />
+            {isAir ? (
+              <>
+                <NumberField
+                  label="Tarifa aérea (US$/kg cobrable)"
+                  adornment="US$"
+                  value={rates.airUsdPerKgCents / 100}
+                  onCommit={(n) => setRates({ ...rates, airUsdPerKgCents: Math.round(n * 100) })}
+                />
+                <NumberField
+                  label="Factor volumétrico aéreo (cm³/kg)"
+                  adornment="cm³"
+                  value={rates.airVolumetricDivisor}
+                  onCommit={(n) =>
+                    n > 0 && setRates({ ...rates, airVolumetricDivisor: Math.round(n) })
+                  }
+                />
+              </>
+            ) : (
+              <NumberField
+                label="Tarifa marítima LCL (US$/W-M)"
+                adornment="US$"
+                value={rates.seaUsdPerRtCents / 100}
+                onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: Math.round(n * 100) })}
+              />
+            )}
             <NumberField
               label="Arancel ad valorem general (% CIF)"
               adornment="%"

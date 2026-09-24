@@ -212,7 +212,7 @@ export default function QuotationDetailPage({ quotationId }) {
       />
 
       <Card sx={{ p: 2, mb: 1.5 }}>
-        <Box sx={{ display: 'flex', columnGap: 4, rowGap: 1.5, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
           <Info label="Incoterm">
             {quotation.incoterms.join(', ') || (
               <UncertainValue verified={false} reason="La cotización no indica Incoterm">
@@ -314,13 +314,21 @@ export default function QuotationDetailPage({ quotationId }) {
 
 function Info({ label, children }) {
   return (
-    <Box>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+    <Box
+      sx={{
+        px: 2,
+        py: 0.5,
+        borderLeft: 1,
+        borderColor: 'divider',
+        '&:first-of-type': { pl: 0, borderLeft: 0 },
+      }}
+    >
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ fontSize: 13 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 28, fontSize: 13 }}>
         {children}
-      </Typography>
+      </Box>
     </Box>
   )
 }

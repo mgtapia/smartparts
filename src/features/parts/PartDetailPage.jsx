@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
@@ -50,7 +51,8 @@ const QUALITY_LABEL = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'A
 const formatKg = (g) => `${(g / 1000).toLocaleString('es-CL')} kg`
 const formatLiters = (cm3) => `${(cm3 / 1000).toLocaleString('es-CL')} L`
 
-export default function PartDetailPage({ partId }) {
+export default function PartDetailPage() {
+  const partId = useRouteId()
   const { part, loading, error, refetch } = usePartDetail(partId)
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions

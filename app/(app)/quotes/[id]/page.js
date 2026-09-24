@@ -1,6 +1,15 @@
+import { Suspense } from 'react'
 import QuotationDetailPage from '@features/quotes/QuotationDetailPage'
 
-export default async function Page({ params }) {
-  const { id } = await params
-  return <QuotationDetailPage quotationId={id} />
+// Sitio estático: una sola página compartida por todas las fichas; el id se lee de la URL.
+export function generateStaticParams() {
+  return [{ id: '_' }]
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <QuotationDetailPage />
+    </Suspense>
+  )
 }

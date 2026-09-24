@@ -2,5 +2,25 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "out",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/parts/*/index.txt", "destination": "/parts/_/index.txt" },
+      { "source": "/quotes/*/index.txt", "destination": "/quotes/_/index.txt" },
+      { "source": "/suppliers/*/index.txt", "destination": "/suppliers/_/index.txt" },
+      { "source": "/vehicles/*/index.txt", "destination": "/vehicles/_/index.txt" },
+      { "source": "/parts/**", "destination": "/parts/_/index.html" },
+      { "source": "/quotes/**", "destination": "/quotes/_/index.html" },
+      { "source": "/suppliers/**", "destination": "/suppliers/_/index.html" },
+      { "source": "/vehicles/**", "destination": "/vehicles/_/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "/_next/static/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      }
+    ]
   }
 }

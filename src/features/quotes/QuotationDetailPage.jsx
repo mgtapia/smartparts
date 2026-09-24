@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ToolbarButton from '@components/common/ToolbarButton'
@@ -60,7 +61,8 @@ const FIELDS = {
 
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
-export default function QuotationDetailPage({ quotationId }) {
+export default function QuotationDetailPage() {
+  const quotationId = useRouteId()
   const { quotations, loading, error, reload } = useQuotationsData()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions

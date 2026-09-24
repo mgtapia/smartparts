@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:hosting": "node scripts/build-hosting.mjs",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",

@@ -85,8 +85,10 @@ describe('computeOrderCost', () => {
   })
 
   it('incluye los costos fijos por embarque: una OC chica paga el piso del agente', () => {
-    const t = computeOrderCost({ ...base, lines: [line('a', 1, { unitPrice: money(500, 'USD') })] })
-      .totals
+    const t = computeOrderCost({
+      ...base,
+      lines: [line('a', 1, { unitPrice: money(500, 'USD') })],
+    }).totals
     // Piso del agente de aduanas del set de parámetros: US$ 80.
     expect(t.localCostsMicro).toBeGreaterThanOrEqual(80_000_000)
   })

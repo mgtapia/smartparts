@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
@@ -18,7 +19,8 @@ import QualityChips from '@features/quotes/components/QualityChips'
 import { TAB_LIST, VEHICLE_TABS, vehicleLabel } from './constants'
 import { useVehicles } from './hooks/useVehicles'
 
-export default function VehicleDetailPage({ vehicleId }) {
+export default function VehicleDetailPage() {
+  const vehicleId = useRouteId()
   const { rows, loading, error } = useVehicles()
   const [tab, setTab] = useUrlTab(Object.values(VEHICLE_TABS))
 

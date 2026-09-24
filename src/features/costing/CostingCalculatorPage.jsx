@@ -1,5 +1,6 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
@@ -28,7 +29,8 @@ function usdMoney(usdAmount) {
   return { amount: Math.round(usdAmount * 100), currency: 'USD', scale: 2 }
 }
 
-export default function CostingCalculatorPage({ initialPartId }) {
+export default function CostingCalculatorPage() {
+  const initialPartId = useSearchParams().get('partId')
   const {
     partsWithQuotes,
     part,

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
@@ -30,7 +31,8 @@ import {
 } from './constants'
 import { useSuppliers } from './hooks/useSuppliers'
 
-export default function SupplierDetailPage({ supplierId }) {
+export default function SupplierDetailPage() {
+  const supplierId = useRouteId()
   const { rows, loading, error, reload } = useSuppliers()
   const [tab, setTab] = useUrlTab(Object.values(SUPPLIER_TABS))
   // { kind: 'fact', key } o { kind: 'field', path, label }

@@ -36,6 +36,7 @@ export const COLUMN_CHOICES = [
 ]
 export const DEFAULT_HIDDEN = new Set([
   'category',
+  'position',
   'variant',
   'insurance',
   'cif',

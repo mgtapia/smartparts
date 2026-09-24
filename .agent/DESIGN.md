@@ -49,7 +49,7 @@ Definidos en `src/constants/colors.js`, mapeados en `src/theme/theme.js` con `co
 
 `@mui/icons-material` como base (sin set bespoke, a diferencia de yonder) — prioriza velocidad de desarrollo sobre identidad visual fuerte en v0.1. Íconos semánticos por dominio: 📦 repuesto, 🚚 embarque, 🏭 proveedor, 📋 cotización.
 
-## Navegación: rail vertical de 13 módulos
+## Navegación: rail vertical de 12 módulos
 
 Mismo patrón de `AppRail` que yonder (columna izquierda, flyout al hover), sin las 6 zonas agrupadas — acá los módulos son planos porque el dominio es más chico:
 

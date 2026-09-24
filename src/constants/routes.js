@@ -1,4 +1,4 @@
-// Rail de navegación — 13 módulos planos (ver .agent/DESIGN.md §Navegación).
+// Rail de navegación — 12 módulos planos (ver .agent/DESIGN.md §Navegación).
 // `permission: 'canViewMargin'` restringe la visibilidad — ver docs/SEGURIDAD-Y-ROLES.md.
 // `implemented: false` = placeholder sin feature real todavía: AppRail no lo
 // muestra (la ruta sigue existiendo, solo no está en la navegación). Distinto
@@ -21,8 +21,15 @@ export const RAIL_ITEMS = Object.freeze([
     icon: 'DirectionsCar',
     implemented: false,
   },
-  { key: 'catalog', path: '/catalog', labelEs: 'Catálogo', icon: 'Category', implemented: true },
-  { key: 'parts', path: '/parts', labelEs: 'Repuestos', icon: 'Build', implemented: true },
+  {
+    key: 'catalog',
+    path: '/catalog',
+    // La ficha de cada repuesto (/parts/[id]) se abre desde el catálogo: mismo ítem activo.
+    alsoActiveOn: ['/parts'],
+    labelEs: 'Catálogo',
+    icon: 'Category',
+    implemented: true,
+  },
   {
     key: 'suppliers',
     path: '/suppliers',

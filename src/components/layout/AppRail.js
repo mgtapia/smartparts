@@ -9,7 +9,6 @@ import { useAuth } from '@contexts/AuthContext'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
-import BuildIcon from '@mui/icons-material/Build'
 import FactoryIcon from '@mui/icons-material/Factory'
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 import SearchIcon from '@mui/icons-material/Search'
@@ -30,7 +29,6 @@ const ICONS = {
   Dashboard: DashboardIcon,
   DirectionsCar: DirectionsCarIcon,
   Category: Inventory2Icon,
-  Build: BuildIcon,
   Factory: FactoryIcon,
   RequestQuote: RequestQuoteIcon,
   Search: SearchIcon,
@@ -72,7 +70,9 @@ export default function AppRail() {
     >
       {RAIL_ITEMS.filter((item) => item.implemented).map((item) => {
         const Icon = ICONS[item.icon]
-        const active = pathname?.startsWith(item.path)
+        const active = [item.path, ...(item.alsoActiveOn ?? [])].some((p) =>
+          pathname?.startsWith(p),
+        )
         return (
           <Tooltip key={item.key} title={item.labelEs} placement="right">
             <Box

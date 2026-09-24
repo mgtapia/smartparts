@@ -29,7 +29,8 @@ export function InfoGrid({ columns, children }) {
 }
 
 /** `hint`: detalle del dato, se ve al pasar el mouse por el ícono junto al rótulo. */
-export function InfoField({ label, children, onEdit, hint }) {
+/** `divided`: mantiene el divisor y el espacio a la izquierda del primer dato, cuando hay una imagen antes. */
+export function InfoField({ label, children, onEdit, hint, divided = false }) {
   return (
     <Box
       sx={{
@@ -37,7 +38,7 @@ export function InfoField({ label, children, onEdit, hint }) {
         py: 0.5,
         borderLeft: 1,
         borderColor: 'divider',
-        '&:first-of-type': { pl: 0, borderLeft: 0 },
+        '&:first-of-type': divided ? {} : { pl: 0, borderLeft: 0 },
       }}
     >
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>

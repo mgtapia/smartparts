@@ -142,7 +142,9 @@ export default function VehicleDetailPage({ vehicleId }) {
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <InfoGrid columns={6}>
-            <InfoField label="Marca">{vehicle.brand ?? '—'}</InfoField>
+            <InfoField label="Marca" divided>
+              {vehicle.brand ?? '—'}
+            </InfoField>
             <InfoField label="Origen">{vehicle.origin ?? '—'}</InfoField>
             <InfoField label="Año">{vehicle.year ?? '—'}</InfoField>
             <InfoField label="Flota">{vehicle.fleetSize ?? '—'}</InfoField>

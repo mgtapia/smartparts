@@ -294,7 +294,7 @@ export default function PartDetailPage({ partId }) {
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <InfoGrid columns={6}>
-            <InfoField label="Código" onEdit={() => setEditing(EDIT.CODE)}>
+            <InfoField label="Código" divided onEdit={() => setEditing(EDIT.CODE)}>
               <UncertainValue
                 verified={part.codeStatus === 'confirmed'}
                 reason="Código sin confirmar con una fuente citable"

@@ -11,7 +11,6 @@ import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
-import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
@@ -26,7 +25,6 @@ import {
   COST_COLUMNS,
   DEFAULT_HIDDEN,
   DETAIL_HELP,
-  MODE_OPTIONS,
   formatDate,
   supplierLabel,
   formatIsoDate,
@@ -286,13 +284,9 @@ export default function QuotationDetailPage({ quotationId }) {
           onChange={setSearch}
           placeholder="Buscar por pieza o código…"
         />
-        <ToolbarSelectBox
-          label="Modo de envío"
-          value={mode}
-          onChange={assumptions.setMode}
-          options={MODE_OPTIONS}
-        />
         <CostParametersDialog
+          mode={mode}
+          setMode={assumptions.setMode}
           rates={rates}
           setRates={assumptions.setRates}
           onReset={assumptions.reset}

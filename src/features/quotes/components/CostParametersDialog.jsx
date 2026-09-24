@@ -7,8 +7,11 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Typography from '@mui/material/Typography'
 import ToolbarButton from '@components/common/ToolbarButton'
+import { MODE_OPTIONS } from '../constants'
 import NumberField from './NumberField'
 
 /**
@@ -19,7 +22,7 @@ import NumberField from './NumberField'
  * parámetros versionados. Lo que depende de cada proveedor no está acá: se edita
  * en la cotización de ese proveedor.
  */
-export default function CostParametersDialog({ rates, setRates, onReset }) {
+export default function CostParametersDialog({ mode, setMode, rates, setRates, onReset }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -33,6 +36,13 @@ export default function CostParametersDialog({ rates, setRates, onReset }) {
             y del agente de aduanas.
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Select size="small" value={mode} onChange={(e) => setMode(e.target.value)} fullWidth>
+              {MODE_OPTIONS.map((o) => (
+                <MenuItem key={o.value} value={o.value}>
+                  {`Modo de envío: ${o.label}`}
+                </MenuItem>
+              ))}
+            </Select>
             <NumberField
               label="Flete aéreo (por kg cobrable)"
               adornment="US$"

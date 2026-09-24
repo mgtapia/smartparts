@@ -19,6 +19,7 @@ import { PART_TYPE } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
+import QualityChips from './components/QualityChips'
 import {
   COLUMN_CHOICES,
   COST_COLUMNS,
@@ -28,7 +29,6 @@ import {
   SUPPLIER_TYPE_LABELS_ES,
   formatDate,
   formatIsoDate,
-  sellsLabel,
 } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine } from './hooks/useQuotations'
@@ -249,16 +249,9 @@ export default function QuotationDetailPage({ quotationId }) {
             )}
           </Info>
           <Info label="Vende">
-            <UncertainValue
-              verified={quotation.originalCount === 0}
-              reason="OEM declarado por el proveedor: se confirma con foto o muestra"
-            >
-              {sellsLabel(quotation)}
-            </UncertainValue>
+            <QualityChips quotation={quotation} />
           </Info>
-          <Info label="SKU cotizados">
-            {quotation.lineCount} = {quotation.originalCount} OEM + {quotation.alternativeCount} AFM
-          </Info>
+          <Info label="SKU cotizados">{quotation.lineCount}</Info>
           <Info label="Por revisar">
             <UncertainValue
               verified={quotation.pendingCount === 0}

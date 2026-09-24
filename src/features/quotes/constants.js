@@ -42,12 +42,6 @@ export const COLUMN_CHOICES = [
 ]
 export const DEFAULT_HIDDEN = new Set(['category', 'insurance', 'cif', 'localCosts', 'vat'])
 
-/** Qué calidades ofrece una cotización, según lo que cotizó: OEM, AFM o ambas. */
-export const sellsLabel = (q) => {
-  if (q.originalCount > 0 && q.alternativeCount > 0) return 'OEM + AFM'
-  return q.originalCount > 0 ? 'OEM' : 'AFM'
-}
-
 // Textos de ayuda: se muestran a demanda (InfoNote), no sueltos en la página.
 export const MATRIX_HELP = [
   'Una fila por repuesto y una columna por proveedor. Cada celda muestra lo que ese proveedor ofrece: una línea por calidad (OEM / AFM).',

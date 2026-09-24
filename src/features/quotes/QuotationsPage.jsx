@@ -14,13 +14,8 @@ import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
 import InfoNote from '@components/common/InfoNote'
-import {
-  MATRIX_HELP,
-  MODE_OPTIONS,
-  SUPPLIER_TYPE_LABELS_ES,
-  formatIsoDate,
-  sellsLabel,
-} from './constants'
+import QualityChips from './components/QualityChips'
+import { MATRIX_HELP, MODE_OPTIONS, SUPPLIER_TYPE_LABELS_ES, formatIsoDate } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
 import {
@@ -183,16 +178,9 @@ const LIST_COLUMNS = [
   {
     id: 'sells',
     label: 'Vende',
-    width: 90,
-    tooltip: 'Calidades que ofrece según lo que cotizó: OEM, AFM o ambas.',
-    render: (q) => (
-      <UncertainValue
-        verified={q.originalCount === 0}
-        reason="OEM declarado por el proveedor: se confirma con foto o muestra"
-      >
-        {sellsLabel(q)}
-      </UncertainValue>
-    ),
+    width: 130,
+    tooltip: 'Calidades que ofrece y cuántos SKU de cada una.',
+    render: (q) => <QualityChips quotation={q} />,
   },
   {
     id: 'incoterm',
@@ -220,10 +208,10 @@ const LIST_COLUMNS = [
   {
     id: 'sku',
     label: 'SKU',
-    width: 170,
+    width: 60,
     align: 'right',
-    tooltip: 'SKU cotizados = OEM + AFM',
-    render: (q) => `${q.lineCount} = ${q.originalCount} OEM + ${q.alternativeCount} AFM`,
+    tooltip: 'SKU cotizados',
+    render: (q) => q.lineCount,
   },
   {
     id: 'valid',

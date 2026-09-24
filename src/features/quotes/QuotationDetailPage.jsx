@@ -193,11 +193,13 @@ export default function QuotationDetailPage({ quotationId }) {
           .join(' · ')
         return (
           <UncertainValue
-            verified={q.currencyConfirmed}
+            verified={q.currencyConfirmed && !q.inferred}
             reason={
-              q.currencyConfirmed
-                ? tiers
-                : `Moneda sin confirmar por el proveedor${tiers ? ` — ${tiers}` : ''}`
+              q.inferred
+                ? q.inferredNote
+                : q.currencyConfirmed
+                  ? tiers
+                  : `Moneda sin confirmar por el proveedor${tiers ? ` — ${tiers}` : ''}`
             }
           >
             {q.currency ? <MoneyValue money={unitPriceMoney(q)} /> : q.priceAmount.toFixed(2)}

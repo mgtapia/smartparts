@@ -85,6 +85,21 @@ describe('buildDashboard', () => {
     expect(confirmed.pending.map((p) => p.id)).not.toContain('currency')
   })
 
+  it('cuenta las cotizaciones inferidas como pendiente', () => {
+    const p1 = part('p1')
+    const d = build({
+      quotations: [
+        quotation('a', [
+          line(p1, 'alternative', { inferred: true }),
+          line(part('p2'), 'alternative', { inferred: true }),
+          line(part('p3')),
+        ]),
+      ],
+    })
+    expect(d.pending.find((p) => p.id === 'inferred')?.count).toBe(2)
+    expect(build().pending.map((p) => p.id)).not.toContain('inferred')
+  })
+
   it('no lista pendientes con cantidad cero', () => {
     expect(build().pending.every((p) => p.count > 0)).toBe(true)
   })

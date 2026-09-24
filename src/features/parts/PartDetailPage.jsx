@@ -183,8 +183,8 @@ export default function PartDetailPage({ partId }) {
         'Precio unitario en la moneda del proveedor. Con tramos por volumen se usa el más alto.',
       render: ({ quote }) => (
         <UncertainValue
-          verified={quote.currencyConfirmed}
-          reason="Moneda sin confirmar por el proveedor"
+          verified={quote.currencyConfirmed && !quote.inferred}
+          reason={quote.inferred ? quote.inferredNote : 'Moneda sin confirmar por el proveedor'}
         >
           {quote.currency ? (
             <MoneyValue money={unitPriceMoney(quote)} />

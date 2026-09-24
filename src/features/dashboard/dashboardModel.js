@@ -67,6 +67,8 @@ export function buildDashboard({
     : assumptions.rates.seaUsdPerRtCents
   const freightMissing = freightRate == null ? 1 : 0
 
+  const inferredLines = quoteRows.flatMap((q) => q.lines).filter((l) => l.quote.inferred)
+
   const expiring = quoteRows.filter(
     (q) =>
       q.validUntil && new Date(q.validUntil).getTime() - today.getTime() <= EXPIRING_DAYS * DAY_MS,
@@ -116,6 +118,12 @@ export function buildDashboard({
       label: 'Repuestos cotizados sin partida arancelaria',
       count: withoutHs.length,
       href: '/catalog',
+    },
+    {
+      id: 'inferred',
+      label: 'Cotizaciones inferidas del lado opuesto, no ofertadas por el proveedor',
+      count: inferredLines.length,
+      href: '/quotes',
     },
     {
       id: 'expiring',

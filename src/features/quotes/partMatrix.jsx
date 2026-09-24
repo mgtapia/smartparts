@@ -47,8 +47,10 @@ function valueOf(line, metric, costCtx) {
     if (micro === null) return { micro: null, verified: false, reason: 'Moneda sin definir' }
     return {
       micro,
-      verified: line.quote.currencyConfirmed,
-      reason: `Moneda sin confirmar por el proveedor (${line.quote.currency}), llevada a USD con el tipo de cambio de referencia`,
+      verified: line.quote.currencyConfirmed && !line.quote.inferred,
+      reason: line.quote.inferred
+        ? line.quote.inferredNote
+        : `Moneda sin confirmar por el proveedor (${line.quote.currency}), llevada a USD con el tipo de cambio de referencia`,
     }
   }
   const cost = costLine(line, costCtx)
@@ -56,7 +58,13 @@ function valueOf(line, metric, costCtx) {
     return { micro: null, verified: false, reason: cost.blockers.join('; ') }
   }
   const landed = cost.components.find((c) => c.code === 'landedNet')
-  return { micro: landed.usdMicro, verified: landed.verified, reason: landed.reasonEs }
+  return {
+    micro: landed.usdMicro,
+    verified: landed.verified,
+    reason: line.quote.inferred
+      ? [line.quote.inferredNote, landed.reasonEs].filter(Boolean).join('; ')
+      : landed.reasonEs,
+  }
 }
 
 /**

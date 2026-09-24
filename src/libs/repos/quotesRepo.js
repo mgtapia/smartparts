@@ -48,6 +48,9 @@ function shapeQuote(id, raw, suppliersById) {
     incotermConfirmed: Boolean(raw.confirmations?.incoterm),
     incotermPlaceConfirmed: Boolean(raw.confirmations?.incoterm_place),
     confirmations: raw.confirmations ?? {},
+    // Cotización inferida: el proveedor cotizó el lado opuesto de la pieza, no esta.
+    inferred: Boolean(raw.inferred),
+    inferredNote: raw.inferred_note ?? null,
     // Variante ofrecida cuando el proveedor cotiza algo que no calza 1:1 con
     // la ficha (ej. terminal 12 mm vs 14 mm) — sin confirmar hasta revisión humana.
     variant: raw.variant ?? null,

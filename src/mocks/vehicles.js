@@ -22,7 +22,7 @@ export const VEHICLES = [
     brand: 'Kia',
     model: 'Niro EV 64.8 kWh AUT',
     shortModel: 'Niro EV',
-    origin: 'Corea',
+    origin: 'Corea del Sur',
     year: 2023,
     fleetSize: 150,
     demandScale: { casi_nunca: 2, rara_vez: 4, a_veces: 8, casi_siempre: 20 },

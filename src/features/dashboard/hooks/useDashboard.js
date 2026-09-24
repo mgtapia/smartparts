@@ -1,49 +1,41 @@
 import { useMemo } from 'react'
 import { useCachedQuery } from '@hooks/useCachedQuery'
-import { listParts, listSavingsOpportunities, listAnomalies } from '@libs/repos/partsRepo'
-import { listQuotes, isQuoteExpiringSoon } from '@libs/repos/quotesRepo'
-import { money } from '@libs/money'
-
-const EMPTY = {
-  partsCount: 0,
-  quoteCoveragePct: 0,
-  partsWithQuoteCount: 0,
-  savingsOpportunities: [],
-  totalSavings: money(0, 'CLP'),
-  anomalies: [],
-  expiringQuotes: [],
-}
-
-function fetchDashboard() {
-  return Promise.all([listParts(), listSavingsOpportunities(), listAnomalies(), listQuotes()])
-}
-
-function summarize([parts, savingsOpportunities, anomalies, quotes]) {
-  const expiringQuotes = quotes.filter((q) => isQuoteExpiringSoon(q))
-  const totalSavingsClp = savingsOpportunities.reduce((sum, row) => sum + row.savingsTotalClp, 0)
-  const partsWithQuote = parts.filter(
-    (p) => p.quoteRollup.original.minUsd !== null || p.quoteRollup.alternative.minUsd !== null,
-  )
-  return {
-    partsCount: parts.length,
-    quoteCoveragePct:
-      parts.length > 0 ? Math.round((partsWithQuote.length / parts.length) * 100) : 0,
-    partsWithQuoteCount: partsWithQuote.length,
-    savingsOpportunities: savingsOpportunities.slice(0, 5),
-    totalSavings: money(totalSavingsClp, 'CLP'),
-    anomalies,
-    expiringQuotes,
-  }
-}
+import { listParts } from '@libs/repos/partsRepo'
+import { getMilestone } from '@libs/repos/milestoneRepo'
+import { costLine, useQuotationsData } from '@features/quotes/hooks/useQuotations'
+import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
+import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
+import { buildDashboard } from '../dashboardModel'
+import { SOURCING_VEHICLE_ID } from '../constants'
 
 /**
- * El dashboard lidera con REPUESTOS (ahorro, cobertura de cotizaciones,
- * anomalías), no con la flota del cliente — la flota es dato de referencia
- * del módulo Vehículos, no el KPI principal (ver .agent/MEMORY.md).
+ * Dashboard de la etapa de sourcing: junta repuestos, cotizaciones, proveedores,
+ * supuestos de costo y el hito, y los resume con `buildDashboard`. Todo viene de
+ * la caché compartida, así que abrirlo después de otra pantalla no vuelve a leer.
  */
 export function useDashboard() {
-  const { data, loading, error } = useCachedQuery('dashboard', fetchDashboard)
-  const summary = useMemo(() => (data ? summarize(data) : EMPTY), [data])
+  const parts = useCachedQuery('parts', listParts)
+  const milestone = useCachedQuery('milestone', getMilestone)
+  const { quotations, loading: quotesLoading, error: quotesError } = useQuotationsData()
+  const { rows, loading: suppliersLoading, error: suppliersError } = useSuppliers()
+  const assumptions = useCostAssumptions()
+  const { mode, rates, settingsFor } = assumptions
 
-  return { ...summary, loading, error }
+  const loading = parts.loading || milestone.loading || quotesLoading || suppliersLoading
+  const error = parts.error || milestone.error || quotesError || suppliersError
+
+  const data = useMemo(() => {
+    if (loading || error) return null
+    return buildDashboard({
+      vehicleId: SOURCING_VEHICLE_ID,
+      parts: parts.data ?? [],
+      quotations,
+      suppliers: rows.map((r) => r.supplier),
+      assumptions: { mode, rates, settingsFor },
+      costOf: (line) => costLine(line, { mode, rates, settingsFor }),
+      milestone: milestone.data ?? {},
+    })
+  }, [loading, error, parts.data, quotations, rows, mode, rates, settingsFor, milestone.data])
+
+  return { data, loading, error, reloadMilestone: milestone.reload }
 }

@@ -142,6 +142,8 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 
 **`quotes/{id}.confirmations`**: `{ incoterm, incoterm_place, currency }`, cada uno `{ source, at }`. Incoterm, lugar y moneda se confirman por cotización completa (todas sus líneas) desde su detalle; sin registro el dato es del equipo y va en rojo.
 
+**`project/milestone`** (un solo documento): pasos del hito hacia la primera OC que se registran a mano, cada uno `{ value, source, at }`: `chosen_supplier` (id del proveedor elegido), `po_issued` (número de OC) y `invoice_accepted` (número de factura). Un paso cuenta como cumplido solo con valor y fuente. El resto de los pasos del dashboard se calculan de los datos, no se guardan.
+
 **`parts/{id}`**: un solo código, el mismo en Chile y en China. `oem_codes[0]` es el código, `code_status` (`missing`|`provisional`|`confirmed`) y `code_source` su evidencia; confirmar exige fuente citable. Además `hs_code` y `hs_code_source` (partida arancelaria), y la imagen en la subcolección `parts/{id}/media/main` como `data_url` reducido (para no engordar la lectura del catálogo).
 
 **`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.

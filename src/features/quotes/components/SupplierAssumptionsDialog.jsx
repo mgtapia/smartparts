@@ -72,7 +72,7 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
               <Typography variant="caption" color="text.secondary">
-                Incoterm supuesto (si la cotización no lo indica)
+                Incoterm supuesto
               </Typography>
               <ToolbarSelectBox
                 fullWidth
@@ -84,7 +84,7 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
               <Typography variant="caption" color="text.secondary">
-                Certificado de origen (Formulario F)
+                Formulario F
               </Typography>
               {formFLocked ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, height: 44 }}>

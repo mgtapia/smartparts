@@ -63,5 +63,5 @@ export const PARAMETERS_HELP = [
 
 export const SUPPLIER_ASSUMPTIONS_HELP = [
   'Estimaciones sin verificar: se confirman con el proveedor y con un forwarder.',
-  'El costo de origen (EXW → FOB) depende de dónde está el proveedor. Sin Formulario F el arancel es el general; con Formulario F, el arancel con TLC.',
+  'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm. El costo de origen (EXW → FOB) depende de dónde está el proveedor. Sin Formulario F el arancel es el general; con Formulario F, el arancel con TLC.',
 ]

@@ -1,6 +1,8 @@
 'use client'
 
+import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
+import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
@@ -9,6 +11,7 @@ import UncertainValue from '@components/common/UncertainValue'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
+import { VEHICLE_IMAGE_WIDTH } from '@constants/layout'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { formatDate, supplierLabel } from '@features/quotes/constants'
 import QualityChips from '@features/quotes/components/QualityChips'
@@ -113,15 +116,40 @@ export default function VehicleDetailPage({ vehicleId }) {
         description={vehicle.model}
       />
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={6}>
-          <InfoField label="Marca">{vehicle.brand ?? '—'}</InfoField>
-          <InfoField label="Origen">{vehicle.origin ?? '—'}</InfoField>
-          <InfoField label="Año">{vehicle.year ?? '—'}</InfoField>
-          <InfoField label="Flota">{vehicle.fleetSize ?? '—'}</InfoField>
-          <InfoField label="Repuestos">{parts.length}</InfoField>
-          <InfoField label="Cotizados">{quotedIds.size}</InfoField>
-        </InfoGrid>
+      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box
+          sx={{
+            width: VEHICLE_IMAGE_WIDTH,
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {vehicle.imageUrl ? (
+            <Box
+              component="img"
+              src={vehicle.imageUrl}
+              alt={vehicleLabel(vehicle)}
+              title={vehicle.imageSource ?? undefined}
+              sx={{ width: '100%', objectFit: 'contain' }}
+            />
+          ) : (
+            <Typography variant="caption" color="error.main">
+              Sin imagen
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <InfoGrid columns={6}>
+            <InfoField label="Marca">{vehicle.brand ?? '—'}</InfoField>
+            <InfoField label="Origen">{vehicle.origin ?? '—'}</InfoField>
+            <InfoField label="Año">{vehicle.year ?? '—'}</InfoField>
+            <InfoField label="Flota">{vehicle.fleetSize ?? '—'}</InfoField>
+            <InfoField label="Repuestos">{parts.length}</InfoField>
+            <InfoField label="Cotizados">{quotedIds.size}</InfoField>
+          </InfoGrid>
+        </Box>
       </Card>
 
       <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />

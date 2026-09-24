@@ -22,3 +22,5 @@ export const SECTION_MARGIN_BOTTOM = 24
 export function px(value) {
   return `${value}px`
 }
+export const VEHICLE_IMAGE_WIDTH = 200 // ancho de la imagen del vehículo en su ficha
+export const VEHICLE_THUMB_WIDTH = 72 // ancho de la miniatura del vehículo en la lista

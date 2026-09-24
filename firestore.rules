@@ -18,7 +18,8 @@ service cloud.firestore {
     // que impide que cualquier cuenta de Google entre y escriba. Mantener
     // sincronizado a mano con src/constants/allowedEmails.js.
     function isAllowedEmail() {
-      return request.auth.token.email in
+      return request.auth.token.email_verified == true
+        && request.auth.token.email in
         ['matiastapia91@gmail.com', 'dmezastange@gmail.com'];
     }
 

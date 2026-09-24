@@ -52,3 +52,15 @@ export const DEFAULT_PARAM_SET = {
 
 // Tipo de cambio de referencia — en Fase 2 esto sale de fx_rates/{fecha}, no de un valor fijo.
 export const DEFAULT_FX = { usdClp: 950_000_000, cnyUsd: 139_000, asOf: '2026-09-17' }
+
+// Supuestos de costo unitario. ESTIMACIONES DEL EQUIPO, ninguna verificada con un
+// forwarder ni con el agente de aduanas: la UI las muestra en rojo mientras siga
+// así. `defaultOriginCostBp` es el costo de origen EXW→FOB por defecto (% del
+// precio EXW); depende de dónde esté cada proveedor, por eso se ajusta por
+// proveedor en la pantalla.
+export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
+  airUsdPerKgCents: 600, // US$ 6,00 por kg cobrable — referencial.
+  seaUsdPerRtCents: 18000, // US$ 180 por R/T (m³) LCL — referencial.
+  ftaDutyBp: 0, // arancel supuesto con TLC Chile-China (Form F) — depende de la partida.
+  defaultOriginCostBp: 500, // 5% del precio EXW — placeholder, sin fuente.
+}

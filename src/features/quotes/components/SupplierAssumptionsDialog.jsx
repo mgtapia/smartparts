@@ -24,8 +24,8 @@ const INCOTERM_OPTIONS = [
 
 const FORM_F_OPTIONS = [
   { value: 'unknown', label: 'Sin confirmar' },
-  { value: 'yes', label: 'Emite Formulario F' },
-  { value: 'no', label: 'No emite Formulario F' },
+  { value: 'yes', label: 'Emite' },
+  { value: 'no', label: 'No emite' },
 ]
 
 const FORM_F_LABELS = Object.fromEntries(FORM_F_OPTIONS.map((o) => [o.value, o.label]))

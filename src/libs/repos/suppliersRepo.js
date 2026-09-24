@@ -1,6 +1,7 @@
 // Repository — Fase 2: lee Firestore (ver .agent/ARCHITECTURE.md §4).
 import { collection, doc, getDoc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { getDb } from '@libs/firebase/client'
+import { invalidateQueries } from '@libs/queryCache'
 
 function shapeSupplier(id, raw) {
   return { id, ...raw }
@@ -30,9 +31,11 @@ export async function updateSupplierFact(supplierId, key, { value, source }) {
     patch.supplier_type_source = source
   }
   await updateDoc(doc(getDb(), 'suppliers', supplierId), patch)
+  invalidateQueries()
 }
 
 /** Campo simple del proveedor (alias, razón social, contacto…): no lleva confirmación. */
 export async function updateSupplierField(supplierId, path, value) {
   await updateDoc(doc(getDb(), 'suppliers', supplierId), { [path]: value?.trim() || null })
+  invalidateQueries()
 }

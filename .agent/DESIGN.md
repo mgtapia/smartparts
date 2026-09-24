@@ -126,6 +126,7 @@ Si algo se repite dos veces con `sx` propio, se convierte en componente común. 
 - **Títulos de sección** de 1 o 2 palabras.
 - **Tooltips**: máximo 260 px con texto balanceado (definido en el tema); no se sobrescribe.
 - **Tipografía**: 13 px como techo en tablas y fichas, sin negrita.
+- **Datos**: toda lectura pasa por `useCachedQuery` (`@hooks/useCachedQuery`, caché en `@libs/queryCache`): un dato ya cargado no se vuelve a leer al cambiar de pantalla, y una escritura llama `invalidateQueries()` en su repositorio. Prohibido un `useEffect` propio que lea Firestore.
 - **Carga**: skeletons con la forma de la pantalla (`ListPageSkeleton` para listas, `DetailPageSkeleton` para fichas, en `@components/common/Skeletons`), no un spinner. El spinner (`LoadingState`) queda solo donde no hay una forma que imitar.
 
 ## Pendiente de confirmar con el equipo de marca

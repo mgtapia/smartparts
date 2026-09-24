@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listParts } from '@libs/repos/partsRepo'
 import { computeCosting } from '@core/costing/engine'
 import { money } from '@libs/money'
@@ -22,9 +23,7 @@ function suggestFreightUsd(mode, totalWeightG, totalVolumeCm3) {
 const DEFAULT_TIER_QUANTITIES = [10, 50, 100]
 
 export function useCostingCalculator(initialPartId) {
-  const [partsWithQuotes, setPartsWithQuotes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data: allParts, loading, error } = useCachedQuery('parts', listParts)
 
   const [partId, setPartId] = useState(initialPartId || null)
   const [quoteId, setQuoteId] = useState(null)
@@ -32,30 +31,19 @@ export function useCostingCalculator(initialPartId) {
   const [marginBp, setMarginBp] = useState(3500) // 35% por defecto — ajustable.
   const [tierFreightUsd, setTierFreightUsd] = useState({})
 
+  // Solo cotizaciones en USD confirmado — costear con moneda sin confirmar
+  // daría un costo puesto en Chile falso.
+  const partsWithQuotes = useMemo(
+    () =>
+      (allParts ?? [])
+        .map((p) => ({ ...p, quotes: p.quotes.filter((q) => q.unitPriceUsd !== null) }))
+        .filter((p) => p.quotes.length > 0),
+    [allParts],
+  )
+
   useEffect(() => {
-    let cancelled = false
-    listParts()
-      .then((all) => {
-        if (cancelled) return
-        // Solo cotizaciones en USD confirmado — costear con moneda sin confirmar
-        // daría un costo puesto en Chile falso.
-        const withQuotes = all
-          .map((p) => ({ ...p, quotes: p.quotes.filter((q) => q.unitPriceUsd !== null) }))
-          .filter((p) => p.quotes.length > 0)
-        setPartsWithQuotes(withQuotes)
-        setPartId((prev) => prev || withQuotes[0]?.id || null)
-        setLoading(false)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err)
-          setLoading(false)
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    setPartId((prev) => prev || partsWithQuotes[0]?.id || null)
+  }, [partsWithQuotes])
 
   const part = useMemo(
     () => partsWithQuotes.find((p) => p.id === partId) || null,

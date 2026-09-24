@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useCachedQuery } from '@hooks/useCachedQuery'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { listParts } from '@libs/repos/partsRepo'
 import { getTopLevelCategories, getCategory } from '@mocks/categories'
@@ -64,53 +65,46 @@ export function useCatalog() {
   const [page, setPage] = useState(1)
   const [currency, setCurrency] = usePersistentState('catalog.currency', CURRENCIES.USD)
 
-  const [allRows, setAllRows] = useState([])
-  const [vehicles, setVehicles] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const {
+    data: partsData,
+    loading: partsLoading,
+    error: partsError,
+  } = useCachedQuery('parts', listParts)
+  const {
+    data: vehicleData,
+    loading: vehiclesLoading,
+    error: vehiclesError,
+  } = useCachedQuery('vehicles', listVehicles)
+  const vehicles = useMemo(() => vehicleData ?? [], [vehicleData])
+  const loading = partsLoading || vehiclesLoading
+  const error = partsError || vehiclesError
 
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([listParts(), listVehicles()])
-      .then(([parts, vehicleList]) => {
-        if (cancelled) return
-        const rows = parts.map((p) => {
-          const categoryTopPath = p.categoryPath.split('__')[0]
-          // Se guardan ambas monedas del precio de referencia — la tabla
-          // elige cuál pintar según el selector de moneda, el orden siempre
-          // se calcula en USD (moneda común, la conversión no reordena).
-          const baselinePriceUsd = clpToUsd(p.baselinePrice, DEFAULT_FX)
-          return {
-            id: p.id,
-            nameEs: p.nameEs,
-            // Nivel superior — el mismo que usa el filtro, para que la fila
-            // calce visualmente con la categoría elegida.
-            categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
-            categoryTopPath,
-            vehicleId: p.vehicleId,
-            vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
-            // Código local (Chile) — el que reconoce el comprador local. El
-            // de sourcing (China/fábrica), cuando existe, se ve en la ficha.
-            code: p.code,
-            codeStatus: p.codeStatus,
-            baselinePriceUsd,
-            baselinePriceClp: p.baselinePrice,
-          }
-        })
-        setAllRows(rows)
-        setVehicles(vehicleList)
-        setLoading(false)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err)
-          setLoading(false)
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const allRows = useMemo(() => {
+    if (!partsData) return []
+    return partsData.map((p) => {
+      const categoryTopPath = p.categoryPath.split('__')[0]
+      // Se guardan ambas monedas del precio de referencia — la tabla
+      // elige cuál pintar según el selector de moneda, el orden siempre
+      // se calcula en USD (moneda común, la conversión no reordena).
+      const baselinePriceUsd = clpToUsd(p.baselinePrice, DEFAULT_FX)
+      return {
+        id: p.id,
+        nameEs: p.nameEs,
+        // Nivel superior — el mismo que usa el filtro, para que la fila
+        // calce visualmente con la categoría elegida.
+        categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
+        categoryTopPath,
+        vehicleId: p.vehicleId,
+        vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
+        // Código local (Chile) — el que reconoce el comprador local. El
+        // de sourcing (China/fábrica), cuando existe, se ve en la ficha.
+        code: p.code,
+        codeStatus: p.codeStatus,
+        baselinePriceUsd,
+        baselinePriceClp: p.baselinePrice,
+      }
+    })
+  }, [partsData])
 
   // Límites reales del baseline (USD) para el slider de precio — se recalculan
   // solo cuando llegan los datos, no en cada render.

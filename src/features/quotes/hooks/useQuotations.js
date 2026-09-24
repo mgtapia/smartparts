@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listParts } from '@libs/repos/partsRepo'
 import { getCategory } from '@mocks/categories'
 import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
@@ -73,29 +74,8 @@ export function costLine(line, { mode, rates, settingsFor }) {
  * (proveedor + archivo/proforma de origen).
  */
 export function useQuotationsData() {
-  const [parts, setParts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [reloadKey, setReloadKey] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-    listParts()
-      .then((all) => {
-        if (cancelled) return
-        setParts(all)
-        setLoading(false)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err)
-          setLoading(false)
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [reloadKey])
+  const { data, loading, error, reload } = useCachedQuery('parts', listParts)
+  const parts = useMemo(() => data ?? [], [data])
 
   const { lines, quotations } = useMemo(() => {
     const flat = []
@@ -146,8 +126,6 @@ export function useQuotationsData() {
     list.sort((a, b) => (b.capturedAt?.getTime() ?? 0) - (a.capturedAt?.getTime() ?? 0))
     return { lines: flat, quotations: list }
   }, [parts])
-
-  const reload = () => setReloadKey((k) => k + 1)
 
   return { lines, quotations, loading, error, reload }
 }

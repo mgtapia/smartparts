@@ -15,6 +15,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { getDb } from '@libs/firebase/client'
+import { invalidateQueries } from '@libs/queryCache'
 import { getCategory } from '@mocks/categories'
 import { getVehicle } from './vehiclesRepo'
 import { listQuotes, listQuotesByPart } from './quotesRepo'
@@ -136,6 +137,7 @@ export async function updatePartCode(partId, { code, codeStatus, source, note })
     sourcing_note: note?.trim() || null,
     updated_at: serverTimestamp(),
   })
+  invalidateQueries()
 }
 
 export async function updatePartNames(partId, { nameEn, nameZh }) {
@@ -144,6 +146,7 @@ export async function updatePartNames(partId, { nameEn, nameZh }) {
     name_zh: nameZh?.trim() || null,
     updated_at: serverTimestamp(),
   })
+  invalidateQueries()
 }
 
 /** Peso (g) y volumen (cm³) con su estado y la fuente de la medición. */
@@ -156,6 +159,7 @@ export async function updatePartLogistics(partId, { weightG, volumeCm3, status, 
     logistics_note: note?.trim() || null,
     updated_at: serverTimestamp(),
   })
+  invalidateQueries()
 }
 
 export async function updatePartCustoms(partId, { hsCode, source }) {
@@ -164,6 +168,7 @@ export async function updatePartCustoms(partId, { hsCode, source }) {
     hs_code_source: source?.trim() || null,
     updated_at: serverTimestamp(),
   })
+  invalidateQueries()
 }
 
 // La imagen va en una subcolección aparte para no engordar cada lectura del
@@ -183,6 +188,7 @@ export async function savePartImage(partId, { dataUrl, source }) {
     source: source?.trim() || null,
     updated_at: serverTimestamp(),
   })
+  invalidateQueries()
 }
 
 export async function listPartsByVehicle(vehicleId) {

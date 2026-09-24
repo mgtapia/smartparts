@@ -14,6 +14,7 @@ import {
   writeBatch,
 } from 'firebase/firestore'
 import { getDb } from '@libs/firebase/client'
+import { invalidateQueries } from '@libs/queryCache'
 import { listSuppliers } from './suppliersRepo'
 
 // El precio se guarda siempre en la moneda en que cotizó el proveedor
@@ -130,4 +131,5 @@ export async function confirmQuotationFields(quoteIds, fields, source) {
     for (const id of quoteIds.slice(i, i + 400)) batch.update(doc(db, 'quotes', id), patch)
     await batch.commit()
   }
+  invalidateQueries()
 }

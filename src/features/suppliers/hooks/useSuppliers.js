@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { FACT_KEYS, factOf } from '../constants'
@@ -14,29 +15,13 @@ export function useSuppliers() {
     error: quotesError,
     reload: reloadQuotes,
   } = useQuotationsData()
-  const [suppliers, setSuppliers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [reloadKey, setReloadKey] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-    listSuppliers()
-      .then((list) => {
-        if (cancelled) return
-        setSuppliers(list)
-        setLoading(false)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err)
-          setLoading(false)
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [reloadKey])
+  const {
+    data,
+    loading,
+    error,
+    reload: reloadSuppliers,
+  } = useCachedQuery('suppliers', listSuppliers)
+  const suppliers = useMemo(() => data ?? [], [data])
 
   const rows = useMemo(
     () =>
@@ -53,9 +38,9 @@ export function useSuppliers() {
   )
 
   const reload = useCallback(() => {
-    setReloadKey((k) => k + 1)
+    reloadSuppliers()
     reloadQuotes()
-  }, [reloadQuotes])
+  }, [reloadSuppliers, reloadQuotes])
 
   return { rows, loading: loading || quotesLoading, error: error || quotesError, reload }
 }

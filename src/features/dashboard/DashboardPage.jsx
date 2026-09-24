@@ -23,38 +23,6 @@ const PRICE_NOTE = [
   'Las cotizaciones inferidas del lado opuesto no son ofertas del proveedor y no cuentan.',
 ]
 
-const SUPPLIER_COLUMNS = [
-  { id: 'name', label: 'Proveedor', render: (s) => s.name },
-  {
-    id: 'parts',
-    label: 'Cotizados',
-    width: 100,
-    align: 'right',
-    tooltip: 'Repuestos con precio de este proveedor.',
-    render: (s) => s.parts,
-  },
-  {
-    id: 'cheapest',
-    label: 'Más barato',
-    width: 120,
-    align: 'right',
-    tooltip:
-      'Repuestos con oferta de dos o más proveedores donde este tiene el menor precio. Un empate suma a todos.',
-    render: (s) => s.cheapest,
-  },
-  {
-    id: 'over',
-    label: 'Sobrecosto',
-    width: 130,
-    align: 'right',
-    tooltip:
-      'Cuánto más caro es, en promedio, que el más barato de cada repuesto con dos o más ofertas.',
-    render: (s) => (s.overBp === null ? '—' : formatBp(s.overBp)),
-  },
-  { id: 'oem', label: 'OEM', width: 70, align: 'right', render: (s) => s.oem },
-  { id: 'afm', label: 'AFM', width: 70, align: 'right', render: (s) => s.afm },
-]
-
 export default function DashboardPage() {
   const { data, loading, error } = useAnalytics(QUALITY.ANY)
 
@@ -158,24 +126,6 @@ export default function DashboardPage() {
           </InfoField>
         </InfoGrid>
       </Card>
-
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}
-      >
-        Proveedores
-        <InfoNote dense title="Cómo leer el dashboard" paragraphs={PRICE_NOTE} />
-      </Typography>
-      <Box sx={{ mb: `${GRID_GAP}px` }}>
-        <ListTable
-          columns={SUPPLIER_COLUMNS}
-          rows={suppliers}
-          getRowKey={(s) => s.id}
-          getRowHref={(s) => `/suppliers/${s.id}`}
-          emptyText="Ningún proveedor tiene precio."
-        />
-      </Box>
 
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
         Mayores diferencias entre proveedores

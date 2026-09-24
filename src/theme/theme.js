@@ -140,6 +140,39 @@ const theme = createTheme({
         root: { borderRadius: RADIUS.pill, fontFamily: FONT_MONO, fontSize: 11 },
       },
     },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: { fontSize: '13px !important', minHeight: 32 },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: { fontSize: '13px !important' },
+      },
+    },
+    // Techo de tamaño de todo texto de formulario/control (13px, el mismo
+    // que MuiSelect/MuiMenuItem arriba) — una sola fuente de verdad para que
+    // un campo nuevo no necesite repetir el ajuste a mano.
+    MuiInputBase: {
+      styleOverrides: {
+        input: { fontSize: '13px !important' },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: { fontSize: '13px !important' },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: { padding: 4 },
+      },
+    },
+    MuiRadio: {
+      styleOverrides: {
+        root: { padding: 4 },
+      },
+    },
     MuiDataGrid: {
       styleOverrides: {
         root: ({ theme }) => ({

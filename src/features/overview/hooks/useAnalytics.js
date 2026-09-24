@@ -4,7 +4,7 @@ import { listParts } from '@libs/repos/partsRepo'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { supplierLabel } from '@features/quotes/constants'
 import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
-import { SOURCING_VEHICLE_ID } from '@features/pending/constants'
+import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
 import { buildAnalytics } from '../analyticsModel'
 
 /**
@@ -17,20 +17,22 @@ export function useAnalytics(quality) {
   const { lines, loading: quotesLoading, error: quotesError } = useQuotationsData()
   const { rows, loading: suppliersLoading, error: suppliersError } = useSuppliers()
 
-  const loading = parts.loading || quotesLoading || suppliersLoading
-  const error = parts.error || quotesError || suppliersError
+  const sourcing = useSourcingVehicle()
+
+  const loading = parts.loading || sourcing.loading || quotesLoading || suppliersLoading
+  const error = parts.error || sourcing.error || quotesError || suppliersError
 
   const data = useMemo(() => {
     if (loading || error) return null
     const suppliers = new Map(rows.map((r) => [r.supplier.id, r.supplier]))
     return buildAnalytics({
-      vehicleId: SOURCING_VEHICLE_ID,
+      vehicleId: sourcing.vehicleId,
       parts: parts.data ?? [],
       lines,
       quality,
       supplierName: (id) => supplierLabel(suppliers.get(id), id),
     })
-  }, [loading, error, parts.data, lines, rows, quality])
+  }, [loading, error, sourcing.vehicleId, parts.data, lines, rows, quality])
 
   return { data, loading, error }
 }

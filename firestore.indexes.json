@@ -4,26 +4,99 @@
       "collectionGroup": "parts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "vehicle_ids", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "quote_rollup.alternative.min_usd_micro", "order": "ASCENDING" }
+        {
+          "fieldPath": "vehicle_ids",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "quote_rollup.alternative.min_usd_micro",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "parts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "category_path", "order": "ASCENDING" },
-        { "fieldPath": "demand_scale", "order": "DESCENDING" }
+        {
+          "fieldPath": "category_path",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "demand_scale",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
-      "collectionGroup": "quotes",
-      "queryScope": "COLLECTION",
+      "collectionGroup": "lines",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
-        { "fieldPath": "part_id", "order": "ASCENDING" },
-        { "fieldPath": "valid_until", "order": "ASCENDING" }
+        {
+          "fieldPath": "part_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "valid_until",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "lines",
+      "fieldPath": "part_id",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "DESCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lines",
+      "fieldPath": "supplier_id",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "DESCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "applications",
+      "fieldPath": "vehicle_id",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "DESCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
+        }
+      ]
+    }
+  ]
 }

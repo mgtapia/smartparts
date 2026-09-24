@@ -1,6 +1,3 @@
-// Alcance de la etapa: en la etapa de sourcing solo se trabaja el Dongfeng E70.
-export const SOURCING_VEHICLE_ID = 'dongfeng_e70'
-
 export const PENDING_TABS = {
   PENDING: 'pendientes',
   MILESTONE: 'hito',

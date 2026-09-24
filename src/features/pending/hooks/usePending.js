@@ -6,7 +6,7 @@ import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
 import { buildPending } from '../pendingModel'
-import { SOURCING_VEHICLE_ID } from '../constants'
+import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
 
 /**
  * Pendientes de la etapa de sourcing: junta repuestos, cotizaciones, proveedores,
@@ -15,26 +15,47 @@ import { SOURCING_VEHICLE_ID } from '../constants'
  */
 export function usePending() {
   const parts = useCachedQuery('parts', listParts)
-  const milestone = useCachedQuery('milestone', getMilestone)
+  const sourcing = useSourcingVehicle()
+  const milestone = useCachedQuery(`milestone:${sourcing.vehicleId}`, () =>
+    getMilestone(sourcing.vehicleId),
+  )
   const { quotations, loading: quotesLoading, error: quotesError } = useQuotationsData()
   const { rows, loading: suppliersLoading, error: suppliersError } = useSuppliers()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
 
-  const loading = parts.loading || milestone.loading || quotesLoading || suppliersLoading
-  const error = parts.error || milestone.error || quotesError || suppliersError
+  const loading =
+    parts.loading || sourcing.loading || milestone.loading || quotesLoading || suppliersLoading
+  const error = parts.error || sourcing.error || milestone.error || quotesError || suppliersError
 
   const data = useMemo(() => {
     if (loading || error) return null
     return buildPending({
-      vehicleId: SOURCING_VEHICLE_ID,
+      vehicleId: sourcing.vehicleId,
       parts: parts.data ?? [],
       quotations,
       suppliers: rows.map((r) => r.supplier),
       assumptions: { mode, rates, settingsFor },
       milestone: milestone.data ?? {},
     })
-  }, [loading, error, parts.data, quotations, rows, mode, rates, settingsFor, milestone.data])
+  }, [
+    loading,
+    error,
+    sourcing.vehicleId,
+    parts.data,
+    quotations,
+    rows,
+    mode,
+    rates,
+    settingsFor,
+    milestone.data,
+  ])
 
-  return { data, loading, error, reloadMilestone: milestone.reload }
+  return {
+    data,
+    loading,
+    error,
+    vehicleId: sourcing.vehicleId,
+    reloadMilestone: milestone.reload,
+  }
 }

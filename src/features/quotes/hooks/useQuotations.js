@@ -9,12 +9,6 @@ import { money } from '@libs/money'
 import { toUsdMicro } from '@libs/fx'
 import { vehicleLabel } from '@features/vehicles/constants'
 
-const NO_FILE = 'sin-archivo'
-
-export function quotationId(supplierId, sourceFile) {
-  return encodeURIComponent(`${supplierId}::${sourceFile ?? NO_FILE}`)
-}
-
 /** Firestore devuelve Timestamp; los seeds viejos traen texto ISO. */
 export function toDate(value) {
   if (!value) return null
@@ -87,7 +81,7 @@ export function useQuotationsData() {
     }
     const groups = new Map()
     for (const line of flat) {
-      const id = quotationId(line.quote.supplierId, line.quote.sourceFile)
+      const id = line.quote.quotationId
       if (!groups.has(id)) {
         groups.set(id, {
           id,

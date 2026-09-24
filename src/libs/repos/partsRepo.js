@@ -4,10 +4,12 @@
 // directo contra los datos reales del cliente inicial sin necesitar Firestore
 // — el motor de costos ya sienta el precedente de separar cómputo puro de I/O.
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
+  limit,
   query,
   serverTimestamp,
   setDoc,
@@ -17,7 +19,7 @@ import {
 import { getDb } from '@libs/firebase/client'
 import { invalidateQueries } from '@libs/queryCache'
 import { getCategory } from '@mocks/categories'
-import { getVehicle } from './vehiclesRepo'
+import { getVehicle, listVehicles } from './vehiclesRepo'
 import { listQuotes, listQuotesByPart } from './quotesRepo'
 
 /**
@@ -84,11 +86,7 @@ export async function listParts() {
     listQuotes(),
   ])
 
-  const vehicleIds = [
-    ...new Set(partsSnap.docs.map((d) => d.data().vehicle_ids?.[0]).filter(Boolean)),
-  ]
-  const vehicles = await Promise.all(vehicleIds.map((id) => getVehicle(id)))
-  const vehiclesById = new Map(vehicles.filter(Boolean).map((v) => [v.id, v]))
+  const vehiclesById = new Map((await listVehicles()).map((v) => [v.id, v]))
 
   const quotesByPart = new Map()
   quotes.forEach((q) => {
@@ -113,7 +111,7 @@ export async function getPart(id) {
   const [vehicle, quotes, bridgeSnap] = await Promise.all([
     getVehicle(raw.vehicle_ids?.[0]),
     listQuotesByPart(id),
-    getDocs(query(collection(getDb(), 'part_vehicle'), where('part_id', '==', id))),
+    getDocs(collection(getDb(), 'parts', id, 'applications')),
   ])
 
   return shapePart(id, raw, {
@@ -173,21 +171,25 @@ export async function updatePartCustoms(partId, { hsCode, source }) {
 
 // La imagen va en una subcolección aparte para no engordar cada lectura del
 // catálogo (que trae todos los repuestos): solo la ficha la carga.
-const mediaRef = (partId) => doc(getDb(), 'parts', partId, 'media', 'main')
+const mediaCollection = (partId) => collection(getDb(), 'parts', partId, 'media')
+const mainImageQuery = (partId) =>
+  query(mediaCollection(partId), where('role', '==', 'main'), limit(1))
 
 export async function getPartImage(partId) {
-  const snap = await getDoc(mediaRef(partId))
-  return snap.exists()
-    ? { dataUrl: snap.data().data_url, source: snap.data().source ?? null }
-    : null
+  const doc0 = (await getDocs(mainImageQuery(partId))).docs[0]
+  return doc0 ? { dataUrl: doc0.data().data_url, source: doc0.data().source ?? null } : null
 }
 
 export async function savePartImage(partId, { dataUrl, source }) {
-  await setDoc(mediaRef(partId), {
+  const data = {
+    role: 'main',
     data_url: dataUrl,
     source: source?.trim() || null,
     updated_at: serverTimestamp(),
-  })
+  }
+  const existing = (await getDocs(mainImageQuery(partId))).docs[0]
+  if (existing) await setDoc(existing.ref, data)
+  else await addDoc(mediaCollection(partId), data)
   invalidateQueries()
 }
 

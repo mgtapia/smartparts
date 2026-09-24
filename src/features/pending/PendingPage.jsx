@@ -21,7 +21,7 @@ import { PENDING_TABS, MANUAL_STEPS, TAB_LIST } from './constants'
 import { usePending } from './hooks/usePending'
 
 export default function PendingPage() {
-  const { data, loading, error, reloadMilestone } = usePending()
+  const { data, loading, error, vehicleId, reloadMilestone } = usePending()
   const [tab, setTab] = useUrlTab(Object.values(PENDING_TABS))
   const [editingStep, setEditingStep] = useState(null)
 
@@ -116,7 +116,7 @@ export default function PendingPage() {
           }
           onClose={() => setEditingStep(null)}
           onSave={async (value, source) => {
-            await updateMilestoneStep(editingStep.manual.key, { value, source })
+            await updateMilestoneStep(vehicleId, editingStep.manual.key, { value, source })
             reloadMilestone()
           }}
         />

@@ -299,7 +299,7 @@ export default function QuotationDetailPage() {
           onClose={() => setEditing(null)}
           onSave={async (value, source) => {
             await confirmQuotationFields(
-              quotation.lines.map((l) => l.quote.id),
+              quotation.lines.map((l) => l.quote),
               { [editing.key]: value },
               source,
             )

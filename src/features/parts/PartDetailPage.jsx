@@ -23,12 +23,7 @@ import {
 import { PART_IMAGE_SIZE } from '@constants/layout'
 import { getPartImage, updatePartCustoms } from '@libs/repos/partsRepo'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
-import {
-  costLine,
-  priceUsdMicro,
-  quotationId,
-  unitPriceMoney,
-} from '@features/quotes/hooks/useQuotations'
+import { costLine, priceUsdMicro, unitPriceMoney } from '@features/quotes/hooks/useQuotations'
 import { shortReason } from '@features/quotes/partMatrix'
 import { supplierLabel } from '@features/quotes/constants'
 import { useUrlTab } from '@hooks/useUrlTab'
@@ -332,7 +327,7 @@ export default function PartDetailPage() {
           columns={quoteColumns}
           rows={rows}
           getRowKey={({ quote }) => quote.id}
-          getRowHref={({ quote }) => `/quotes/${quotationId(quote.supplierId, quote.sourceFile)}`}
+          getRowHref={({ quote }) => `/quotes/${quote.quotationId}`}
           emptyText="Sin cotizaciones todavía."
         />
       ) : null}

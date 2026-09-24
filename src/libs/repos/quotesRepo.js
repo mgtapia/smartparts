@@ -4,9 +4,8 @@
 // que ya consumían las pantallas desde Fase 1 — conversión única en el borde
 // de lectura, nunca aritmética de dinero con floats (ver CLAUDE.md).
 import {
-  collection,
+  collectionGroup,
   doc,
-  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -24,13 +23,16 @@ import { listSuppliers } from './suppliersRepo'
 // (`currency_status: 'unconfirmed'`, `price.currency: null`). `unitPriceUsd`
 // solo tiene valor si la moneda está confirmada y ya es USD — si no, es null
 // y ninguna pantalla lo toma por dólares ni lo usa para costear.
-function shapeQuote(id, raw, suppliersById) {
+// Una cotización es un documento (`quotations/{id}`) y sus líneas están en la
+// subcolección `lines`: `quote.id` es el id de la línea y `quote.quotationId` el de su cotización.
+function shapeQuote(id, raw, suppliersById, quotationId) {
   const scale = raw.price?.scale ?? 2
   const currency = raw.price?.currency ?? null
   const currencyConfirmed = currency !== null && raw.currency_status !== 'unconfirmed'
   const priceAmount = raw.price.amount / 10 ** scale
   return {
     id,
+    quotationId,
     partId: raw.part_id,
     supplierId: raw.supplier_id,
     supplier: suppliersById.get(raw.supplier_id) || null,
@@ -77,22 +79,22 @@ async function suppliersById() {
   return new Map(suppliers.map((s) => [s.id, s]))
 }
 
+const shapeLine = (d, byId) => shapeQuote(d.id, d.data(), byId, d.ref.parent.parent.id)
+
 export async function listQuotes() {
-  const [snap, byId] = await Promise.all([getDocs(collection(getDb(), 'quotes')), suppliersById()])
-  return snap.docs.map((d) => shapeQuote(d.id, d.data(), byId))
+  const [snap, byId] = await Promise.all([
+    getDocs(collectionGroup(getDb(), 'lines')),
+    suppliersById(),
+  ])
+  return snap.docs.map((d) => shapeLine(d, byId))
 }
 
 export async function listQuotesByPart(partId) {
   const [snap, byId] = await Promise.all([
-    getDocs(query(collection(getDb(), 'quotes'), where('part_id', '==', partId))),
+    getDocs(query(collectionGroup(getDb(), 'lines'), where('part_id', '==', partId))),
     suppliersById(),
   ])
-  return snap.docs.map((d) => shapeQuote(d.id, d.data(), byId))
-}
-
-export async function getQuote(id) {
-  const [snap, byId] = await Promise.all([getDoc(doc(getDb(), 'quotes', id)), suppliersById()])
-  return snap.exists() ? shapeQuote(snap.id, snap.data(), byId) : null
+  return snap.docs.map((d) => shapeLine(d, byId))
 }
 
 export function isQuoteExpiringSoon(quote, withinDays = 7, today = new Date()) {
@@ -107,11 +109,11 @@ export function isQuoteExpiringSoon(quote, withinDays = 7, today = new Date()) {
  * líneas. Cada dato queda con su fuente y fecha en `confirmations`; sin ese
  * registro el dato sigue sin confirmar. `fields` admite `incoterm`,
  * `incotermPlace` y `currency`.
- * @param {string[]} quoteIds
+ * @param {Array<{ id: string, quotationId: string }>} quotes  Líneas a actualizar.
  * @param {{ incoterm?: string, incotermPlace?: string, currency?: string }} fields
  * @param {string} source  De dónde sale la confirmación (chat, proforma, correo…).
  */
-export async function confirmQuotationFields(quoteIds, fields, source) {
+export async function confirmQuotationFields(quotes, fields, source) {
   const db = getDb()
   const stamp = { source, at: serverTimestamp() }
   const patch = {}
@@ -129,9 +131,11 @@ export async function confirmQuotationFields(quoteIds, fields, source) {
     patch['confirmations.currency'] = stamp
   }
   // Firestore admite 500 escrituras por lote.
-  for (let i = 0; i < quoteIds.length; i += 400) {
+  for (let i = 0; i < quotes.length; i += 400) {
     const batch = writeBatch(db)
-    for (const id of quoteIds.slice(i, i + 400)) batch.update(doc(db, 'quotes', id), patch)
+    for (const q of quotes.slice(i, i + 400)) {
+      batch.update(doc(db, 'quotations', q.quotationId, 'lines', q.id), patch)
+    }
     await batch.commit()
   }
   invalidateQueries()

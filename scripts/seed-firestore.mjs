@@ -23,9 +23,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { money, toMicros } from '../src/libs/money.js'
 import { VEHICLES } from '../src/mocks/vehicles.js'
 import { CATEGORIES } from '../src/mocks/categories.js'
-import { SUPPLIERS } from '../src/mocks/suppliers.js'
 import { PARTS } from '../src/mocks/parts.js'
-import { QUOTES } from '../src/mocks/quotes.js'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '../src/mocks/costParams.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -50,14 +48,15 @@ loadEnvLocal()
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
 
 const RESET = process.argv.includes('--reset')
+// 'suppliers' y 'quotes' NO se siembran ni se borran acá: solo contienen datos
+// reales (proveedores y cotizaciones recibidos). Los mocks de src/mocks/ eran
+// inventados y no deben volver a la base — ver .agent/STATUS.md.
 const SEEDED_COLLECTIONS = [
   'vehicles',
   'categories',
-  'suppliers',
   'parts',
   'part_vehicle',
   'oem_index',
-  'quotes',
   'cost_param_sets',
   'fx_rates',
 ]
@@ -107,15 +106,6 @@ async function main() {
     await db.collection('categories').doc(c.path).set(c)
   }
 
-  console.log('Sembrando suppliers…')
-  for (const s of SUPPLIERS) {
-    const { id, ...rest } = s
-    await db
-      .collection('suppliers')
-      .doc(id)
-      .set({ ...rest, created_at: FieldValue.serverTimestamp() })
-  }
-
   console.log('Sembrando cost_param_sets…')
   await db.collection('cost_param_sets').doc(DEFAULT_PARAM_SET.id).set(DEFAULT_PARAM_SET)
 
@@ -129,15 +119,10 @@ async function main() {
   const partRefs = new Map() // mock part id -> DocumentReference
   PARTS.forEach((p) => partRefs.set(p.id, db.collection('parts').doc()))
 
-  const validQuotes = QUOTES.filter((q) => {
-    const ok = partRefs.has(q.partId)
-    if (!ok) {
-      console.warn(`  ⚠ cotización ${q.id} referencia part_id "${q.partId}" inexistente, se omite.`)
-    }
-    return ok
-  })
-  const quoteRefs = new Map() // mock quote id -> DocumentReference
-  validQuotes.forEach((q) => quoteRefs.set(q.id, db.collection('quotes').doc()))
+  // Sin cotizaciones de ejemplo: los rollups de precio parten vacíos y se
+  // recalculan desde cotizaciones reales.
+  const validQuotes = []
+  const quoteRefs = new Map()
 
   function rollupFor(mockPartId) {
     const rollup = {
@@ -226,9 +211,7 @@ async function main() {
   })
   await oemBatch.commit()
 
-  console.log(
-    `\n✔ Listo. ${PARTS.length} repuestos, ${validQuotes.length} cotizaciones, ${VEHICLES.length} vehículos, ${SUPPLIERS.length} proveedores.`,
-  )
+  console.log(`\n✔ Listo. ${PARTS.length} repuestos, ${VEHICLES.length} vehículos.`)
 }
 
 main()

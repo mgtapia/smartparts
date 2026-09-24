@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { usePersistentState } from '@hooks/usePersistentState'
 import { listParts } from '@libs/repos/partsRepo'
 import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
@@ -32,7 +33,8 @@ const SORT_VALUE_GETTERS = {
 }
 
 function compareRows(a, b, field, sortDir) {
-  const getValue = SORT_VALUE_GETTERS[field]
+  // Un campo guardado de una versión anterior puede ya no existir.
+  const getValue = SORT_VALUE_GETTERS[field] ?? SORT_VALUE_GETTERS[SORT_FIELDS.NAME]
   const av = getValue(a)
   const bv = getValue(b)
   if (av === null || av === undefined) return bv === null || bv === undefined ? 0 : 1
@@ -47,14 +49,20 @@ function toggleInList(list, value) {
 
 export function useCatalog() {
   const [search, setSearch] = useState('')
-  const [categoryFilters, setCategoryFilters] = useState([])
-  const [vehicleFilters, setVehicleFilters] = useState([])
-  const [codeStatusFilters, setCodeStatusFilters] = useState([])
-  const [priceRange, setPriceRange] = useState(null) // null = sin restringir (todavía no tocado)
-  const [sortField, setSortField] = useState(SORT_FIELDS.NAME)
-  const [sortDir, setSortDir] = useState('asc')
+  // Filtros, orden y moneda se recuerdan entre visitas (por navegador). La
+  // búsqueda de texto no: es de una sola consulta, no una preferencia.
+  const [categoryFilters, setCategoryFilters] = usePersistentState('catalog.categoryFilters', [])
+  const [vehicleFilters, setVehicleFilters] = usePersistentState('catalog.vehicleFilters', [])
+  const [codeStatusFilters, setCodeStatusFilters] = usePersistentState(
+    'catalog.codeStatusFilters',
+    [],
+  )
+  // null = sin restringir (todavía no tocado)
+  const [priceRange, setPriceRange] = usePersistentState('catalog.priceRange', null)
+  const [sortField, setSortField] = usePersistentState('catalog.sortField', SORT_FIELDS.NAME)
+  const [sortDir, setSortDir] = usePersistentState('catalog.sortDir', 'asc')
   const [page, setPage] = useState(1)
-  const [currency, setCurrency] = useState(CURRENCIES.USD)
+  const [currency, setCurrency] = usePersistentState('catalog.currency', CURRENCIES.USD)
 
   const [allRows, setAllRows] = useState([])
   const [vehicles, setVehicles] = useState([])

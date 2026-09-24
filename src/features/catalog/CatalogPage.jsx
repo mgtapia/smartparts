@@ -25,6 +25,7 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
+import { usePersistentState } from '@hooks/usePersistentState'
 import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES, CURRENCIES } from './hooks/useCatalog'
 import FilterPanel from './components/FilterPanel'
 import ColumnsMenu from './components/ColumnsMenu'
@@ -51,6 +52,12 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
+// hiddenColumns es un Set → se guarda como lista.
+const SET_STORAGE = {
+  serialize: (set) => JSON.stringify([...set]),
+  deserialize: (raw) => new Set(JSON.parse(raw)),
+}
+
 const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90 }
 const REPUESTO_MIN_WIDTH = 220
 const ROW_GAP = 16 // px — mismo valor que `gap: 2` en el Box de la fila
@@ -194,8 +201,12 @@ export default function CatalogPage() {
     loading,
     error,
   } = useCatalog()
-  const [filtersOpen, setFiltersOpen] = useState(true)
-  const [hiddenColumns, setHiddenColumns] = useState(new Set())
+  const [filtersOpen, setFiltersOpen] = usePersistentState('catalog.filtersOpen', true)
+  const [hiddenColumns, setHiddenColumns] = usePersistentState(
+    'catalog.hiddenColumns',
+    new Set(),
+    SET_STORAGE,
+  )
   const isColumnVisible = (id) => !hiddenColumns.has(id)
   const toggleColumn = (id) =>
     setHiddenColumns((prev) => {
@@ -213,7 +224,7 @@ export default function CatalogPage() {
     const columnCount = 1 + optionalIds.length
     return REPUESTO_MIN_WIDTH + fixedWidthSum + (columnCount - 1) * ROW_GAP + 24
   }, [hiddenColumns])
-  const [groupBy, setGroupBy] = useState(GROUP_BY.NONE)
+  const [groupBy, setGroupBy] = usePersistentState('catalog.groupBy', GROUP_BY.NONE)
   const groupedSections = useMemo(() => {
     const getKey = GROUP_KEY_GETTERS[groupBy]
     if (!getKey) return [{ key: null, rows }]

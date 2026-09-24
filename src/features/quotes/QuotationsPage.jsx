@@ -13,6 +13,7 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { useUrlTab } from '@hooks/useUrlTab'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
@@ -27,7 +28,7 @@ import {
   buildMatrix,
 } from './partMatrix'
 
-const VIEWS = { LIST: 'list', MATRIX: 'matrix' }
+const VIEWS = { LIST: 'proveedor', MATRIX: 'repuesto' }
 const countSuppliers = (list) => new Set(list.map((q) => q.supplierId)).size
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
@@ -35,7 +36,7 @@ export default function QuotationsPage() {
   const { lines, quotations, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
-  const [view, setView] = useState(VIEWS.LIST)
+  const [view, setView] = useUrlTab(Object.values(VIEWS))
   const [metric, setMetric] = useState(METRICS.PRICE)
   const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
   const [search, setSearch] = useState('')

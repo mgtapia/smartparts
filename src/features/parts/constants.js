@@ -1,11 +1,11 @@
 import { LOGISTICS_STATUS_LABELS_ES } from '@constants/enums'
 
 export const PART_TABS = {
-  QUOTES: 'quotes',
-  IDENTITY: 'identity',
-  LOGISTICS: 'logistics',
-  CUSTOMS: 'customs',
-  DEMAND: 'demand',
+  QUOTES: 'cotizaciones',
+  IDENTITY: 'identificacion',
+  LOGISTICS: 'logistica',
+  CUSTOMS: 'aduana',
+  DEMAND: 'demanda',
 }
 
 export const TAB_LIST = [

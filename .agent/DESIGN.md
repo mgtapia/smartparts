@@ -93,7 +93,7 @@ Aprobado por el usuario en la ficha de repuesto (`src/features/parts/PartDetailP
 
 1. `PageHeader` con `back` (flecha en la misma fila del título; nunca una fila aparte), título y descripción corta.
 2. **Resumen siempre visible**: una tarjeta con la imagen o identificador a la izquierda y un `InfoGrid` (columnas iguales con divisor) con solo los datos que sirven para decidir. Lo importante nunca va escondido.
-3. **Tabs** (`ViewTabs`) para agrupar el resto: la más usada primero y activa por defecto. Dentro de cada tab, uno o más `InfoGrid`; una lista usa `ListTable`.
+3. **Tabs** (`ViewTabs`) para agrupar el resto: la más usada primero y activa por defecto. La pestaña activa vive en la URL (`?tab=…`, con `useUrlTab` de `@hooks/useUrlTab`; valores en español) para poder abrirla directo y compartir el enlace. La página que lo usa va dentro de un `<Suspense>` en su `page.js`. Dentro de cada tab, uno o más `InfoGrid`; una lista usa `ListTable`.
 4. **Editar y confirmar**: cada dato editable lleva un lápiz (`InfoField onEdit`) que abre un modal. Un dato que se **confirma** exige una **fuente** (chat, proforma, documento, medición). Sin fuente solo se guarda como sin confirmar. Un dato confirmado sale del rojo; corregirlo es una acción explícita, nunca un campo libre.
 5. Todo lo no verificado en rojo (`UncertainValue` con el motivo). Un dato sin valor dice "Sin dato" o el motivo concreto, en rojo, nunca un guion mudo.
 6. Los costos son estimaciones mientras haya un supuesto: rojo y con la fórmula a la vista.

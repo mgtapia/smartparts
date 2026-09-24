@@ -29,6 +29,7 @@ import {
 } from '@features/quotes/hooks/useQuotations'
 import { shortReason } from '@features/quotes/partMatrix'
 import { supplierLabel } from '@features/quotes/constants'
+import { useUrlTab } from '@hooks/useUrlTab'
 import { usePartDetail } from './hooks/usePartDetail'
 import CodeDialog from './components/CodeDialog'
 import ImageDialog from './components/ImageDialog'
@@ -52,7 +53,7 @@ export default function PartDetailPage({ partId }) {
   const { part, loading, error, refetch } = usePartDetail(partId)
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
-  const [tab, setTab] = useState(PART_TABS.QUOTES)
+  const [tab, setTab] = useUrlTab(Object.values(PART_TABS))
   const [editing, setEditing] = useState(null)
   const [image, setImage] = useState(null)
   const [imageKey, setImageKey] = useState(0)

@@ -48,6 +48,15 @@ Si una línea con batería de litio (Clase 9) no puede ir en el modo de envío e
 
 Yonder no tiene tests — este proyecto sí, en `src/core/costing/`. Es una función pura: barato de testear, caro no hacerlo. Golden test de referencia + property-based tests de las invariantes de suma (`npm run test`, Vitest + fast-check).
 
+### UI y datos (aprobadas por el usuario, no se negocian)
+
+- **Solo datos reales.** Nada inventado en Firestore ni en la UI: los mocks viven solo en tests. Un valor sin fuente no se muestra como dato.
+- **Rojo = no verificado**, siempre, con el motivo (`UncertainValue`). Confirmar un dato exige fuente y lo saca del rojo.
+- **Reutilizar antes de crear**: catálogo de componentes y patrón de ficha en [[DESIGN]]. Rediseñar bien, no parchar.
+- **Español** salvo siglas universales; etiquetas precisas y sin paréntesis de relleno; explicaciones en un `InfoNote`.
+- **Nunca auto-confirmar** `part_type: 'original'` ni aceptar un código sin fuente citable.
+- **Tareas grandes se planifican antes** y se commitean por tanda.
+
 ## Hook de convenciones
 
 `.claude/hooks/check-conventions.mjs` (PostToolUse en `Edit|Write`) bloquea automáticamente:

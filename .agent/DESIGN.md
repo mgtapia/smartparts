@@ -87,9 +87,44 @@ Igual regla que yonder: **máx. 2 tipos**. Ancho fijo (contenido de página, for
 - Filas de data grid: densidad `compact` de MUI X Data Grid por defecto (más filas visibles, dominio tabular).
 - Separación entre secciones grandes: `mb: 24px`.
 
-## Patrón de ficha de repuesto
+## Patrón de ficha (repuesto, proveedor y lo que venga)
 
-La pantalla central de la app (ver [[PRD]] §Módulo `parts`). Layout de dos columnas: identidad + specs + fotos a la izquierda (ancho fijo ~380px), tabs de cotizaciones/histórico/vehículos compatibles a la derecha (resto del ancho). El `quote_rollup` (mínimo vigente) siempre visible arriba, sin scroll.
+Aprobado por el usuario en la ficha de repuesto (`src/features/parts/PartDetailPage.jsx`); las demás fichas lo copian.
+
+1. `PageHeader` con `back` (flecha en la misma fila del título; nunca una fila aparte), título y descripción corta.
+2. **Resumen siempre visible**: una tarjeta con la imagen o identificador a la izquierda y un `InfoGrid` (columnas iguales con divisor) con solo los datos que sirven para decidir. Lo importante nunca va escondido.
+3. **Tabs** (`ViewTabs`) para agrupar el resto: la más usada primero y activa por defecto. Dentro de cada tab, uno o más `InfoGrid`; una lista usa `ListTable`.
+4. **Editar y confirmar**: cada dato editable lleva un lápiz (`InfoField onEdit`) que abre un modal. Un dato que se **confirma** exige una **fuente** (chat, proforma, documento, medición). Sin fuente solo se guarda como sin confirmar. Un dato confirmado sale del rojo; corregirlo es una acción explícita, nunca un campo libre.
+5. Todo lo no verificado en rojo (`UncertainValue` con el motivo). Un dato sin valor dice "Sin dato" o el motivo concreto, en rojo, nunca un guion mudo.
+6. Los costos son estimaciones mientras haya un supuesto: rojo y con la fórmula a la vista.
+
+## Catálogo de componentes comunes (reutilizar antes de crear)
+
+| Necesidad | Componente |
+| --- | --- |
+| Título con flecha de volver, meta y acciones | `PageHeader` |
+| Datos clave en columnas con divisor y lápiz | `InfoGrid`, `InfoField` |
+| Agrupar vistas de una página | `ViewTabs` |
+| Lista tipo catálogo | `ListTable` |
+| Buscador, selector, botón, botón de ícono de barra | `ToolbarSearch`, `ToolbarSelectBox`, `ToolbarButton`, `ToolbarIconButton` |
+| Ayuda de una pantalla o modal | `InfoNote` |
+| Valor no verificado | `UncertainValue` |
+| Modal de edición | `FormDialog`, `DialogField`, `DialogTextInput` |
+| Confirmar un dato con su fuente | `SourcedValueDialog` |
+| Campo numérico de modal | `NumberField` |
+| Botón al pie de un modal | `ModalActionButton` |
+| Dinero | `MoneyValue`, `MoneyFromMicros` |
+
+Si algo se repite dos veces con `sx` propio, se convierte en componente común. No se crean estilos nuevos de input, selector, tabla ni botón.
+
+## Reglas de texto
+
+- **Español** en todo lo visible. Solo se dejan en inglés las siglas universales del oficio: OEM, AFM, EXW, FCA, FOB, CIF, HS, MOQ, LCL, UN38.3. Sin anglicismos como "landed cost" o "supplier".
+- **Etiquetas**: precisas, de 1 a 3 palabras, con el término técnico correcto. Sin paréntesis salvo una unidad necesaria (`Tarifa aérea (US$/kg cobrable)`). Las opciones de un selector no repiten el nombre del campo.
+- **Explicaciones** en un `InfoNote` o al final de la página, nunca sueltas ni entre paréntesis.
+- **Títulos de sección** de 1 o 2 palabras.
+- **Tooltips**: máximo 260 px con texto balanceado (definido en el tema); no se sobrescribe.
+- **Tipografía**: 13 px como techo en tablas y fichas, sin negrita.
 
 ## Pendiente de confirmar con el equipo de marca
 

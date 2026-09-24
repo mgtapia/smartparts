@@ -24,6 +24,17 @@ Cómo trabajar en este repo (para agentes y humanos).
 3. `NEXT_DIST_DIR=.next-verify npm run build` → *Compiled successfully*.
 4. Actualizar [[STATUS]] con lo hecho y lo que sigue. Si cambió una decisión de producto o de dominio, actualizar [[MEMORY]].
 
+## Cómo se trabaja con el usuario
+
+- **No actuar sin pedido ni improvisar por partes.** Si un cambio toca diseño o modelo de datos, se rediseña completo: se lee el código, se propone y se aplica de una vez. Sin parches sucesivos.
+- **Ante una decisión de fondo** se da una recomendación, no una lista de opciones. Si el usuario ya decidió algo, no se vuelve a discutir.
+- **Aplicar todo lo ya conversado** de diseño y de datos (ver [[DESIGN]] y [[MEMORY]]); repetir un error ya corregido es lo que más molesta.
+- **Un cambio de datos en Firestore** corre primero en simulación (dry-run), se revisa el resultado y solo entonces se aplica.
+- **Commits frecuentes** por tanda, sin esperar a que lo pidan (Conventional Commits en español, con la línea de atribución).
+- **Informar con honestidad**: qué se hizo, qué se verificó y qué no (por ejemplo, si no se vio en el navegador).
+- **Feedback del usuario que se repite** se guarda como regla: en [[DESIGN]], en CLAUDE.md o en la memoria del agente.
+- Para una pantalla nueva sigue la skill `nueva-pantalla` (`.claude/skills/nueva-pantalla/SKILL.md`).
+
 ## Mensaje de commit
 
 Conventional Commits en español: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`. Cuerpo explica el *por qué*, no el *qué* (el diff ya dice el qué).

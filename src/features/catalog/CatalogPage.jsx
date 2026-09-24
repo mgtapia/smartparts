@@ -23,7 +23,8 @@ import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { ListPageSkeleton } from '@components/common/Skeletons'
 import { RADIUS } from '@constants/colors'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES, CURRENCIES } from './hooks/useCatalog'
@@ -224,7 +225,7 @@ export default function CatalogPage() {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <ListPageSkeleton />
       </ContentWidth>
     )
   }

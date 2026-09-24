@@ -16,7 +16,8 @@ import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { PART_TYPE } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
@@ -98,7 +99,7 @@ export default function QuotationDetailPage({ quotationId }) {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <DetailPageSkeleton />
       </ContentWidth>
     )
   }

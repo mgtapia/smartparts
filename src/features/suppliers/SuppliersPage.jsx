@@ -7,7 +7,8 @@ import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import UncertainValue from '@components/common/UncertainValue'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { ListPageSkeleton } from '@components/common/Skeletons'
 import { supplierLabel } from '@features/quotes/constants'
 import { FACT_KEYS, factOf, factText } from './constants'
 import { useSuppliers } from './hooks/useSuppliers'
@@ -95,7 +96,7 @@ export default function SuppliersPage() {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <ListPageSkeleton />
       </ContentWidth>
     )
   }

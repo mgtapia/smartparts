@@ -126,6 +126,7 @@ Si algo se repite dos veces con `sx` propio, se convierte en componente común. 
 - **Títulos de sección** de 1 o 2 palabras.
 - **Tooltips**: máximo 260 px con texto balanceado (definido en el tema); no se sobrescribe.
 - **Tipografía**: 13 px como techo en tablas y fichas, sin negrita.
+- **Carga**: skeletons con la forma de la pantalla (`ListPageSkeleton` para listas, `DetailPageSkeleton` para fichas, en `@components/common/Skeletons`), no un spinner. El spinner (`LoadingState`) queda solo donde no hay una forma que imitar.
 
 ## Pendiente de confirmar con el equipo de marca
 

@@ -12,7 +12,8 @@ import UncertainValue from '@components/common/UncertainValue'
 import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import TextValueDialog from '@components/common/TextValueDialog'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { updateSupplierFact, updateSupplierField } from '@libs/repos/suppliersRepo'
 import { formatDate, supplierLabel } from '@features/quotes/constants'
@@ -38,7 +39,7 @@ export default function SupplierDetailPage({ supplierId }) {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <DetailPageSkeleton />
       </ContentWidth>
     )
   }

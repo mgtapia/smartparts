@@ -12,7 +12,8 @@ import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { DetailPageSkeleton } from '@components/common/Skeletons'
 import {
   CONFIRMED_LOGISTICS_STATUSES,
   LOGISTICS_STATUS_LABELS_ES,
@@ -83,7 +84,7 @@ export default function PartDetailPage({ partId }) {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <DetailPageSkeleton />
       </ContentWidth>
     )
   }

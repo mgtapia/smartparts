@@ -12,7 +12,8 @@ import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
+import { ErrorState } from '@components/common/AsyncState'
+import { ListPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
@@ -65,7 +66,7 @@ export default function QuotationsPage() {
   if (loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <ListPageSkeleton />
       </ContentWidth>
     )
   }

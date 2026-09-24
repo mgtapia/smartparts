@@ -50,9 +50,10 @@ export const sellsLabel = (q) => {
 
 // Textos de ayuda: se muestran a demanda (InfoNote), no sueltos en la página.
 export const MATRIX_HELP = [
-  'Cada celda es el costo final por unidad, puesto en Chile y sin IVA. Debajo va el Incoterm y el precio del proveedor.',
-  'El mejor de cada fila va marcado. Se compara siempre el costo final, nunca el precio EXW: el EXW no incluye lo que le falta para llegar a Chile, y eso cambia según el proveedor.',
-  'Rojo = estimado, sin verificar.',
+  'Una fila por repuesto y una columna por proveedor. Cada celda muestra lo que ese proveedor ofrece: una línea por calidad (OEM / AFM).',
+  'Va marcado el más barato de cada calidad. Un asterisco indica que el proveedor ofrece varias variantes de la pieza y se muestra la más barata.',
+  'Precio del proveedor = lo que cotizó, en USD, con su Incoterm (un EXW no incluye lo que falta para llegar a Chile). Costo final = puesto en Chile y sin IVA; es lo que hay que comparar para decidir.',
+  'Rojo = estimado, sin verificar (moneda sin confirmar, OEM declarado por el proveedor, tarifas y parámetros supuestos).',
 ]
 
 export const DETAIL_HELP = [

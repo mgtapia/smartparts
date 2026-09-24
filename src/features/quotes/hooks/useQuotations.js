@@ -5,6 +5,7 @@ import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
 import { computeUnitCost } from '@core/costing/unitCost'
 import { money } from '@libs/money'
+import { toUsdMicro } from '@libs/fx'
 
 const NO_FILE = 'sin-archivo'
 
@@ -18,6 +19,12 @@ export function toDate(value) {
   if (typeof value.toDate === 'function') return value.toDate()
   const d = new Date(value)
   return Number.isNaN(d.getTime()) ? null : d
+}
+
+/** Precio del proveedor llevado a USD (micros), sin costos adicionales. Null si no hay moneda. */
+export function priceUsdMicro(quote) {
+  if (!quote.currency) return null
+  return toUsdMicro(money(quote.price.amount, quote.currency), DEFAULT_FX)
 }
 
 /**

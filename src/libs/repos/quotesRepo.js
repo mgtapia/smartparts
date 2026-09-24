@@ -3,7 +3,16 @@
 // docs/MODELO-DE-DATOS.md); `unitPriceUsd` acá es el número plano en dólares
 // que ya consumían las pantallas desde Fase 1 — conversión única en el borde
 // de lectura, nunca aritmética de dinero con floats (ver CLAUDE.md).
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  where,
+  writeBatch,
+} from 'firebase/firestore'
 import { getDb } from '@libs/firebase/client'
 import { listSuppliers } from './suppliersRepo'
 
@@ -34,6 +43,10 @@ function shapeQuote(id, raw, suppliersById) {
     moq: raw.moq,
     incoterm: raw.incoterm || null,
     incotermPlace: raw.incoterm_place ?? null,
+    // Confirmación explícita por dato ({ source, at }): sin ella el dato es del equipo o un supuesto.
+    incotermConfirmed: Boolean(raw.confirmations?.incoterm),
+    incotermPlaceConfirmed: Boolean(raw.confirmations?.incoterm_place),
+    confirmations: raw.confirmations ?? {},
     // Variante ofrecida cuando el proveedor cotiza algo que no calza 1:1 con
     // la ficha (ej. terminal 12 mm vs 14 mm) — sin confirmar hasta revisión humana.
     variant: raw.variant ?? null,
@@ -83,4 +96,38 @@ export function isQuoteExpiringSoon(quote, withinDays = 7, today = new Date()) {
   const validUntil = new Date(quote.validUntil)
   const diffDays = (validUntil.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   return diffDays >= 0 && diffDays <= withinDays
+}
+
+/**
+ * Confirma (o corrige) datos de una cotización completa: se aplica a todas sus
+ * líneas. Cada dato queda con su fuente y fecha en `confirmations`; sin ese
+ * registro el dato sigue sin confirmar. `fields` admite `incoterm`,
+ * `incotermPlace` y `currency`.
+ * @param {string[]} quoteIds
+ * @param {{ incoterm?: string, incotermPlace?: string, currency?: string }} fields
+ * @param {string} source  De dónde sale la confirmación (chat, proforma, correo…).
+ */
+export async function confirmQuotationFields(quoteIds, fields, source) {
+  const db = getDb()
+  const stamp = { source, at: serverTimestamp() }
+  const patch = {}
+  if (fields.incoterm !== undefined) {
+    patch.incoterm = fields.incoterm
+    patch['confirmations.incoterm'] = stamp
+  }
+  if (fields.incotermPlace !== undefined) {
+    patch.incoterm_place = fields.incotermPlace
+    patch['confirmations.incoterm_place'] = stamp
+  }
+  if (fields.currency !== undefined) {
+    patch['price.currency'] = fields.currency
+    patch.currency_status = 'confirmed'
+    patch['confirmations.currency'] = stamp
+  }
+  // Firestore admite 500 escrituras por lote.
+  for (let i = 0; i < quoteIds.length; i += 400) {
+    const batch = writeBatch(db)
+    for (const id of quoteIds.slice(i, i + 400)) batch.update(doc(db, 'quotes', id), patch)
+    await batch.commit()
+  }
 }

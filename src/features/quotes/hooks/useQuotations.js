@@ -75,6 +75,7 @@ export function useQuotationsData() {
   const [parts, setParts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -93,7 +94,7 @@ export function useQuotationsData() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadKey])
 
   const { lines, quotations } = useMemo(() => {
     const flat = []
@@ -135,6 +136,8 @@ export function useQuotationsData() {
         incotermPlaces: [...new Set(q.map((x) => x.incotermPlace).filter(Boolean))],
         currencies: [...new Set(q.map((x) => x.currency ?? 'sin definir'))],
         currencyConfirmed: q.every((x) => x.currencyConfirmed),
+        incotermConfirmed: q.every((x) => x.incotermConfirmed),
+        incotermPlaceConfirmed: q.every((x) => x.incotermPlaceConfirmed),
         capturedAt: dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : null,
         validUntil: valid[0] ?? null,
       }
@@ -143,5 +146,7 @@ export function useQuotationsData() {
     return { lines: flat, quotations: list }
   }, [parts])
 
-  return { lines, quotations, loading, error }
+  const reload = () => setReloadKey((k) => k + 1)
+
+  return { lines, quotations, loading, error, reload }
 }

@@ -65,3 +65,14 @@ export const SUPPLIER_ASSUMPTIONS_HELP = [
   'Estimaciones sin verificar: se confirman con el proveedor y con un forwarder.',
   'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm. El costo de origen (EXW → FOB) depende de dónde está el proveedor. Sin Formulario F el arancel es el general; con Formulario F, el arancel con TLC.',
 ]
+
+// Incoterms que el motor sabe llevar a FOB (ver src/core/costing/unitCost.js) y monedas con que se cotiza.
+export const INCOTERM_CHOICES = [
+  { value: 'EXW', label: 'EXW' },
+  { value: 'FCA', label: 'FCA' },
+  { value: 'FOB', label: 'FOB' },
+]
+export const CURRENCY_CHOICES = [
+  { value: 'USD', label: 'USD' },
+  { value: 'CNY', label: 'CNY' },
+]

@@ -1,10 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { confirmQuotationFields } from '@libs/repos/quotesRepo'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
@@ -16,12 +20,15 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { PART_TYPE } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
+import ConfirmFieldDialog from './components/ConfirmFieldDialog'
 import CostParametersDialog from './components/CostParametersDialog'
 import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
 import QualityChips from './components/QualityChips'
 import {
   COLUMN_CHOICES,
   COST_COLUMNS,
+  CURRENCY_CHOICES,
+  INCOTERM_CHOICES,
   DEFAULT_HIDDEN,
   DETAIL_HELP,
   formatDate,
@@ -30,10 +37,30 @@ import {
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine, unitPriceMoney } from './hooks/useQuotations'
 
+const FIELDS = {
+  incoterm: {
+    key: 'incoterm',
+    label: 'Incoterm',
+    options: INCOTERM_CHOICES,
+    current: (q) => q.incoterms[0] ?? '',
+  },
+  place: {
+    key: 'incotermPlace',
+    label: 'lugar del Incoterm',
+    current: (q) => q.incotermPlaces[0] ?? '',
+  },
+  currency: {
+    key: 'currency',
+    label: 'moneda',
+    options: CURRENCY_CHOICES,
+    current: (q) => (q.currencies[0] === 'sin definir' ? '' : (q.currencies[0] ?? '')),
+  },
+}
+
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationDetailPage({ quotationId }) {
-  const { quotations, loading, error } = useQuotationsData()
+  const { quotations, loading, error, reload } = useQuotationsData()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
   const [search, setSearch] = useState('')
@@ -49,6 +76,8 @@ export default function QuotationDetailPage({ quotationId }) {
       else next.add(id)
       return next
     })
+
+  const [editing, setEditing] = useState(null)
 
   const quotation = quotations.find((q) => q.id === quotationId) ?? null
   const term = normalize(search.trim())
@@ -213,24 +242,31 @@ export default function QuotationDetailPage({ quotationId }) {
 
       <Card sx={{ p: 2, mb: 1.5 }}>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-          <Info label="Incoterm">
-            {quotation.incoterms.join(', ') || (
-              <UncertainValue verified={false} reason="La cotización no indica Incoterm">
-                Sin definir
-              </UncertainValue>
-            )}
+          <Info label="Incoterm" onEdit={() => setEditing(FIELDS.incoterm)}>
+            <UncertainValue
+              verified={quotation.incotermConfirmed && quotation.incoterms.length > 0}
+              reason={
+                quotation.incoterms.length > 0
+                  ? 'Incoterm sin confirmar por escrito'
+                  : 'La cotización no indica Incoterm'
+              }
+            >
+              {quotation.incoterms.join(', ') || 'Sin definir'}
+            </UncertainValue>
           </Info>
-          <Info label="Origen">
-            {quotation.incotermPlaces.join(', ') || (
-              <UncertainValue
-                verified={false}
-                reason="La cotización no indica el lugar del Incoterm"
-              >
-                Sin lugar
-              </UncertainValue>
-            )}
+          <Info label="Origen" onEdit={() => setEditing(FIELDS.place)}>
+            <UncertainValue
+              verified={quotation.incotermPlaceConfirmed && quotation.incotermPlaces.length > 0}
+              reason={
+                quotation.incotermPlaces.length > 0
+                  ? 'Lugar del Incoterm sin confirmar'
+                  : 'La cotización no indica el lugar del Incoterm'
+              }
+            >
+              {quotation.incotermPlaces.join(', ') || 'Sin lugar'}
+            </UncertainValue>
           </Info>
-          <Info label="Moneda">
+          <Info label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
             <UncertainValue
               verified={quotation.currencyConfirmed}
               reason="Moneda sin confirmar por el proveedor"
@@ -242,16 +278,25 @@ export default function QuotationDetailPage({ quotationId }) {
           <Info label="Vende">
             <QualityChips quotation={quotation} />
           </Info>
-          <Info label="Por revisar">
-            <UncertainValue
-              verified={quotation.pendingCount === 0}
-              reason="Calidad y emparejamiento pendientes de revisión humana"
-            >
-              {quotation.pendingCount}
-            </UncertainValue>
-          </Info>
         </Box>
       </Card>
+
+      {editing ? (
+        <ConfirmFieldDialog
+          label={editing.label}
+          initial={editing.current(quotation)}
+          options={editing.options}
+          onClose={() => setEditing(null)}
+          onConfirm={async (value, source) => {
+            await confirmQuotationFields(
+              quotation.lines.map((l) => l.quote.id),
+              { [editing.key]: value },
+              source,
+            )
+            reload()
+          }}
+        />
+      ) : null}
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
         <ToolbarSearch
@@ -282,7 +327,7 @@ export default function QuotationDetailPage({ quotationId }) {
       {sample ? (
         <Card sx={{ p: 2 }}>
           <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-            Cómo se calcula cada costo
+            Cálculo
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
             Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas son
@@ -312,7 +357,7 @@ export default function QuotationDetailPage({ quotationId }) {
   )
 }
 
-function Info({ label, children }) {
+function Info({ label, children, onEdit }) {
   return (
     <Box
       sx={{
@@ -326,8 +371,15 @@ function Info({ label, children }) {
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
         {label}
       </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 28, fontSize: 13 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minHeight: 28, fontSize: 13 }}>
         {children}
+        {onEdit ? (
+          <Tooltip title="Editar y confirmar">
+            <IconButton size="small" aria-label={`Editar ${label}`} onClick={onEdit}>
+              <EditOutlinedIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+        ) : null}
       </Box>
     </Box>
   )

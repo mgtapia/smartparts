@@ -171,7 +171,7 @@ export default function PartDetailPage({ partId }) {
             Precio
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            <Row label="Precio actual (lo que paga hoy)">
+            <Row label="Precio referencia (Chile, neto)">
               <MoneyValue money={part.baselinePrice} sx={{ fontWeight: 700 }} />
               {part.includesVat ? null : (
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
@@ -252,7 +252,11 @@ export default function PartDetailPage({ partId }) {
                     {q.partType === PART_TYPE.ORIGINAL ? 'Original' : 'Alternativo'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {q.supplier?.platform} · MOQ {q.moq} · vence {q.validUntil}
+                    {q.incoterm
+                      ? `${q.incoterm}${q.incotermPlace ? ` ${q.incotermPlace}` : ''} · `
+                      : ''}
+                    MOQ {q.moq ?? '—'} · {q.validUntil ? `vence ${q.validUntil}` : 'sin vigencia'}
+                    {q.variant ? ` · variante: ${q.variant}` : ''}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -260,10 +264,25 @@ export default function PartDetailPage({ partId }) {
                     label={MATCH_STATUS_LABELS_ES[q.matchStatus]}
                     tone={MATCH_STATUS_TONE[q.matchStatus]}
                   />
-                  <MoneyValue
-                    money={{ amount: Math.round(q.unitPriceUsd * 100), currency: 'USD', scale: 2 }}
-                    sx={{ fontWeight: 700 }}
-                  />
+                  {q.currencyConfirmed ? (
+                    <MoneyValue
+                      money={{
+                        amount: Math.round(q.priceAmount * 100),
+                        currency: q.currency,
+                        scale: 2,
+                      }}
+                      sx={{ fontWeight: 700 }}
+                    />
+                  ) : (
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {q.priceAmount.toFixed(2)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {q.currency ? `${q.currency} · ` : ''}moneda sin confirmar
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             ))}

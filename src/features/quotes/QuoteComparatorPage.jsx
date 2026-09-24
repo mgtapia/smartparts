@@ -120,8 +120,9 @@ export default function QuoteComparatorPage() {
                     {q.supplier?.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {q.supplier?.country} · {q.supplier?.platform} · MOQ {q.moq} ·{' '}
-                    {q.supplier?.incoterm} · vence {q.validUntil}
+                    {q.supplier?.country} · {q.supplier?.platform} · MOQ {q.moq} · {q.incoterm}
+                    {q.incotermPlace ? ` ${q.incotermPlace}` : ''} · vence {q.validUntil ?? '—'}
+                    {q.variant ? ` · variante: ${q.variant}` : ''}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

@@ -37,7 +37,11 @@ export function useCostingCalculator(initialPartId) {
     listParts()
       .then((all) => {
         if (cancelled) return
-        const withQuotes = all.filter((p) => p.quotes.length > 0)
+        // Solo cotizaciones en USD confirmado — costear con moneda sin confirmar
+        // daría un costo puesto en Chile falso.
+        const withQuotes = all
+          .map((p) => ({ ...p, quotes: p.quotes.filter((q) => q.unitPriceUsd !== null) }))
+          .filter((p) => p.quotes.length > 0)
         setPartsWithQuotes(withQuotes)
         setPartId((prev) => prev || withQuotes[0]?.id || null)
         setLoading(false)

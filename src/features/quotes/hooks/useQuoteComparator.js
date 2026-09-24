@@ -12,7 +12,11 @@ export function useQuoteComparator() {
     listParts()
       .then((all) => {
         if (cancelled) return
-        const withQuotes = all.filter((p) => p.quotes.length > 0)
+        // Solo cotizaciones con precio en USD confirmado — las de moneda sin
+        // confirmar no se comparan (no hay base común) hasta que se convierta.
+        const withQuotes = all
+          .map((p) => ({ ...p, quotes: p.quotes.filter((q) => q.unitPriceUsd !== null) }))
+          .filter((p) => p.quotes.length > 0)
         setPartsWithQuotes(withQuotes)
         setSelectedId((prev) => prev ?? withQuotes[0]?.id ?? null)
         setLoading(false)

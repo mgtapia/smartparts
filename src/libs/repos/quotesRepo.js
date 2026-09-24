@@ -7,17 +7,39 @@ import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firesto
 import { getDb } from '@libs/firebase/client'
 import { listSuppliers } from './suppliersRepo'
 
+// El precio se guarda siempre en la moneda en que cotizó el proveedor
+// (`price.currency`); convertir (a USD/CLP) es un paso de presentación o de
+// cálculo, nunca del dato. La moneda es una variable aparte del monto: una
+// cotización puede cargarse antes de saber en qué moneda está
+// (`currency_status: 'unconfirmed'`, `price.currency: null`). `unitPriceUsd`
+// solo tiene valor si la moneda está confirmada y ya es USD — si no, es null
+// y ninguna pantalla lo toma por dólares ni lo usa para costear.
 function shapeQuote(id, raw, suppliersById) {
   const scale = raw.price?.scale ?? 2
+  const currency = raw.price?.currency ?? null
+  const currencyConfirmed = currency !== null && raw.currency_status !== 'unconfirmed'
+  const priceAmount = raw.price.amount / 10 ** scale
   return {
     id,
     partId: raw.part_id,
     supplierId: raw.supplier_id,
     supplier: suppliersById.get(raw.supplier_id) || null,
     partType: raw.part_type,
-    unitPriceUsd: raw.price.amount / 10 ** scale,
+    priceAmount,
+    currency,
+    currencyConfirmed,
+    unitPriceUsd: currencyConfirmed && currency === 'USD' ? priceAmount : null,
     moq: raw.moq,
     incoterm: raw.incoterm || null,
+    incotermPlace: raw.incoterm_place ?? null,
+    // Variante ofrecida cuando el proveedor cotiza algo que no calza 1:1 con
+    // la ficha (ej. terminal 12 mm vs 14 mm) — sin confirmar hasta revisión humana.
+    variant: raw.variant ?? null,
+    // Tramos por cantidad: [{ minQty, amount }] (mismo scale/moneda que price).
+    priceTiers: (raw.price_tiers ?? []).map((t) => ({
+      minQty: t.min_qty,
+      amount: t.amount / 10 ** scale,
+    })),
     capturedAt: raw.captured_at,
     validUntil: raw.valid_until,
     matchScore: raw.match_score,
@@ -49,6 +71,7 @@ export async function getQuote(id) {
 }
 
 export function isQuoteExpiringSoon(quote, withinDays = 7, today = new Date()) {
+  if (!quote.validUntil) return false
   const validUntil = new Date(quote.validUntil)
   const diffDays = (validUntil.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   return diffDays >= 0 && diffDays <= withinDays

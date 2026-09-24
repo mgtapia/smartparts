@@ -37,7 +37,7 @@ export default function QuotationsPage() {
   const { mode, rates, settingsFor } = assumptions
   const [view, setView] = useState(VIEWS.LIST)
   const [metric, setMetric] = useState(METRICS.PRICE)
-  const [quality, setQuality] = useState(QUALITY_FILTERS.BOTH)
+  const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
   const [search, setSearch] = useState('')
 
   const term = normalize(search.trim())
@@ -82,7 +82,7 @@ export default function QuotationsPage() {
         title="Cotizaciones"
         meta={
           isMatrix
-            ? `${matrix.rows.length} repuestos cotizados.`
+            ? `${matrix.rows.length} repuestos cotizados${quality === QUALITY_FILTERS.ANY ? '' : ` · ${matrix.rows.filter((r) => r.offers > 0).length} con oferta ${quality === QUALITY_FILTERS.OEM ? 'OEM' : 'AFM'}`}.`
             : `${countSuppliers(filteredQuotations)} de ${countSuppliers(quotations)} proveedores.`
         }
       />

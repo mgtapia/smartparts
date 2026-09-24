@@ -38,8 +38,9 @@ export const DEFAULT_HIDDEN = new Set(['category', 'insurance', 'cif', 'localCos
 
 // Textos de ayuda: se muestran a demanda (InfoNote), no sueltos en la página.
 export const MATRIX_HELP = [
-  'Una fila por repuesto y una columna por proveedor. Cada celda muestra lo que ese proveedor ofrece: una línea por calidad (OEM / AFM).',
-  'Va marcado el más barato de cada calidad. Un asterisco indica que el proveedor ofrece varias variantes de la pieza y se muestra la más barata.',
+  'Una fila por repuesto cotizado y una columna por proveedor. Cada celda es un solo valor: el más barato que ese proveedor ofrece en la calidad elegida.',
+  'Cualquier calidad: se muestra el más barato sin importar si es OEM o AFM (la etiqueta indica cuál es). Solo OEM: piezas de fábrica. Solo AFM: sirve para ver si hay alternativa para cada repuesto — la columna Ofertas en rojo indica que no la hay.',
+  'Va marcado el proveedor más barato de cada fila. Un asterisco indica que ofrece varias variantes de la pieza y se muestra la más barata.',
   'Precio del proveedor = lo que cotizó, en USD, con su Incoterm (un EXW no incluye lo que falta para llegar a Chile). Costo final = puesto en Chile y sin IVA; es lo que hay que comparar para decidir.',
   'Rojo = estimado, sin verificar (moneda sin confirmar, OEM declarado por el proveedor, tarifas y parámetros supuestos).',
 ]

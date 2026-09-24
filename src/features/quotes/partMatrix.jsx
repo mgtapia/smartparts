@@ -14,25 +14,24 @@ export const METRIC_OPTIONS = [
   { value: METRICS.LANDED, label: 'Costo final en Chile' },
 ]
 
-export const QUALITY_FILTERS = { BOTH: 'both', OEM: PART_TYPE.ORIGINAL, AFM: PART_TYPE.ALTERNATIVE }
+// "Cualquier calidad": al cliente no le importa si es original → se ofrece el
+// más barato. "Solo OEM": el cliente pide pieza de fábrica. "Solo AFM": vista
+// interna para saber si hay alternativa para cada repuesto.
+export const QUALITY_FILTERS = { ANY: 'any', OEM: PART_TYPE.ORIGINAL, AFM: PART_TYPE.ALTERNATIVE }
 export const QUALITY_OPTIONS = [
-  { value: QUALITY_FILTERS.BOTH, label: 'OEM + AFM' },
+  { value: QUALITY_FILTERS.ANY, label: 'Cualquier calidad' },
   { value: QUALITY_FILTERS.OEM, label: 'Solo OEM' },
   { value: QUALITY_FILTERS.AFM, label: 'Solo AFM' },
 ]
 
-const ALL_QUALITIES = [
-  { type: PART_TYPE.ORIGINAL, label: 'OEM' },
-  { type: PART_TYPE.ALTERNATIVE, label: 'AFM' },
-]
-
+const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 /**
  * Valor de una línea según la métrica elegida:
  *  - precio: lo que cotizó el proveedor, llevado a USD (no requiere Incoterm).
  *  - costo final: puesto en Chile y sin IVA (requiere Incoterm y moneda).
- * `null` cuando no se puede calcular; en ese caso `reason` explica por qué.
+ * `micro` es null cuando no se puede calcular; `reason` explica por qué.
  */
 function valueOf(line, metric, costCtx) {
   if (metric === METRICS.PRICE) {
@@ -53,19 +52,18 @@ function valueOf(line, metric, costCtx) {
 }
 
 /**
- * Matriz de decisión: una fila por repuesto y una columna por proveedor. Cada
- * celda muestra lo que ese proveedor ofrece de la pieza, una línea por calidad
- * (OEM / AFM). Si ofrece varias variantes de la misma pieza y calidad, muestra
- * la más barata. En cada fila va marcado el más barato de cada calidad.
+ * Matriz de decisión: una fila por repuesto cotizado y una columna por
+ * proveedor. Cada celda es UN valor: el más barato que ese proveedor ofrece
+ * dentro de la calidad elegida (si hay varias variantes, también el más
+ * barato). Los repuestos sin oferta de la calidad elegida siguen apareciendo,
+ * con la columna "Ofertas" en rojo — así se ve qué falta.
  */
-export function buildMatrix(lines, metric, term, qualityFilter, costCtx) {
-  const combined = qualityFilter === QUALITY_FILTERS.BOTH
-  const QUALITIES = ALL_QUALITIES.filter((q) => combined || q.type === qualityFilter)
+export function buildMatrix(lines, metric, term, quality, costCtx) {
+  const accepts = (type) => quality === QUALITY_FILTERS.ANY || type === quality
   const supplierMap = new Map()
   const byPart = new Map()
 
   for (const line of lines) {
-    if (!QUALITIES.some((q) => q.type === line.quote.partType)) continue
     if (
       term &&
       !normalize(line.part.nameEs).includes(term) &&
@@ -76,30 +74,24 @@ export function buildMatrix(lines, metric, term, qualityFilter, costCtx) {
     const { supplierId } = line.quote
     supplierMap.set(supplierId, supplierLabel(line.quote.supplier, supplierId))
     if (!byPart.has(line.part.id)) byPart.set(line.part.id, { part: line.part, cells: new Map() })
-    const cell = byPart.get(line.part.id).cells.get(supplierId) ?? {}
-    byPart.get(line.part.id).cells.set(supplierId, cell)
+    if (!accepts(line.quote.partType)) continue
 
+    const cells = byPart.get(line.part.id).cells
+    const current = cells.get(supplierId)
     const value = valueOf(line, metric, costCtx)
-    const current = cell[line.quote.partType]
     const variants = (current?.variants ?? 0) + 1
     const better =
       !current || (value.micro !== null && (current.micro === null || value.micro < current.micro))
-    cell[line.quote.partType] = better ? { ...value, line, variants } : { ...current, variants }
+    cells.set(supplierId, better ? { ...value, line, variants } : { ...current, variants })
   }
 
   const suppliers = [...supplierMap.entries()].map(([id, name]) => ({ id, name }))
   const rows = [...byPart.values()]
     .sort((a, b) => a.part.nameEs.localeCompare(b.part.nameEs, 'es'))
     .map((row) => {
-      // Más barato por calidad, solo si hay al menos dos proveedores que comparar.
-      const best = {}
-      for (const { type } of QUALITIES) {
-        const priced = [...row.cells.entries()]
-          .map(([supplierId, cell]) => [supplierId, cell[type]?.micro])
-          .filter(([, micro]) => micro !== null && micro !== undefined)
-        if (priced.length > 1) best[type] = priced.sort((a, b) => a[1] - b[1])[0][0]
-      }
-      return { ...row, best }
+      const priced = [...row.cells.entries()].filter(([, c]) => c.micro !== null)
+      const best = priced.length > 1 ? priced.sort((a, b) => a[1].micro - b[1].micro)[0][0] : null
+      return { ...row, best, offers: priced.length }
     })
 
   const columns = [
@@ -122,53 +114,58 @@ export function buildMatrix(lines, metric, term, qualityFilter, costCtx) {
     ...suppliers.map((s) => ({
       id: s.id,
       label: s.name,
-      width: 150,
+      width: 120,
       align: 'right',
       tooltip: s.name,
       render: (r) => {
-        const cell = r.cells.get(s.id)
-        const offered = QUALITIES.filter((q) => cell?.[q.type])
-        if (offered.length === 0) return '—'
+        const v = r.cells.get(s.id)
+        if (!v) return '—'
+        const tag = QUALITY_TAG[v.line.quote.partType]
+        const variantNote =
+          v.variants > 1 ? ` — ${v.variants} variantes, se muestra la más barata` : ''
         return (
-          <Box sx={{ lineHeight: 1.3 }}>
-            {offered.map((q) => {
-              const v = cell[q.type]
-              const isBest = r.best[q.type] === s.id
-              return (
-                <Box
-                  key={q.type}
-                  title={v.variants > 1 ? `${v.variants} variantes: se muestra la más barata` : ''}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: 1,
-                    borderRadius: `${RADIUS.inputSmall}px`,
-                    px: 1,
-                    bgcolor: isBest ? 'action.selected' : undefined,
-                  }}
-                >
-                  {combined ? (
-                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>
-                      {q.label}
-                    </Typography>
-                  ) : null}
-                  {v.micro === null ? (
-                    <UncertainValue verified={false} reason={v.reason}>
-                      —
-                    </UncertainValue>
-                  ) : (
-                    <UncertainValue verified={v.verified} reason={v.reason}>
-                      <MoneyFromMicros micros={v.micro} currency="USD" />
-                      {v.variants > 1 ? '*' : ''}
-                    </UncertainValue>
-                  )}
-                </Box>
-              )
-            })}
+          <Box
+            title={`${tag}${variantNote}`}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: 1,
+              borderRadius: `${RADIUS.inputSmall}px`,
+              px: 1,
+              bgcolor: r.best === s.id ? 'action.selected' : undefined,
+            }}
+          >
+            <UncertainValue verified={v.micro !== null && v.verified} reason={v.reason}>
+              {v.micro === null ? (
+                '—'
+              ) : (
+                <>
+                  <MoneyFromMicros micros={v.micro} currency="USD" />
+                  {v.variants > 1 ? '*' : ''}
+                </>
+              )}
+            </UncertainValue>
+            {quality === QUALITY_FILTERS.ANY && v.micro !== null ? (
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+                {tag}
+              </Typography>
+            ) : null}
           </Box>
         )
       },
     })),
+    {
+      id: 'offers',
+      label: 'Ofertas',
+      width: 70,
+      align: 'right',
+      tooltip: 'Proveedores con precio para este repuesto en la calidad elegida.',
+      render: (r) => (
+        <UncertainValue verified={r.offers > 0} reason="Sin oferta de esta calidad">
+          {r.offers}
+        </UncertainValue>
+      ),
+    },
   ]
 
   return { suppliers, rows, columns }

@@ -4,9 +4,39 @@ Para que el equipo y los agentes hablen el mismo idioma. Términos usados en el 
 
 ## Incoterms y precio
 
-- **FOB** (Free On Board): el vendedor entrega la mercancía a bordo del buque/avión en origen; desde ahí, flete y riesgo son del comprador. Es el precio que suele cotizar un proveedor chino.
-- **CIF** (Cost, Insurance and Freight): FOB + flete + seguro. Es la base sobre la que Aduana Chile calcula el arancel.
+Los Incoterms (ICC, versión **2020**) fijan hasta dónde llega el vendedor: costos, riesgo y trámites. Siempre se escriben **con un lugar nombrado** ("EXW Zhengzhou", "FOB Shanghai") — sin lugar, el término está incompleto. Un precio sin Incoterm y lugar no es comparable con otro.
+
+| Incoterm | Nombre | Qué incluye el precio del vendedor | Modo de transporte |
+| --- | --- | --- | --- |
+| **EXW** | Ex Works | Solo la mercancía, lista en la fábrica/bodega del vendedor. Carga, transporte interno, exportación y todo lo demás: comprador | Cualquiera |
+| **FCA** | Free Carrier | Entrega en un lugar acordado, con la exportación ya despachada por el vendedor | Cualquiera (el correcto para aéreo y contenedor) |
+| **FOB** | Free On Board | Mercancía a bordo del buque en el puerto de origen, con la exportación despachada | **Solo marítimo/fluvial** |
+| **CFR** | Cost and Freight | FOB + flete hasta el puerto de destino (sin seguro) | Solo marítimo |
+| **CIF** | Cost, Insurance and Freight | CFR + seguro. Es la base sobre la que Aduana Chile calcula el arancel | Solo marítimo |
+| **CIP** | Carriage and Insurance Paid | Equivalente a CIF para cualquier modo (con seguro) | Cualquiera |
+| **DAP** | Delivered at Place | Entregado en destino, sin despachar importación | Cualquiera |
+| **DDP** | Delivered Duty Paid | Entregado con importación y aranceles pagados por el vendedor | Cualquiera |
+
+Ojo: proveedores chinos dicen "FOB" también para carga aérea, aunque técnicamente sería FCA. Lo que importa es lo que el proveedor incluye en el precio — preguntarlo por escrito.
+
 - **Landed cost**: el costo total puesto en destino, incluyendo todo lo demás además de CIF (arancel, IVA, gastos locales). Es "cuánto me costó realmente" — ver [[MOTOR-DE-COSTOS]].
+
+## Términos de compra y documentos comerciales
+
+- **MOQ** (Minimum Order Quantity): cantidad mínima que el proveedor acepta vender.
+- **Lead time**: días desde la orden/pago hasta que la mercancía está lista (producción) — distinto del tránsito.
+- **RFQ** (Request for Quotation): solicitud de cotización enviada al proveedor.
+- **PI** (Proforma Invoice): cotización formal del proveedor con precio, Incoterm, plazo y condiciones de pago; es la base para pagar.
+- **PO** (Purchase Order): orden de compra del comprador.
+- **Commercial Invoice**: factura comercial de la exportación; base del valor en Aduana.
+- **Packing List**: detalle de bultos con peso y dimensiones.
+- **HS code** (Harmonized System): código arancelario internacional de 6 dígitos (Chile lo extiende a 8); define arancel y requisitos por producto.
+- **Gross / Net weight**: peso bruto (con embalaje) / neto (solo el producto). **Volumetric (chargeable) weight**: peso por volumen que cobran aéreo y courier cuando supera al real.
+- **CBM** (cubic metre): metro cúbico, unidad de cobro del marítimo LCL.
+- **LCL / FCL**: carga consolidada / contenedor completo.
+- **THC** (Terminal Handling Charge): cargo por manejo en terminal del puerto.
+- **AWB / B/L**: guía aérea / conocimiento de embarque marítimo.
+- **OEM / AFM**: pieza de calidad original del fabricante del vehículo / repuesto de un tercero sin vínculo con la marca (*aftermarket*).
 
 ## Aduana y documentos
 

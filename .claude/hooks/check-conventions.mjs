@@ -55,6 +55,22 @@ process.stdin.on('end', () => {
     }
   }
 
+  // --- Ids de Firestore: los asigna Firestore, nunca se inventan ---
+  const isDataCode =
+    /\.(js|jsx|mjs)$/.test(norm) &&
+    /\/(src\/libs\/repos|scripts)\//.test(norm) &&
+    !/\.test\.js$/.test(norm)
+  if (isDataCode) {
+    // `.doc('literal')` o `doc(db, 'coleccion', 'literal')`: un id escrito a mano.
+    const literalId =
+      /\.doc\(\s*['"`]|\bdoc\([^()]*,\s*['"`][\w-]+['"`]\s*,\s*['"`][^'"`]+['"`]\s*\)/
+    if (literalId.test(txt)) {
+      issues.push(
+        'Id de documento fijado a mano: todo id lo asigna Firestore (doc() o add()). La clave natural va como campo y se busca por consulta — ver docs/MODELO-DE-DATOS.md.',
+      )
+    }
+  }
+
   // --- Reglas de vistas/componentes (no constantes, no tests) ---
   const inScope = /(^|\/)(app|src\/(components|features))\/.*\.(js|jsx)$/.test(norm)
   const exempt = /ContentWidth\.js$|\/constants\//.test(norm)

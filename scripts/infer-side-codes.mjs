@@ -30,12 +30,14 @@ function loadEnvLocal() {
 }
 loadEnvLocal()
 
-const VEHICLE_ID = 'dongfeng_e70'
+const VEHICLE_SHORT_MODEL = 'E70'
 const apply = process.argv.includes('--apply')
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
 const db = getAdminDb()
+const { findVehicleId } = await import('./lib/model.mjs')
+const vehicleId = await findVehicleId(db, VEHICLE_SHORT_MODEL)
 
-const snap = await db.collection('parts').where('vehicle_ids', 'array-contains', VEHICLE_ID).get()
+const snap = await db.collection('parts').where('vehicle_ids', 'array-contains', vehicleId).get()
 const parts = snap.docs.map((d) => ({ id: d.id, ref: d.ref, ...d.data() }))
 
 const codeOf = (p) => p.oem_codes?.[0]?.code ?? null

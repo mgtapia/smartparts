@@ -10,8 +10,7 @@
 // ni las que ya están 'missing' (ya reportan el problema real, no hay nada que
 // "degradar").
 //
-// Uso: node scripts/mark-parts-unverified.mjs <vehicleId>
-//   node scripts/mark-parts-unverified.mjs dongfeng_e70
+// Uso: node scripts/mark-parts-unverified.mjs <vehicleId>   (id del documento en `vehicles`)
 
 import fs from 'node:fs'
 import path from 'node:path'

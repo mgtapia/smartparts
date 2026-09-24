@@ -4,16 +4,21 @@ Firestore. Convenciones generales del proyecto en [[ARCHITECTURE]] y CLAUDE.md.
 
 ## Colecciones
 
+**Regla: todo id de documento lo asigna Firestore.** Nunca se inventa un id (`sup_…`, `q_…`, `a__b`, un código, una ruta o una fecha): la clave natural (alias, código OEM, ruta, fecha, archivo de origen) va como **campo** y se busca por consulta. Lo que pertenece a otro documento va en una **subcolección**.
+
 ```
-vehicles/            los 4 EVs, con flota y escala de rotación
-categories/          taxonomía con materialized path (carroceria__frontal__opticos)
-parts/               ficha maestra — el documento central
+vehicles/            los 4 EVs, con flota y escala de rotación; `sourcing_stage` marca el de la etapa actual
+  /media/            imagen del vehículo (documento con role: 'main')
+categories/          taxonomía; el campo `path` es la ruta materializada (carroceria__frontal__opticos)
+parts/               ficha maestra — el documento central (`category_id`, `category_path`, `vehicle_ids`)
   /baseline_prices/  histórico de lo que se paga hoy
-  /media/            fotos y documentos
-part_vehicle/        puente M:N + posición (Frontal/Trasera/Conductor/Copiloto)
-oem_index/           centinela de unicidad de código OEM
+  /media/            fotos y documentos (role: 'main' para la foto principal)
+  /applications/     aplicación del repuesto a un vehículo: vehicle_id + posición (Frontal/Trasera/Conductor/Copiloto)
+oem_index/           centinela de código OEM (campo `code`)
 suppliers/           proveedores (China prioritario, no exclusivo — /contacts, /events)
-quotes/              cotizaciones (top-level, no subcolección)
+quotations/          una cotización por proveedor y archivo de origen (supplier_id, source_file)
+  /lines/            líneas de la cotización: repuesto, calidad, precio, Incoterm, confirmaciones
+milestones/          hito hacia la primera OC, un documento por vehículo (vehicle_id)
 source_listings/     crudo de los conectores, pre-normalización
 connector_runs/      salud de los jobs de sourcing
 shipments/           embarques (+ /lines, /events, /documents)
@@ -33,7 +38,7 @@ Firestore **no tiene Decimal** — solo float64. Todo importe es un mapa `{ amou
 
 ### 2. La relación M:N repuesto ↔ vehículo
 
-Híbrida: `parts.vehicle_ids` (array) es la fuente de consulta — viable porque son 4 vehículos, no 400 — y `part_vehicle/` guarda la metadata de aplicación: la **posición** (columna `Lugar` de la planilla: Frontal/Trasera/Conductor/Copiloto/Piloto — es posición, **no** categoría), el rango de años fino y quién verificó el encaje. Ambas escrituras en la misma transacción, más un job nocturno de reconciliación.
+Híbrida: `parts.vehicle_ids` (array) es la fuente de consulta — viable porque son 4 vehículos, no 400 — y la subcolección `parts/{id}/applications` guarda la metadata de aplicación: la **posición** (columna `Lugar` de la planilla: Frontal/Trasera/Conductor/Copiloto/Piloto — es posición, **no** categoría), el rango de años fino y quién verificó el encaje. Ambas escrituras en la misma transacción, más un job nocturno de reconciliación.
 
 ### 3. Firestore no tiene joins
 
@@ -90,7 +95,7 @@ Notas directas de la planilla real:
 - `baseline_price.includes_vat: false` explícito — los precios del cliente inicial son netos, pero un baseline futuro de otra fuente puede venir con IVA.
 - `sourcing_strategy: 'local_only'` — para componentes donde importar directo no es viable a esta escala (packs de tracción completos), la app debe poder decirlo en vez de mostrar un número engañosamente atractivo.
 
-### `part_vehicle/{id}`
+### `parts/{partId}/applications/{id}`
 
 ```json
 {
@@ -115,7 +120,7 @@ Centinela de unicidad — detecta el caso real encontrado en la planilla: mismo 
 
 Inmutable. Cada costeo guardado referencia su `id`, nunca "el vigente" — así uno de hace seis meses se reproduce idéntico.
 
-### `quotes/{quoteId}`
+### `quotations/{quotationId}/lines/{lineId}`
 
 ```json
 {
@@ -140,11 +145,11 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 
 **`suppliers/{id}.facts`** (ficha del proveedor): datos que se confirman con fuente, cada uno `{ value, source, at }`. Claves: `type`, `formF` (`yes`|`no`), `location`, `port`, `moq`, `payment`, `leadTime`, `license`. Un dato está **confirmado** si tiene valor y fuente; si no, la UI lo muestra en rojo. `type` se replica en `supplier_type` y `supplier_type_source`. El Formulario F que usa el motor de costos sale de `facts.formF.value`; sin dato se trata como desconocido y se aplica el arancel general. Campos simples sin confirmación: `alias`, `name`, `name_zh`, `contact.*`.
 
-**`quotes/{id}.inferred`**: `true` en una cotización que el proveedor no hizo: se copia del lado opuesto de la pieza (DER/IZQ) cuando el proveedor cotizó el complementario. Lleva `inferred_from_quote` (id de la cotización original) e `inferred_note`. La UI muestra su precio en rojo con esa nota y el dashboard la cuenta como pendiente. Se generan con `scripts/infer-side-quotes.mjs`, solo para repuestos con código inferido; nunca se crean si el complementario no tiene cotización.
+**`quotations/{id}/lines/{id}.inferred`**: `true` en una cotización que el proveedor no hizo: se copia del lado opuesto de la pieza (DER/IZQ) cuando el proveedor cotizó el complementario. Lleva `inferred_from_quote` (id de la cotización original) e `inferred_note`. La UI muestra su precio en rojo con esa nota y el dashboard la cuenta como pendiente. Se generan con `scripts/infer-side-quotes.mjs`, solo para repuestos con código inferido; nunca se crean si el complementario no tiene cotización.
 
-**`quotes/{id}.confirmations`**: `{ incoterm, incoterm_place, currency }`, cada uno `{ source, at }`. Incoterm, lugar y moneda se confirman por cotización completa (todas sus líneas) desde su detalle; sin registro el dato es del equipo y va en rojo.
+**`quotations/{id}/lines/{id}.confirmations`**: `{ incoterm, incoterm_place, currency }`, cada uno `{ source, at }`. Incoterm, lugar y moneda se confirman por cotización completa (todas sus líneas) desde su detalle; sin registro el dato es del equipo y va en rojo.
 
-**`project/milestone`** (un solo documento): pasos del hito hacia la primera OC que se registran a mano, cada uno `{ value, source, at }`: `chosen_supplier` (id del proveedor elegido), `po_issued` (número de OC) y `invoice_accepted` (número de factura). Un paso cuenta como cumplido solo con valor y fuente. El resto de los pasos del dashboard se calculan de los datos, no se guardan.
+**`milestones/{id}`** (un documento por vehículo, con `vehicle_id`): pasos del hito hacia la primera OC que se registran a mano, cada uno `{ value, source, at }`: `chosen_supplier` (id del proveedor elegido), `po_issued` (número de OC) y `invoice_accepted` (número de factura). Un paso cuenta como cumplido solo con valor y fuente. El resto de los pasos del dashboard se calculan de los datos, no se guardan.
 
 **`parts/{id}`**: un solo código, el mismo en Chile y en China. `oem_codes[0]` es el código, `code_status` (`missing`|`provisional`|`confirmed`) y `code_source` su evidencia; confirmar exige fuente citable. Además `hs_code` y `hs_code_source` (partida arancelaria), y la imagen en la subcolección `parts/{id}/media/main` como `data_url` reducido (para no engordar la lectura del catálogo).
 
@@ -157,6 +162,6 @@ Regla dura: **nunca auto-confirmar `part_type: 'original'`.** Que un vendedor es
 Los que exige el rollup y el catálogo transversal:
 - `parts`: `vehicle_ids` (array-contains) + `quote_rollup.alternative.min_usd_micro` (asc).
 - `parts`: `category_path` (asc) + `demand_scale` (desc) — para el catálogo ordenado por rotación × ahorro.
-- `quotes`: `part_id` (asc) + `valid_until` (asc) — para detectar cotizaciones por vencer.
+- `lines` (grupo de colecciones): `part_id` (asc) + `valid_until` (asc) — para detectar cotizaciones por vencer.
 
 Se declaran conforme se necesiten en Fase 2, no especulativamente.

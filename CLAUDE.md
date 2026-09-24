@@ -55,6 +55,7 @@ Yonder no tiene tests — este proyecto sí, en `src/core/costing/`. Es una func
 - **Reutilizar antes de crear**: catálogo de componentes y patrón de ficha en [[DESIGN]]. Rediseñar bien, no parchar.
 - **Español** salvo siglas universales; etiquetas precisas y sin paréntesis de relleno; explicaciones en un `InfoNote`.
 - **Nunca auto-confirmar** `part_type: 'original'` ni aceptar un código sin fuente citable.
+- **Todo id de documento lo asigna Firestore.** Nunca un id inventado (`sup_…`, `q_…`, códigos, rutas, fechas); la clave natural va como campo y se busca por consulta. Lo que pertenece a otro documento va en una subcolección (ver [[MODELO-DE-DATOS]]). El hook lo bloquea en repos y scripts.
 - **Tareas grandes se planifican antes** y se commitean por tanda.
 
 ## Hook de convenciones

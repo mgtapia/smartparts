@@ -31,17 +31,19 @@ function loadEnvLocal() {
 }
 loadEnvLocal()
 
-const VEHICLE_ID = 'dongfeng_e70'
+const VEHICLE_SHORT_MODEL = 'E70'
 const apply = process.argv.includes('--apply')
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
 const db = getAdminDb()
+const { findVehicleId, loadQuotationIndex, upsertLines } = await import('./lib/model.mjs')
+const vehicleId = await findVehicleId(db, VEHICLE_SHORT_MODEL)
 
 const partsSnap = await db
   .collection('parts')
-  .where('vehicle_ids', 'array-contains', VEHICLE_ID)
+  .where('vehicle_ids', 'array-contains', vehicleId)
   .get()
 const parts = partsSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
-const quotesSnap = await db.collection('quotes').get()
+const quotesSnap = await db.collectionGroup('lines').get()
 const quotes = quotesSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
 
 const sideOf = (name) => (/\bDER\b/.test(name) ? 'DER' : /\bIZQ\b/.test(name) ? 'IZQ' : null)
@@ -64,7 +66,6 @@ for (const target of targets) {
   for (const q of quotes.filter((x) => x.part_id === sibling.id && !x.inferred)) {
     const { id, ...rest } = q
     plan.push({
-      id: `q_${q.supplier_id}_${target.id}_${q.part_type}`,
       target: target.name_es,
       from: sibling.name_es,
       supplier: q.supplier_id,
@@ -89,7 +90,9 @@ if (!apply) {
   console.log('Dry-run: no se escribió nada. Usar --apply.')
   process.exit(0)
 }
-const batch = db.batch()
-for (const p of plan) batch.set(db.collection('quotes').doc(p.id), p.data)
-await batch.commit()
-console.log(`Aplicado: ${plan.length} cotizaciones escritas.`)
+const { created, updated } = await upsertLines(
+  db,
+  await loadQuotationIndex(db),
+  plan.map((p) => p.data),
+)
+console.log(`Aplicado: ${created} líneas creadas, ${updated} actualizadas.`)

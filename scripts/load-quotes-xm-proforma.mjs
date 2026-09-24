@@ -38,8 +38,8 @@ function loadEnvLocal() {
 }
 loadEnvLocal()
 
-const VEHICLE_ID = 'dongfeng_e70'
-const SUPPLIER_ID = 'sup_xm_industrial'
+const VEHICLE_SHORT_MODEL = 'E70'
+const SUPPLIER_ALIAS = 'XM Industrial'
 const SOURCE_FILE = 'Proforma XM Industrial - Dongfeng E70 (2026-09-24).jpeg'
 const CAPTURED = '2026-09-24T00:00:00Z'
 const VALID_UNTIL = '2026-10-01'
@@ -142,12 +142,16 @@ const ITEMS = [
 
 const apply = process.argv.includes('--apply')
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
+const { findSupplierId, findVehicleId, loadQuotationIndex, upsertLines } =
+  await import('./lib/model.mjs')
 
 async function main() {
   const db = getAdminDb()
+  const vehicleId = await findVehicleId(db, VEHICLE_SHORT_MODEL)
+  const supplierId = await findSupplierId(db, SUPPLIER_ALIAS)
   const partsSnap = await db
     .collection('parts')
-    .where('vehicle_ids', 'array-contains', VEHICLE_ID)
+    .where('vehicle_ids', 'array-contains', vehicleId)
     .get()
   const partsByName = new Map()
   for (const d of partsSnap.docs) partsByName.set(d.data().name_es.trim(), d.id)
@@ -163,9 +167,8 @@ async function main() {
       }
       const [at10, below10] = item.usd
       quotes.push({
-        id: `q_${SUPPLIER_ID}_${partId}_original_${item.no}`,
         part_id: partId,
-        supplier_id: SUPPLIER_ID,
+        supplier_id: supplierId,
         part_type: 'original',
         price: { amount: below10, currency: 'USD', scale: 2 },
         price_tiers: [
@@ -193,19 +196,16 @@ async function main() {
 
   console.log(`XM: ${quotes.length} cotizaciones desde ${ITEMS.length} ítems`)
   console.log(`  sin match de repuesto: ${missing.length}`, missing)
-  const dup = quotes.length - new Set(quotes.map((q) => q.id)).size
-  if (dup) console.log(`  ⚠ ${dup} ids repetidos`)
+  const dup =
+    quotes.length -
+    new Set(quotes.map((q) => `${q.part_id}|${q.part_type}|${q.supplier_item}`)).size
+  if (dup) console.log(`  ⚠ ${dup} repetidas`)
   if (!apply) {
     console.log('Dry-run — nada escrito. Repetir con --apply.')
     return
   }
-  const batch = db.batch()
-  for (const q of quotes) {
-    const { id, ...data } = q
-    batch.set(db.collection('quotes').doc(id), data)
-  }
-  await batch.commit()
-  console.log(`✔ ${quotes.length} cotizaciones escritas.`)
+  const { created, updated } = await upsertLines(db, await loadQuotationIndex(db), quotes)
+  console.log(`✔ Líneas de cotización: ${created} creadas, ${updated} actualizadas.`)
 }
 
 main()

@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// OBSOLETO: este seed parte de los mocks de Fase 1 y del modelo con ids propios. La base
+// tiene datos reales, ids de Firestore y subcolecciones (ver docs/MODELO-DE-DATOS.md), y
+// los mocks no deben volver a la base. No se usa; se conserva solo como referencia.
+console.error('seed-firestore.mjs está obsoleto: no se ejecuta. Ver el encabezado del archivo.')
+process.exit(1)
 // Seed de Firestore desde los mocks reales de Fase 1 — bootstrap único de
 // Fase 2 (ver .agent/ROADMAP.md). Requiere credenciales de Firebase Admin en
 // .env.local (FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY, ver

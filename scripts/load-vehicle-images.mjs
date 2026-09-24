@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Carga la imagen de cada vehículo desde la carpeta del equipo en Drive
 // (Trabajo > Repuestos > Fotos). Se reduce a WebP de lado máximo 900 px con
-// transparencia y se guarda como data URL en `vehicles/{id}.image`, junto con su
-// fuente. Volver a correr reemplaza la imagen. No toca ningún otro campo.
+// transparencia y se guarda como data URL en `vehicles/{id}/media/{auto}` (`role: 'main'`),
+// junto con su fuente. Volver a correr reemplaza la imagen. No toca ningún otro campo.
 //
 // Uso: node scripts/load-vehicle-images.mjs [--apply] [--dir "G:/My Drive/Trabajo/Repuestos/Fotos"]
 
@@ -32,11 +32,12 @@ loadEnvLocal()
 const MAX_SIDE = 900
 const QUALITY = 85
 const SOURCE = 'Carpeta del equipo en Drive: Trabajo > Repuestos > Fotos'
+// Modelo corto del vehículo (campo `shortModel`) → archivo.
 const FILES = {
-  dongfeng_e70: 'dongfeng e70.png',
-  kia_niro_ev: 'kia niro.png',
-  neta_aya: 'neta aya.png',
-  dongfeng_nammi: 'dongfeng nammi.png',
+  E70: 'dongfeng e70.png',
+  'Niro EV': 'kia niro.png',
+  Aya: 'neta aya.png',
+  Nammi: 'dongfeng nammi.png',
 }
 
 const args = process.argv.slice(2)
@@ -45,19 +46,24 @@ const dirIdx = args.indexOf('--dir')
 const dir = dirIdx >= 0 ? args[dirIdx + 1] : 'G:/My Drive/Trabajo/Repuestos/Fotos'
 
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
+const { findVehicleId } = await import('./lib/model.mjs')
 const db = getAdminDb()
 
-for (const [vehicleId, file] of Object.entries(FILES)) {
+for (const [shortModel, file] of Object.entries(FILES)) {
   const buffer = await sharp(path.join(dir, file))
     .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: 'inside', withoutEnlargement: true })
     .webp({ quality: QUALITY })
     .toBuffer()
   const dataUrl = `data:image/webp;base64,${buffer.toString('base64')}`
-  console.log(`${vehicleId}: ${file} → ${Math.round(buffer.length / 1024)} KB`)
+  console.log(`${shortModel}: ${file} → ${Math.round(buffer.length / 1024)} KB`)
   if (!apply) continue
-  await db
+  const media = db
     .collection('vehicles')
-    .doc(vehicleId)
-    .update({ image: { data_url: dataUrl, source: SOURCE, updated_at: new Date() } })
+    .doc(await findVehicleId(db, shortModel))
+    .collection('media')
+  const existing = (await media.where('role', '==', 'main').limit(1).get()).docs[0]
+  const data = { role: 'main', data_url: dataUrl, source: SOURCE, updated_at: new Date() }
+  if (existing) await existing.ref.set(data)
+  else await media.add(data)
 }
 console.log(apply ? 'Aplicado.' : 'Dry-run: no se escribió nada. Usar --apply.')

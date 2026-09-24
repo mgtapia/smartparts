@@ -39,12 +39,13 @@ function loadEnvLocal() {
 }
 loadEnvLocal()
 
-const VEHICLE_ID = 'dongfeng_e70'
+// El vehículo y los proveedores se buscan por campos (modelo corto, alias): ningún id se fija a mano.
+const VEHICLE_SHORT_MODEL = 'E70'
 
 // Cada archivo tiene su propio layout de columnas.
 const SOURCES = {
   henan: {
-    supplierId: 'sup_henan_ronglai',
+    supplierAlias: 'Henan Ronglai',
     file: 'Cotización Dongfeng E70 - Henan Ronglai.xlsx',
     // F = calidad OEM, G = calidad AFM (repuesto de tercero)
     prices: [
@@ -57,7 +58,7 @@ const SOURCES = {
     incoterm: 'EXW',
   },
   file3: {
-    supplierId: 'sup_sin_identificar_dongfeng_e70_3',
+    supplierAlias: 'Anhui Zuoheng',
     file: 'Cotización Dongfeng E70 - Proveedor sin identificar.xlsx',
     // F = precio; G = calidad ("Original" / "copy"). H e I no tienen
     // encabezado — se guardan crudas, sin interpretar.
@@ -72,7 +73,7 @@ const SOURCES = {
   // equipo como F/G × 1,03 ÷ 6,65 — moneda sin confirmar. I/J no se cargan
   // como precio: es un dato derivado, no del proveedor.
   dealer: {
-    supplierId: 'sup_dealer_alibaba_cqjfb',
+    supplierAlias: 'Dealer cqjfb',
     file: 'Cotización Dongfeng E70 - Dealer Alibaba cqjfb.xlsx',
     prices: [
       { col: 'F', partType: 'alternative' },
@@ -130,12 +131,16 @@ if (!source || !xlsxPath) {
 const apply = flags.includes('--apply')
 
 const { getAdminDb } = await import('../src/libs/admin/firebaseAdmin.js')
+const { findSupplierId, findVehicleId, loadQuotationIndex, upsertLines } =
+  await import('./lib/model.mjs')
 
 async function main() {
   const db = getAdminDb()
+  const vehicleId = await findVehicleId(db, VEHICLE_SHORT_MODEL)
+  const supplierId = await findSupplierId(db, source.supplierAlias)
   const partsSnap = await db
     .collection('parts')
-    .where('vehicle_ids', 'array-contains', VEHICLE_ID)
+    .where('vehicle_ids', 'array-contains', vehicleId)
     .get()
   const partsByName = new Map()
   for (const d of partsSnap.docs) partsByName.set(d.data().name_es.trim().toLowerCase(), d.id)
@@ -170,9 +175,8 @@ async function main() {
         if (cells[n] !== undefined) sourceRaw[`col_${n}`] = cells[n].trim()
       if (p.typeCol) sourceRaw.quality_label = (cells[p.typeCol] || '').trim()
       quotes.push({
-        id: `q_${source.supplierId}_${partId}_${partType}`,
         part_id: partId,
-        supplier_id: source.supplierId,
+        supplier_id: supplierId,
         part_type: partType,
         price: { amount, currency: source.currency, scale: 2 },
         currency_status: source.currencyStatus,
@@ -194,22 +198,15 @@ async function main() {
   )
   console.log(`  sin match de repuesto: ${unmatched.length}`, unmatched.slice(0, 10))
   console.log(`  precio no numérico (omitidas): ${skipped.length}`)
-  const dup = quotes.length - new Set(quotes.map((q) => q.id)).size
-  if (dup) console.log(`  ⚠ ${dup} ids repetidos (misma pieza+tipo dos veces en el archivo)`)
+  const dup = quotes.length - new Set(quotes.map((q) => `${q.part_id}|${q.part_type}`)).size
+  if (dup) console.log(`  ⚠ ${dup} repetidas (misma pieza y calidad dos veces en el archivo)`)
 
   if (!apply) {
     console.log('Dry-run — nada escrito. Repetir con --apply.')
     return
   }
-  for (let i = 0; i < quotes.length; i += 400) {
-    const batch = db.batch()
-    for (const q of quotes.slice(i, i + 400)) {
-      const { id, ...data } = q
-      batch.set(db.collection('quotes').doc(id), data)
-    }
-    await batch.commit()
-  }
-  console.log(`✔ ${quotes.length} cotizaciones escritas en Firestore.`)
+  const { created, updated } = await upsertLines(db, await loadQuotationIndex(db), quotes)
+  console.log(`✔ Líneas de cotización: ${created} creadas, ${updated} actualizadas.`)
 }
 
 main()

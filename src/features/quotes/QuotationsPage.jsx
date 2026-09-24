@@ -9,6 +9,7 @@ import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
@@ -31,10 +32,6 @@ import {
 } from './partMatrix'
 
 const VIEWS = { LIST: 'list', MATRIX: 'matrix' }
-const VIEW_OPTIONS = [
-  { value: VIEWS.LIST, label: 'Cotizaciones' },
-  { value: VIEWS.MATRIX, label: 'Matriz por repuesto' },
-]
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationsPage() {
@@ -92,13 +89,21 @@ export default function QuotationsPage() {
         }
       />
 
+      <ViewTabs
+        value={view}
+        onChange={setView}
+        tabs={[
+          { value: VIEWS.LIST, label: `Cotizaciones (${quotations.length})` },
+          { value: VIEWS.MATRIX, label: 'Matriz por repuesto' },
+        ]}
+      />
+
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
         <ToolbarSearch
           value={search}
           onChange={setSearch}
           placeholder={isMatrix ? 'Buscar por repuesto o código…' : 'Buscar por proveedor…'}
         />
-        <ToolbarSelectBox label="Vista" value={view} onChange={setView} options={VIEW_OPTIONS} />
         {isMatrix ? (
           <>
             <ToolbarSelectBox

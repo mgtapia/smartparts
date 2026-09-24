@@ -3,13 +3,11 @@ export const SOURCING_VEHICLE_ID = 'dongfeng_e70'
 
 export const DASHBOARD_TABS = {
   PENDING: 'pendientes',
-  SUPPLIERS: 'proveedores',
   MILESTONE: 'hito',
 }
 
 export const TAB_LIST = [
   { value: DASHBOARD_TABS.PENDING, label: 'Pendientes' },
-  { value: DASHBOARD_TABS.SUPPLIERS, label: 'Proveedores' },
   { value: DASHBOARD_TABS.MILESTONE, label: 'Hito' },
 ]
 

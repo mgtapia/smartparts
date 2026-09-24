@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listParts } from '@libs/repos/partsRepo'
 import { getMilestone } from '@libs/repos/milestoneRepo'
-import { costLine, useQuotationsData } from '@features/quotes/hooks/useQuotations'
+import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
 import { buildDashboard } from '../dashboardModel'
@@ -32,7 +32,6 @@ export function useDashboard() {
       quotations,
       suppliers: rows.map((r) => r.supplier),
       assumptions: { mode, rates, settingsFor },
-      costOf: (line) => costLine(line, { mode, rates, settingsFor }),
       milestone: milestone.data ?? {},
     })
   }, [loading, error, parts.data, quotations, rows, mode, rates, settingsFor, milestone.data])

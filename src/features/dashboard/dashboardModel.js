@@ -1,6 +1,6 @@
 // Modelo del dashboard de sourcing: función pura, sin React ni Firebase. Recibe
 // los datos ya leídos y devuelve el resumen, los pendientes por confirmar, la
-// comparación de proveedores y los pasos del hito hacia la primera OC. Nada de
+// proveedores que cotizan y los pasos del hito hacia la primera OC. Nada de
 // acá estima un ahorro del cliente ni inventa cantidades: cuenta hechos.
 import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
 import { factOf } from '@features/suppliers/constants'
@@ -17,7 +17,6 @@ const hasStepValue = (step) => Boolean(step?.value && step?.source)
  * @param {any[]} input.quotations     Cotizaciones agrupadas (con `lines: [{ part, quote }]`).
  * @param {any[]} input.suppliers      Proveedores.
  * @param {{ mode: string, rates: any, settingsFor: (id: string) => any }} input.assumptions
- * @param {(line: any) => { landedNetUsdMicro: number|null, blockers: string[] }} input.costOf
  * @param {Record<string, { value: string, source: string, at?: any }>} [input.milestone]
  * @param {Date} [input.today]
  */
@@ -27,7 +26,6 @@ export function buildDashboard({
   quotations,
   suppliers,
   assumptions,
-  costOf,
   milestone = {},
   today = new Date(),
 }) {
@@ -127,53 +125,6 @@ export function buildDashboard({
     },
   ].filter((p) => p.count > 0)
 
-  // ---- Costo final por línea y ganador por repuesto y calidad ----
-  const costed = quoteRows.flatMap((q) =>
-    q.lines.map((line) => ({ line, supplierId: q.supplierId, cost: costOf(line) })),
-  )
-  const groups = new Map()
-  for (const c of costed) {
-    if (c.cost.landedNetUsdMicro === null) continue
-    const key = `${c.line.part.id}|${c.line.quote.partType}`
-    if (!groups.has(key)) groups.set(key, [])
-    groups.get(key).push(c)
-  }
-  const wins = new Map()
-  let comparedGroups = 0
-  for (const offers of groups.values()) {
-    if (new Set(offers.map((o) => o.supplierId)).size < 2) continue
-    comparedGroups++
-    const best = offers.reduce((a, b) =>
-      b.cost.landedNetUsdMicro < a.cost.landedNetUsdMicro ? b : a,
-    )
-    wins.set(best.supplierId, (wins.get(best.supplierId) ?? 0) + 1)
-  }
-
-  // ---- Proveedores ----
-  const supplierRows = activeSuppliers.map((supplier) => {
-    const own = quoteRows.filter((q) => q.supplierId === supplier.id)
-    const ownCosted = costed.filter((c) => c.supplierId === supplier.id)
-    const computable = ownCosted.filter((c) => c.cost.landedNetUsdMicro !== null).length
-    const partIds = new Set(own.flatMap((q) => q.lines.map((l) => l.part.id)))
-    return {
-      supplier,
-      quotations: own,
-      quotedParts: partIds.size,
-      totalParts: scopeParts.length,
-      originalCount: own.reduce((n, q) => n + q.originalCount, 0),
-      alternativeCount: own.reduce((n, q) => n + q.alternativeCount, 0),
-      incoterms: [...new Set(own.flatMap((q) => q.incoterms))],
-      incotermConfirmed: own.every((q) => q.incotermConfirmed && q.incotermPlaceConfirmed),
-      currencies: [...new Set(own.flatMap((q) => q.currencies))],
-      currencyConfirmed: own.every((q) => q.currencyConfirmed),
-      formF: factOf(supplier, 'formF'),
-      cheapestIn: wins.get(supplier.id) ?? 0,
-      computableLines: computable,
-      totalLines: ownCosted.length,
-      costBlocker: computable === 0 ? (ownCosted[0]?.cost.blockers[0] ?? null) : null,
-    }
-  })
-
   // ---- Hito ----
   const ratio = (done, total) => ({
     done: total > 0 && done === total,
@@ -258,8 +209,7 @@ export function buildDashboard({
       stepsTotal: steps.length,
     },
     pending,
-    suppliers: supplierRows,
-    comparedGroups,
+    suppliers: activeSuppliers,
     steps,
   }
 }

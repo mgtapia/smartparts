@@ -17,8 +17,6 @@ import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { updateMilestoneStep } from '@libs/repos/milestoneRepo'
 import { supplierLabel } from '@features/quotes/constants'
-import QualityChips from '@features/quotes/components/QualityChips'
-import { factText } from '@features/suppliers/constants'
 import { DASHBOARD_TABS, MANUAL_STEPS, TAB_LIST } from './constants'
 import { useDashboard } from './hooks/useDashboard'
 
@@ -42,10 +40,10 @@ export default function DashboardPage() {
     )
   }
 
-  const { summary, pending, suppliers, steps, comparedGroups } = data
+  const { summary, pending, suppliers, steps } = data
   const supplierName = (id) => {
-    const row = suppliers.find((s) => s.supplier.id === id)
-    return row ? supplierLabel(row.supplier, id) : id
+    const supplier = suppliers.find((s) => s.id === id)
+    return supplier ? supplierLabel(supplier, id) : id
   }
 
   const pendingColumns = [
@@ -60,70 +58,6 @@ export default function DashboardPage() {
           {p.count}
         </UncertainValue>
       ),
-    },
-  ]
-
-  const supplierColumns = [
-    {
-      id: 'supplier',
-      label: 'Proveedor',
-      render: (r) => (
-        <span title={r.supplier.name}>{supplierLabel(r.supplier, r.supplier.id)}</span>
-      ),
-    },
-    {
-      id: 'parts',
-      label: 'Repuestos',
-      width: 100,
-      align: 'right',
-      tooltip: 'Repuestos del Dongfeng E70 con cotización de este proveedor, sobre el total.',
-      render: (r) => `${r.quotedParts} de ${r.totalParts}`,
-    },
-    { id: 'offer', label: 'Oferta', width: 110, render: (r) => <QualityChips quotation={r} /> },
-    {
-      id: 'incoterm',
-      label: 'Incoterm',
-      width: 90,
-      render: (r) => (
-        <UncertainValue verified={r.incotermConfirmed} reason="Incoterm o lugar sin confirmar">
-          {r.incoterms.join(', ') || 'Sin definir'}
-        </UncertainValue>
-      ),
-    },
-    {
-      id: 'currency',
-      label: 'Moneda',
-      width: 70,
-      render: (r) => (
-        <UncertainValue verified={r.currencyConfirmed} reason="Moneda sin confirmar">
-          {r.currencies.join(', ')}
-        </UncertainValue>
-      ),
-    },
-    {
-      id: 'formF',
-      label: 'Formulario F',
-      width: 100,
-      render: (r) => (
-        <UncertainValue verified={r.formF.confirmed} reason="Sin confirmar con una fuente">
-          {factText('formF', r.formF.value) ?? 'Sin dato'}
-        </UncertainValue>
-      ),
-    },
-    {
-      id: 'cheapest',
-      label: 'Más barato en',
-      width: 110,
-      align: 'right',
-      tooltip: `Repuestos donde tiene el menor costo final en la misma calidad, entre los ${comparedGroups} comparables con dos o más proveedores.`,
-      render: (r) =>
-        r.computableLines === 0 ? (
-          <UncertainValue verified={false} reason={r.costBlocker ?? 'Sin costo final calculable'}>
-            Falta dato
-          </UncertainValue>
-        ) : (
-          r.cheapestIn
-        ),
     },
   ]
 
@@ -177,10 +111,7 @@ export default function DashboardPage() {
           initialSource={editingStep.value?.source ?? ''}
           options={
             editingStep.manual.key === MANUAL_STEPS.chosenSupplier.key
-              ? suppliers.map((r) => ({
-                  value: r.supplier.id,
-                  label: supplierLabel(r.supplier, r.supplier.id),
-                }))
+              ? suppliers.map((s) => ({ value: s.id, label: supplierLabel(s, s.id) }))
               : undefined
           }
           onClose={() => setEditingStep(null)}
@@ -218,16 +149,6 @@ export default function DashboardPage() {
           getRowKey={(p) => p.id}
           getRowHref={(p) => p.href}
           emptyText="Sin pendientes por confirmar."
-        />
-      ) : null}
-
-      {tab === DASHBOARD_TABS.SUPPLIERS ? (
-        <ListTable
-          columns={supplierColumns}
-          rows={suppliers}
-          getRowKey={(r) => r.supplier.id}
-          getRowHref={(r) => `/suppliers/${r.supplier.id}`}
-          emptyText="Sin proveedores cotizando todavía."
         />
       ) : null}
 

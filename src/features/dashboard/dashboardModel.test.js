@@ -54,7 +54,6 @@ function build(over = {}) {
     quotations: [quotation('a', [line(p1), line(p2)]), quotation('b', [line(p1)])],
     suppliers,
     assumptions: assumptionsWith(),
-    costOf: () => ({ landedNetUsdMicro: null, blockers: ['Falta dato'] }),
     ...over,
   })
 }
@@ -100,31 +99,6 @@ describe('buildDashboard', () => {
     const byId = Object.fromEntries(d.pending.map((p) => [p.id, p.count]))
     expect(byId.origin).toBe(2)
     expect(byId.freight).toBe(1)
-  })
-
-  it('cuenta en qué repuestos cada proveedor es el más barato, solo entre dos o más', () => {
-    const cost = { a: 300, b: 200 }
-    const d = build({
-      costOf: (l) => ({
-        landedNetUsdMicro: l.part.id === 'p1' ? cost[l.quote.supplierRef] : 500,
-        blockers: [],
-      }),
-      quotations: [
-        quotation('a', [line(part('p1'), 'alternative', { supplierRef: 'a' }), line(part('p2'))]),
-        quotation('b', [line(part('p1'), 'alternative', { supplierRef: 'b' })]),
-      ],
-    })
-    const byId = Object.fromEntries(d.suppliers.map((s) => [s.supplier.id, s.cheapestIn]))
-    // p1 lo cotizan ambos: gana b. p2 solo lo cotiza a: no cuenta como comparación.
-    expect(byId).toEqual({ a: 0, b: 1 })
-    expect(d.comparedGroups).toBe(1)
-  })
-
-  it('sin costo calculable informa el motivo y no inventa ganadores', () => {
-    const d = build()
-    expect(d.comparedGroups).toBe(0)
-    expect(d.suppliers.every((s) => s.cheapestIn === 0)).toBe(true)
-    expect(d.suppliers[0].costBlocker).toBe('Falta dato')
   })
 
   it('un paso manual solo cuenta si tiene valor y fuente', () => {

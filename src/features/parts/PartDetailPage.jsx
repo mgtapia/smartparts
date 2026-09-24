@@ -35,7 +35,7 @@ import CodeDialog from './components/CodeDialog'
 import ImageDialog from './components/ImageDialog'
 import LogisticsDialog from './components/LogisticsDialog'
 import NamesDialog from './components/NamesDialog'
-import { DEMAND_BASIS_LABELS_ES, DEMAND_SCALE_LABELS_ES, PART_TABS, TAB_LIST } from './constants'
+import { PART_TABS, TAB_LIST } from './constants'
 
 const EDIT = {
   CODE: 'code',
@@ -440,25 +440,6 @@ export default function PartDetailPage({ partId }) {
                   Sin fuente
                 </UncertainValue>
               )}
-            </InfoField>
-          </InfoGrid>
-        </Card>
-      ) : null}
-
-      {tab === PART_TABS.DEMAND ? (
-        <Card sx={{ p: 2 }}>
-          <InfoGrid>
-            <InfoField label="Cantidad estimada">{part.quantityEstimated ?? '—'}</InfoField>
-            <InfoField label="Base">
-              <UncertainValue
-                verified={part.demandBasis === 'historical'}
-                reason="Es una estimación de rotación, no consumo real del taller"
-              >
-                {DEMAND_BASIS_LABELS_ES[part.demandBasis] ?? '—'}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Rotación">
-              {DEMAND_SCALE_LABELS_ES[part.demandScale] ?? '—'}
             </InfoField>
           </InfoGrid>
         </Card>

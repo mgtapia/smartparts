@@ -179,7 +179,7 @@ const LIST_COLUMNS = [
     id: 'sells',
     label: 'Vende',
     width: 130,
-    tooltip: 'Calidades que ofrece y cuántos SKU de cada una.',
+    tooltip: 'Calidades que ofrece: OEM, AFM o ambas.',
     render: (q) => <QualityChips quotation={q} />,
   },
   {

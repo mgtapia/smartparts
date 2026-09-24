@@ -274,10 +274,10 @@ export default function QuotationDetailPage({ quotationId }) {
               {quotation.currencies.join(', ')}
             </UncertainValue>
           </InfoField>
-          <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
           <InfoField label="Oferta">
             <QualityChips quotation={quotation} />
           </InfoField>
+          <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
         </InfoGrid>
       </Card>
 

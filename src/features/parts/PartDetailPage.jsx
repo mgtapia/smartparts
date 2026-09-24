@@ -291,7 +291,7 @@ export default function PartDetailPage({ partId }) {
           )}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <InfoGrid>
+          <InfoGrid columns={6}>
             <InfoField label="Código" onEdit={() => setEditing(EDIT.CODE)}>
               <UncertainValue
                 verified={part.codeStatus === 'confirmed'}
@@ -335,7 +335,7 @@ export default function PartDetailPage({ partId }) {
 
       {tab === PART_TABS.IDENTITY ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid>
+          <InfoGrid columns={3}>
             <InfoField label="Español">{part.nameEs}</InfoField>
             <InfoField label="Inglés" onEdit={() => setEditing(EDIT.NAMES)}>
               {part.nameEn ?? (
@@ -352,7 +352,7 @@ export default function PartDetailPage({ partId }) {
               )}
             </InfoField>
           </InfoGrid>
-          <InfoGrid>
+          <InfoGrid columns={3}>
             <InfoField label="Vehículo">
               {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
             </InfoField>
@@ -361,6 +361,18 @@ export default function PartDetailPage({ partId }) {
               {part.codeSource ?? (
                 <UncertainValue verified={false} reason="El código no tiene fuente registrada">
                   Sin fuente
+                </UncertainValue>
+              )}
+            </InfoField>
+            <InfoField label="Mercancía peligrosa">
+              {part.dgProfile ? (
+                `UN ${part.dgProfile.unNumber}`
+              ) : (
+                <UncertainValue
+                  verified={false}
+                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
+                >
+                  Sin clasificar
                 </UncertainValue>
               )}
             </InfoField>
@@ -375,7 +387,7 @@ export default function PartDetailPage({ partId }) {
 
       {tab === PART_TABS.LOGISTICS ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid>
+          <InfoGrid columns={5}>
             <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
               <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
                 {formatKg(part.weightG)}
@@ -402,21 +414,11 @@ export default function PartDetailPage({ partId }) {
               )}
             </InfoField>
           </InfoGrid>
-          <InfoGrid>
-            <InfoField label="Mercancía peligrosa">
-              {part.dgProfile ? (
-                `UN ${part.dgProfile.unNumber}`
-              ) : (
-                <UncertainValue
-                  verified={false}
-                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
-                >
-                  Sin clasificar
-                </UncertainValue>
-              )}
-            </InfoField>
-            {part.logisticsNote ? <InfoField label="Nota">{part.logisticsNote}</InfoField> : null}
-          </InfoGrid>
+          {part.logisticsNote ? (
+            <InfoGrid columns={5}>
+              <InfoField label="Nota">{part.logisticsNote}</InfoField>
+            </InfoGrid>
+          ) : null}
         </Card>
       ) : null}
 

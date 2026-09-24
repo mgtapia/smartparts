@@ -8,11 +8,20 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 
 /**
  * Datos clave de una ficha en columnas iguales separadas por un divisor
- * vertical. Cada dato es un `InfoField`; con `onEdit` muestra un lápiz.
+ * vertical. Cada dato es un `InfoField`; con `onEdit` muestra un lápiz. Con
+ * `columns` fija la cantidad de columnas (todas de igual ancho); sin ella se
+ * reparte según el espacio.
  */
-export function InfoGrid({ children }) {
+export function InfoGrid({ columns, children }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: columns
+          ? `repeat(${columns}, minmax(0, 1fr))`
+          : 'repeat(auto-fit, minmax(150px, 1fr))',
+      }}
+    >
       {children}
     </Box>
   )

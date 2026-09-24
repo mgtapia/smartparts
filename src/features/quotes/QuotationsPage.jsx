@@ -32,6 +32,7 @@ import {
 } from './partMatrix'
 
 const VIEWS = { LIST: 'list', MATRIX: 'matrix' }
+const countSuppliers = (list) => new Set(list.map((q) => q.supplierId)).size
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationsPage() {
@@ -85,7 +86,7 @@ export default function QuotationsPage() {
         meta={
           isMatrix
             ? `${matrix.rows.length} repuestos cotizados.`
-            : `${filteredQuotations.length} de ${quotations.length} cotizaciones.`
+            : `${countSuppliers(filteredQuotations)} de ${countSuppliers(quotations)} proveedores.`
         }
       />
 

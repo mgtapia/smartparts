@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
-import DashboardPage from '@features/dashboard/DashboardPage'
+import PendingPage from '@features/pending/PendingPage'
 
 export default function Page() {
   return (
     <Suspense>
-      <DashboardPage />
+      <PendingPage />
     </Suspense>
   )
 }

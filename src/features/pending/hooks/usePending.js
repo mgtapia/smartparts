@@ -5,15 +5,15 @@ import { getMilestone } from '@libs/repos/milestoneRepo'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
-import { buildDashboard } from '../dashboardModel'
+import { buildPending } from '../pendingModel'
 import { SOURCING_VEHICLE_ID } from '../constants'
 
 /**
- * Dashboard de la etapa de sourcing: junta repuestos, cotizaciones, proveedores,
- * supuestos de costo y el hito, y los resume con `buildDashboard`. Todo viene de
+ * Pendientes de la etapa de sourcing: junta repuestos, cotizaciones, proveedores,
+ * supuestos de costo y el hito, y los resume con `buildPending`. Todo viene de
  * la caché compartida, así que abrirlo después de otra pantalla no vuelve a leer.
  */
-export function useDashboard() {
+export function usePending() {
   const parts = useCachedQuery('parts', listParts)
   const milestone = useCachedQuery('milestone', getMilestone)
   const { quotations, loading: quotesLoading, error: quotesError } = useQuotationsData()
@@ -26,7 +26,7 @@ export function useDashboard() {
 
   const data = useMemo(() => {
     if (loading || error) return null
-    return buildDashboard({
+    return buildPending({
       vehicleId: SOURCING_VEHICLE_ID,
       parts: parts.data ?? [],
       quotations,

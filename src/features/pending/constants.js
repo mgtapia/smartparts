@@ -1,14 +1,14 @@
 // Alcance del dashboard: en la etapa de sourcing solo se trabaja el Dongfeng E70.
 export const SOURCING_VEHICLE_ID = 'dongfeng_e70'
 
-export const DASHBOARD_TABS = {
+export const PENDING_TABS = {
   PENDING: 'pendientes',
   MILESTONE: 'hito',
 }
 
 export const TAB_LIST = [
-  { value: DASHBOARD_TABS.PENDING, label: 'Pendientes' },
-  { value: DASHBOARD_TABS.MILESTONE, label: 'Hito' },
+  { value: PENDING_TABS.PENDING, label: 'Pendientes' },
+  { value: PENDING_TABS.MILESTONE, label: 'Hito' },
 ]
 
 /** Pasos del hito que se marcan a mano, con su fuente: no hay dato del cual calcularlos. */

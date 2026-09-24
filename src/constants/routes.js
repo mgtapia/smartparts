@@ -1,4 +1,4 @@
-// Rail de navegación — 12 módulos planos (ver .agent/DESIGN.md §Navegación).
+// Rail de navegación — módulos planos (ver .agent/DESIGN.md §Navegación).
 // `permission: 'canViewMargin'` restringe la visibilidad — ver docs/SEGURIDAD-Y-ROLES.md.
 // `implemented: false` = placeholder sin feature real todavía: AppRail no lo
 // muestra (la ruta sigue existiendo, solo no está en la navegación). Distinto
@@ -42,6 +42,13 @@ export const RAIL_ITEMS = Object.freeze([
     path: '/quotes',
     labelEs: 'Cotizaciones',
     icon: 'RequestQuote',
+    implemented: true,
+  },
+  {
+    key: 'pending',
+    path: '/pending',
+    labelEs: 'Pendientes',
+    icon: 'Checklist',
     implemented: true,
   },
   { key: 'sourcing', path: '/sourcing', labelEs: 'Sourcing', icon: 'Search', implemented: false },

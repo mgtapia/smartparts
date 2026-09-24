@@ -1,4 +1,4 @@
-// Modelo del dashboard de sourcing: función pura, sin React ni Firebase. Recibe
+// Modelo de pendientes e hito de sourcing: función pura, sin React ni Firebase. Recibe
 // los datos ya leídos y devuelve el resumen, los pendientes por confirmar, la
 // proveedores que cotizan y los pasos del hito hacia la primera OC. Nada de
 // acá estima un ahorro del cliente ni inventa cantidades: cuenta hechos.
@@ -20,7 +20,7 @@ const hasStepValue = (step) => Boolean(step?.value && step?.source)
  * @param {Record<string, { value: string, source: string, at?: any }>} [input.milestone]
  * @param {Date} [input.today]
  */
-export function buildDashboard({
+export function buildPending({
   vehicleId,
   parts,
   quotations,

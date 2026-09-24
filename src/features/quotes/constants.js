@@ -12,10 +12,7 @@ export const COST_COLUMNS = [
   { code: 'vat', label: 'IVA' },
 ]
 
-export const formatDate = (d) => (d ? d.toLocaleDateString('es-CL') : '—')
-
-/** 'AAAA-MM-DD' → 'DD-MM-AAAA' sin pasar por Date (evita el corrimiento por zona horaria). */
-export const formatIsoDate = (iso) => iso.split('-').reverse().join('-')
+export { formatDate, formatIsoDate } from '@libs/dates'
 
 export const MODE_OPTIONS = [SHIPPING_MODES.SEA_LCL, SHIPPING_MODES.AIR].map((m) => ({
   value: m,

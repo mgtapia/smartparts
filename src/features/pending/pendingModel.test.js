@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildDashboard } from './dashboardModel'
+import { buildPending } from './pendingModel'
 
 const VEHICLE = 'dongfeng_e70'
 
@@ -48,7 +48,7 @@ function build(over = {}) {
   const p1 = part('p1')
   const p2 = part('p2')
   const p3 = part('p3')
-  return buildDashboard({
+  return buildPending({
     vehicleId: VEHICLE,
     parts: [p1, p2, p3, part('otro', { vehicleId: 'kia_niro_ev' })],
     quotations: [quotation('a', [line(p1), line(p2)]), quotation('b', [line(p1)])],
@@ -58,7 +58,7 @@ function build(over = {}) {
   })
 }
 
-describe('buildDashboard', () => {
+describe('buildPending', () => {
   it('cuenta cobertura solo sobre el vehículo del alcance', () => {
     const { summary } = build()
     expect(summary.totalParts).toBe(3)

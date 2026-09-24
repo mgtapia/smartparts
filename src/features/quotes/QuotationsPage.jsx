@@ -206,12 +206,12 @@ const LIST_COLUMNS = [
     ),
   },
   {
-    id: 'sku',
-    label: 'SKU',
-    width: 60,
+    id: 'parts',
+    label: 'Repuestos',
+    width: 90,
     align: 'right',
-    tooltip: 'SKU cotizados',
-    render: (q) => q.lineCount,
+    tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
+    render: (q) => q.partCount,
   },
   {
     id: 'valid',

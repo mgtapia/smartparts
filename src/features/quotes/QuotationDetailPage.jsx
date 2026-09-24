@@ -251,7 +251,7 @@ export default function QuotationDetailPage({ quotationId }) {
           <Info label="Vende">
             <QualityChips quotation={quotation} />
           </Info>
-          <Info label="SKU cotizados">{quotation.lineCount}</Info>
+          <Info label="Repuestos">{quotation.partCount}</Info>
           <Info label="Por revisar">
             <UncertainValue
               verified={quotation.pendingCount === 0}

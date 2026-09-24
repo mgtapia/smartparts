@@ -75,7 +75,7 @@ export function buildMatrix(lines, metric, term, quality, costCtx) {
     if (
       term &&
       !normalize(line.part.nameEs).includes(term) &&
-      !normalize(line.part.localCode?.code).includes(term)
+      !normalize(line.part.code).includes(term)
     ) {
       continue
     }
@@ -114,7 +114,7 @@ export function buildMatrix(lines, metric, term, quality, costCtx) {
         >
           {r.part.nameEs}
           <Box component="span" sx={{ color: 'text.secondary', ml: 1, fontSize: 12 }}>
-            {r.part.localCode?.code ?? ''}
+            {r.part.code ?? ''}
           </Box>
         </Link>
       ),

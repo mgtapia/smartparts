@@ -6,7 +6,6 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
-import InfoNote from '@components/common/InfoNote'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
@@ -35,15 +34,7 @@ import CodeDialog from './components/CodeDialog'
 import ImageDialog from './components/ImageDialog'
 import LogisticsDialog from './components/LogisticsDialog'
 import NamesDialog from './components/NamesDialog'
-import {
-  CODE_HELP,
-  CUSTOMS_HELP,
-  DEMAND_BASIS_LABELS_ES,
-  DEMAND_SCALE_LABELS_ES,
-  LOGISTICS_HELP,
-  PART_TABS,
-  TAB_LIST,
-} from './constants'
+import { DEMAND_BASIS_LABELS_ES, DEMAND_SCALE_LABELS_ES, PART_TABS, TAB_LIST } from './constants'
 
 const EDIT = {
   CODE: 'code',
@@ -303,18 +294,13 @@ export default function PartDetailPage({ partId }) {
           <InfoGrid>
             <InfoField label="Código" onEdit={() => setEditing(EDIT.CODE)}>
               <UncertainValue
-                verified={part.codeStatus === 'confirmed' && !part.codeConflict}
-                reason={
-                  part.codeConflict
-                    ? 'El código de Chile y el de China difieren: falta confirmar cuál es'
-                    : 'Código sin confirmar con una fuente citable'
-                }
+                verified={part.codeStatus === 'confirmed'}
+                reason="Código sin confirmar con una fuente citable"
               >
                 <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
                   {part.code ?? 'Sin código'}
                 </Box>
               </UncertainValue>
-              <InfoNote dense title="Sobre el código" paragraphs={CODE_HELP} />
             </InfoField>
             <InfoField label="Precio referencia">
               <MoneyValue money={part.baselinePrice} />
@@ -389,9 +375,6 @@ export default function PartDetailPage({ partId }) {
 
       {tab === PART_TABS.LOGISTICS ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <InfoNote dense title="Sobre peso y volumen" paragraphs={LOGISTICS_HELP} />
-          </Box>
           <InfoGrid>
             <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
               <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
@@ -439,9 +422,6 @@ export default function PartDetailPage({ partId }) {
 
       {tab === PART_TABS.CUSTOMS ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <InfoNote dense title="Sobre la partida arancelaria" paragraphs={CUSTOMS_HELP} />
-          </Box>
           <InfoGrid>
             <InfoField label="Partida HS" onEdit={() => setEditing(EDIT.CUSTOMS)}>
               <UncertainValue

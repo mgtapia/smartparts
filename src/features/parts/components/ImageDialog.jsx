@@ -3,7 +3,8 @@
 import { useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import FormDialog, { DialogField, DialogTextInput } from '@components/common/FormDialog'
-import ModalActionButton from '@components/common/ModalActionButton'
+import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined'
+import ToolbarButton from '@components/common/ToolbarButton'
 import { IMAGE_PREVIEW_HEIGHT } from '@constants/layout'
 import { resizeImageToDataUrl } from '@libs/imageResize'
 import { savePartImage } from '@libs/repos/partsRepo'
@@ -52,8 +53,9 @@ export default function ImageDialog({ part, image, onSaved, onClose }) {
         />
       ) : null}
       <Box>
-        <ModalActionButton
+        <ToolbarButton
           label={preview ? 'Cambiar imagen' : 'Elegir imagen'}
+          startIcon={<AddPhotoAlternateOutlinedIcon fontSize="small" />}
           onClick={() => inputRef.current?.click()}
         />
       </Box>

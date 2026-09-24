@@ -20,19 +20,11 @@ import { getVehicle } from './vehiclesRepo'
 import { listQuotes, listQuotesByPart } from './quotesRepo'
 
 /**
- * `oem_codes[]` puede traer dos códigos por repuesto, marcados por `role`:
- * 'local' — el código tal cual lo usa el comprador/importador local (Chile),
- * nunca se pisa. 'sourcing' — el que se verificó como reconocible por
- * proveedores/fábrica (China u otro origen), se actualiza cuando se
- * verifica o se corrige. Docs viejos sin `role` (una sola entrada) se tratan
- * como el código local — es lo que siempre hubo antes de esta distinción.
+ * Un repuesto tiene un solo código, el mismo en Chile y en China: solo se
+ * confirma (`code_status` y `code_source`). `oem_codes[0]` es ese código.
  */
-export function getLocalCode(oemCodes) {
-  return oemCodes?.find((c) => c.role === 'local') ?? oemCodes?.[0] ?? null
-}
-
-export function getSourcingCode(oemCodes) {
-  return oemCodes?.find((c) => c.role === 'sourcing') ?? null
+export function getCode(oemCodes) {
+  return oemCodes?.[0] ?? null
 }
 
 function shapeRollupBucket(bucket) {
@@ -58,16 +50,7 @@ function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {
     position,
     // oem_codes[] — nunca un código suelto como identidad, ver docs/MODELO-DE-DATOS.md.
     oemCodes: raw.oem_codes || [],
-    localCode: getLocalCode(raw.oem_codes),
-    sourcingCode: getSourcingCode(raw.oem_codes),
-    // Un solo código, el mismo en Chile y en China: solo se confirma. Si un doc
-    // viejo trae dos códigos distintos (local y sourcing) queda como conflicto
-    // hasta que alguien confirme cuál es.
-    code: getSourcingCode(raw.oem_codes)?.code ?? getLocalCode(raw.oem_codes)?.code ?? null,
-    codeConflict:
-      Boolean(getSourcingCode(raw.oem_codes)?.code) &&
-      Boolean(getLocalCode(raw.oem_codes)?.code) &&
-      getSourcingCode(raw.oem_codes).code !== getLocalCode(raw.oem_codes).code,
+    code: getCode(raw.oem_codes)?.code ?? null,
     codeSource: raw.code_source ?? null,
     codeStatus: raw.code_status,
     hsCode: raw.hs_code ?? null,
@@ -136,42 +119,6 @@ export async function getPart(id) {
     vehicle,
     quotes,
     position: bridgeSnap.docs[0]?.data()?.position ?? null,
-  })
-}
-
-/**
- * Escritura manual de sourcing — código verificado o rechazado a mano contra
- * una fuente real (no otra IA sin cita), para que la conclusión quede en la
- * ficha del repuesto en vez de perderse en un chat. Nunca pisa el código
- * local (Chile/planilla del cliente) — un proveedor chino que no reconoce un
- * código no significa que el comprador local deje de reconocerlo, así que
- * ambos quedan guardados por separado (`role: 'local'`/`'sourcing'`).
- * `codeStatus`/`sourcing_note` describen la confianza del código de
- * *sourcing* específicamente, no del local (ese siempre es "el que tienen").
- */
-export async function updatePartSourcing(
-  partId,
-  { localCode, sourcingCode, codeStatus, sourcingNote },
-) {
-  const oemCodes = []
-  const trimmedLocal = localCode?.trim()
-  if (trimmedLocal) oemCodes.push({ code: trimmedLocal, source: 'client_baseline', role: 'local' })
-
-  const trimmedSourcing = sourcingCode?.trim()
-  if (trimmedSourcing) {
-    oemCodes.push({
-      code: trimmedSourcing,
-      code_status: codeStatus,
-      source: 'manual_verification',
-      role: 'sourcing',
-    })
-  }
-
-  await updateDoc(doc(getDb(), 'parts', partId), {
-    oem_codes: oemCodes,
-    code_status: codeStatus,
-    sourcing_note: sourcingNote?.trim() || null,
-    updated_at: serverTimestamp(),
   })
 }
 
@@ -301,14 +248,12 @@ export function computeAnomalies(rawParts) {
       })
     })
 
-  // Las anomalías de la planilla original se detectan sobre el código LOCAL
-  // (el que trajo el cliente) — un código de sourcing verificado aparte no
-  // cambia si la planilla original tenía duplicados o precios en conflicto.
+  // Duplicados y precios en conflicto de la planilla original, por código.
   const byCode = new Map()
   rawParts
-    .filter((p) => getLocalCode(p.oem_codes)?.code)
+    .filter((p) => getCode(p.oem_codes)?.code)
     .forEach((p) => {
-      const code = getLocalCode(p.oem_codes).code
+      const code = getCode(p.oem_codes).code
       if (!byCode.has(code)) byCode.set(code, [])
       byCode.get(code).push(p)
     })

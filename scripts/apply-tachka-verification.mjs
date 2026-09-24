@@ -63,12 +63,11 @@ async function main() {
   for (const doc of snap.docs) {
     const raw = doc.data()
     const codes = raw.oem_codes || []
-    const localEntry = codes.find((c) => c.role === 'local') ?? codes[0]
-    const existingSourcing = codes.find((c) => c.role === 'sourcing')
-    const code = localEntry?.code
+    const current = codes[0]
+    const code = current?.code
     const hit = code ? results[code] : null
     if (!hit?.found) continue
-    if (existingSourcing?.source === 'manual_verification') continue
+    if (current?.source === 'manual_verification') continue
 
     const site = hit.site ?? 'tachka.ru'
     const reason = reserves.get(code)
@@ -77,10 +76,7 @@ async function main() {
       ? `Existe como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) pero con reservas: ${reason}. ${CAVEAT}`
       : `Verificado como artículo Dongfeng en ${site} ("${hit.nameRu}", ${hit.url}) — 2026-09-21. Ajuste al E70 no indicado en la ficha salvo modelos i-pro/Evolute. ${CAVEAT}`
 
-    const newCodes = [
-      localEntry ?? { code, source: 'client_baseline', role: 'local' },
-      { code, code_status: status, source: site.replace('.', '_'), role: 'sourcing' },
-    ]
+    const newCodes = [{ code, code_status: status, source: site.replace('.', '_') }]
 
     batch.update(doc.ref, {
       code_status: status,

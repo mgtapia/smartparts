@@ -91,7 +91,7 @@ export function useCatalog() {
             vehicleLabel: p.vehicle ? `${p.vehicle.brand} ${p.vehicle.shortModel}` : p.vehicleId,
             // Código local (Chile) — el que reconoce el comprador local. El
             // de sourcing (China/fábrica), cuando existe, se ve en la ficha.
-            code: p.localCode?.code || null,
+            code: p.code,
             codeStatus: p.codeStatus,
             baselinePriceUsd,
             baselinePriceClp: p.baselinePrice,

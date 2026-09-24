@@ -45,17 +45,12 @@ async function main() {
     const raw = doc.data()
     byStatus[raw.code_status] = (byStatus[raw.code_status] || 0) + 1
     const codes = raw.oem_codes || []
-    const sourcingEntry = codes.find((c) => c.role === 'sourcing')
-    const source = sourcingEntry
-      ? sourcingEntry.source
-      : codes.length
-        ? '(sin verificar — solo local)'
-        : '(sin código)'
+    const source = codes.length ? (codes[0].source ?? '(sin fuente)') : '(sin código)'
     bySourcingSource[source] = (bySourcingSource[source] || 0) + 1
   })
   console.log(`${vehicleId}: ${snap.size} repuestos totales`)
   console.log('Por code_status:', byStatus)
-  console.log('Código de sourcing por fuente:', bySourcingSource)
+  console.log('Código por fuente:', bySourcingSource)
 }
 
 main().then(() => process.exit(0))

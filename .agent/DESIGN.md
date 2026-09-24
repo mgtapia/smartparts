@@ -122,6 +122,7 @@ Si algo se repite dos veces con `sx` propio, se convierte en componente común. 
 - **Español** en todo lo visible. Solo se dejan en inglés las siglas universales del oficio: OEM, AFM, EXW, FCA, FOB, CIF, HS, MOQ, LCL, UN38.3. Sin anglicismos como "landed cost" o "supplier".
 - **Etiquetas**: precisas, de 1 a 3 palabras, con el término técnico correcto. Sin paréntesis salvo una unidad necesaria (`Tarifa aérea (US$/kg cobrable)`). Las opciones de un selector no repiten el nombre del campo.
 - **Explicaciones** en un `InfoNote` o al final de la página, nunca sueltas ni entre paréntesis.
+- **Sin ayuda de relleno**: un `InfoNote` solo se agrega si dice algo que ni el rojo, ni el tooltip, ni la etiqueta ya dicen. Si repite lo visible, no va.
 - **Títulos de sección** de 1 o 2 palabras.
 - **Tooltips**: máximo 260 px con texto balanceado (definido en el tema); no se sobrescribe.
 - **Tipografía**: 13 px como techo en tablas y fichas, sin negrita.

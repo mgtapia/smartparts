@@ -85,9 +85,7 @@ export default function QuotationDetailPage({ quotationId }) {
     return quotation.lines
       .filter(
         ({ part }) =>
-          !term ||
-          normalize(part.nameEs).includes(term) ||
-          normalize(part.localCode?.code).includes(term),
+          !term || normalize(part.nameEs).includes(term) || normalize(part.code).includes(term),
       )
       .map((line) => {
         const cost = costLine(line, { mode, rates, settingsFor })
@@ -151,7 +149,7 @@ export default function QuotationDetailPage({ quotationId }) {
       width: 100,
       render: ({ line }) => (
         <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
-          {line.part.localCode?.code ?? '—'}
+          {line.part.code ?? '—'}
         </Box>
       ),
     },

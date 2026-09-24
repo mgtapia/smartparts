@@ -69,18 +69,14 @@ async function main() {
       continue
     }
     const codes = raw.oem_codes || []
-    const localEntry = codes.find((c) => c.role === 'local') ?? codes[0]
-    if (localEntry?.source && localEntry.source !== 'client_baseline') {
+    const current = codes[0]
+    if (current?.source && current.source !== 'client_baseline') {
       skippedManual++
       continue
     }
 
-    // Solo se toca la entrada local (`role: 'local'`, o la única que había
-    // todavía sin migrar) — una entrada 'sourcing' ya verificada no se
-    // degrada solo porque el resto del lote se está marcando sin verificar.
-    const oemCodes = codes.map((c) =>
-      c === localEntry ? { ...c, role: 'local', code_status: 'provisional' } : c,
-    )
+    // Solo se marca el código del lote; uno ya verificado a mano no se toca (arriba).
+    const oemCodes = codes.map((c) => (c === current ? { ...c, code_status: 'provisional' } : c))
     batch.update(doc.ref, {
       code_status: 'provisional',
       oem_codes: oemCodes,

@@ -32,10 +32,8 @@ export function useCostAssumptions() {
   const updateSupplier = (supplierId, patch) =>
     setSupplierSettings((prev) => ({ ...prev, [supplierId]: { ...prev[supplierId], ...patch } }))
 
-  const reset = () => {
-    setRates(DEFAULT_RATES)
-    setSupplierSettings({})
-  }
+  // Solo los parámetros generales: lo de cada proveedor se edita en su cotización.
+  const reset = () => setRates(DEFAULT_RATES)
 
   return { mode, setMode, rates, setRates, settingsFor, updateSupplier, reset }
 }

@@ -18,7 +18,8 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { PART_TYPE, SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
-import CostAssumptionsMenu from './components/CostAssumptionsMenu'
+import CostParametersDialog from './components/CostParametersDialog'
+import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
 import QualityChips from './components/QualityChips'
 import {
   COLUMN_CHOICES,
@@ -291,18 +292,18 @@ export default function QuotationDetailPage({ quotationId }) {
           onChange={assumptions.setMode}
           options={MODE_OPTIONS}
         />
-        <CostAssumptionsMenu
+        <CostParametersDialog
           rates={rates}
           setRates={assumptions.setRates}
-          suppliers={[
-            { id: quotation.supplierId, name: supplierLabel(supplier, quotation.supplierId) },
-          ]}
-          settingsFor={settingsFor}
-          updateSupplier={assumptions.updateSupplier}
           onReset={assumptions.reset}
         />
-        <InfoNote paragraphs={DETAIL_HELP} />
+        <SupplierAssumptionsDialog
+          supplierName={supplierLabel(supplier, quotation.supplierId)}
+          settings={settingsFor(quotation.supplierId)}
+          onChange={(patch) => assumptions.updateSupplier(quotation.supplierId, patch)}
+        />
         <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />
+        <InfoNote paragraphs={DETAIL_HELP} />
       </Box>
 
       <Box sx={{ mb: 2 }}>

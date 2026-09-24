@@ -13,7 +13,7 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
-import CostAssumptionsMenu from './components/CostAssumptionsMenu'
+import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
 import { MATRIX_HELP, MODE_OPTIONS, supplierLabel } from './constants'
@@ -116,7 +116,6 @@ export default function QuotationsPage() {
               onChange={setMetric}
               options={METRIC_OPTIONS}
             />
-            <InfoNote paragraphs={MATRIX_HELP} />
             {metric === METRICS.LANDED ? (
               <>
                 <ToolbarSelectBox
@@ -125,16 +124,14 @@ export default function QuotationsPage() {
                   onChange={assumptions.setMode}
                   options={MODE_OPTIONS}
                 />
-                <CostAssumptionsMenu
+                <CostParametersDialog
                   rates={assumptions.rates}
                   setRates={assumptions.setRates}
-                  suppliers={matrix.suppliers}
-                  settingsFor={assumptions.settingsFor}
-                  updateSupplier={assumptions.updateSupplier}
                   onReset={assumptions.reset}
                 />
               </>
             ) : null}
+            <InfoNote paragraphs={MATRIX_HELP} />
           </>
         ) : null}
       </Box>

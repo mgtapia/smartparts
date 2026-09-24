@@ -5,9 +5,11 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 
+// Vacío = sin dato (null); un valor no numérico o negativo se ignora (undefined).
 const toNumber = (raw) => {
+  if (raw === '') return null
   const n = Number(raw)
-  return Number.isFinite(n) && n >= 0 ? n : null
+  return Number.isFinite(n) && n >= 0 ? n : undefined
 }
 
 /**
@@ -15,7 +17,13 @@ const toNumber = (raw) => {
  * catálogo: caption arriba, input pequeño con prefijo (US$, %) y sin label
  * flotante. Solo confirma valores válidos y no negativos.
  */
-export default function NumberField({ label, value, onCommit, adornment }) {
+export default function NumberField({
+  label,
+  value,
+  onCommit,
+  adornment,
+  placeholder = 'Sin definir',
+}) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
       <Typography variant="caption" color="text.secondary">
@@ -24,10 +32,11 @@ export default function NumberField({ label, value, onCommit, adornment }) {
       <TextField
         size="small"
         type="number"
-        value={value}
+        value={value ?? ''}
+        placeholder={placeholder}
         onChange={(e) => {
           const n = toNumber(e.target.value)
-          if (n !== null) onCommit(n)
+          if (n !== undefined) onCommit(n)
         }}
         slotProps={{
           input: { startAdornment: <InputAdornment position="start">{adornment}</InputAdornment> },

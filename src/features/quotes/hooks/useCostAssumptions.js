@@ -18,8 +18,11 @@ const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
  */
 export function useCostAssumptions() {
   const [mode, setMode] = usePersistentState('quotes.mode', SHIPPING_MODES.SEA_LCL)
-  const [storedRates, setRates] = usePersistentState('quotes.rates', DEFAULT_RATES)
-  const [supplierSettings, setSupplierSettings] = usePersistentState('quotes.supplierSettings', {})
+  const [storedRates, setRates] = usePersistentState('quotes.rates.v2', DEFAULT_RATES)
+  const [supplierSettings, setSupplierSettings] = usePersistentState(
+    'quotes.supplierSettings.v2',
+    {},
+  )
 
   // Un valor guardado de una versión anterior puede no tener claves nuevas.
   const rates = useMemo(

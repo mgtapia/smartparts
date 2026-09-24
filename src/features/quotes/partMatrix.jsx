@@ -28,6 +28,7 @@ export const QUALITY_OPTIONS = [
 const shortReason = (reason) => {
   if (/Sin Incoterm/.test(reason ?? '')) return 'Sin Incoterm'
   if (/Moneda sin definir/.test(reason ?? '')) return 'Sin moneda'
+  if (/Falta/.test(reason ?? '')) return 'Falta dato'
   return '—'
 }
 

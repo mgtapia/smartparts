@@ -25,8 +25,8 @@ const ASSUMED_HS = 'SUPUESTA-TLC'
 
 /**
  * @typedef {Object} UnitCostAssumptions
- * @property {number} airUsdPerKgCents   Tarifa aérea, centavos de USD por kg cobrable.
- * @property {number} seaUsdPerRtCents   Tarifa marítima LCL, centavos de USD por R/T (m³ o t).
+ * @property {number|null} airUsdPerKgCents   Tarifa aérea, centavos de USD por kg cobrable; null = sin dato.
+ * @property {number|null} seaUsdPerRtCents   Tarifa marítima LCL, centavos de USD por R/T (m³ o t); null = sin dato.
  * @property {number} [airVolumetricDivisor]  cm³ por kg para el peso volumétrico aéreo; si falta, el del set de parámetros.
  * @property {number} [generalDutyBp]    Arancel general (sin Form F), en bp; si falta, el del set de parámetros.
  * @property {number} ftaDutyBp          Arancel con TLC (solo con Form F), en basis points.
@@ -65,7 +65,7 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
  * @param {import('../../libs/money').Money} input.unitPrice   Precio unitario del proveedor.
  * @param {string|null} input.incoterm
  * @param {boolean} [input.incotermAssumed]  El Incoterm no viene de la cotización: es un supuesto.
- * @param {number} input.originCostBp     Costo de origen EXW→FOB de ESTE proveedor, en bp del precio.
+ * @param {number|null} input.originCostBp     Costo de origen EXW→FOB de ESTE proveedor, en bp del precio.
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
  * @param {number} input.weightG          Peso bruto por unidad (g).
  * @param {number} input.volumeCm3        Volumen por unidad (cm³).
@@ -92,6 +92,15 @@ export function computeUnitCost(input) {
     }
   }
 
+  const isAir = mode === 'air' || mode === 'courier'
+  // Sin dato no se inventa: se informa qué falta para poder calcular.
+  const missing = []
+  if (isExw && input.originCostBp == null) missing.push('Falta el gasto de origen del proveedor')
+  if ((isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents) == null) {
+    missing.push(`Falta la tarifa de flete ${isAir ? 'aéreo' : 'marítimo'}`)
+  }
+  if (missing.length > 0) return { blockers: missing, components: [], landedNetUsdMicro: null }
+
   const priceUsdMicro = toUsdMicro(unitPrice, fx)
 
   // 1) Costo de origen (solo EXW): % del precio, específico del proveedor.
@@ -99,7 +108,6 @@ export function computeUnitCost(input) {
   const fobMicro = priceUsdMicro + originMicro
 
   // 2) Flete unitario: unidades cobrables × tarifa.
-  const isAir = mode === 'air' || mode === 'courier'
   // Aéreo: el transportista cobra el MAYOR entre el peso real y el volumétrico
   // (volumen ÷ divisor); marítimo LCL: el mayor entre toneladas y m³.
   const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor

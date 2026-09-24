@@ -59,10 +59,10 @@ export const DEFAULT_FX = { usdClp: 950_000_000, cnyUsd: 139_000, asOf: '2026-09
 // precio EXW); depende de dónde esté cada proveedor, por eso se ajusta por
 // proveedor en la pantalla.
 export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
-  airUsdPerKgCents: 600, // US$ 6,00 por kg cobrable — referencial.
-  seaUsdPerRtCents: 18000, // US$ 180 por R/T (m³) LCL — referencial.
+  airUsdPerKgCents: null, // US$ por kg cobrable. Sin dato: lo define el equipo con la cotización de un forwarder.
+  seaUsdPerRtCents: null, // US$ por R/T (m³) LCL. Sin dato, igual que la aérea.
   airVolumetricDivisor: 6000, // cm³ por kg: convierte volumen a peso volumétrico (6000 estándar IATA; algunos couriers 5000).
   generalDutyBp: 600, // 6 %: arancel general, se aplica si el proveedor no tiene certificado de origen (Formulario F).
   ftaDutyBp: 0, // arancel con TLC Chile-China (solo con Formulario F): 0 % estimado, depende de la partida — sin verificar.
-  defaultOriginCostBp: 500, // 5% del precio EXW — placeholder, sin fuente.
+  defaultOriginCostBp: null, // % del precio EXW de gastos hasta FOB. Sin dato: se define por proveedor.
 }

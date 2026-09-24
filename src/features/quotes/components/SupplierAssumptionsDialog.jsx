@@ -70,8 +70,8 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
             <NumberField
               label="Gastos EXW → FOB (% precio EXW)"
               adornment="%"
-              value={settings.originCostBp / 100}
-              onCommit={(n) => onChange({ originCostBp: Math.round(n * 100) })}
+              value={settings.originCostBp == null ? null : settings.originCostBp / 100}
+              onCommit={(n) => onChange({ originCostBp: n == null ? null : Math.round(n * 100) })}
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
               <Typography variant="caption" color="text.secondary">

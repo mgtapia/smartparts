@@ -18,6 +18,9 @@ import { RADIUS } from '@constants/colors'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
 import NumberField from './NumberField'
 
+const fromCents = (c) => (c == null ? null : c / 100)
+const toCents = (n) => (n == null ? null : Math.round(n * 100))
+
 /**
  * Parámetros generales del cálculo de costo (modo de transporte, tarifas de
  * flete, factor volumétrico y aranceles), en un modal. Son estimaciones del
@@ -74,8 +77,8 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
                 <NumberField
                   label="Tarifa aérea (US$/kg cobrable)"
                   adornment="US$"
-                  value={rates.airUsdPerKgCents / 100}
-                  onCommit={(n) => setRates({ ...rates, airUsdPerKgCents: Math.round(n * 100) })}
+                  value={fromCents(rates.airUsdPerKgCents)}
+                  onCommit={(n) => setRates({ ...rates, airUsdPerKgCents: toCents(n) })}
                 />
                 <NumberField
                   label="Factor volumétrico aéreo (cm³/kg)"
@@ -90,8 +93,8 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
               <NumberField
                 label="Tarifa marítima LCL (US$/W-M)"
                 adornment="US$"
-                value={rates.seaUsdPerRtCents / 100}
-                onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: Math.round(n * 100) })}
+                value={fromCents(rates.seaUsdPerRtCents)}
+                onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: toCents(n) })}
               />
             )}
           </Box>

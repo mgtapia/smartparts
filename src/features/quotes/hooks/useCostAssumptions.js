@@ -3,7 +3,11 @@ import { usePersistentState } from '@hooks/usePersistentState'
 import { SHIPPING_MODES } from '@constants/enums'
 import { DEFAULT_UNIT_COST_ASSUMPTIONS } from '@mocks/costParams'
 
-const { defaultOriginCostBp, ...DEFAULT_RATES } = DEFAULT_UNIT_COST_ASSUMPTIONS
+const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_RATES } =
+  DEFAULT_UNIT_COST_ASSUMPTIONS
+// Los aranceles son parámetros globales fijos (no dependen del proveedor ni de la
+// cotización): no se editan ni se guardan por navegador.
+const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
 
 /**
  * Supuestos editables del costo unitario: modo de envío, tarifas, arancel TLC
@@ -18,7 +22,10 @@ export function useCostAssumptions() {
   const [supplierSettings, setSupplierSettings] = usePersistentState('quotes.supplierSettings', {})
 
   // Un valor guardado de una versión anterior puede no tener claves nuevas.
-  const rates = useMemo(() => ({ ...DEFAULT_RATES, ...storedRates }), [storedRates])
+  const rates = useMemo(
+    () => ({ ...DEFAULT_RATES, ...storedRates, ...FIXED_DUTIES }),
+    [storedRates],
+  )
 
   const settingsFor = useCallback(
     (supplierId) => ({

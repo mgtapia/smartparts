@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
@@ -14,7 +13,7 @@ import ToolbarSearch from '@components/common/ToolbarSearch'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
-import { PART_TYPE, SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
+import { PART_TYPE } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostParametersDialog from './components/CostParametersDialog'
@@ -27,7 +26,6 @@ import {
   DETAIL_HELP,
   formatDate,
   supplierLabel,
-  formatIsoDate,
 } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine, unitPriceMoney } from './hooks/useQuotations'
@@ -88,17 +86,16 @@ export default function QuotationDetailPage({ quotationId }) {
   if (!quotation) {
     return (
       <ContentWidth>
-        <PageHeader title="Cotización no encontrada" />
-        <Button component={Link} href="/quotes">
-          Volver a cotizaciones
-        </Button>
+        <PageHeader
+          back={{ href: '/quotes', label: 'Cotizaciones' }}
+          title="Cotización no encontrada"
+        />
       </ContentWidth>
     )
   }
 
   const supplier = quotation.supplier
   const sample = rows.find((r) => r.cost.components.length > 0)
-  const declarations = supplier?.declarations ?? []
 
   const allColumns = [
     {
@@ -207,10 +204,8 @@ export default function QuotationDetailPage({ quotationId }) {
 
   return (
     <ContentWidth>
-      <Button component={Link} href="/quotes" size="small" sx={{ mb: 1, textTransform: 'none' }}>
-        ← Cotizaciones
-      </Button>
       <PageHeader
+        back={{ href: '/quotes', label: 'Cotizaciones' }}
         title={supplierLabel(supplier, 'Proveedor')}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
         meta={`${rows.length} de ${quotation.lineCount} SKU.`}
@@ -218,12 +213,6 @@ export default function QuotationDetailPage({ quotationId }) {
 
       <Card sx={{ p: 2, mb: 1.5 }}>
         <Box sx={{ display: 'flex', columnGap: 4, rowGap: 1.5, flexWrap: 'wrap' }}>
-          <Info label="Razón social">{supplier?.name ?? '—'}</Info>
-          <Info label="Tipo">
-            <UncertainValue verified={false} reason="Declarado por el proveedor, sin verificar">
-              {SUPPLIER_TYPE_LABELS_ES[supplier?.supplier_type] ?? 'Sin confirmar'}
-            </UncertainValue>
-          </Info>
           <Info label="Incoterm">
             {quotation.incoterms.join(', ') || (
               <UncertainValue verified={false} reason="La cotización no indica Incoterm">
@@ -250,19 +239,9 @@ export default function QuotationDetailPage({ quotationId }) {
             </UncertainValue>
           </Info>
           <Info label="Fecha">{formatDate(quotation.capturedAt)}</Info>
-          <Info label="Vigencia">
-            {quotation.validUntil ? (
-              formatIsoDate(quotation.validUntil)
-            ) : (
-              <UncertainValue verified={false} reason="La cotización no indica vigencia">
-                Sin vigencia
-              </UncertainValue>
-            )}
-          </Info>
           <Info label="Vende">
             <QualityChips quotation={quotation} />
           </Info>
-          <Info label="Repuestos">{quotation.partCount}</Info>
           <Info label="Por revisar">
             <UncertainValue
               verified={quotation.pendingCount === 0}
@@ -272,11 +251,6 @@ export default function QuotationDetailPage({ quotationId }) {
             </UncertainValue>
           </Info>
         </Box>
-        {declarations.length > 0 ? (
-          <Typography variant="caption" color="error.main" sx={{ display: 'block', mt: 1.5 }}>
-            Lo que declara el proveedor (sin verificar): {declarations.join(' · ')}
-          </Typography>
-        ) : null}
       </Card>
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>

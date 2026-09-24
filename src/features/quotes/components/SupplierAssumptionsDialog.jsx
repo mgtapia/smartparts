@@ -28,6 +28,8 @@ const FORM_F_OPTIONS = [
   { value: 'no', label: 'No emite Formulario F' },
 ]
 
+const FORM_F_LABELS = Object.fromEntries(FORM_F_OPTIONS.map((o) => [o.value, o.label]))
+
 /**
  * Supuestos que dependen del proveedor y alimentan el cálculo de sus costos:
  * gastos de origen (EXW → FOB) según dónde está, y si emite Formulario F (de
@@ -37,10 +39,13 @@ const FORM_F_OPTIONS = [
  */
 export default function SupplierAssumptionsDialog({ supplierName, settings, onChange }) {
   const [open, setOpen] = useState(false)
+  const [editingFormF, setEditingFormF] = useState(false)
+  // Un dato ya confirmado no se edita de pasada: se corrige con una acción explícita.
+  const formFLocked = settings.formF !== 'unknown' && !editingFormF
 
   return (
     <>
-      <ToolbarButton label="Supuestos del proveedor" onClick={() => setOpen(true)} />
+      <ToolbarButton label="Supuestos" onClick={() => setOpen(true)} />
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -81,13 +86,25 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
               <Typography variant="caption" color="text.secondary">
                 Certificado de origen (Formulario F)
               </Typography>
-              <ToolbarSelectBox
-                fullWidth
-                label="Certificado de origen"
-                value={settings.formF}
-                onChange={(formF) => onChange({ formF })}
-                options={FORM_F_OPTIONS}
-              />
+              {formFLocked ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, height: 44 }}>
+                  <Typography variant="body2" sx={{ fontSize: 13 }}>
+                    {FORM_F_LABELS[settings.formF]}
+                  </Typography>
+                  <ModalActionButton label="Corregir" onClick={() => setEditingFormF(true)} />
+                </Box>
+              ) : (
+                <ToolbarSelectBox
+                  fullWidth
+                  label="Certificado de origen"
+                  value={settings.formF}
+                  onChange={(formF) => {
+                    onChange({ formF })
+                    setEditingFormF(false)
+                  }}
+                  options={FORM_F_OPTIONS}
+                />
+              )}
             </Box>
           </Box>
         </DialogContent>

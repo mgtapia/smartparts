@@ -58,7 +58,7 @@ export const supplierLabel = (supplier, fallbackId = '') =>
 export const PARAMETERS_HELP = [
   'Flete aéreo: el transportista cobra el mayor entre el peso real y el peso volumétrico (volumen ÷ factor volumétrico, 6000 cm³ por kg es lo estándar; algunos couriers usan 5000). Flete marítimo LCL: el mayor entre las toneladas y los m³.',
   'Estimaciones del equipo, sin verificar: reemplazar por cotizaciones reales de forwarder y del agente de aduanas. Por eso los costos calculados salen en rojo.',
-  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). El arancel con TLC se aplica solo a los que lo emiten, y eso se marca en "Supuestos del proveedor", dentro de su cotización. Mientras no esté confirmado, se aplica el general.',
+  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). Los aranceles son fijos y no dependen del proveedor: lo que sí depende es si el proveedor emite el Formulario F, que se marca en "Supuestos". Mientras no esté confirmado, se aplica el general.',
 ]
 
 export const SUPPLIER_ASSUMPTIONS_HELP = [

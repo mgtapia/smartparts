@@ -8,8 +8,10 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
+import UncertainValue from '@components/common/UncertainValue'
 import ModalActionButton from '@components/common/ModalActionButton'
-import ToolbarButton from '@components/common/ToolbarButton'
+import TuneIcon from '@mui/icons-material/Tune'
+import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
@@ -30,7 +32,9 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
 
   return (
     <>
-      <ToolbarButton label="Parámetros" onClick={() => setOpen(true)} />
+      <ToolbarIconButton label="Parámetros de cálculo" onClick={() => setOpen(true)}>
+        <TuneIcon fontSize="small" />
+      </ToolbarIconButton>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -89,17 +93,13 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
                 onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: Math.round(n * 100) })}
               />
             )}
-            <NumberField
+            <FixedValue
               label="Arancel ad valorem general (% CIF)"
-              adornment="%"
-              value={rates.generalDutyBp / 100}
-              onCommit={(n) => setRates({ ...rates, generalDutyBp: Math.round(n * 100) })}
+              value={`${rates.generalDutyBp / 100} %`}
             />
-            <NumberField
+            <FixedValue
               label="Arancel TLC Chile-China (% CIF)"
-              adornment="%"
-              value={rates.ftaDutyBp / 100}
-              onCommit={(n) => setRates({ ...rates, ftaDutyBp: Math.round(n * 100) })}
+              value={`${rates.ftaDutyBp / 100} %`}
             />
           </Box>
         </DialogContent>
@@ -109,5 +109,24 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
         </DialogActions>
       </Dialog>
     </>
+  )
+}
+
+/** Parámetro global que no se edita acá: viene del set de parámetros, sin verificar. */
+function FixedValue({ label, value }) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: 13, height: 44, lineHeight: '44px' }}>
+        <UncertainValue
+          verified={false}
+          reason="Fijo por ley, igual para todos los proveedores. Valor estimado, sin verificar con el agente de aduanas"
+        >
+          {value}
+        </UncertainValue>
+      </Typography>
+    </Box>
   )
 }

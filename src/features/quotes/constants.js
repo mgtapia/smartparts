@@ -34,7 +34,14 @@ export const COLUMN_CHOICES = [
   { id: 'price', label: 'Precio' },
   ...COST_COLUMNS.map((c) => ({ id: c.code, label: c.label })),
 ]
-export const DEFAULT_HIDDEN = new Set(['category', 'insurance', 'cif', 'localCosts', 'vat'])
+export const DEFAULT_HIDDEN = new Set([
+  'category',
+  'variant',
+  'insurance',
+  'cif',
+  'localCosts',
+  'vat',
+])
 
 // Textos de ayuda: se muestran a demanda (InfoNote), no sueltos en la página.
 export const MATRIX_HELP = [

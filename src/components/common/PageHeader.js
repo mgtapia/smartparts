@@ -7,9 +7,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 /**
  * Encabezado de página. `back` ({ href, label }) pone una flecha de volver a la
- * izquierda del título, en la misma fila. `meta` es el dato corto de estado (ej. "592 de 592
- * repuestos.") y va en la misma fila que el título, alineado a la derecha;
- * `description` es texto explicativo y va debajo del título.
+ * izquierda del título, en la misma fila. A la derecha van las `actions` y, al
+ * final, `meta`: el dato corto de estado (ej. "592 de 592 repuestos."), siempre
+ * el último. `description` es texto explicativo y va debajo del título.
  */
 export default function PageHeader({ title, description, meta, actions, back }) {
   return (
@@ -23,32 +23,23 @@ export default function PageHeader({ title, description, meta, actions, back }) 
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box
-          sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2 }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-            {back ? (
-              <Tooltip title={back.label}>
-                <IconButton
-                  component={Link}
-                  href={back.href}
-                  aria-label={back.label}
-                  size="small"
-                  sx={{ ml: -1 }}
-                >
-                  <ArrowBackIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-            <Typography variant="h5" component="h1">
-              {title}
-            </Typography>
-          </Box>
-          {meta ? (
-            <Typography variant="body2" color="text.secondary">
-              {meta}
-            </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          {back ? (
+            <Tooltip title={back.label}>
+              <IconButton
+                component={Link}
+                href={back.href}
+                aria-label={back.label}
+                size="small"
+                sx={{ ml: -1 }}
+              >
+                <ArrowBackIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           ) : null}
+          <Typography variant="h5" component="h1">
+            {title}
+          </Typography>
         </Box>
         {description ? (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -56,7 +47,16 @@ export default function PageHeader({ title, description, meta, actions, back }) 
           </Typography>
         ) : null}
       </Box>
-      {actions ? <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box> : null}
+      {actions || meta ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          {actions ? <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box> : null}
+          {meta ? (
+            <Typography variant="body2" color="text.secondary">
+              {meta}
+            </Typography>
+          ) : null}
+        </Box>
+      ) : null}
     </Box>
   )
 }

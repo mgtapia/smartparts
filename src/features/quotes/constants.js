@@ -66,12 +66,12 @@ export const supplierLabel = (supplier, fallbackId = '') =>
 export const PARAMETERS_HELP = [
   'Flete aéreo: el transportista cobra el mayor entre el peso real y el peso volumétrico (volumen ÷ factor volumétrico, 6000 cm³ por kg es lo estándar; algunos couriers usan 5000). Flete marítimo LCL: el mayor entre las toneladas y los m³.',
   'Estimaciones del equipo, sin verificar: reemplazar por cotizaciones reales de forwarder y del agente de aduanas. Por eso los costos calculados salen en rojo.',
-  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). Los aranceles son fijos y no dependen del proveedor: lo que sí depende es si el proveedor emite el Formulario F, que se marca en "Supuestos". Mientras no esté confirmado, se aplica el general.',
+  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). Los aranceles son fijos y no dependen del proveedor: lo que sí depende es si el proveedor emite el Formulario F, que se confirma en su ficha. Mientras no esté confirmado, se aplica el general.',
 ]
 
 export const SUPPLIER_ASSUMPTIONS_HELP = [
   'Estimaciones sin verificar: se confirman con el proveedor y con un forwarder.',
-  'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm. El costo de origen (EXW → FOB) depende de dónde está el proveedor. Sin Formulario F el arancel es el general; con Formulario F, el arancel con TLC.',
+  'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm. El costo de origen (EXW → FOB) depende de dónde está el proveedor. El Formulario F no se supone: se confirma en la ficha del proveedor.',
 ]
 
 // Incoterms que el motor sabe llevar a FOB (ver src/core/costing/unitCost.js) y monedas con que se cotiza.

@@ -1,10 +1,10 @@
-import Placeholder from '@components/common/Placeholder'
+import { Suspense } from 'react'
+import SuppliersPage from '@features/suppliers/SuppliersPage'
 
-export default function SuppliersPage() {
+export default function Page() {
   return (
-    <Placeholder
-      title="Proveedores"
-      description="Proveedores chinos: ficha, MOQ, incoterm y scorecard."
-    />
+    <Suspense>
+      <SuppliersPage />
+    </Suspense>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Button from '@mui/material/Button'
 import { RADIUS } from '@constants/colors'
 
@@ -8,9 +9,10 @@ import { RADIUS } from '@constants/colors'
  * lenguaje que las pastillas de filtro (pill, 44 px, 13 px, sin negrita) pero
  * sin chevron, porque no despliega una lista sino que abre otra cosa.
  */
-export default function ToolbarButton({ label, onClick, startIcon }) {
+export default function ToolbarButton({ label, onClick, startIcon, href }) {
   return (
     <Button
+      {...(href ? { component: Link, href } : {})}
       variant="outlined"
       onClick={onClick}
       startIcon={startIcon}

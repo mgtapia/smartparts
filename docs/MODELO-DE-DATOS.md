@@ -138,6 +138,12 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 
 **`suppliers/{id}`** agrega `alias` (nombre corto para mostrar), `supplier_type` (`factory`|`distributor`|`reseller`|`trader`, declarado por el proveedor, sin verificar), `declarations[]` (lo que dijo textualmente), `is_placeholder`, `contact`.
 
+**`suppliers/{id}.facts`** (ficha del proveedor): datos que se confirman con fuente, cada uno `{ value, source, at }`. Claves: `type`, `formF` (`yes`|`no`), `location`, `port`, `moq`, `payment`, `leadTime`, `license`. Un dato está **confirmado** si tiene valor y fuente; si no, la UI lo muestra en rojo. `type` se replica en `supplier_type` y `supplier_type_source`. El Formulario F que usa el motor de costos sale de `facts.formF.value`; sin dato se trata como desconocido y se aplica el arancel general. Campos simples sin confirmación: `alias`, `name`, `name_zh`, `contact.*`.
+
+**`quotes/{id}.confirmations`**: `{ incoterm, incoterm_place, currency }`, cada uno `{ source, at }`. Incoterm, lugar y moneda se confirman por cotización completa (todas sus líneas) desde su detalle; sin registro el dato es del equipo y va en rojo.
+
+**`parts/{id}`**: un solo código, el mismo en Chile y en China. `oem_codes[0]` es el código, `code_status` (`missing`|`provisional`|`confirmed`) y `code_source` su evidencia; confirmar exige fuente citable. Además `hs_code` y `hs_code_source` (partida arancelaria), y la imagen en la subcolección `parts/{id}/media/main` como `data_url` reducido (para no engordar la lectura del catálogo).
+
 **`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.
 
 Regla dura: **nunca auto-confirmar `part_type: 'original'`.** Que un vendedor escriba 原厂 no significa nada — pasar a verificado requiere acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).

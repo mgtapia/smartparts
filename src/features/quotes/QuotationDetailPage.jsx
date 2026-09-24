@@ -8,6 +8,7 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import ToolbarButton from '@components/common/ToolbarButton'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import InfoNote from '@components/common/InfoNote'
@@ -234,6 +235,9 @@ export default function QuotationDetailPage({ quotationId }) {
         title={supplierLabel(supplier, 'Proveedor')}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
         meta={`${rows.length} de ${quotation.lineCount} SKU.`}
+        actions={
+          <ToolbarButton label="Ficha del proveedor" href={`/suppliers/${quotation.supplierId}`} />
+        }
       />
 
       <Card sx={{ p: 2, mb: 1.5 }}>
@@ -271,7 +275,7 @@ export default function QuotationDetailPage({ quotationId }) {
             </UncertainValue>
           </InfoField>
           <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
-          <InfoField label="Vende">
+          <InfoField label="Oferta">
             <QualityChips quotation={quotation} />
           </InfoField>
         </InfoGrid>

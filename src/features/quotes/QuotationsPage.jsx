@@ -173,7 +173,7 @@ const LIST_COLUMNS = [
   },
   {
     id: 'sells',
-    label: 'Vende',
+    label: 'Oferta',
     width: 130,
     tooltip: 'Calidades que ofrece: OEM, AFM o ambas.',
     render: (q) => <QualityChips quotation={q} />,
@@ -223,17 +223,17 @@ const LIST_COLUMNS = [
     ),
   },
   {
-    id: 'date',
-    label: 'Fecha',
-    width: 100,
-    render: (q) => formatDate(q.capturedAt),
-  },
-  {
     id: 'parts',
     label: 'Repuestos',
     width: 90,
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
     render: (q) => q.partCount,
+  },
+  {
+    id: 'date',
+    label: 'Fecha',
+    width: 100,
+    render: (q) => formatDate(q.capturedAt),
   },
 ]

@@ -56,7 +56,8 @@ export function costLine(line, { mode, rates, settingsFor }) {
     incoterm: quote.incoterm ?? (incotermAssumed ? settings.assumedIncoterm : null),
     incotermAssumed,
     originCostBp: settings.originCostBp,
-    formF: settings.formF,
+    // Formulario F: dato del proveedor que se confirma en su ficha.
+    formF: quote.supplier?.facts?.formF?.value ?? 'unknown',
     weightG: part.weightG,
     volumeCm3: part.volumeCm3,
     logisticsConfirmed: CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus),

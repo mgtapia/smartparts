@@ -35,7 +35,7 @@ export const RAIL_ITEMS = Object.freeze([
     path: '/suppliers',
     labelEs: 'Proveedores',
     icon: 'Factory',
-    implemented: false,
+    implemented: true,
   },
   {
     key: 'quotes',

@@ -7,14 +7,14 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
+import RuleIcon from '@mui/icons-material/Rule'
 import InfoNote from '@components/common/InfoNote'
 import ModalActionButton from '@components/common/ModalActionButton'
-import RuleIcon from '@mui/icons-material/Rule'
+import NumberField from '@components/common/NumberField'
 import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
 import { SUPPLIER_ASSUMPTIONS_HELP } from '../constants'
-import NumberField from '@components/common/NumberField'
 
 const INCOTERM_OPTIONS = [
   { value: 'none', label: 'No suponer' },
@@ -23,26 +23,14 @@ const INCOTERM_OPTIONS = [
   { value: 'FOB', label: 'FOB' },
 ]
 
-const FORM_F_OPTIONS = [
-  { value: 'unknown', label: 'Sin confirmar' },
-  { value: 'yes', label: 'Emite' },
-  { value: 'no', label: 'No emite' },
-]
-
-const FORM_F_LABELS = Object.fromEntries(FORM_F_OPTIONS.map((o) => [o.value, o.label]))
-
 /**
- * Supuestos que dependen del proveedor y alimentan el cálculo de sus costos:
- * gastos de origen (EXW → FOB) según dónde está, y si emite Formulario F (de
- * eso depende que se aplique el arancel TLC). Van en la cotización de ese
- * proveedor, no entre los parámetros generales. Hoy se guardan por navegador;
- * cuando exista la edición de la ficha de proveedor, se guardan ahí.
+ * Supuestos del proveedor mientras no haya un dato real: gastos de origen
+ * EXW → FOB e Incoterm cuando la cotización no lo indica. Los datos que sí se
+ * conocen (Formulario F, ubicación, puerto) no se suponen: se confirman en la
+ * ficha del proveedor. Hoy los supuestos se guardan por navegador.
  */
 export default function SupplierAssumptionsDialog({ supplierName, settings, onChange }) {
   const [open, setOpen] = useState(false)
-  const [editingFormF, setEditingFormF] = useState(false)
-  // Un dato ya confirmado no se edita de pasada: se corrige con una acción explícita.
-  const formFLocked = settings.formF !== 'unknown' && !editingFormF
 
   return (
     <>
@@ -84,30 +72,6 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
                 onChange={(assumedIncoterm) => onChange({ assumedIncoterm })}
                 options={INCOTERM_OPTIONS}
               />
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-              <Typography variant="caption" color="text.secondary">
-                Formulario F
-              </Typography>
-              {formFLocked ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, height: 44 }}>
-                  <Typography variant="body2" sx={{ fontSize: 13 }}>
-                    {FORM_F_LABELS[settings.formF]}
-                  </Typography>
-                  <ModalActionButton label="Corregir" onClick={() => setEditingFormF(true)} />
-                </Box>
-              ) : (
-                <ToolbarSelectBox
-                  fullWidth
-                  label="Certificado de origen"
-                  value={settings.formF}
-                  onChange={(formF) => {
-                    onChange({ formF })
-                    setEditingFormF(false)
-                  }}
-                  options={FORM_F_OPTIONS}
-                />
-              )}
             </Box>
           </Box>
         </DialogContent>

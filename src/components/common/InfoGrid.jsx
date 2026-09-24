@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 
 /**
  * Datos clave de una ficha en columnas iguales separadas por un divisor
@@ -27,7 +28,8 @@ export function InfoGrid({ columns, children }) {
   )
 }
 
-export function InfoField({ label, children, onEdit }) {
+/** `hint`: detalle del dato, se ve al pasar el mouse por el ícono junto al rótulo. */
+export function InfoField({ label, children, onEdit, hint }) {
   return (
     <Box
       sx={{
@@ -40,6 +42,11 @@ export function InfoField({ label, children, onEdit }) {
     >
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
         {label}
+        {hint ? (
+          <Tooltip title={hint}>
+            <HelpOutlineIcon sx={{ fontSize: 13, ml: 0.5, verticalAlign: 'text-bottom' }} />
+          </Tooltip>
+        ) : null}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minHeight: 28, fontSize: 13 }}>
         {children}

@@ -19,7 +19,7 @@ export const RAIL_ITEMS = Object.freeze([
     path: '/vehicles',
     labelEs: 'Vehículos',
     icon: 'DirectionsCar',
-    implemented: false,
+    implemented: true,
   },
   {
     key: 'catalog',

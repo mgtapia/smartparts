@@ -224,6 +224,12 @@ const LIST_COLUMNS = [
     ),
   },
   {
+    id: 'vehicles',
+    label: 'Vehículos',
+    width: 110,
+    render: (q) => q.vehicles.map((v) => v.label).join(', ') || '—',
+  },
+  {
     id: 'parts',
     label: 'Repuestos',
     width: 90,

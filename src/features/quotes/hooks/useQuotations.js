@@ -7,6 +7,7 @@ import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
 import { computeUnitCost } from '@core/costing/unitCost'
 import { money } from '@libs/money'
 import { toUsdMicro } from '@libs/fx'
+import { vehicleLabel } from '@features/vehicles/constants'
 
 const NO_FILE = 'sin-archivo'
 
@@ -108,6 +109,17 @@ export function useQuotationsData() {
       return {
         ...g,
         lineCount: g.lines.length,
+        // Vehículos cuyos repuestos incluye la cotización.
+        vehicles: [
+          ...new Map(
+            g.lines
+              .filter((l) => l.part.vehicle)
+              .map((l) => [
+                l.part.vehicleId,
+                { id: l.part.vehicleId, label: vehicleLabel(l.part.vehicle) },
+              ]),
+          ).values(),
+        ],
         partCount: new Set(g.lines.map((l) => l.part.id)).size,
         originalCount: q.filter((x) => x.partType === 'original').length,
         alternativeCount: q.filter((x) => x.partType === 'alternative').length,

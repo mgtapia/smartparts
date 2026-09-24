@@ -24,6 +24,7 @@ import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostParametersDialog from './components/CostParametersDialog'
 import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
 import QualityChips from './components/QualityChips'
+import VehicleLinks from '@features/vehicles/components/VehicleLinks'
 import {
   COLUMN_CHOICES,
   COST_COLUMNS,
@@ -279,6 +280,9 @@ export default function QuotationDetailPage({ quotationId }) {
           </InfoField>
           <InfoField label="Oferta">
             <QualityChips quotation={quotation} />
+          </InfoField>
+          <InfoField label="Vehículos">
+            <VehicleLinks vehicles={quotation.vehicles} />
           </InfoField>
           <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
         </InfoGrid>

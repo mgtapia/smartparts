@@ -1,10 +1,10 @@
-import Placeholder from '@components/common/Placeholder'
+import { Suspense } from 'react'
+import VehiclesPage from '@features/vehicles/VehiclesPage'
 
-export default function VehiclesPage() {
+export default function Page() {
   return (
-    <Placeholder
-      title="Vehículos"
-      description="Los 4 EVs de la flota: despiece, cotizaciones y costo de mantención."
-    />
+    <Suspense>
+      <VehiclesPage />
+    </Suspense>
   )
 }

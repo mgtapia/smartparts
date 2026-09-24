@@ -91,22 +91,6 @@ export function buildAnalytics({ vehicleId, parts, lines, quality, supplierName 
     }))
     .sort((a, b) => b.parts - a.parts)
 
-  // Canasta común: repuestos que cotizaron todos los proveedores, sumados por proveedor.
-  const commonIds = quotedIds.filter((id) => cheapest.get(id).size === supplierIds.length)
-  const basket =
-    supplierIds.length >= 2 && commonIds.length > 0
-      ? supplierIds
-          .map((supplierId) => ({
-            id: supplierId,
-            name: supplierName(supplierId),
-            totalMicro: commonIds.reduce(
-              (sum, id) => sum + cheapest.get(id).get(supplierId).micro,
-              0,
-            ),
-          }))
-          .sort((a, b) => a.totalMicro - b.totalMicro)
-      : []
-
   // Calidad: independiente del filtro; qué ofrece cada proveedor y cuánto difiere AFM de OEM.
   const offered = new Map() // supplierId -> { oem:Set, afm:Set }
   const pairs = new Map() // partId::supplierId -> { oem, afm }
@@ -122,23 +106,9 @@ export function buildAnalytics({ vehicleId, parts, lines, quality, supplierName 
     pair[slot] = Math.min(pair[slot] ?? l.micro, l.micro)
     pairs.set(key, pair)
   }
-  const qualityBySupplier = [...offered.entries()]
-    .map(([id, o]) => ({ id, name: supplierName(id), oem: o.oem.size, afm: o.afm.size }))
-    .sort((a, b) => b.oem + b.afm - (a.oem + a.afm))
   const afmDiffs = [...pairs.values()]
     .filter((p) => p.oem != null && p.afm != null)
     .map((p) => roundDiv((p.afm - p.oem) * BP, p.oem))
-
-  // Cobertura por categoría.
-  const categoryLabels = new Map(lines.map((l) => [l.part.id, l.part.categoryLabel]))
-  const byCategory = new Map()
-  for (const p of scopeParts) {
-    const label = categoryLabels.get(p.id) ?? p.categoryPath.split('__')[0]
-    const c = byCategory.get(label) ?? { label, total: 0, quoted: 0 }
-    c.total += 1
-    if (cheapest.has(p.id)) c.quoted += 1
-    byCategory.set(label, c)
-  }
 
   const cells = quotedIds.flatMap((id) => [...cheapest.get(id).values()])
 
@@ -152,11 +122,12 @@ export function buildAnalytics({ vehicleId, parts, lines, quality, supplierName 
       pricesTotal: cells.length,
       pricesUnconfirmedCurrency: cells.filter((c) => !c.confirmed).length,
     },
-    suppliers,
-    basket: { items: basket, parts: commonIds.length },
-    qualityBySupplier,
+    suppliers: suppliers.map((s) => ({
+      ...s,
+      oem: offered.get(s.id)?.oem.size ?? 0,
+      afm: offered.get(s.id)?.afm.size ?? 0,
+    })),
     afmVsOem: { medianBp: median(afmDiffs), pairs: afmDiffs.length },
-    categories: [...byCategory.values()].sort((a, b) => b.total - a.total),
     topGaps: gaps.sort((a, b) => b.spreadBp - a.spreadBp).slice(0, TOP_GAPS),
   }
 }

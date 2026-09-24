@@ -22,5 +22,3 @@ export const SECTION_MARGIN_BOTTOM = 24
 export function px(value) {
   return `${value}px`
 }
-
-export const CHART_HEIGHT = 260 // alto de un gráfico dentro de una tarjeta

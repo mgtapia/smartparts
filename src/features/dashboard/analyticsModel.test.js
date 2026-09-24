@@ -47,17 +47,6 @@ describe('buildAnalytics', () => {
     expect([a.overBp, b.overBp]).toEqual([5000, 2500])
   })
 
-  it('suma la canasta solo con repuestos cotizados por todos', () => {
-    const { basket } = build(lines)
-    expect(basket.parts).toBe(2)
-    expect(basket.items.map((i) => [i.id, i.totalMicro])).toEqual(
-      [
-        ['a', 30000000],
-        ['b', 25000000],
-      ].sort((x, y) => x[1] - y[1]),
-    )
-  })
-
   it('ignora las cotizaciones inferidas', () => {
     const { summary } = build([...lines, line(p3, 'b', 100, { inferred: true })])
     expect(summary.comparableParts).toBe(2)

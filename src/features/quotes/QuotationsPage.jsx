@@ -93,7 +93,7 @@ export default function QuotationsPage() {
         value={view}
         onChange={setView}
         tabs={[
-          { value: VIEWS.LIST, label: `Por proveedor (${quotations.length})` },
+          { value: VIEWS.LIST, label: 'Por proveedor' },
           { value: VIEWS.MATRIX, label: 'Por repuesto' },
         ]}
       />

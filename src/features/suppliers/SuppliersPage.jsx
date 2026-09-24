@@ -10,7 +10,7 @@ import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
 import { supplierLabel } from '@features/quotes/constants'
-import { FACT_KEYS, factOf, factText } from './constants'
+import { factOf, factText } from './constants'
 import { useSuppliers } from './hooks/useSuppliers'
 
 const normalize = (s) => (s ?? '').toString().toLowerCase()
@@ -59,21 +59,6 @@ const COLUMNS = [
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
     render: ({ partCount }) => partCount,
-  },
-  {
-    id: 'pending',
-    label: 'Por confirmar',
-    width: 110,
-    align: 'right',
-    tooltip: 'Datos del proveedor sin confirmar con una fuente.',
-    render: ({ unconfirmed }) => (
-      <UncertainValue
-        verified={unconfirmed === 0}
-        reason="Datos del proveedor sin confirmar con una fuente"
-      >
-        {unconfirmed} de {FACT_KEYS.length}
-      </UncertainValue>
-    ),
   },
 ]
 

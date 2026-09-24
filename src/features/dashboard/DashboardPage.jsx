@@ -123,17 +123,12 @@ export default function DashboardPage() {
       ) : null}
 
       <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={5}>
+        <InfoGrid columns={4}>
           <InfoField label="Proveedores">{summary.suppliersCount}</InfoField>
           <InfoField label="Repuestos cotizados">
             {summary.quotedPartsCount} de {summary.totalParts}
           </InfoField>
           <InfoField label="Cotizaciones">{summary.quotationsCount}</InfoField>
-          <InfoField label="Por confirmar">
-            <UncertainValue verified={summary.pendingCount === 0} reason="Datos sin confirmar">
-              {summary.pendingCount}
-            </UncertainValue>
-          </InfoField>
           <InfoField label="Avance del hito">
             {summary.stepsDone} de {summary.stepsTotal}
           </InfoField>

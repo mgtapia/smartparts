@@ -53,7 +53,7 @@ Definidos en `src/constants/colors.js`, mapeados en `src/theme/theme.js` con `co
 
 Mismo patrón de `AppRail` que yonder (columna izquierda, flyout al hover), sin las 6 zonas agrupadas — acá los módulos son planos porque el dominio es más chico:
 
-**Dashboard · Vehículos · Catálogo · Repuestos · Proveedores · Cotizaciones · Sourcing · Costeo · Embarques · Clientes · Precios · Importar · Ajustes**
+**Vista general · Vehículos · Catálogo · Repuestos · Proveedores · Cotizaciones · Sourcing · Costeo · Embarques · Clientes · Precios · Importar · Ajustes**
 
 `Precios` visible solo para roles con permiso de ver margen (ver [[SEGURIDAD-Y-ROLES]]).
 
@@ -78,11 +78,11 @@ Mismo patrón de `AppRail` que yonder (columna izquierda, flyout al hover), sin 
 
 ## Layout de anchos
 
-Igual regla que yonder: **máx. 2 tipos**. Ancho fijo (contenido de página, formularios, fichas) y ancho completo (catálogo/repuestos con filtros + data grid, dashboard). La columna central de las vistas full-width igual respeta un `maxWidth` de lectura para los bloques de texto/resumen.
+Igual regla que yonder: **máx. 2 tipos**. Ancho fijo (contenido de página, formularios, fichas) y ancho completo (catálogo/repuestos con filtros + data grid). La columna central de las vistas full-width igual respeta un `maxWidth` de lectura para los bloques de texto/resumen.
 
 ## Espaciado de grids
 
-- Grids de tarjetas (dashboard, catálogo en modo card): `gap: 16px`.
+- Grids de tarjetas (catálogo en modo card): `gap: 16px`.
 - Sidebars (filtros, resumen de costeo): `gap: 14px`.
 - Filas de data grid: densidad `compact` de MUI X Data Grid por defecto (más filas visibles, dominio tabular).
 - Separación entre secciones grandes: `mb: 24px`.

@@ -23,7 +23,7 @@ const PRICE_NOTE = [
   'Las cotizaciones inferidas del lado opuesto no son ofertas del proveedor y no cuentan.',
 ]
 
-export default function DashboardPage() {
+export default function OverviewPage() {
   const { data, loading, error } = useAnalytics(QUALITY.ANY)
 
   if (loading) {
@@ -86,7 +86,7 @@ export default function DashboardPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Dashboard" />
+      <PageHeader title="Vista general" />
 
       <Card sx={{ p: 2, mb: `${GRID_GAP}px` }}>
         <InfoGrid columns={5}>

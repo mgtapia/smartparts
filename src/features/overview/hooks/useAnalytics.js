@@ -9,7 +9,7 @@ import { buildAnalytics } from '../analyticsModel'
 
 /**
  * Métricas para decidir con quién comprar, según la calidad elegida. Todo sale
- * de la caché compartida, así que abrir el dashboard después de otra pantalla
+ * de la caché compartida, así que abrir la vista general después de otra pantalla
  * no vuelve a leer.
  */
 export function useAnalytics(quality) {

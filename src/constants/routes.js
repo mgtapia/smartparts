@@ -8,9 +8,9 @@
 
 export const RAIL_ITEMS = Object.freeze([
   {
-    key: 'dashboard',
-    path: '/dashboard',
-    labelEs: 'Dashboard',
+    key: 'overview',
+    path: '/overview',
+    labelEs: 'Vista general',
     icon: 'Dashboard',
     implemented: true,
   },
@@ -81,4 +81,4 @@ export const RAIL_ITEMS = Object.freeze([
 ])
 
 export const LOGIN_PATH = '/login'
-export const DEFAULT_AUTHENTICATED_PATH = '/dashboard'
+export const DEFAULT_AUTHENTICATED_PATH = '/overview'

@@ -68,7 +68,7 @@ Los conectores solo se ejecutan desde `app/api/**`, nunca desde el cliente.
 
 ## 8 · Cohesión/acoplamiento y SOLID
 
-- Un concepto de dominio (repuesto, cotización, embarque) vive en un solo lugar: su feature. Las pantallas que solo lo muestran (dashboard, catálogo transversal) lo consumen vía repository, no duplican lógica.
+- Un concepto de dominio (repuesto, cotización, embarque) vive en un solo lugar: su feature. Las pantallas que solo lo muestran (vista general, catálogo transversal) lo consumen vía repository, no duplican lógica.
 - El motor de costos es el ejemplo canónico de **Single Responsibility** + **Dependency Inversion**: no conoce Firestore ni la UI; recibe todo lo que necesita como argumento (`params`, `fx`) en vez de leerlo él mismo.
 - Los conceptos de costo local (`LocalCostConcept[]`) son **Open/Closed**: agregar un cargo nuevo (p.ej. una tasa portuaria nueva) es agregar un dato a `cost_param_sets`, no tocar código del motor.
 

@@ -47,3 +47,16 @@ export const sellsLabel = (q) => {
   if (q.originalCount > 0 && q.alternativeCount > 0) return 'OEM + AFM'
   return q.originalCount > 0 ? 'OEM' : 'AFM'
 }
+
+// Textos de ayuda: se muestran a demanda (InfoNote), no sueltos en la página.
+export const MATRIX_HELP = [
+  'Cada celda es el costo final por unidad, puesto en Chile y sin IVA. Debajo va el Incoterm y el precio del proveedor.',
+  'El mejor de cada fila va marcado. Se compara siempre el costo final, nunca el precio EXW: el EXW no incluye lo que le falta para llegar a Chile, y eso cambia según el proveedor.',
+  'Rojo = estimado, sin verificar.',
+]
+
+export const DETAIL_HELP = [
+  'Todos los costos son por unidad. El costo final es el puesto en Chile, sin IVA.',
+  'Rojo = estimado, sin verificar. Pasa el mouse sobre un valor para ver por qué.',
+  'Las fórmulas de cada costo están al final de la página.',
+]

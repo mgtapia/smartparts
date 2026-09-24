@@ -15,7 +15,14 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { PART_TYPE } from '@constants/enums'
 import { RADIUS } from '@constants/colors'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
-import { MODE_OPTIONS, SUPPLIER_TYPE_LABELS_ES, formatIsoDate, sellsLabel } from './constants'
+import InfoNote from '@components/common/InfoNote'
+import {
+  MATRIX_HELP,
+  MODE_OPTIONS,
+  SUPPLIER_TYPE_LABELS_ES,
+  formatIsoDate,
+  sellsLabel,
+} from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine } from './hooks/useQuotations'
 
@@ -105,6 +112,7 @@ export default function QuotationsPage() {
               onChange={assumptions.setMode}
               options={MODE_OPTIONS}
             />
+            <InfoNote paragraphs={MATRIX_HELP} />
             <CostAssumptionsMenu
               rates={assumptions.rates}
               setRates={assumptions.setRates}
@@ -119,11 +127,6 @@ export default function QuotationsPage() {
 
       {isMatrix ? (
         <>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            Costo final por unidad, puesto en Chile y sin IVA; debajo, el precio del proveedor. El
-            mejor de cada fila va marcado y se compara siempre el costo final, no el precio EXW.
-            Rojo = estimado, sin verificar.
-          </Typography>
           <ListTable
             columns={matrix.columns}
             rows={matrix.rows}

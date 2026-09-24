@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import InfoNote from '@components/common/InfoNote'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
@@ -22,6 +23,7 @@ import {
   COLUMN_CHOICES,
   COST_COLUMNS,
   DEFAULT_HIDDEN,
+  DETAIL_HELP,
   MODE_OPTIONS,
   SUPPLIER_TYPE_LABELS_ES,
   formatDate,
@@ -293,6 +295,7 @@ export default function QuotationDetailPage({ quotationId }) {
           updateSupplier={assumptions.updateSupplier}
           onReset={assumptions.reset}
         />
+        <InfoNote paragraphs={DETAIL_HELP} />
         <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />
       </Box>
 

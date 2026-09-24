@@ -54,3 +54,14 @@ export const DETAIL_HELP = [
 /** Nombre corto para mostrar: el alias si existe; el nombre completo queda como razón social. */
 export const supplierLabel = (supplier, fallbackId = '') =>
   supplier?.alias || supplier?.name || fallbackId
+
+export const PARAMETERS_HELP = [
+  'Flete aéreo: el transportista cobra el mayor entre el peso real y el peso volumétrico (volumen ÷ factor volumétrico, 6000 cm³ por kg es lo estándar; algunos couriers usan 5000). Flete marítimo LCL: el mayor entre las toneladas y los m³.',
+  'Estimaciones del equipo, sin verificar: reemplazar por cotizaciones reales de forwarder y del agente de aduanas. Por eso los costos calculados salen en rojo.',
+  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). El arancel con TLC se aplica solo a los que lo emiten, y eso se marca en "Supuestos del proveedor", dentro de su cotización. Mientras no esté confirmado, se aplica el general.',
+]
+
+export const SUPPLIER_ASSUMPTIONS_HELP = [
+  'Estimaciones sin verificar: se confirman con el proveedor y con un forwarder.',
+  'El costo de origen (EXW → FOB) depende de dónde está el proveedor. Sin Formulario F el arancel es el general; con Formulario F, el arancel con TLC.',
+]

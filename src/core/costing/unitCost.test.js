@@ -62,6 +62,31 @@ describe('computeUnitCost', () => {
     expect(fta.landedNet.usdMicro).toBeLessThan(general.landedNet.usdMicro)
   })
 
+  it('el arancel general de los supuestos pisa el del set de parámetros', () => {
+    const low = byCode(
+      computeUnitCost({ ...base, assumptions: { ...ASSUMPTIONS, generalDutyBp: 0 } }),
+    )
+    const high = byCode(
+      computeUnitCost({ ...base, assumptions: { ...ASSUMPTIONS, generalDutyBp: 1200 } }),
+    )
+    expect(low.duty.usdMicro).toBe(0)
+    expect(high.duty.usdMicro).toBeGreaterThan(byCode(computeUnitCost(base)).duty.usdMicro)
+  })
+
+  it('aéreo cobra el mayor entre peso real y volumétrico, con el divisor editable', () => {
+    const bulky = { ...base, mode: 'air', weightG: 1000, volumeCm3: 60000 }
+    const dense = { ...base, mode: 'air', weightG: 10000, volumeCm3: 1000 }
+    expect(byCode(computeUnitCost(bulky)).freight.formulaEs).toContain('volumétrico')
+    expect(byCode(computeUnitCost(dense)).freight.formulaEs).toContain('real')
+    const wide = byCode(
+      computeUnitCost({ ...bulky, assumptions: { ...ASSUMPTIONS, airVolumetricDivisor: 5000 } }),
+    )
+    const std = byCode(
+      computeUnitCost({ ...bulky, assumptions: { ...ASSUMPTIONS, airVolumetricDivisor: 6000 } }),
+    )
+    expect(wide.freight.usdMicro).toBeGreaterThan(std.freight.usdMicro)
+  })
+
   it('aéreo cuesta más que marítimo para una pieza liviana y compacta', () => {
     const sea = byCode(computeUnitCost(base))
     const air = byCode(computeUnitCost({ ...base, mode: 'air' }))

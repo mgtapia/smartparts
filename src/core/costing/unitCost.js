@@ -27,7 +27,9 @@ const ASSUMED_HS = 'SUPUESTA-TLC'
  * @typedef {Object} UnitCostAssumptions
  * @property {number} airUsdPerKgCents   Tarifa aérea, centavos de USD por kg cobrable.
  * @property {number} seaUsdPerRtCents   Tarifa marítima LCL, centavos de USD por R/T (m³ o t).
- * @property {number} ftaDutyBp          Arancel supuesto con TLC (Form F), en basis points.
+ * @property {number} [airVolumetricDivisor]  cm³ por kg para el peso volumétrico aéreo; si falta, el del set de parámetros.
+ * @property {number} [generalDutyBp]    Arancel general (sin Form F), en bp; si falta, el del set de parámetros.
+ * @property {number} ftaDutyBp          Arancel con TLC (solo con Form F), en basis points.
  */
 
 /**
@@ -97,8 +99,11 @@ export function computeUnitCost(input) {
 
   // 2) Flete unitario: unidades cobrables × tarifa.
   const isAir = mode === 'air' || mode === 'courier'
+  // Aéreo: el transportista cobra el MAYOR entre el peso real y el volumétrico
+  // (volumen ÷ divisor); marítimo LCL: el mayor entre toneladas y m³.
+  const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor
   const chargeable = isAir
-    ? airChargeableWeight(weightG, volumeCm3, params.freightDefaults.airVolumetricDivisor)
+    ? airChargeableWeight(weightG, volumeCm3, airDivisor)
     : seaLclChargeableRt(weightG, volumeCm3, params.freightDefaults.seaLclWmKgPerCbm)
   const chargeableUnits = isAir ? chargeable.chargeableKg : chargeable.chargeableRt
   const rateCents = isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents
@@ -107,11 +112,13 @@ export function computeUnitCost(input) {
   // 3) Arancel: con Form F usamos la tasa TLC supuesta (vía la partida
   //    ficticia); sin él, el arancel general.
   const withFormF = input.formF === 'yes'
+  const generalBp = assumptions.generalDutyBp ?? params.duty.generalAdValoremBp
   const dutyParams = {
     ...params.duty,
+    generalAdValoremBp: generalBp,
     rateOverridesByHs: {
       ...params.duty.rateOverridesByHs,
-      [ASSUMED_HS]: { generalBp: params.duty.generalAdValoremBp, ftaBp: assumptions.ftaDutyBp },
+      [ASSUMED_HS]: { generalBp, ftaBp: assumptions.ftaDutyBp },
     },
   }
 
@@ -150,7 +157,10 @@ export function computeUnitCost(input) {
   const join = (...reasons) => reasons.filter(Boolean).join('; ') || undefined
   const unitLabel = isAir ? 'kg cobrables' : 'R/T (m³ o t)'
   const basisEs = chargeable.basis === 'volumetric' ? 'volumétrico' : 'real'
-  const dutyRateBp = withFormF ? assumptions.ftaDutyBp : params.duty.generalAdValoremBp
+  const freightBasisEs = isAir
+    ? `Aéreo cobra el mayor entre el peso real (${(weightG / 1000).toFixed(3)} kg) y el volumétrico (${(volumeCm3 / airDivisor).toFixed(3)} kg = ${volumeCm3} cm³ ÷ ${airDivisor}).`
+    : `Marítimo LCL cobra el mayor entre el peso (${(weightG / 1e6).toFixed(4)} t) y el volumen (${(volumeCm3 / 1e6).toFixed(4)} m³).`
+  const dutyRateBp = withFormF ? assumptions.ftaDutyBp : generalBp
 
   /** @type {CostComponent[]} */
   const components = [
@@ -176,7 +186,7 @@ export function computeUnitCost(input) {
       code: 'freight',
       labelEs: 'Flete internacional',
       usdMicro: line.freight.amount,
-      formulaEs: `${chargeable.basis === 'volumetric' ? 'Volumen' : 'Peso'} ${basisEs}: ${chargeableUnits.toFixed(4)} ${unitLabel} × US$ ${(rateCents / 100).toFixed(2)} por ${isAir ? 'kg' : 'R/T'}. Tarifa estimada.`,
+      formulaEs: `${freightBasisEs} Cobra ${chargeableUnits.toFixed(4)} ${unitLabel} (${basisEs}) × US$ ${(rateCents / 100).toFixed(2)} por ${isAir ? 'kg' : 'R/T'}. Tarifa estimada.`,
       verified: false,
       reasonEs: join('tarifa sin cotización real de forwarder', logisticsReason),
     },

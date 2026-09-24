@@ -16,7 +16,7 @@ import { RADIUS } from '@constants/colors'
  * controles de dropdown de la barra se vean como una sola familia. `label`
  * no se muestra como texto — solo identifica el control al pasar el mouse.
  */
-export default function ToolbarSelectBox({ label, value, onChange, options }) {
+export default function ToolbarSelectBox({ label, value, onChange, options, fullWidth = false }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -35,6 +35,7 @@ export default function ToolbarSelectBox({ label, value, onChange, options }) {
           borderRadius: `${RADIUS.pill}px`,
           px: 1.5,
           height: 44,
+          width: fullWidth ? '100%' : undefined,
         }}
       >
         <Select
@@ -59,6 +60,7 @@ export default function ToolbarSelectBox({ label, value, onChange, options }) {
           )}
           sx={{
             minWidth: 72,
+            flex: fullWidth ? 1 : undefined,
             '& .MuiSelect-select': {
               display: 'flex',
               alignItems: 'center',

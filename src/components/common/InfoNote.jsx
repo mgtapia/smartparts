@@ -16,8 +16,9 @@ import { POPOVER_TEXT_WIDTH } from '@constants/layout'
  * @param {Object} props
  * @param {string} [props.title]        Tooltip del ícono.
  * @param {string[]} props.paragraphs
+ * @param {boolean} [props.dense]   Ícono chico, para usarlo dentro de un título o un modal.
  */
-export default function InfoNote({ title = 'Cómo leer esta tabla', paragraphs }) {
+export default function InfoNote({ title = 'Cómo leer esta tabla', paragraphs, dense = false }) {
   const [anchorEl, setAnchorEl] = useState(null)
 
   return (
@@ -26,7 +27,7 @@ export default function InfoNote({ title = 'Cómo leer esta tabla', paragraphs }
         <IconButton
           size="small"
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          sx={{ height: 44, width: 44 }}
+          sx={{ height: dense ? 28 : 44, width: dense ? 28 : 44 }}
         >
           <InfoOutlinedIcon fontSize="small" />
         </IconButton>

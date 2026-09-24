@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
+import Divider from '@mui/material/Divider'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -93,6 +94,12 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates, o
                 onCommit={(n) => setRates({ ...rates, seaUsdPerRtCents: Math.round(n * 100) })}
               />
             )}
+          </Box>
+          <Divider sx={{ my: 2.5 }} />
+          <Typography variant="caption" color="text.secondary">
+            Fijos
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 2, mt: 1 }}>
             <FixedValue
               label="Arancel ad valorem general (% CIF)"
               value={`${rates.generalDutyBp / 100} %`}

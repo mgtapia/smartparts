@@ -28,6 +28,7 @@ import {
   MODE_OPTIONS,
   SUPPLIER_TYPE_LABELS_ES,
   formatDate,
+  supplierLabel,
   formatIsoDate,
 } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
@@ -211,13 +212,14 @@ export default function QuotationDetailPage({ quotationId }) {
         ← Cotizaciones
       </Button>
       <PageHeader
-        title={supplier?.name ?? 'Proveedor'}
+        title={supplierLabel(supplier, 'Proveedor')}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
         meta={`${rows.length} de ${quotation.lineCount} SKU.`}
       />
 
       <Card sx={{ p: 2, mb: 1.5 }}>
         <Box sx={{ display: 'flex', columnGap: 4, rowGap: 1.5, flexWrap: 'wrap' }}>
+          <Info label="Razón social">{supplier?.name ?? '—'}</Info>
           <Info label="Tipo">
             <UncertainValue verified={false} reason="Declarado por el proveedor, sin verificar">
               {SUPPLIER_TYPE_LABELS_ES[supplier?.supplier_type] ?? 'Sin confirmar'}
@@ -227,6 +229,16 @@ export default function QuotationDetailPage({ quotationId }) {
             {quotation.incoterms.join(', ') || (
               <UncertainValue verified={false} reason="La cotización no indica Incoterm">
                 Sin definir
+              </UncertainValue>
+            )}
+          </Info>
+          <Info label="Origen">
+            {quotation.incotermPlaces.join(', ') || (
+              <UncertainValue
+                verified={false}
+                reason="La cotización no indica el lugar del Incoterm"
+              >
+                Sin lugar
               </UncertainValue>
             )}
           </Info>
@@ -283,7 +295,9 @@ export default function QuotationDetailPage({ quotationId }) {
         <CostAssumptionsMenu
           rates={rates}
           setRates={assumptions.setRates}
-          suppliers={[{ id: quotation.supplierId, name: supplier?.name ?? quotation.supplierId }]}
+          suppliers={[
+            { id: quotation.supplierId, name: supplierLabel(supplier, quotation.supplierId) },
+          ]}
           settingsFor={settingsFor}
           updateSupplier={assumptions.updateSupplier}
           onReset={assumptions.reset}

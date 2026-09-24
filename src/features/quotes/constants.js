@@ -55,3 +55,7 @@ export const DETAIL_HELP = [
   'Rojo = estimado, sin verificar. Pasa el mouse sobre un valor para ver por qué.',
   'Las fórmulas de cada costo están al final de la página.',
 ]
+
+/** Nombre corto para mostrar: el alias si existe; el nombre completo queda como razón social. */
+export const supplierLabel = (supplier, fallbackId = '') =>
+  supplier?.alias || supplier?.name || fallbackId

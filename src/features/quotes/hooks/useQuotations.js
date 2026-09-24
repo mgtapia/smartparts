@@ -115,9 +115,9 @@ export function useQuotationsData() {
         originalCount: q.filter((x) => x.partType === 'original').length,
         alternativeCount: q.filter((x) => x.partType === 'alternative').length,
         pendingCount: q.filter((x) => x.matchStatus === 'pending_review').length,
-        incoterms: [
-          ...new Set(q.map((x) => [x.incoterm, x.incotermPlace].filter(Boolean).join(' '))),
-        ].filter(Boolean),
+        incoterms: [...new Set(q.map((x) => x.incoterm).filter(Boolean))],
+        // Lugar nombrado del Incoterm (ej. "Guangzhou" en "EXW Guangzhou").
+        incotermPlaces: [...new Set(q.map((x) => x.incotermPlace).filter(Boolean))],
         currencies: [...new Set(q.map((x) => x.currency ?? 'sin definir'))],
         currencyConfirmed: q.every((x) => x.currencyConfirmed),
         capturedAt: dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : null,

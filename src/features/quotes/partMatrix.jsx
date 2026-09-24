@@ -5,6 +5,7 @@ import { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { PART_TYPE } from '@constants/enums'
 import { RADIUS } from '@constants/colors'
+import { supplierLabel } from './constants'
 import { costLine, priceUsdMicro } from './hooks/useQuotations'
 
 export const METRICS = { PRICE: 'price', LANDED: 'landed' }
@@ -73,7 +74,7 @@ export function buildMatrix(lines, metric, term, qualityFilter, costCtx) {
       continue
     }
     const { supplierId } = line.quote
-    supplierMap.set(supplierId, line.quote.supplier?.name ?? supplierId)
+    supplierMap.set(supplierId, supplierLabel(line.quote.supplier, supplierId))
     if (!byPart.has(line.part.id)) byPart.set(line.part.id, { part: line.part, cells: new Map() })
     const cell = byPart.get(line.part.id).cells.get(supplierId) ?? {}
     byPart.get(line.part.id).cells.set(supplierId, cell)

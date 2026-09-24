@@ -15,7 +15,7 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
-import { MATRIX_HELP, MODE_OPTIONS, SUPPLIER_TYPE_LABELS_ES, formatIsoDate } from './constants'
+import { MATRIX_HELP, MODE_OPTIONS, SUPPLIER_TYPE_LABELS_ES, supplierLabel } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
 import {
@@ -48,6 +48,7 @@ export default function QuotationsPage() {
         (q) =>
           !term ||
           normalize(q.supplier?.name).includes(term) ||
+          normalize(q.supplier?.alias).includes(term) ||
           normalize(q.sourceFile).includes(term),
       ),
     [quotations, term],
@@ -163,7 +164,7 @@ const LIST_COLUMNS = [
   {
     id: 'supplier',
     label: 'Proveedor',
-    render: (q) => <span title={q.supplier?.name}>{q.supplier?.name ?? q.supplierId}</span>,
+    render: (q) => <span title={q.supplier?.name}>{supplierLabel(q.supplier, q.supplierId)}</span>,
   },
   {
     id: 'type',
@@ -185,13 +186,27 @@ const LIST_COLUMNS = [
   {
     id: 'incoterm',
     label: 'Incoterm',
-    width: 130,
+    width: 90,
     render: (q) =>
       q.incoterms.length > 0 ? (
         q.incoterms.join(', ')
       ) : (
         <UncertainValue verified={false} reason="La cotización no indica Incoterm">
           Sin definir
+        </UncertainValue>
+      ),
+  },
+  {
+    id: 'origin',
+    label: 'Origen',
+    width: 110,
+    tooltip: 'Lugar nombrado del Incoterm (ej. EXW Guangzhou).',
+    render: (q) =>
+      q.incotermPlaces.length > 0 ? (
+        q.incotermPlaces.join(', ')
+      ) : (
+        <UncertainValue verified={false} reason="La cotización no indica el lugar del Incoterm">
+          Sin lugar
         </UncertainValue>
       ),
   },
@@ -212,18 +227,5 @@ const LIST_COLUMNS = [
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
     render: (q) => q.partCount,
-  },
-  {
-    id: 'valid',
-    label: 'Vigencia',
-    width: 100,
-    render: (q) =>
-      q.validUntil ? (
-        formatIsoDate(q.validUntil)
-      ) : (
-        <UncertainValue verified={false} reason="La cotización no indica vigencia">
-          Sin vigencia
-        </UncertainValue>
-      ),
   },
 ]

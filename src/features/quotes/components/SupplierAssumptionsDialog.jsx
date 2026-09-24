@@ -9,7 +9,8 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
 import ModalActionButton from '@components/common/ModalActionButton'
-import ToolbarButton from '@components/common/ToolbarButton'
+import RuleIcon from '@mui/icons-material/Rule'
+import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
 import { SUPPLIER_ASSUMPTIONS_HELP } from '../constants'
@@ -45,7 +46,9 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
 
   return (
     <>
-      <ToolbarButton label="Supuestos" onClick={() => setOpen(true)} />
+      <ToolbarIconButton label="Supuestos" onClick={() => setOpen(true)}>
+        <RuleIcon fontSize="small" />
+      </ToolbarIconButton>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}

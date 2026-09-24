@@ -24,6 +24,8 @@ export function useCostAssumptions() {
     (supplierId) => ({
       originCostBp: defaultOriginCostBp,
       formF: 'unknown',
+      // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
+      assumedIncoterm: 'none',
       ...supplierSettings[supplierId],
     }),
     [supplierSettings],

@@ -46,6 +46,7 @@ function shapeQuote(id, raw, suppliersById) {
     priceTiers: (raw.price_tiers ?? []).map((t) => ({
       minQty: t.min_qty,
       amount: t.amount / 10 ** scale,
+      amountMinor: t.amount, // entero en unidad menor (mismo scale que price)
     })),
     capturedAt: raw.captured_at,
     validUntil: raw.valid_until,

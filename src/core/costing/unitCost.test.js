@@ -99,6 +99,12 @@ describe('computeUnitCost', () => {
     expect(r.landedNetUsdMicro).toBeNull()
   })
 
+  it('un Incoterm supuesto se costea pero queda marcado como no verificado', () => {
+    const r = computeUnitCost({ ...base, incotermAssumed: true })
+    expect(byCode(r).origin.verified).toBe(false)
+    expect(byCode(r).origin.reasonEs).toContain('supuesto')
+  })
+
   it('sin Incoterm devuelve blocker', () => {
     expect(computeUnitCost({ ...base, incoterm: null }).blockers.length).toBe(1)
   })

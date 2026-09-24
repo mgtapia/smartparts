@@ -64,6 +64,7 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
  * @param {Object} input
  * @param {import('../../libs/money').Money} input.unitPrice   Precio unitario del proveedor.
  * @param {string|null} input.incoterm
+ * @param {boolean} [input.incotermAssumed]  El Incoterm no viene de la cotización: es un supuesto.
  * @param {number} input.originCostBp     Costo de origen EXW→FOB de ESTE proveedor, en bp del precio.
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
  * @param {number} input.weightG          Peso bruto por unidad (g).
@@ -179,8 +180,11 @@ export function computeUnitCost(input) {
       formulaEs: isExw
         ? `Precio EXW × ${pct(input.originCostBp)} (transporte interno hasta el puerto, despacho de exportación y manejo en origen). Depende de dónde está el proveedor. Estimación del equipo.`
         : 'No aplica: el precio ya es FOB/FCA.',
-      verified: !isExw,
-      reasonEs: isExw ? 'estimación sin cotización real de forwarder' : undefined,
+      verified: !isExw && !input.incotermAssumed,
+      reasonEs: join(
+        isExw ? 'estimación sin cotización real de forwarder' : undefined,
+        input.incotermAssumed ? 'Incoterm supuesto: la cotización no lo indica' : undefined,
+      ),
     },
     {
       code: 'freight',

@@ -21,10 +21,22 @@ export function toDate(value) {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-/** Precio del proveedor llevado a USD (micros), sin costos adicionales. Null si no hay moneda. */
-export function priceUsdMicro(quote) {
+/**
+ * Precio unitario para comparar: si el proveedor ofrece tramos por volumen, el
+ * MÁS ALTO (el que paga quien compra pocas unidades). En esta etapa se comparan
+ * precios unitarios; cómo baja el precio con la cantidad va en el simulador.
+ * Null si la cotización no tiene moneda.
+ */
+export function unitPriceMoney(quote) {
   if (!quote.currency) return null
-  return toUsdMicro(money(quote.price.amount, quote.currency), DEFAULT_FX)
+  const amounts = [quote.price.amount, ...quote.priceTiers.map((t) => t.amountMinor)]
+  return money(Math.max(...amounts), quote.currency)
+}
+
+/** Precio unitario del proveedor llevado a USD (micros), sin costos adicionales. Null si no hay moneda. */
+export function priceUsdMicro(quote) {
+  const unit = unitPriceMoney(quote)
+  return unit === null ? null : toUsdMicro(unit, DEFAULT_FX)
 }
 
 /**
@@ -37,9 +49,12 @@ export function costLine(line, { mode, rates, settingsFor }) {
     return { blockers: ['Moneda sin definir'], components: [], landedNetUsdMicro: null }
   }
   const settings = settingsFor(quote.supplierId)
+  // La cotización manda; solo si no trae Incoterm se usa el supuesto del proveedor.
+  const incotermAssumed = !quote.incoterm && settings.assumedIncoterm !== 'none'
   return computeUnitCost({
-    unitPrice: money(quote.price.amount, quote.currency),
-    incoterm: quote.incoterm,
+    unitPrice: unitPriceMoney(quote),
+    incoterm: quote.incoterm ?? (incotermAssumed ? settings.assumedIncoterm : null),
+    incotermAssumed,
     originCostBp: settings.originCostBp,
     formF: settings.formF,
     weightG: part.weightG,

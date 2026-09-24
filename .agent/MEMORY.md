@@ -83,6 +83,33 @@ Regla reforzada: cuando una fuente de IA se equivoca una vez en una sesión, no 
 
 **Planilla completa importada (2026-09-17)**: `src/mocks/parts.js` pasó de un subconjunto curado de 22 filas a las **592 filas reales de las 4 marcas** (Dongfeng E70, Kia Niro EV, Nammi Básico+Full, Neta Aya — 1 fila se descartó por no traer precio neto). `weight_g`/`volume_cm3` para las filas nuevas son heurística por palabra clave en el nombre (ver comentario en `parts.js`), no medición — mismo criterio de "estimado, no inventado silenciosamente" que ya regía. Con el dataset completo, `computeAnomalies()` reporta **60 códigos faltantes** y **~70 `duplicate_position`** (la mayoría son pares DER/IZQ compartiendo un mismo código OEM — puede ser un error de la planilla o puede ser que el proveedor real use un solo código para la pieza simétrica; sin verificar). Pendiente de decisión del usuario: ¿el dashboard debe seguir mostrando cada par DER/IZQ como anomalía individual, o el volumen real ameritó separar "duplicado sin verificar" de "conflicto de precio" (esto sí, sin ambigüedad, es un error real) en la UI?
 
+## Etapa de sourcing — decisiones y reglas (2026-09-24)
+
+Para no confundirnos: esto es lo acordado con el usuario, ordenado por tema. El estado de avance vive en [[STATUS]].
+
+**Etapas del negocio.** (1) **Sourcing** (hoy): cotizar el Dongfeng E70 con proveedores chinos, comparar en igualdad de condiciones y elegir. (2) **Venta** (después): lista de precios al cliente, margen, tipo de cambio de venta, IVA crédito/débito, comparación aéreo vs marítimo por urgencia y plan mixto, traspaso de ahorro. Hito antes de viajar a China: **una primera PO y su factura aceptadas por el cliente inicial**; recién ahí se negocia en persona. El archivo de referencia de un socio (planilla de operaciones, con tres tipos de cambio y prorrateo del flete por volumen y de Aduana por valor) sirve para la etapa 2, no para esta.
+
+**Datos: solo reales.** En Firestore y en la UI solo datos reales; los mocks de `src/mocks/` son únicamente para tests. `scripts/seed-firestore.mjs` ya no siembra ni borra `suppliers`/`quotes`. Ojo: `--reset` sí borra `parts` (códigos verificados y traducciones incluidos) — no usarlo sin respaldo. Una vez se mostraron 3 cotizaciones inventadas y hubo que borrarlas.
+
+**Lo no verificado va en rojo, siempre** (componente `UncertainValue`): estimaciones, moneda sin confirmar, OEM declarado por el proveedor, tipo de proveedor, peso/volumen no confirmado, parámetros fiscales sin verificar, Incoterm supuesto. Sale del rojo solo cuando se confirma. Hoy **todo costo calculado sale en rojo** porque origen, tarifas y aranceles son estimaciones.
+
+**Cotizaciones.**
+- El precio se guarda **siempre en la moneda del proveedor**; convertir es presentación o cálculo. Si la moneda no se conoce: `price.currency: null` + `currency_status: 'unconfirmed'`.
+- Incoterms 2020 con **lugar nombrado** (ej. "EXW Guangzhou"); un EXW **no** se compara con un FOB. Se decide por **costo final puesto en Chile**, nunca por precio EXW.
+- Calidad con términos universales: **OEM** (original) / **AFM** (aftermarket). Nunca se auto-confirma `original`: todo entra `pending_review`. El "Original" de un distribuidor no es original de fábrica.
+- Si hay tramos por volumen se compara el **precio unitario más alto**; cómo baja con la cantidad va en el simulador (otra sección, pendiente).
+- En la matriz por repuesto: "Cualquier calidad" muestra el más barato por proveedor (lo que se ofrece si al cliente no le importa el origen); "Solo OEM" cuando exige pieza de fábrica; "Solo AFM" es interno, para saber si hay alternativa por repuesto.
+
+**Costos (motor unitario, `src/core/costing/unitCost.js`).** Costo **por unidad**, sin costos fijos por embarque (mínimo del agente, prima mínima de seguro). Cadena: precio → costo de origen EXW→FOB (% del precio, **por proveedor**, según dónde esté) → flete → seguro → CIF → arancel → gastos locales → costo final sin IVA (el IVA es crédito, no costo). **Arancel:** 6 % general si el proveedor **no** tiene certificado de origen; con **Formulario F** aplica el TLC Chile-China (0 % estimado; depende de la partida arancelaria, todavía no hay HS code por repuesto). **Flete aéreo:** el transportista cobra el mayor entre peso real y peso volumétrico (volumen ÷ factor, 6000 cm³/kg estándar, editable); **marítimo LCL:** el mayor entre toneladas y m³ (W/M). Tarifas, costo de origen y arancel TLC son **estimaciones sin fuente**: reemplazar por cotizaciones reales de forwarder y del agente de aduanas.
+
+**Proveedores.** 4 reales (Henan Ronglai, Anhui Zuoheng, XM Industrial, un revendedor de Alibaba). Tienen `alias` (nombre corto) y `supplier_type`: Fábrica / Distribuidor / Revendedor / Intermediario, siempre **declarado por el proveedor**. Costo de origen, Formulario F e Incoterm supuesto se editan **por proveedor** en su cotización (hoy por navegador; deben pasar a Firestore con la edición de fichas).
+
+**Peso y volumen.** Los valores originales son una heurística por nombre, no mediciones (solo ~50 combinaciones para ~590 repuestos). Estado `logistics_status`: estimado / dudoso / ficha de vendedor / confirmado por proveedor / medido; solo los dos últimos cuentan como confirmados. Las fichas de Alibaba traen pesos por defecto (ej. 20 kg) → nunca confirmados. La fuente buena es el packing list del proveedor.
+
+**Códigos.** Un proveedor que cotiza contra **nuestro** código no prueba que el código sea correcto (circular): decisión pendiente sobre un nivel "cotizado por proveedor" distinto de "confirmado". Los sitios chilenos no tienen catálogo del E70.
+
+**Trabajo.** Commits frecuentes por tanda; nunca escribir el nombre real del cliente en archivos versionados (decir "cliente inicial").
+
 ## Datos pendientes del usuario (no bloquean Fase 0/1, sí Fase 2)
 
 - Costo diario de inmovilización de un vehículo de la flota cliente (o arriendo diario como proxy) — variable central del comparador barco vs. avión.

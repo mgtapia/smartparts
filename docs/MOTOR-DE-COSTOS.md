@@ -73,6 +73,18 @@ El arancel ad valorem, el IVA, los umbrales y las tarifas del agente de aduanas 
 
 Las invariantes de suma (`Σ líneas === total` para cada campo monetario, `landedNet = cif + duty + localCosts`, `cashOutlay = landedNet + vat`) están cubiertas además con **property-based tests** (`fast-check`, 200 corridas aleatorias) — es la forma más barata de garantizar que nadie las rompa después sin darse cuenta.
 
+## Costo unitario por pieza (`src/core/costing/unitCost.js`)
+
+Envoltura pura sobre `computeCosting` para comparar proveedores **por unidad** (etapa de sourcing). No reemplaza al motor de embarques: usa las mismas fórmulas con 1 unidad y quita los costos **fijos por embarque** (mínimo del agente de aduanas, prima mínima de seguro), que no se pueden repartir por unidad sin inventar un tamaño de embarque. El costo real de un embarque completo es el simulador por cantidades (pendiente).
+
+Cadena: precio del proveedor (a USD) → **costo de origen** (solo EXW: % del precio, por proveedor) → flete (unidades cobrables × tarifa) → seguro → CIF → arancel → gastos locales → **costo final sin IVA**; el IVA se informa aparte (crédito recuperable). Cada componente devuelve su **fórmula** y `verified`; nada sale verificado mientras los supuestos y el set de parámetros no lo estén (se muestra en rojo).
+
+- **Incoterm:** EXW suma costo de origen; FOB/FCA no. Otro Incoterm o ninguno → `blocker`, no un número. Se puede fijar un **Incoterm supuesto** por proveedor cuando la cotización no lo trae (queda marcado como supuesto).
+- **Arancel:** 6 % general sin certificado de origen; con Formulario F, la tasa TLC (bajo una partida ficticia `SUPUESTA-TLC`, porque el TLC depende del HS code, que aún no está por repuesto).
+- **Flete aéreo:** mayor entre peso real y volumétrico (volumen ÷ factor, 6000 cm³/kg estándar, editable). **Marítimo LCL:** mayor entre toneladas y m³ (W/M).
+- **Precio con tramos por volumen:** se usa el más alto (precio unitario).
+- **Ojo:** el motor arma sus `Money` con `money(micros, 'USD')` — `amount` viene en micros aunque el `scale` diga 2. `unitCost.js` lo lee como micros a propósito; no pasar esos Money a `MoneyValue` sin convertir.
+
 ## Estado actual de la implementación
 
 `ENGINE_VERSION = '1.0.0'`. Implementado y con 28/28 tests verdes: `money.js`, `types.js`, `weights.js`, `allocation.js`, `localCosts.js`, `duties.js`, `vat.js`, `dgBlocker.js`, `engine.js`.

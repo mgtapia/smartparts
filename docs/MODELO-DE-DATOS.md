@@ -134,6 +134,12 @@ Inmutable. Cada costeo guardado referencia su `id`, nunca "el vigente" — así 
 }
 ```
 
+Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confirmed`|`unconfirmed`), `incoterm_place` (lugar nombrado, ej. Guangzhou), `price_tiers[{min_qty, amount}]` (tramos por volumen; `price` = tramo de 1 unidad), `variant` (cuando lo cotizado no calza 1:1 con la ficha, ej. terminal 12 mm / 14 mm), `supplier_item`, `source_file`, `source_raw` (columnas sin interpretar), `shipping_included`, `packaging`, `supplier_declaration`. Las cotizaciones son datos reales de proveedores; no se siembran mocks.
+
+**`suppliers/{id}`** agrega `alias` (nombre corto para mostrar), `supplier_type` (`factory`|`distributor`|`reseller`|`trader`, declarado por el proveedor, sin verificar), `declarations[]` (lo que dijo textualmente), `is_placeholder`, `contact`.
+
+**`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.
+
 Regla dura: **nunca auto-confirmar `part_type: 'original'`.** Que un vendedor escriba 原厂 no significa nada — pasar a verificado requiere acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
 
 ## Índices compuestos (`firestore.indexes.json`)

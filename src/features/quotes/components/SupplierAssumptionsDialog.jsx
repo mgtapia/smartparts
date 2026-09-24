@@ -15,6 +15,13 @@ import { RADIUS } from '@constants/colors'
 import { SUPPLIER_ASSUMPTIONS_HELP } from '../constants'
 import NumberField from './NumberField'
 
+const INCOTERM_OPTIONS = [
+  { value: 'none', label: 'No suponer' },
+  { value: 'EXW', label: 'EXW' },
+  { value: 'FCA', label: 'FCA' },
+  { value: 'FOB', label: 'FOB' },
+]
+
 const FORM_F_OPTIONS = [
   { value: 'unknown', label: 'Sin confirmar' },
   { value: 'yes', label: 'Emite Formulario F' },
@@ -58,6 +65,18 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
               value={settings.originCostBp / 100}
               onCommit={(n) => onChange({ originCostBp: Math.round(n * 100) })}
             />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+              <Typography variant="caption" color="text.secondary">
+                Incoterm supuesto (si la cotización no lo indica)
+              </Typography>
+              <ToolbarSelectBox
+                fullWidth
+                label="Incoterm supuesto"
+                value={settings.assumedIncoterm}
+                onChange={(assumedIncoterm) => onChange({ assumedIncoterm })}
+                options={INCOTERM_OPTIONS}
+              />
+            </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
               <Typography variant="caption" color="text.secondary">
                 Certificado de origen (Formulario F)

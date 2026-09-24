@@ -63,8 +63,18 @@ Mismo patrón de `AppRail` que yonder (columna izquierda, flyout al hover), sin 
 2. **Color**: solo tokens de `@constants/colors`.
 3. **Espaciado**: `GRID_GAP`/`SIDEBAR_GAP`/`LIST_GAP` de `@constants/layout`.
 4. **Componentes comunes** (`@components/common`): `PageHeader`, `StatCard`, `SectionLabel`, `Pill`/`Tag` (para `code_status`, `demand_basis`, estados de cotización), `MoneyValue` (formatea un `Money` — nunca `toFixed()` inline en un componente), `PaperCard`.
-5. **Tablas**: `@mui/x-data-grid` para todo catálogo/listado tabular — es el dominio central, no se reinventa con `<Table>` de MUI base salvo vistas de detalle de pocas filas.
+5. **Tablas y listas**: el **catálogo es la referencia de diseño** y se mantiene. Se usa `ListTable` (`@components/common`): encabezado `overline`, filas de 44 px, 13 px, **sin negrita**, columnas de ancho base fijo con una principal que se estira. **Ninguna tabla pasa del ancho de la pantalla**: sin scroll horizontal, las columnas se achican con puntos suspensivos. Solo la información clave en la lista; el resto al abrir el detalle o con "Columnas".
 6. Antes de escribir `sx` extenso: ¿ya existe un componente? Si no, ¿debería? Si sí → crearlo.
+
+## Estándar de barra de herramientas, modales y textos (2026-09-24)
+
+- **Barra**: buscador (`ToolbarSearch`, 44 px) + selectores (`ToolbarSelectBox`, pastilla de 44 px) + botones de acción (`ToolbarButton`) + **ícono de información al final** (`InfoNote`). Cambiar de vista no es un filtro: va en pestañas de pastilla (`ViewTabs`) bajo el título.
+- **`PageHeader`**: `meta` (ej. "592 de 592 repuestos.") en la misma fila del título, a la derecha. No repetir la palabra del título en la pestaña ni en el conteo.
+- **Texto adicional**: nunca suelto en la página. Va en un ícono `InfoNote` (popover) o al final de la página. Los datos del proveedor que hay que ver (ej. lo que declara) sí son datos, no ayuda.
+- **Modales**: grilla de dos columnas con campos del mismo tamaño (`NumberField`: caption arriba, input de 44 px con prefijo; selectores con `ToolbarSelectBox fullWidth`), botones al pie chicos y con jerarquía (`ModalActionButton`: primario relleno / secundario solo texto). Solo se piden los campos que corresponden a lo elegido (ej. parámetros del modo de transporte seleccionado). No inventar estilos nuevos de input o selector.
+- **Etiquetas**: precisas y con el término técnico de importación (Incoterm, W/M, ad valorem % CIF, Formulario F…). El lector es un experto: sin relleno explicativo en la etiqueta.
+- **Español**: tipos y estados con etiquetas en español estandarizadas en `@constants/enums` (ej. Fábrica / Distribuidor / Revendedor / Intermediario); calidad con términos universales OEM / AFM.
+- **Rojo = no verificado** (ver [[MEMORY]]): `UncertainValue`, con el motivo en un tooltip.
 
 ## Layout de anchos
 

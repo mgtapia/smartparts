@@ -2,7 +2,7 @@
 
 Qué necesitamos saber para decidir a quién comprarle y a qué costo, qué **ya tenemos**, y qué **NO tenemos** (con cómo conseguirlo). Vocabulario universal: ver [[GLOSARIO-IMPORTACION]] (Incoterms 2020, HS code, MOQ, PI, etc.) — ningún término interno que otro importador no entendería.
 
-Estado al 2026-09-23. Se actualiza cada vez que llega información nueva.
+Estado al 2026-09-24. Se actualiza cada vez que llega información nueva.
 
 ## Etapa y objetivo
 
@@ -33,7 +33,7 @@ Leyenda: ✅ tenemos · 🟡 parcial / sin respaldo · ❌ no tenemos.
 
 | Dato | Estado | Detalle / cómo conseguirlo |
 | --- | --- | --- |
-| Precio unitario | ✅ | 2 proveedores, USD, ~270 líneas cargadas |
+| Precio unitario | ✅ | 4 proveedores, 418 cotizaciones cargadas (uno de ellos en CNY, sin confirmar). Con tramos por volumen se compara el precio unitario más alto |
 | Moneda | 🟡 | USD, confirmado por el equipo; falta respaldo escrito del proveedor |
 | Incoterm | 🟡 | EXW según el equipo; falta confirmación escrita |
 | **Lugar nombrado del Incoterm** (ej. "EXW Zhengzhou") | ❌ | Obligatorio para que el término esté completo. Pedir dirección exacta de retiro |
@@ -49,7 +49,7 @@ Leyenda: ✅ tenemos · 🟡 parcial / sin respaldo · ❌ no tenemos.
 
 | Dato | Estado | Detalle / cómo conseguirlo |
 | --- | --- | --- |
-| Peso bruto y dimensiones del bulto | ❌ | Hoy hay valores genéricos repetidos (solo ~50 combinaciones en ~590 repuestos): no sirven para fletes. Pedir en el RFQ (packing list por línea) |
+| Peso bruto y dimensiones del bulto | ❌ | Hoy hay valores genéricos repetidos (solo ~50 combinaciones en ~590 repuestos), marcados `estimated`/`suspect` en `logistics_status`: no sirven para fletes reales. Pedir en el RFQ (packing list por línea) |
 | Unidades por bulto / embalaje | ❌ | Pedir |
 | Peso volumétrico | ❌ | Se calcula al tener dimensiones reales |
 | Mercancía peligrosa (batería, litio) | 🟡 | Reglas en el motor; falta clasificar cada pieza del E70 |
@@ -58,8 +58,8 @@ Leyenda: ✅ tenemos · 🟡 parcial / sin respaldo · ❌ no tenemos.
 
 | Dato | Estado | Detalle / cómo conseguirlo |
 | --- | --- | --- |
-| Razón social y contacto | 🟡 | Uno parcial (intermediario, Zhengzhou); el otro sin identificar |
-| Fábrica o trader/dealer | ❌ | Preguntar directo; pedir licencia comercial (营业执照) |
+| Razón social y contacto | 🟡 | 4 proveedores con nombre. Contacto de Henan Ronglai y Anhui Zuoheng; XM Industrial sin contacto en la proforma; el revendedor de Alibaba sin nombre (solo su tienda) |
+| Tipo de proveedor (fábrica / distribuidor / revendedor / intermediario) | 🟡 | Declarado, sin verificar: XM = fábrica, Anhui = distribuidor, Alibaba = revendedor; Henan sin declarar. Pedir licencia comercial (营业执照) |
 | Ubicación y puerto de embarque habitual | ❌ | Necesario para el tramo interno |
 | ¿Emite Form F (certificado de origen TLC Chile-China)? | ❌ | Preguntar explícito. Sin Form F no se asume ahorro de arancel |
 | Origen de fabricación de la pieza | ❌ | Un intermediario puede vender piezas no chinas (no califican al TLC) |

@@ -47,6 +47,12 @@ Ojo: proveedores chinos dicen "FOB" también para carga aérea, aunque técnicam
 
 Todo tipo es lo que el proveedor declara hasta que se verifique (licencia comercial, origen de las piezas).
 
+## Flete y peso cobrable
+
+- **Peso volumétrico**: volumen ÷ factor volumétrico (6000 cm³/kg estándar IATA; algunos couriers 5000). En **aéreo** el transportista cobra el **mayor** entre peso real y volumétrico.
+- **W/M** (Weight/Measurement, _revenue ton_): en **marítimo LCL** se cobra el mayor entre toneladas y m³ (1 t ≈ 1 m³).
+- **Arancel ad valorem general**: 6 % sobre el CIF cuando la mercancía no tiene certificado de origen. **Arancel TLC Chile-China**: tasa preferencial con **Formulario F**, depende de la partida (HS code).
+
 ## Aduana y documentos
 
 - **DIN** (Declaración de Ingreso): el documento con el que se formaliza la importación ante Aduana Chile.

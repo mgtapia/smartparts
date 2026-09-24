@@ -30,7 +30,7 @@ import {
   formatIsoDate,
 } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
-import { useQuotationsData, costLine } from './hooks/useQuotations'
+import { useQuotationsData, costLine, unitPriceMoney } from './hooks/useQuotations'
 
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
@@ -155,7 +155,8 @@ export default function QuotationDetailPage({ quotationId }) {
       label: 'Precio',
       width: 90,
       align: 'right',
-      tooltip: 'Precio del proveedor, en su moneda y con su Incoterm.',
+      tooltip:
+        'Precio unitario del proveedor, en su moneda. Si tiene tramos por volumen se usa el más alto; el detalle por volumen va en el simulador.',
       render: ({ line }) => {
         const q = line.quote
         const tiers = q.priceTiers
@@ -175,7 +176,7 @@ export default function QuotationDetailPage({ quotationId }) {
                 : `Moneda sin confirmar por el proveedor${tiers ? ` — ${tiers}` : ''}`
             }
           >
-            {q.currency ? <MoneyValue money={q.price} /> : q.priceAmount.toFixed(2)}
+            {q.currency ? <MoneyValue money={unitPriceMoney(q)} /> : q.priceAmount.toFixed(2)}
           </UncertainValue>
         )
       },

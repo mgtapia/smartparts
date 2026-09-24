@@ -24,6 +24,13 @@ export const QUALITY_OPTIONS = [
   { value: QUALITY_FILTERS.AFM, label: 'Solo AFM' },
 ]
 
+// Motivo corto cuando no se puede calcular: un guion solo no dice por qué.
+const shortReason = (reason) => {
+  if (/Sin Incoterm/.test(reason ?? '')) return 'Sin Incoterm'
+  if (/Moneda sin definir/.test(reason ?? '')) return 'Sin moneda'
+  return '—'
+}
+
 const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
@@ -137,7 +144,7 @@ export function buildMatrix(lines, metric, term, quality, costCtx) {
           >
             <UncertainValue verified={v.micro !== null && v.verified} reason={v.reason}>
               {v.micro === null ? (
-                '—'
+                shortReason(v.reason)
               ) : (
                 <>
                   <MoneyFromMicros micros={v.micro} currency="USD" />

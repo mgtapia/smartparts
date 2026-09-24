@@ -2,6 +2,7 @@
 // Máx. 2 anchos de contenido: fijo (MAX_WIDTH) y completo. No inventar otros.
 
 export const MAX_WIDTH = 1180
+export const TOOLTIP_MAX_WIDTH = 260 // ancho máximo de un tooltip: por sobre esto el texto pasa a otra línea
 export const POPOVER_TEXT_WIDTH = 360 // ancho máximo del texto en un popover informativo
 export const RAIL_WIDTH = 68
 

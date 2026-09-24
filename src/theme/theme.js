@@ -2,6 +2,7 @@
 
 import { createTheme } from '@mui/material/styles'
 import { COLORS, RADIUS, FONT_BODY, FONT_DISPLAY, FONT_MONO } from '@constants/colors'
+import { TOOLTIP_MAX_WIDTH } from '@constants/layout'
 
 // Paleta de marca — modo CLARO. Fondos claros/cálidos, chrome oscuro (rail/header)
 // invariante entre modos — ver .agent/DESIGN.md.
@@ -107,6 +108,11 @@ const theme = createTheme({
       styleOverrides: (theme) => ({
         'html, body': { backgroundColor: theme.palette.brand.bodyBg },
       }),
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: { maxWidth: TOOLTIP_MAX_WIDTH, textWrap: 'balance', fontSize: 12 },
+      },
     },
     MuiAppBar: {
       defaultProps: { elevation: 0, color: 'transparent' },

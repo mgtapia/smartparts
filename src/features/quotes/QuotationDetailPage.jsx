@@ -1,54 +1,74 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
 import Button from '@mui/material/Button'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import ListTable from '@components/common/ListTable'
+import ToolbarSearch from '@components/common/ToolbarSearch'
+import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { PART_TYPE } from '@constants/enums'
-import { COST_COLUMNS } from './constants'
-import CostAssumptionsPanel from './components/CostAssumptionsPanel'
+import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
+import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
+import CostAssumptionsMenu from './components/CostAssumptionsMenu'
+import {
+  COLUMN_CHOICES,
+  COST_COLUMNS,
+  DEFAULT_HIDDEN,
+  MODE_OPTIONS,
+  SUPPLIER_TYPE_LABELS_ES,
+  formatDate,
+  formatIsoDate,
+  sellsLabel,
+} from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine } from './hooks/useQuotations'
 
-const SUPPLIER_TYPE_LABELS_ES = {
-  factory: 'Fábrica',
-  distributor: 'Distribuidor',
-  dealer: 'Dealer',
-}
-
-const CELL_SX = { fontSize: 13, py: 0.75, px: 1, whiteSpace: 'nowrap' }
-const HEAD_SX = { ...CELL_SX, color: 'text.secondary', fontWeight: 600 }
-
-const formatDate = (d) => (d ? d.toLocaleDateString('es-CL') : '—')
+const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationDetailPage({ quotationId }) {
   const { quotations, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
+  const [search, setSearch] = useState('')
+  const [hidden, setHidden] = usePersistentState(
+    'quotes.detail.hiddenColumns',
+    DEFAULT_HIDDEN,
+    SET_STORAGE,
+  )
+  const toggleColumn = (id) =>
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
 
   const quotation = quotations.find((q) => q.id === quotationId) ?? null
+  const term = normalize(search.trim())
 
   const rows = useMemo(() => {
     if (!quotation) return []
     return quotation.lines
+      .filter(
+        ({ part }) =>
+          !term ||
+          normalize(part.nameEs).includes(term) ||
+          normalize(part.localCode?.code).includes(term),
+      )
       .map((line) => {
         const cost = costLine(line, { mode, rates, settingsFor })
         return { line, cost, byCode: Object.fromEntries(cost.components.map((c) => [c.code, c])) }
       })
       .sort((a, b) => a.line.part.nameEs.localeCompare(b.line.part.nameEs, 'es'))
-  }, [quotation, mode, rates, settingsFor])
+  }, [quotation, term, mode, rates, settingsFor])
 
   if (loading) {
     return (
@@ -79,6 +99,110 @@ export default function QuotationDetailPage({ quotationId }) {
   const sample = rows.find((r) => r.cost.components.length > 0)
   const declarations = supplier?.declarations ?? []
 
+  const allColumns = [
+    {
+      id: 'part',
+      label: 'Pieza',
+      render: ({ line }) => (
+        <Link
+          href={`/parts/${line.part.id}`}
+          style={{ color: 'inherit', textDecoration: 'none' }}
+          title={line.part.nameEs}
+        >
+          {line.part.nameEs}
+        </Link>
+      ),
+    },
+    {
+      id: 'category',
+      label: 'Categoría',
+      width: 100,
+      render: ({ line }) => line.part.categoryLabel,
+    },
+    { id: 'position', label: 'Lugar', width: 80, render: ({ line }) => line.part.position ?? '—' },
+    {
+      id: 'code',
+      label: 'Código',
+      width: 100,
+      render: ({ line }) => (
+        <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
+          {line.part.localCode?.code ?? '—'}
+        </Box>
+      ),
+    },
+    {
+      id: 'quality',
+      label: 'Calidad',
+      width: 90,
+      render: ({ line }) => (
+        <UncertainValue
+          verified={false}
+          reason="Calidad declarada por el proveedor: se confirma con foto o muestra"
+        >
+          {line.quote.partType === PART_TYPE.ORIGINAL ? 'OEM' : 'AFM'}
+        </UncertainValue>
+      ),
+    },
+    {
+      id: 'variant',
+      label: 'Variante',
+      width: 110,
+      render: ({ line }) => line.quote.variant ?? '—',
+    },
+    {
+      id: 'price',
+      label: 'Precio',
+      width: 90,
+      align: 'right',
+      tooltip: 'Precio del proveedor, en su moneda y con su Incoterm.',
+      render: ({ line }) => {
+        const q = line.quote
+        const tiers = q.priceTiers
+          .slice()
+          .sort((a, b) => b.minQty - a.minQty)
+          .map(
+            (t) =>
+              `${t.minQty === 1 ? 'menos de 10' : `${t.minQty} o más`}: ${t.amount.toFixed(2)}`,
+          )
+          .join(' · ')
+        return (
+          <UncertainValue
+            verified={q.currencyConfirmed}
+            reason={
+              q.currencyConfirmed
+                ? tiers
+                : `Moneda sin confirmar por el proveedor${tiers ? ` — ${tiers}` : ''}`
+            }
+          >
+            {q.currency ? <MoneyValue money={q.price} /> : q.priceAmount.toFixed(2)}
+          </UncertainValue>
+        )
+      },
+    },
+    ...COST_COLUMNS.map((c) => ({
+      id: c.code,
+      label: c.label,
+      width: 90,
+      align: 'right',
+      render: ({ cost, byCode }) => {
+        if (cost.blockers.length > 0) {
+          return (
+            <UncertainValue verified={false} reason={cost.blockers.join('; ')}>
+              —
+            </UncertainValue>
+          )
+        }
+        const comp = byCode[c.code]
+        return (
+          <UncertainValue verified={comp.verified} reason={comp.reasonEs}>
+            <MoneyFromMicros micros={comp.usdMicro} currency="USD" />
+          </UncertainValue>
+        )
+      },
+    })),
+  ]
+  const columns = allColumns.filter((c) => !hidden.has(c.id))
+
   return (
     <ContentWidth>
       <Button component={Link} href="/quotes" size="small" sx={{ mb: 1, textTransform: 'none' }}>
@@ -87,10 +211,11 @@ export default function QuotationDetailPage({ quotationId }) {
       <PageHeader
         title={supplier?.name ?? 'Proveedor'}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
+        meta={`${rows.length} de ${quotation.lineCount} SKU.`}
       />
 
-      <Card sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+      <Card sx={{ p: 2, mb: 1.5 }}>
+        <Box sx={{ display: 'flex', columnGap: 4, rowGap: 1.5, flexWrap: 'wrap' }}>
           <Info label="Tipo">
             <UncertainValue verified={false} reason="Declarado por el proveedor, sin verificar">
               {SUPPLIER_TYPE_LABELS_ES[supplier?.supplier_type] ?? 'Sin confirmar'}
@@ -113,13 +238,33 @@ export default function QuotationDetailPage({ quotationId }) {
           </Info>
           <Info label="Fecha">{formatDate(quotation.capturedAt)}</Info>
           <Info label="Vigencia">
-            {quotation.validUntil ?? (
+            {quotation.validUntil ? (
+              formatIsoDate(quotation.validUntil)
+            ) : (
               <UncertainValue verified={false} reason="La cotización no indica vigencia">
                 Sin vigencia
               </UncertainValue>
             )}
           </Info>
-          <Info label="Líneas">{quotation.lineCount}</Info>
+          <Info label="Vende">
+            <UncertainValue
+              verified={quotation.originalCount === 0}
+              reason="OEM declarado por el proveedor: se confirma con foto o muestra"
+            >
+              {sellsLabel(quotation)}
+            </UncertainValue>
+          </Info>
+          <Info label="SKU cotizados">
+            {quotation.lineCount} = {quotation.originalCount} OEM + {quotation.alternativeCount} AFM
+          </Info>
+          <Info label="Por revisar">
+            <UncertainValue
+              verified={quotation.pendingCount === 0}
+              reason="Calidad y emparejamiento pendientes de revisión humana"
+            >
+              {quotation.pendingCount}
+            </UncertainValue>
+          </Info>
         </Box>
         {declarations.length > 0 ? (
           <Typography variant="caption" color="error.main" sx={{ display: 'block', mt: 1.5 }}>
@@ -128,121 +273,46 @@ export default function QuotationDetailPage({ quotationId }) {
         ) : null}
       </Card>
 
-      <CostAssumptionsPanel
-        mode={mode}
-        setMode={assumptions.setMode}
-        rates={rates}
-        setRates={assumptions.setRates}
-        suppliers={[{ id: quotation.supplierId, name: supplier?.name ?? quotation.supplierId }]}
-        settingsFor={settingsFor}
-        updateSupplier={assumptions.updateSupplier}
-        onReset={assumptions.reset}
-      />
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <ToolbarSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por pieza o código…"
+        />
+        <ToolbarSelectBox
+          label="Modo de envío"
+          value={mode}
+          onChange={assumptions.setMode}
+          options={MODE_OPTIONS}
+        />
+        <CostAssumptionsMenu
+          rates={rates}
+          setRates={assumptions.setRates}
+          suppliers={[{ id: quotation.supplierId, name: supplier?.name ?? quotation.supplierId }]}
+          settingsFor={settingsFor}
+          updateSupplier={assumptions.updateSupplier}
+          onReset={assumptions.reset}
+        />
+        <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />
+      </Box>
 
-      <Card sx={{ mb: 2, overflowX: 'auto' }}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              {['Pieza', 'Categoría', 'Lugar', 'Código', 'Calidad', 'Variante', 'Precio'].map(
-                (h) => (
-                  <TableCell key={h} sx={HEAD_SX}>
-                    {h}
-                  </TableCell>
-                ),
-              )}
-              {COST_COLUMNS.map((c) => (
-                <TableCell key={c.code} sx={{ ...HEAD_SX, textAlign: 'right' }}>
-                  {c.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map(({ line, cost, byCode }) => {
-              const { part, quote } = line
-              return (
-                <TableRow key={quote.id} hover>
-                  <TableCell sx={CELL_SX}>
-                    <Link href={`/parts/${part.id}`}>{part.nameEs}</Link>
-                  </TableCell>
-                  <TableCell sx={CELL_SX}>{part.categoryLabel}</TableCell>
-                  <TableCell sx={CELL_SX}>{part.position ?? '—'}</TableCell>
-                  <TableCell sx={CELL_SX}>{part.localCode?.code ?? '—'}</TableCell>
-                  <TableCell sx={CELL_SX}>
-                    <UncertainValue
-                      verified={false}
-                      reason="Calidad declarada por el proveedor: se confirma con foto o muestra"
-                    >
-                      {quote.partType === PART_TYPE.ORIGINAL ? 'Original' : 'Alternativo'}
-                    </UncertainValue>
-                  </TableCell>
-                  <TableCell sx={CELL_SX}>{quote.variant ?? '—'}</TableCell>
-                  <TableCell sx={CELL_SX}>
-                    <UncertainValue
-                      verified={quote.currencyConfirmed}
-                      reason="Moneda sin confirmar por el proveedor"
-                    >
-                      {quote.currency ? (
-                        <MoneyValue money={quote.price} />
-                      ) : (
-                        quote.priceAmount.toFixed(2)
-                      )}
-                    </UncertainValue>
-                    {quote.priceTiers.length > 1 ? (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block' }}
-                      >
-                        {quote.priceTiers
-                          .slice()
-                          .sort((a, b) => b.minQty - a.minQty)
-                          .map(
-                            (t) =>
-                              `${t.minQty === 1 ? '<10' : `≥${t.minQty}`}: ${t.amount.toFixed(2)}`,
-                          )
-                          .join(' · ')}
-                      </Typography>
-                    ) : null}
-                  </TableCell>
-                  {cost.blockers.length > 0 ? (
-                    <TableCell colSpan={COST_COLUMNS.length} sx={CELL_SX}>
-                      <UncertainValue verified={false} reason="No se puede costear esta línea">
-                        {cost.blockers.join('; ')}
-                      </UncertainValue>
-                    </TableCell>
-                  ) : (
-                    COST_COLUMNS.map((c) => {
-                      const comp = byCode[c.code]
-                      return (
-                        <TableCell key={c.code} sx={{ ...CELL_SX, textAlign: 'right' }}>
-                          <UncertainValue verified={comp.verified} reason={comp.reasonEs}>
-                            <MoneyFromMicros micros={comp.usdMicro} currency="USD" />
-                          </UncertainValue>
-                        </TableCell>
-                      )
-                    })
-                  )}
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </Card>
+      <Box sx={{ mb: 2 }}>
+        <ListTable columns={columns} rows={rows} getRowKey={({ line }) => line.quote.id} />
+      </Box>
 
       {sample ? (
         <Card sx={{ p: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
             Cómo se calcula cada costo
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
             Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas son
             las mismas para todas. Rojo = todavía no verificado.
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {sample.cost.components.map((c) => (
               <Box key={c.code}>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ fontSize: 13 }}>
                   <UncertainValue verified={c.verified} reason={c.reasonEs}>
                     {c.labelEs}
                   </UncertainValue>
@@ -269,7 +339,9 @@ function Info({ label, children }) {
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
         {label}
       </Typography>
-      <Typography variant="body2">{children}</Typography>
+      <Typography variant="body2" sx={{ fontSize: 13 }}>
+        {children}
+      </Typography>
     </Box>
   )
 }

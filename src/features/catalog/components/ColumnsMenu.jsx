@@ -12,7 +12,7 @@ import { CATALOG_COLUMNS } from '../constants'
 // Mismo popover que el resto de los filtros (FilterPanel/FilterChip) — el
 // trigger sigue siendo un ícono (no una pastilla con label), pero el
 // contenido adentro (checks, texto, espaciado) es exactamente el mismo.
-export default function ColumnsMenu({ hiddenColumns, onToggle }) {
+export default function ColumnsMenu({ hiddenColumns, onToggle, columns = CATALOG_COLUMNS }) {
   const [anchorEl, setAnchorEl] = useState(null)
 
   return (
@@ -28,7 +28,7 @@ export default function ColumnsMenu({ hiddenColumns, onToggle }) {
       </Tooltip>
       <FilterPopover anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
         <FormGroup sx={{ gap: 0.5 }}>
-          {CATALOG_COLUMNS.map((col) => (
+          {columns.map((col) => (
             <CheckboxRow
               key={col.id}
               checked={!hiddenColumns.has(col.id)}

@@ -110,7 +110,7 @@ export function useQuotationsData() {
         pendingCount: q.filter((x) => x.matchStatus === 'pending_review').length,
         incoterms: [
           ...new Set(q.map((x) => [x.incoterm, x.incotermPlace].filter(Boolean).join(' '))),
-        ],
+        ].filter(Boolean),
         currencies: [...new Set(q.map((x) => x.currency ?? 'sin definir'))],
         currencyConfirmed: q.every((x) => x.currencyConfirmed),
         capturedAt: dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : null,

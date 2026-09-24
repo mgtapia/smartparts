@@ -25,7 +25,7 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { RADIUS } from '@constants/colors'
-import { usePersistentState } from '@hooks/usePersistentState'
+import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES, CURRENCIES } from './hooks/useCatalog'
 import FilterPanel from './components/FilterPanel'
 import ColumnsMenu from './components/ColumnsMenu'
@@ -52,15 +52,8 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-// hiddenColumns es un Set → se guarda como lista.
-const SET_STORAGE = {
-  serialize: (set) => JSON.stringify([...set]),
-  deserialize: (raw) => new Set(JSON.parse(raw)),
-}
-
 const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90 }
 const REPUESTO_MIN_WIDTH = 220
-const ROW_GAP = 16 // px — mismo valor que `gap: 2` en el Box de la fila
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -110,7 +103,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           variant="caption"
           color="text.secondary"
           sx={{
-            flex: `0 0 ${COL_WIDTH.vehicle}px`,
+            flex: `0 1 ${COL_WIDTH.vehicle}px`,
             minWidth: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -126,7 +119,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           variant="caption"
           color="text.secondary"
           sx={{
-            flex: `0 0 ${COL_WIDTH.category}px`,
+            flex: `0 1 ${COL_WIDTH.category}px`,
             minWidth: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -143,7 +136,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
-            flex: `0 0 ${COL_WIDTH.code}px`,
+            flex: `0 1 ${COL_WIDTH.code}px`,
             minWidth: 0,
           }}
         >
@@ -161,7 +154,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
       {isColumnVisible('baseline') ? (
         <MoneyValue
           money={currency === CURRENCIES.USD ? r.baselinePriceUsd : r.baselinePriceClp}
-          sx={{ flex: `0 0 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
+          sx={{ flex: `0 1 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
         />
       ) : null}
     </Box>
@@ -215,15 +208,6 @@ export default function CatalogPage() {
       else next.add(id)
       return next
     })
-  // Ancho mínimo real de la fila según las columnas visibles — si el
-  // contenedor es más angosto, la tabla scrollea horizontal en vez de
-  // desbordar la página (las columnas de ancho fijo no se achican).
-  const tableMinWidth = useMemo(() => {
-    const optionalIds = Object.keys(COL_WIDTH).filter((id) => !hiddenColumns.has(id))
-    const fixedWidthSum = optionalIds.reduce((sum, id) => sum + COL_WIDTH[id], 0)
-    const columnCount = 1 + optionalIds.length
-    return REPUESTO_MIN_WIDTH + fixedWidthSum + (columnCount - 1) * ROW_GAP + 24
-  }, [hiddenColumns])
   const [groupBy, setGroupBy] = usePersistentState('catalog.groupBy', GROUP_BY.NONE)
   const groupedSections = useMemo(() => {
     const getKey = GROUP_KEY_GETTERS[groupBy]
@@ -255,7 +239,7 @@ export default function CatalogPage() {
 
   return (
     <ContentWidth full>
-      <PageHeader title="Catálogo" description={`${filteredCount} de ${totalCount} repuestos.`} />
+      <PageHeader title="Catálogo" meta={`${filteredCount} de ${totalCount} repuestos.`} />
 
       {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
           columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).
@@ -368,8 +352,8 @@ export default function CatalogPage() {
         {/* Header y filas comparten este mismo contenedor con scroll — así
             scrollean horizontal juntos como una sola tabla si hay muchas
             columnas visibles, en vez de desbordar el ancho de la página. */}
-        <Box sx={{ overflowX: 'auto' }}>
-          <Box sx={{ minWidth: tableMinWidth }}>
+        <Box>
+          <Box>
             <Box
               sx={{
                 display: 'flex',
@@ -385,7 +369,14 @@ export default function CatalogPage() {
               <Typography
                 variant="overline"
                 color="text.secondary"
-                sx={{ flex: `1 1 ${REPUESTO_MIN_WIDTH}px`, lineHeight: 1 }}
+                sx={{
+                  flex: `1 1 ${REPUESTO_MIN_WIDTH}px`,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1,
+                }}
               >
                 Repuesto
               </Typography>
@@ -394,8 +385,12 @@ export default function CatalogPage() {
                   variant="overline"
                   color="text.secondary"
                   sx={{
-                    flex: `0 0 ${COL_WIDTH.vehicle}px`,
+                    flex: `0 1 ${COL_WIDTH.vehicle}px`,
                     lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     display: { xs: 'none', sm: 'block' },
                   }}
                 >
@@ -407,8 +402,12 @@ export default function CatalogPage() {
                   variant="overline"
                   color="text.secondary"
                   sx={{
-                    flex: `0 0 ${COL_WIDTH.category}px`,
+                    flex: `0 1 ${COL_WIDTH.category}px`,
                     lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     display: { xs: 'none', md: 'block' },
                   }}
                 >
@@ -419,7 +418,14 @@ export default function CatalogPage() {
                 <Typography
                   variant="overline"
                   color="text.secondary"
-                  sx={{ flex: `0 0 ${COL_WIDTH.code}px`, lineHeight: 1 }}
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.code}px`,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1,
+                  }}
                 >
                   Código
                 </Typography>
@@ -430,8 +436,12 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `0 0 ${COL_WIDTH.baseline}px`,
+                      flex: `0 1 ${COL_WIDTH.baseline}px`,
                       lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                       textAlign: 'right',
                       cursor: 'help',
                     }}

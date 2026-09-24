@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
 
+/** Opciones para persistir un `Set` (se guarda como lista). */
+export const SET_STORAGE = {
+  serialize: (set) => JSON.stringify([...set]),
+  deserialize: (raw) => new Set(JSON.parse(raw)),
+}
+
 const parseJson = (raw) => JSON.parse(raw)
 const stringifyJson = (value) => JSON.stringify(value)
 

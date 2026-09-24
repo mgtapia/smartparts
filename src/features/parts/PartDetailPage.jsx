@@ -12,12 +12,25 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
-import { CODE_STATUS_LABELS_ES, PART_TYPE, MATCH_STATUS } from '@constants/enums'
+import {
+  CODE_STATUS_LABELS_ES,
+  CONFIRMED_LOGISTICS_STATUSES,
+  LOGISTICS_STATUS_LABELS_ES,
+  PART_TYPE,
+  MATCH_STATUS,
+} from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, SECTION_MARGIN_BOTTOM, px } from '@constants/layout'
 import { usePartDetail } from './hooks/usePartDetail'
 import SourcingDialog from './components/SourcingDialog'
 
+const LOGISTICS_STATUS_TONE = {
+  estimated: 'warning',
+  suspect: 'error',
+  seller_listing: 'warning',
+  supplier_confirmed: 'success',
+  measured: 'success',
+}
 const CODE_STATUS_TONE = { confirmed: 'success', provisional: 'warning', missing: 'error' }
 const MATCH_STATUS_LABELS_ES = {
   [MATCH_STATUS.AUTO_CONFIRMED]: 'Auto-confirmado',
@@ -151,10 +164,24 @@ export default function PartDetailPage({ partId }) {
               )}
             </Row>
             <Row label="Posición">{part.position || '—'}</Row>
-            <Row label="Peso / volumen estimado">
+            <Row label="Peso / volumen">
               {(part.weightG / 1000).toLocaleString('es-CL')} kg ·{' '}
               {(part.volumeCm3 / 1000).toLocaleString('es-CL')} L
             </Row>
+            <Row label="Estado del peso/volumen">
+              <Pill
+                label={LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}
+                tone={LOGISTICS_STATUS_TONE[part.logisticsStatus]}
+              />
+            </Row>
+            {!CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus) ||
+            part.logisticsSource ||
+            part.logisticsNote ? (
+              <Typography variant="caption" color="text.secondary">
+                {[part.logisticsSource, part.logisticsNote].filter(Boolean).join(' — ') ||
+                  'Sin fuente: heurística por nombre, no una medición.'}
+              </Typography>
+            ) : null}
             {part.sourcingNote ? (
               <>
                 <Divider />

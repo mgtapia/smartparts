@@ -14,7 +14,12 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
 import Pill from '@components/common/Pill'
-import { SHIPPING_MODE_LABELS_ES, SHIPPING_MODES } from '@constants/enums'
+import {
+  CONFIRMED_LOGISTICS_STATUSES,
+  LOGISTICS_STATUS_LABELS_ES,
+  SHIPPING_MODE_LABELS_ES,
+  SHIPPING_MODES,
+} from '@constants/enums'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { GRID_GAP, px } from '@constants/layout'
 import { useCostingCalculator } from './hooks/useCostingCalculator'
@@ -154,6 +159,12 @@ export default function CostingCalculatorPage({ initialPartId }) {
         <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
           Precio por volumen — {part?.nameEs}
         </Typography>
+        {part && !CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus) ? (
+          <Typography variant="caption" color="warning.main" sx={{ display: 'block', mb: 1 }}>
+            Peso y volumen sin confirmar ({LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}): el
+            flete y el costo puesto en Chile son orientativos.
+          </Typography>
+        ) : null}
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
           landedNet (sin IVA) + margen. El flete es editable por tramo — el valor sugerido es una
           referencia, no una cotización real (ver docs/MOTOR-DE-COSTOS.md).

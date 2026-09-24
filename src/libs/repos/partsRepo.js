@@ -62,6 +62,10 @@ function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {
     codeStatus: raw.code_status,
     weightG: raw.weight_g,
     volumeCm3: raw.volume_cm3,
+    // Procedencia del peso/volumen; sin dato → estimado (heurística original).
+    logisticsStatus: raw.logistics_status ?? 'estimated',
+    logisticsSource: raw.logistics_source ?? null,
+    logisticsNote: raw.logistics_note ?? null,
     baselinePrice: raw.baseline_price,
     includesVat: raw.includes_vat,
     demandBasis: raw.demand_basis,

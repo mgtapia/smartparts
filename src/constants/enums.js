@@ -29,6 +29,32 @@ export const CODE_STATUS_LABELS_ES = Object.freeze({
   [CODE_STATUS.CONFIRMED]: 'Confirmado',
 })
 
+// Confianza del peso/volumen de un repuesto — mismo patrón que CODE_STATUS.
+// Solo 'supplier_confirmed' y 'measured' cuentan como confirmados: una ficha de
+// vendedor (Alibaba, etc.) es referencia, no dato firme (suelen traer valores
+// por defecto, ej. 20 kg). Un flete calculado con datos no confirmados es
+// orientativo, y la UI lo dice.
+export const LOGISTICS_STATUS = Object.freeze({
+  ESTIMATED: 'estimated',
+  SUSPECT: 'suspect',
+  SELLER_LISTING: 'seller_listing',
+  SUPPLIER_CONFIRMED: 'supplier_confirmed',
+  MEASURED: 'measured',
+})
+
+export const LOGISTICS_STATUS_LABELS_ES = Object.freeze({
+  [LOGISTICS_STATUS.ESTIMATED]: 'Estimado',
+  [LOGISTICS_STATUS.SUSPECT]: 'Dudoso',
+  [LOGISTICS_STATUS.SELLER_LISTING]: 'Ficha de vendedor',
+  [LOGISTICS_STATUS.SUPPLIER_CONFIRMED]: 'Confirmado por proveedor',
+  [LOGISTICS_STATUS.MEASURED]: 'Medido',
+})
+
+export const CONFIRMED_LOGISTICS_STATUSES = Object.freeze([
+  LOGISTICS_STATUS.SUPPLIER_CONFIRMED,
+  LOGISTICS_STATUS.MEASURED,
+])
+
 export const DEMAND_BASIS = Object.freeze({
   ESTIMATED: 'estimated',
   HISTORICAL: 'historical',

@@ -1,63 +1,92 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Tooltip from '@mui/material/Tooltip'
-import Divider from '@mui/material/Divider'
-import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
-import MoneyValue from '@components/common/MoneyValue'
-import Pill from '@components/common/Pill'
+import InfoNote from '@components/common/InfoNote'
+import ListTable from '@components/common/ListTable'
+import ViewTabs from '@components/common/ViewTabs'
+import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
+import UncertainValue from '@components/common/UncertainValue'
+import SourcedValueDialog from '@components/common/SourcedValueDialog'
+import { InfoGrid, InfoField } from '@components/common/InfoGrid'
+import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import {
-  CODE_STATUS_LABELS_ES,
   CONFIRMED_LOGISTICS_STATUSES,
   LOGISTICS_STATUS_LABELS_ES,
   PART_TYPE,
-  MATCH_STATUS,
 } from '@constants/enums'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
-import { GRID_GAP, SECTION_MARGIN_BOTTOM, px } from '@constants/layout'
+import { PART_IMAGE_SIZE } from '@constants/layout'
+import { getPartImage, updatePartCustoms } from '@libs/repos/partsRepo'
+import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
+import {
+  costLine,
+  priceUsdMicro,
+  quotationId,
+  unitPriceMoney,
+} from '@features/quotes/hooks/useQuotations'
+import { shortReason } from '@features/quotes/partMatrix'
+import { supplierLabel } from '@features/quotes/constants'
 import { usePartDetail } from './hooks/usePartDetail'
-import SourcingDialog from './components/SourcingDialog'
+import CodeDialog from './components/CodeDialog'
+import ImageDialog from './components/ImageDialog'
+import LogisticsDialog from './components/LogisticsDialog'
+import NamesDialog from './components/NamesDialog'
+import {
+  CODE_HELP,
+  CUSTOMS_HELP,
+  DEMAND_BASIS_LABELS_ES,
+  DEMAND_SCALE_LABELS_ES,
+  LOGISTICS_HELP,
+  PART_TABS,
+  TAB_LIST,
+} from './constants'
 
-const LOGISTICS_STATUS_TONE = {
-  estimated: 'warning',
-  suspect: 'error',
-  seller_listing: 'warning',
-  supplier_confirmed: 'success',
-  measured: 'success',
+const EDIT = {
+  CODE: 'code',
+  NAMES: 'names',
+  LOGISTICS: 'logistics',
+  CUSTOMS: 'customs',
+  IMAGE: 'image',
 }
-const CODE_STATUS_TONE = { confirmed: 'success', provisional: 'warning', missing: 'error' }
-const MATCH_STATUS_LABELS_ES = {
-  [MATCH_STATUS.AUTO_CONFIRMED]: 'Auto-confirmado',
-  [MATCH_STATUS.PENDING_REVIEW]: 'En revisión',
-  [MATCH_STATUS.REJECTED]: 'Rechazado',
-}
-const MATCH_STATUS_TONE = {
-  auto_confirmed: 'success',
-  pending_review: 'warning',
-  rejected: 'error',
-}
+const QUALITY_LABEL = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 
-function DisabledAction({ label, reason }) {
-  return (
-    <Tooltip title={reason}>
-      <span>
-        <Button variant="outlined" size="small" disabled>
-          {label}
-        </Button>
-      </span>
-    </Tooltip>
-  )
-}
+const formatKg = (g) => `${(g / 1000).toLocaleString('es-CL')} kg`
+const formatLiters = (cm3) => `${(cm3 / 1000).toLocaleString('es-CL')} L`
 
 export default function PartDetailPage({ partId }) {
   const { part, loading, error, refetch } = usePartDetail(partId)
-  const [sourcingDialogOpen, setSourcingDialogOpen] = useState(false)
+  const assumptions = useCostAssumptions()
+  const { mode, rates, settingsFor } = assumptions
+  const [tab, setTab] = useState(PART_TABS.QUOTES)
+  const [editing, setEditing] = useState(null)
+  const [image, setImage] = useState(null)
+  const [imageKey, setImageKey] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    getPartImage(partId)
+      .then((img) => !cancelled && setImage(img))
+      .catch(() => !cancelled && setImage(null))
+    return () => {
+      cancelled = true
+    }
+  }, [partId, imageKey])
+
+  // Una fila por cotización con su costo final unitario, ordenadas por precio en USD.
+  const rows = useMemo(() => {
+    if (!part) return []
+    return part.quotes
+      .map((quote) => ({
+        quote,
+        cost: costLine({ part, quote }, { mode, rates, settingsFor }),
+        priceMicro: priceUsdMicro(quote),
+      }))
+      .sort((a, b) => (a.priceMicro ?? Infinity) - (b.priceMicro ?? Infinity))
+  }, [part, mode, rates, settingsFor])
 
   if (loading) {
     return (
@@ -66,7 +95,6 @@ export default function PartDetailPage({ partId }) {
       </ContentWidth>
     )
   }
-
   if (error) {
     return (
       <ContentWidth>
@@ -74,259 +102,384 @@ export default function PartDetailPage({ partId }) {
       </ContentWidth>
     )
   }
-
   if (!part) {
     return (
       <ContentWidth>
-        <Typography variant="body2" color="text.secondary">
-          Repuesto no encontrado.
-        </Typography>
-        <Button component={Link} href="/catalog" sx={{ mt: 2 }}>
-          Volver al catálogo
-        </Button>
+        <PageHeader back={{ href: '/catalog', label: 'Catálogo' }} title="Repuesto no encontrado" />
       </ContentWidth>
     )
   }
 
+  const closeEditor = () => setEditing(null)
+  const saved = () => refetch()
+  const logisticsConfirmed = CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus)
+  const logisticsReason = `${LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}: falta confirmarlo con el proveedor o medirlo`
+
+  const bestCost = (type) => {
+    const ofType = rows.filter((r) => r.quote.partType === type)
+    if (ofType.length === 0)
+      return { text: 'Sin cotización', reason: 'Ningún proveedor cotizó esta calidad' }
+    const priced = ofType.filter((r) => r.cost.landedNetUsdMicro !== null)
+    if (priced.length === 0) {
+      return { text: 'Falta dato', reason: ofType[0].cost.blockers.join('; ') }
+    }
+    const best = priced.reduce((a, b) =>
+      b.cost.landedNetUsdMicro < a.cost.landedNetUsdMicro ? b : a,
+    )
+    return {
+      micro: best.cost.landedNetUsdMicro,
+      reason: `${supplierLabel(best.quote.supplier, best.quote.supplierId)}. Costo estimado, sin verificar`,
+    }
+  }
+
+  const bestCostField = (type, label) => {
+    const b = bestCost(type)
+    return (
+      <InfoField label={label}>
+        <UncertainValue verified={false} reason={b.reason}>
+          {b.micro === undefined ? b.text : <MoneyFromMicros micros={b.micro} currency="USD" />}
+        </UncertainValue>
+      </InfoField>
+    )
+  }
+
+  const quoteColumns = [
+    {
+      id: 'supplier',
+      label: 'Proveedor',
+      render: ({ quote }) => supplierLabel(quote.supplier, quote.supplierId),
+    },
+    {
+      id: 'quality',
+      label: 'Calidad',
+      width: 90,
+      render: ({ quote }) => (
+        <UncertainValue
+          verified={quote.partType !== PART_TYPE.ORIGINAL}
+          reason="OEM declarado por el proveedor: se confirma con foto o muestra"
+        >
+          {QUALITY_LABEL[quote.partType]}
+        </UncertainValue>
+      ),
+    },
+    {
+      id: 'incoterm',
+      label: 'Incoterm',
+      width: 100,
+      render: ({ quote }) => (
+        <UncertainValue
+          verified={quote.incotermConfirmed}
+          reason={
+            quote.incoterm
+              ? 'Incoterm sin confirmar por escrito'
+              : 'La cotización no indica Incoterm'
+          }
+        >
+          {quote.incoterm
+            ? `${quote.incoterm}${quote.incotermPlace ? ` ${quote.incotermPlace}` : ''}`
+            : 'Sin definir'}
+        </UncertainValue>
+      ),
+    },
+    {
+      id: 'price',
+      label: 'Precio',
+      width: 100,
+      align: 'right',
+      tooltip:
+        'Precio unitario en la moneda del proveedor. Con tramos por volumen se usa el más alto.',
+      render: ({ quote }) => (
+        <UncertainValue
+          verified={quote.currencyConfirmed}
+          reason="Moneda sin confirmar por el proveedor"
+        >
+          {quote.currency ? (
+            <MoneyValue money={unitPriceMoney(quote)} />
+          ) : (
+            quote.priceAmount.toFixed(2)
+          )}
+        </UncertainValue>
+      ),
+    },
+    {
+      id: 'landed',
+      label: 'Costo final',
+      width: 100,
+      align: 'right',
+      tooltip:
+        'Costo unitario puesto en Chile, sin IVA. Estimado con los parámetros y supuestos vigentes.',
+      render: ({ cost }) => (
+        <UncertainValue
+          verified={false}
+          reason={
+            cost.landedNetUsdMicro === null
+              ? cost.blockers.join('; ')
+              : 'Costo estimado, sin verificar'
+          }
+        >
+          {cost.landedNetUsdMicro === null ? (
+            shortReason(cost.blockers[0])
+          ) : (
+            <MoneyFromMicros micros={cost.landedNetUsdMicro} currency="USD" />
+          )}
+        </UncertainValue>
+      ),
+    },
+  ]
+
   return (
     <ContentWidth>
       <PageHeader
+        back={{ href: '/catalog', label: 'Catálogo' }}
         title={part.nameEs}
-        description={`${part.vehicle?.brand} ${part.vehicle?.model} · ${part.category?.labelEs || part.categoryPath}`}
-        actions={
-          <>
-            <Button variant="outlined" size="small" onClick={() => setSourcingDialogOpen(true)}>
-              Confirmar código
-            </Button>
-            <DisabledAction
-              label="Cargar cotización"
-              reason="Disponible en Fase 2 — requiere escritura a Firestore"
-            />
-          </>
-        }
+        description={`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''} · ${part.category?.labelEs ?? part.categoryPath}`}
       />
 
-      {sourcingDialogOpen ? (
-        <SourcingDialog
-          open={sourcingDialogOpen}
+      {editing === EDIT.CODE ? (
+        <CodeDialog part={part} onSaved={saved} onClose={closeEditor} />
+      ) : null}
+      {editing === EDIT.NAMES ? (
+        <NamesDialog part={part} onSaved={saved} onClose={closeEditor} />
+      ) : null}
+      {editing === EDIT.LOGISTICS ? (
+        <LogisticsDialog part={part} onSaved={saved} onClose={closeEditor} />
+      ) : null}
+      {editing === EDIT.IMAGE ? (
+        <ImageDialog
           part={part}
-          onClose={() => setSourcingDialogOpen(false)}
-          onSaved={() => {
-            setSourcingDialogOpen(false)
-            refetch()
+          image={image}
+          onSaved={() => setImageKey((k) => k + 1)}
+          onClose={closeEditor}
+        />
+      ) : null}
+      {editing === EDIT.CUSTOMS ? (
+        <SourcedValueDialog
+          title="Partida arancelaria"
+          label="Partida arancelaria HS"
+          initial={part.hsCode ?? ''}
+          initialSource={part.hsCodeSource ?? ''}
+          onClose={closeEditor}
+          onSave={async (value, source) => {
+            await updatePartCustoms(part.id, { hsCode: value, source })
+            saved()
           }}
         />
       ) : null}
 
-      <Box sx={{ display: 'flex', gap: px(GRID_GAP), flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 300 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-            Identidad
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            {part.nameEn || part.nameZh ? (
-              <>
-                {part.nameEn ? (
-                  <Row label="Nombre (inglés)">
-                    <Typography variant="body2">{part.nameEn}</Typography>
-                  </Row>
-                ) : null}
-                {part.nameZh ? (
-                  <Row label="Nombre (chino)">
-                    <Typography variant="body2">{part.nameZh}</Typography>
-                  </Row>
-                ) : null}
-                <Divider />
-              </>
-            ) : null}
-            <Row label="Código local (Chile)">
-              {part.localCode?.code ? (
-                <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace' }}>
-                  {part.localCode.code}
-                </Box>
-              ) : (
-                <Pill label="Sin código" tone="error" />
-              )}
-            </Row>
-            <Row label="Código de sourcing (China)">
-              {part.sourcingCode?.code ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace' }}>
-                    {part.sourcingCode.code}
-                  </Box>
-                  <Pill
-                    label={CODE_STATUS_LABELS_ES[part.codeStatus]}
-                    tone={CODE_STATUS_TONE[part.codeStatus]}
-                  />
-                </Box>
-              ) : (
-                <Pill label={CODE_STATUS_LABELS_ES[part.codeStatus]} tone="warning" />
-              )}
-            </Row>
-            <Row label="Posición">{part.position || '—'}</Row>
-            <Row label="Peso / volumen">
-              {(part.weightG / 1000).toLocaleString('es-CL')} kg ·{' '}
-              {(part.volumeCm3 / 1000).toLocaleString('es-CL')} L
-            </Row>
-            <Row label="Estado del peso/volumen">
-              <Pill
-                label={LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}
-                tone={LOGISTICS_STATUS_TONE[part.logisticsStatus]}
-              />
-            </Row>
-            {!CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus) ||
-            part.logisticsSource ||
-            part.logisticsNote ? (
-              <Typography variant="caption" color="text.secondary">
-                {[part.logisticsSource, part.logisticsNote].filter(Boolean).join(' — ') ||
-                  'Sin fuente: heurística por nombre, no una medición.'}
-              </Typography>
-            ) : null}
-            {part.sourcingNote ? (
-              <>
-                <Divider />
-                <Typography variant="caption" color="warning.main">
-                  {part.sourcingNote}
-                </Typography>
-              </>
-            ) : null}
-          </Box>
-        </Card>
-
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 300 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-            Precio
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            <Row label="Precio referencia (Chile, neto)">
-              <MoneyValue money={part.baselinePrice} sx={{ fontWeight: 700 }} />
-              {part.includesVat ? null : (
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                  neto, sin IVA
-                </Typography>
-              )}
-            </Row>
-            <Row label="Mejor cotización original">
-              {part.quoteRollup.original.minUsd !== null ? (
-                <MoneyValue
-                  money={{
-                    amount: Math.round(part.quoteRollup.original.minUsd * 100),
-                    currency: 'USD',
-                    scale: 2,
-                  }}
-                />
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  Sin cotización todavía
-                </Typography>
-              )}
-            </Row>
-            <Row label="Mejor cotización alternativa">
-              {part.quoteRollup.alternative.minUsd !== null ? (
-                <MoneyValue
-                  money={{
-                    amount: Math.round(part.quoteRollup.alternative.minUsd * 100),
-                    currency: 'USD',
-                    scale: 2,
-                  }}
-                />
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  Sin cotización todavía
-                </Typography>
-              )}
-            </Row>
-            <Divider />
-            <Button
-              component={Link}
-              href={`/costing?partId=${part.id}`}
-              variant="contained"
-              size="small"
-              sx={{ alignSelf: 'flex-start' }}
-            >
-              Calcular landed cost
-            </Button>
-          </Box>
-        </Card>
-      </Box>
-
-      <Card sx={{ p: 2.5, mt: px(SECTION_MARGIN_BOTTOM) }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-          Cotizaciones ({part.quotes.length})
-        </Typography>
-        {part.quotes.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
-            Sin cotizaciones todavía.
-          </Typography>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {part.quotes.map((q) => (
-              <Box
-                key={q.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  p: 1.25,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1.5,
-                }}
+      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box
+          role="button"
+          tabIndex={0}
+          aria-label="Cargar imagen"
+          onClick={() => setEditing(EDIT.IMAGE)}
+          onKeyDown={(e) => e.key === 'Enter' && setEditing(EDIT.IMAGE)}
+          sx={{
+            width: PART_IMAGE_SIZE,
+            height: PART_IMAGE_SIZE,
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            borderRadius: 1,
+            overflow: 'hidden',
+            bgcolor: 'brand.bodyBg',
+          }}
+        >
+          {image?.dataUrl ? (
+            <Box
+              component="img"
+              src={image.dataUrl}
+              alt={part.nameEs}
+              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <Typography variant="caption" color="error.main">
+              Sin imagen
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <InfoGrid>
+            <InfoField label="Código" onEdit={() => setEditing(EDIT.CODE)}>
+              <UncertainValue
+                verified={part.codeStatus === 'confirmed' && !part.codeConflict}
+                reason={
+                  part.codeConflict
+                    ? 'El código de Chile y el de China difieren: falta confirmar cuál es'
+                    : 'Código sin confirmar con una fuente citable'
+                }
               >
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {q.supplier?.name} ·{' '}
-                    {q.partType === PART_TYPE.ORIGINAL ? 'Original' : 'Alternativo'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {q.incoterm
-                      ? `${q.incoterm}${q.incotermPlace ? ` ${q.incotermPlace}` : ''} · `
-                      : ''}
-                    MOQ {q.moq ?? '—'} · {q.validUntil ? `vence ${q.validUntil}` : 'sin vigencia'}
-                    {q.variant ? ` · variante: ${q.variant}` : ''}
-                  </Typography>
+                <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
+                  {part.code ?? 'Sin código'}
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Pill
-                    label={MATCH_STATUS_LABELS_ES[q.matchStatus]}
-                    tone={MATCH_STATUS_TONE[q.matchStatus]}
-                  />
-                  {q.currencyConfirmed ? (
-                    <MoneyValue
-                      money={{
-                        amount: Math.round(q.priceAmount * 100),
-                        currency: q.currency,
-                        scale: 2,
-                      }}
-                      sx={{ fontWeight: 700 }}
-                    />
-                  ) : (
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                        {q.priceAmount.toFixed(2)}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {q.currency ? `${q.currency} · ` : ''}moneda sin confirmar
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        )}
+              </UncertainValue>
+              <InfoNote dense title="Sobre el código" paragraphs={CODE_HELP} />
+            </InfoField>
+            <InfoField label="Precio referencia">
+              <MoneyValue money={part.baselinePrice} />
+            </InfoField>
+            <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                {formatKg(part.weightG)}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Volumen" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                {formatLiters(part.volumeCm3)}
+              </UncertainValue>
+            </InfoField>
+            {bestCostField(PART_TYPE.ORIGINAL, 'Mejor costo OEM')}
+            {bestCostField(PART_TYPE.ALTERNATIVE, 'Mejor costo AFM')}
+          </InfoGrid>
+        </Box>
       </Card>
-    </ContentWidth>
-  )
-}
 
-function Row({ label, children }) {
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Box sx={{ typography: 'body2' }}>{children}</Box>
-    </Box>
+      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
+
+      {tab === PART_TABS.QUOTES ? (
+        <ListTable
+          columns={quoteColumns}
+          rows={rows}
+          getRowKey={({ quote }) => quote.id}
+          getRowHref={({ quote }) => `/quotes/${quotationId(quote.supplierId, quote.sourceFile)}`}
+          emptyText="Sin cotizaciones todavía."
+        />
+      ) : null}
+
+      {tab === PART_TABS.IDENTITY ? (
+        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <InfoGrid>
+            <InfoField label="Español">{part.nameEs}</InfoField>
+            <InfoField label="Inglés" onEdit={() => setEditing(EDIT.NAMES)}>
+              {part.nameEn ?? (
+                <UncertainValue verified={false} reason="Sin traducción cargada">
+                  Sin dato
+                </UncertainValue>
+              )}
+            </InfoField>
+            <InfoField label="Chino" onEdit={() => setEditing(EDIT.NAMES)}>
+              {part.nameZh ?? (
+                <UncertainValue verified={false} reason="Sin traducción cargada">
+                  Sin dato
+                </UncertainValue>
+              )}
+            </InfoField>
+          </InfoGrid>
+          <InfoGrid>
+            <InfoField label="Vehículo">
+              {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
+            </InfoField>
+            <InfoField label="Categoría">{part.category?.labelEs ?? part.categoryPath}</InfoField>
+            <InfoField label="Fuente del código">
+              {part.codeSource ?? (
+                <UncertainValue verified={false} reason="El código no tiene fuente registrada">
+                  Sin fuente
+                </UncertainValue>
+              )}
+            </InfoField>
+          </InfoGrid>
+          {part.sourcingNote ? (
+            <InfoGrid>
+              <InfoField label="Nota del código">{part.sourcingNote}</InfoField>
+            </InfoGrid>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {tab === PART_TABS.LOGISTICS ? (
+        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <InfoNote dense title="Sobre peso y volumen" paragraphs={LOGISTICS_HELP} />
+          </Box>
+          <InfoGrid>
+            <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                {formatKg(part.weightG)}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Volumen" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                {formatLiters(part.volumeCm3)}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Estado">
+              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                {LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Fuente">
+              {part.logisticsSource ?? (
+                <UncertainValue
+                  verified={false}
+                  reason="Sin fuente: estimación por nombre de pieza"
+                >
+                  Sin fuente
+                </UncertainValue>
+              )}
+            </InfoField>
+          </InfoGrid>
+          <InfoGrid>
+            <InfoField label="Mercancía peligrosa">
+              {part.dgProfile ? (
+                `UN ${part.dgProfile.unNumber}`
+              ) : (
+                <UncertainValue
+                  verified={false}
+                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
+                >
+                  Sin clasificar
+                </UncertainValue>
+              )}
+            </InfoField>
+            {part.logisticsNote ? <InfoField label="Nota">{part.logisticsNote}</InfoField> : null}
+          </InfoGrid>
+        </Card>
+      ) : null}
+
+      {tab === PART_TABS.CUSTOMS ? (
+        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <InfoNote dense title="Sobre la partida arancelaria" paragraphs={CUSTOMS_HELP} />
+          </Box>
+          <InfoGrid>
+            <InfoField label="Partida HS" onEdit={() => setEditing(EDIT.CUSTOMS)}>
+              <UncertainValue
+                verified={Boolean(part.hsCode && part.hsCodeSource)}
+                reason="Sin partida confirmada con el agente de aduanas"
+              >
+                {part.hsCode ?? 'Sin dato'}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Fuente">
+              {part.hsCodeSource ?? (
+                <UncertainValue verified={false} reason="Sin fuente registrada">
+                  Sin fuente
+                </UncertainValue>
+              )}
+            </InfoField>
+          </InfoGrid>
+        </Card>
+      ) : null}
+
+      {tab === PART_TABS.DEMAND ? (
+        <Card sx={{ p: 2 }}>
+          <InfoGrid>
+            <InfoField label="Cantidad estimada">{part.quantityEstimated ?? '—'}</InfoField>
+            <InfoField label="Base">
+              <UncertainValue
+                verified={part.demandBasis === 'historical'}
+                reason="Es una estimación de rotación, no consumo real del taller"
+              >
+                {DEMAND_BASIS_LABELS_ES[part.demandBasis] ?? '—'}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Rotación">
+              {DEMAND_SCALE_LABELS_ES[part.demandScale] ?? '—'}
+            </InfoField>
+          </InfoGrid>
+        </Card>
+      ) : null}
+    </ContentWidth>
   )
 }

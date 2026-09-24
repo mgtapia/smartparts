@@ -16,7 +16,7 @@ import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
-import NumberField from './NumberField'
+import NumberField from '@components/common/NumberField'
 
 const fromCents = (c) => (c == null ? null : c / 100)
 const toCents = (n) => (n == null ? null : Math.round(n * 100))

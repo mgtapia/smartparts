@@ -5,12 +5,11 @@ import { confirmQuotationFields } from '@libs/repos/quotesRepo'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import { InfoGrid, InfoField } from '@components/common/InfoGrid'
+import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import InfoNote from '@components/common/InfoNote'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
@@ -20,7 +19,6 @@ import { LoadingState, ErrorState } from '@components/common/AsyncState'
 import { PART_TYPE } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
-import ConfirmFieldDialog from './components/ConfirmFieldDialog'
 import CostParametersDialog from './components/CostParametersDialog'
 import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
 import QualityChips from './components/QualityChips'
@@ -241,8 +239,8 @@ export default function QuotationDetailPage({ quotationId }) {
       />
 
       <Card sx={{ p: 2, mb: 1.5 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-          <Info label="Incoterm" onEdit={() => setEditing(FIELDS.incoterm)}>
+        <InfoGrid>
+          <InfoField label="Incoterm" onEdit={() => setEditing(FIELDS.incoterm)}>
             <UncertainValue
               verified={quotation.incotermConfirmed && quotation.incoterms.length > 0}
               reason={
@@ -253,8 +251,8 @@ export default function QuotationDetailPage({ quotationId }) {
             >
               {quotation.incoterms.join(', ') || 'Sin definir'}
             </UncertainValue>
-          </Info>
-          <Info label="Origen" onEdit={() => setEditing(FIELDS.place)}>
+          </InfoField>
+          <InfoField label="Origen" onEdit={() => setEditing(FIELDS.place)}>
             <UncertainValue
               verified={quotation.incotermPlaceConfirmed && quotation.incotermPlaces.length > 0}
               reason={
@@ -265,29 +263,30 @@ export default function QuotationDetailPage({ quotationId }) {
             >
               {quotation.incotermPlaces.join(', ') || 'Sin lugar'}
             </UncertainValue>
-          </Info>
-          <Info label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
+          </InfoField>
+          <InfoField label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
             <UncertainValue
               verified={quotation.currencyConfirmed}
               reason="Moneda sin confirmar por el proveedor"
             >
               {quotation.currencies.join(', ')}
             </UncertainValue>
-          </Info>
-          <Info label="Fecha">{formatDate(quotation.capturedAt)}</Info>
-          <Info label="Vende">
+          </InfoField>
+          <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
+          <InfoField label="Vende">
             <QualityChips quotation={quotation} />
-          </Info>
-        </Box>
+          </InfoField>
+        </InfoGrid>
       </Card>
 
       {editing ? (
-        <ConfirmFieldDialog
+        <SourcedValueDialog
+          title={`Confirmar ${editing.label}`}
           label={editing.label}
           initial={editing.current(quotation)}
           options={editing.options}
           onClose={() => setEditing(null)}
-          onConfirm={async (value, source) => {
+          onSave={async (value, source) => {
             await confirmQuotationFields(
               quotation.lines.map((l) => l.quote.id),
               { [editing.key]: value },
@@ -354,33 +353,5 @@ export default function QuotationDetailPage({ quotationId }) {
         </Card>
       ) : null}
     </ContentWidth>
-  )
-}
-
-function Info({ label, children, onEdit }) {
-  return (
-    <Box
-      sx={{
-        px: 2,
-        py: 0.5,
-        borderLeft: 1,
-        borderColor: 'divider',
-        '&:first-of-type': { pl: 0, borderLeft: 0 },
-      }}
-    >
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-        {label}
-      </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minHeight: 28, fontSize: 13 }}>
-        {children}
-        {onEdit ? (
-          <Tooltip title="Editar y confirmar">
-            <IconButton size="small" aria-label={`Editar ${label}`} onClick={onEdit}>
-              <EditOutlinedIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
-        ) : null}
-      </Box>
-    </Box>
   )
 }

@@ -14,7 +14,7 @@ import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { RADIUS } from '@constants/colors'
 import { SUPPLIER_ASSUMPTIONS_HELP } from '../constants'
-import NumberField from './NumberField'
+import NumberField from '@components/common/NumberField'
 
 const INCOTERM_OPTIONS = [
   { value: 'none', label: 'No suponer' },

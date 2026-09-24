@@ -10,6 +10,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore'
@@ -59,7 +60,19 @@ function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {
     oemCodes: raw.oem_codes || [],
     localCode: getLocalCode(raw.oem_codes),
     sourcingCode: getSourcingCode(raw.oem_codes),
+    // Un solo código, el mismo en Chile y en China: solo se confirma. Si un doc
+    // viejo trae dos códigos distintos (local y sourcing) queda como conflicto
+    // hasta que alguien confirme cuál es.
+    code: getSourcingCode(raw.oem_codes)?.code ?? getLocalCode(raw.oem_codes)?.code ?? null,
+    codeConflict:
+      Boolean(getSourcingCode(raw.oem_codes)?.code) &&
+      Boolean(getLocalCode(raw.oem_codes)?.code) &&
+      getSourcingCode(raw.oem_codes).code !== getLocalCode(raw.oem_codes).code,
+    codeSource: raw.code_source ?? null,
     codeStatus: raw.code_status,
+    hsCode: raw.hs_code ?? null,
+    hsCodeSource: raw.hs_code_source ?? null,
+    dgProfile: raw.dg_profile ?? null,
     weightG: raw.weight_g,
     volumeCm3: raw.volume_cm3,
     // Procedencia del peso/volumen; sin dato → estimado (heurística original).
@@ -158,6 +171,69 @@ export async function updatePartSourcing(
     oem_codes: oemCodes,
     code_status: codeStatus,
     sourcing_note: sourcingNote?.trim() || null,
+    updated_at: serverTimestamp(),
+  })
+}
+
+/**
+ * Confirma o corrige el código único del repuesto (el mismo en Chile y en
+ * China). Un código confirmado exige fuente citable: la UI no deja guardarlo
+ * sin ella. Reemplaza los dos códigos por rol de versiones anteriores.
+ */
+export async function updatePartCode(partId, { code, codeStatus, source, note }) {
+  const trimmed = code?.trim()
+  await updateDoc(doc(getDb(), 'parts', partId), {
+    oem_codes: trimmed ? [{ code: trimmed, source: source?.trim() || 'manual_verification' }] : [],
+    code_status: trimmed ? codeStatus : 'missing',
+    code_source: source?.trim() || null,
+    sourcing_note: note?.trim() || null,
+    updated_at: serverTimestamp(),
+  })
+}
+
+export async function updatePartNames(partId, { nameEn, nameZh }) {
+  await updateDoc(doc(getDb(), 'parts', partId), {
+    name_en: nameEn?.trim() || null,
+    name_zh: nameZh?.trim() || null,
+    updated_at: serverTimestamp(),
+  })
+}
+
+/** Peso (g) y volumen (cm³) con su estado y la fuente de la medición. */
+export async function updatePartLogistics(partId, { weightG, volumeCm3, status, source, note }) {
+  await updateDoc(doc(getDb(), 'parts', partId), {
+    weight_g: weightG,
+    volume_cm3: volumeCm3,
+    logistics_status: status,
+    logistics_source: source?.trim() || null,
+    logistics_note: note?.trim() || null,
+    updated_at: serverTimestamp(),
+  })
+}
+
+export async function updatePartCustoms(partId, { hsCode, source }) {
+  await updateDoc(doc(getDb(), 'parts', partId), {
+    hs_code: hsCode?.trim() || null,
+    hs_code_source: source?.trim() || null,
+    updated_at: serverTimestamp(),
+  })
+}
+
+// La imagen va en una subcolección aparte para no engordar cada lectura del
+// catálogo (que trae todos los repuestos): solo la ficha la carga.
+const mediaRef = (partId) => doc(getDb(), 'parts', partId, 'media', 'main')
+
+export async function getPartImage(partId) {
+  const snap = await getDoc(mediaRef(partId))
+  return snap.exists()
+    ? { dataUrl: snap.data().data_url, source: snap.data().source ?? null }
+    : null
+}
+
+export async function savePartImage(partId, { dataUrl, source }) {
+  await setDoc(mediaRef(partId), {
+    data_url: dataUrl,
+    source: source?.trim() || null,
     updated_at: serverTimestamp(),
   })
 }

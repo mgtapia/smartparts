@@ -15,7 +15,7 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { LoadingState, ErrorState } from '@components/common/AsyncState'
-import { PART_TYPE } from '@constants/enums'
+import { PART_TYPE, SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostAssumptionsMenu from './components/CostAssumptionsMenu'
@@ -26,7 +26,6 @@ import {
   DEFAULT_HIDDEN,
   DETAIL_HELP,
   MODE_OPTIONS,
-  SUPPLIER_TYPE_LABELS_ES,
   formatDate,
   supplierLabel,
   formatIsoDate,

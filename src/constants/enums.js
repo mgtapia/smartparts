@@ -55,6 +55,22 @@ export const CONFIRMED_LOGISTICS_STATUSES = Object.freeze([
   LOGISTICS_STATUS.MEASURED,
 ])
 
+// Tipo de proveedor. Es lo que el proveedor dice ser: hasta verificarlo (licencia
+// comercial, origen de las piezas) se muestra como no confirmado.
+export const SUPPLIER_TYPE = Object.freeze({
+  FACTORY: 'factory',
+  DISTRIBUTOR: 'distributor',
+  RESELLER: 'reseller',
+  TRADER: 'trader',
+})
+
+export const SUPPLIER_TYPE_LABELS_ES = Object.freeze({
+  [SUPPLIER_TYPE.FACTORY]: 'Fábrica',
+  [SUPPLIER_TYPE.DISTRIBUTOR]: 'Distribuidor',
+  [SUPPLIER_TYPE.RESELLER]: 'Revendedor',
+  [SUPPLIER_TYPE.TRADER]: 'Intermediario',
+})
+
 export const DEMAND_BASIS = Object.freeze({
   ESTIMATED: 'estimated',
   HISTORICAL: 'historical',

@@ -38,6 +38,15 @@ Ojo: proveedores chinos dicen "FOB" también para carga aérea, aunque técnicam
 - **AWB / B/L**: guía aérea / conocimiento de embarque marítimo.
 - **OEM / AFM**: pieza de calidad original del fabricante del vehículo / repuesto de un tercero sin vínculo con la marca (*aftermarket*).
 
+## Tipos de proveedor
+
+- **Fábrica**: fabrica la pieza. Puede emitir el Formulario F (certificado de origen) con más facilidad.
+- **Distribuidor**: compra a fábrica o a otros y revende con acuerdo de distribución; no fabrica.
+- **Revendedor**: compra y revende sin ser distribuidor autorizado (ej. tienda en Alibaba).
+- **Intermediario** (_trader_): no tiene stock propio, consigue la pieza con terceros y cobra comisión.
+
+Todo tipo es lo que el proveedor declara hasta que se verifique (licencia comercial, origen de las piezas).
+
 ## Aduana y documentos
 
 - **DIN** (Declaración de Ingreso): el documento con el que se formaliza la importación ante Aduana Chile.

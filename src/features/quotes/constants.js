@@ -12,12 +12,6 @@ export const COST_COLUMNS = [
   { code: 'vat', label: 'IVA' },
 ]
 
-export const SUPPLIER_TYPE_LABELS_ES = {
-  factory: 'Fábrica',
-  distributor: 'Distribuidor',
-  dealer: 'Dealer',
-}
-
 export const formatDate = (d) => (d ? d.toLocaleDateString('es-CL') : '—')
 
 /** 'AAAA-MM-DD' → 'DD-MM-AAAA' sin pasar por Date (evita el corrimiento por zona horaria). */

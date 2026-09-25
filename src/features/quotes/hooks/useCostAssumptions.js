@@ -18,7 +18,7 @@ const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
  */
 export function useCostAssumptions() {
   const [mode, setMode] = usePersistentState('quotes.mode', SHIPPING_MODES.SEA_LCL)
-  const [storedRates, setRates] = usePersistentState('quotes.rates.v2', DEFAULT_RATES)
+  const [storedRates, setRates] = usePersistentState('quotes.rates.v3', DEFAULT_RATES)
   const [supplierSettings, setSupplierSettings] = usePersistentState(
     'quotes.supplierSettings.v3',
     {},

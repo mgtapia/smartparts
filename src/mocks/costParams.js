@@ -59,8 +59,8 @@ export const DEFAULT_FX = { usdClp: 950_000_000, cnyUsd: 139_000, asOf: '2026-09
 // precio EXW); depende de dónde esté cada proveedor, por eso se ajusta por
 // proveedor en la pantalla.
 export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
-  airUsdPerKgCents: null, // US$ por kg cobrable. Sin dato: lo define el equipo con la cotización de un forwarder.
-  seaUsdPerRtCents: null, // US$ por R/T (m³) LCL. Sin dato, igual que la aérea.
+  airUsdPerKgCents: 980, // US$9,80 por kg cobrable, aéreo Shanghai o Guangzhou a Santiago. Tarifa de referencia publicada por sino-shipping.com (sept 2026), sin cotización de forwarder; otras fuentes van de US$7 a US$11.
+  seaUsdPerRtCents: 12000, // US$120 por R/T (m³) LCL, Shanghai o Ningbo a San Antonio. Referencia publicada por sino-shipping.com (sept 2026); delpagroup.com da US$80–150. Sin cotización de forwarder.
   airVolumetricDivisor: 6000, // cm³ por kg: convierte volumen a peso volumétrico (6000 estándar IATA; algunos couriers 5000).
   generalDutyBp: 600, // 6 %: arancel general, se aplica si el proveedor no tiene certificado de origen (Formulario F).
   ftaDutyBp: 0, // arancel con TLC Chile-China (solo con Formulario F): 0 % estimado, depende de la partida — sin verificar.

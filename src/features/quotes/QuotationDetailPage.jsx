@@ -166,7 +166,10 @@ export default function QuotationDetailPage() {
       render: ({ line }) => (
         <UncertainValue
           verified={line.quote.partTypeConfirmed}
-          reason="Calidad inferida del lado opuesto: el proveedor no la indicó"
+          reason={
+            line.quote.partTypeNote ??
+            'Calidad inferida del lado opuesto: el proveedor no la indicó'
+          }
         >
           {line.quote.partType === PART_TYPE.ORIGINAL ? 'OEM' : 'AFM'}
         </UncertainValue>

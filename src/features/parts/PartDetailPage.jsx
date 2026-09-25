@@ -158,7 +158,9 @@ export default function PartDetailPage() {
       render: ({ quote }) => (
         <UncertainValue
           verified={quote.partTypeConfirmed}
-          reason="Calidad inferida del lado opuesto: el proveedor no la indicó"
+          reason={
+            quote.partTypeNote ?? 'Calidad inferida del lado opuesto: el proveedor no la indicó'
+          }
         >
           {QUALITY_LABEL[quote.partType]}
         </UncertainValue>

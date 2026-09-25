@@ -37,10 +37,11 @@ const db = getAdminDb()
 const lines = (await db.collectionGroup('lines').get()).docs
 const targets = lines.filter((d) => {
   const x = d.data()
-  return !x.inferred && !x.confirmations?.part_type
+  // `part_type_estimated`: la calidad la eligió el equipo (el proveedor no la indicó); no se confirma.
+  return !x.inferred && !x.part_type_estimated && !x.confirmations?.part_type
 })
 console.log(
-  `${lines.length} líneas; ${targets.length} por confirmar; ${lines.filter((d) => d.data().inferred).length} inferidas (no se tocan).`,
+  `${lines.length} líneas; ${targets.length} por confirmar; ${lines.filter((d) => d.data().inferred).length} inferidas y ${lines.filter((d) => d.data().part_type_estimated).length} con calidad elegida por el equipo (no se tocan).`,
 )
 if (!apply) {
   console.log('Dry-run: no se escribió nada. Usar --apply.')

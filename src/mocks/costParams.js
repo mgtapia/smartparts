@@ -64,5 +64,5 @@ export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
   airVolumetricDivisor: 6000, // cm³ por kg: convierte volumen a peso volumétrico (6000 estándar IATA; algunos couriers 5000).
   generalDutyBp: 600, // 6 %: arancel general, se aplica si el proveedor no tiene certificado de origen (Formulario F).
   ftaDutyBp: 0, // arancel con TLC Chile-China (solo con Formulario F): 0 % estimado, depende de la partida — sin verificar.
-  defaultOriginCostBp: null, // % del precio EXW de gastos hasta FOB. Sin dato: se define por proveedor.
+  defaultOriginCostBp: 300, // 3 % del precio EXW en gastos hasta FOB. Estimación del equipo sin fuente; se ajusta por proveedor según su distancia al puerto.
 }

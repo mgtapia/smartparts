@@ -64,7 +64,7 @@ export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
   airVolumetricDivisor: 6000, // cm³ por kg: convierte volumen a peso volumétrico (6000 estándar IATA; algunos couriers 5000).
   generalDutyBp: 600, // 6 %: arancel general, se aplica si el proveedor no tiene certificado de origen (Formulario F).
   ftaDutyBp: 0, // arancel con TLC Chile-China (solo con Formulario F): 0 % estimado, depende de la partida — sin verificar.
-  defaultOriginCostBp: 300, // 3 % del precio EXW cuando no se conoce la distancia al puerto. Estimación del equipo sin fuente.
+  defaultOriginCostBp: 300, // 3 % del precio EXW: proveedor sin distancia → el mayor entre esto y el transporte con la distancia promedio (decisión del usuario, 2026-09-25). Sin fuente.
   // Embarque típico sobre el que se prorratean los gastos por embarque: cada pieza paga la parte
   // del embarque que ocupa, como si el embarque fuera solo de esa pieza dividido por las piezas.
   seaShipmentRt: 4, // 4 m³ LCL: el ejemplo real de interbal.cl (agosto 2026). Ajustar al pedido real.

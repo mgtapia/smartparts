@@ -64,7 +64,7 @@ export default function SupplierAssumptionsDialog({ supplierName, settings, onCh
                   verified={settings.originDistanceConfirmed}
                   reason={
                     settings.originDistanceKm == null
-                      ? 'Sin distancia no se calcula el transporte en China. Se carga en la ficha del proveedor'
+                      ? 'Sin distancia, el transporte en China es el mayor entre el 3 % del precio y el de la distancia promedio de los otros proveedores. Se carga en la ficha del proveedor'
                       : 'Estimada, sin fuente. Se corrige en la ficha del proveedor'
                   }
                 >

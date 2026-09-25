@@ -53,6 +53,7 @@ export function costLine(line, { mode, rates, settingsFor }) {
     incotermAssumed,
     originDistanceKm: settings.originDistanceKm,
     originDistanceConfirmed: settings.originDistanceConfirmed,
+    originFallback: settings.originFallback,
     // Formulario F: dato del proveedor que se confirma en su ficha.
     formF: quote.supplier?.facts?.formF?.value ?? 'unknown',
     weightG: part.weightG,

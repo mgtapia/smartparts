@@ -58,14 +58,23 @@ export function useCostAssumptions() {
     )
   }, [suppliers, isAir])
 
+  // Distancia promedio de los proveedores con dato: base del supuesto para los que no tienen.
+  const averageKm = useMemo(() => {
+    const known = [...distanceBySupplier.values()].map((d) => d.km).filter((km) => km != null)
+    return known.length ? known.reduce((a, b) => a + b, 0) / known.length : null
+  }, [distanceBySupplier])
+
   const settingsFor = useCallback(
     (supplierId) => {
       const distance = distanceBySupplier.get(supplierId) ?? { km: null, confirmed: false }
       return {
         // Distancia al puerto o aeropuerto, desde la ficha del proveedor: el costo unitario
-        // calcula con ella el transporte en China. Sin distancia, avisa que falta.
+        // calcula con ella el transporte en China.
         originDistanceKm: distance.km,
         originDistanceConfirmed: distance.confirmed,
+        // Sin distancia: el mayor entre el 3 % del precio y el transporte con la distancia
+        // promedio. Con cero, el proveedor sin datos saldría más barato que los que sí tienen.
+        originFallback: { bp: defaultOriginCostBp, averageKm },
         // Solo para el simulador de pedidos, que todavía estima el origen como % del precio.
         originCostBp: estimateOriginCostBp(distance.km ?? Number.NaN) ?? defaultOriginCostBp,
         // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
@@ -73,7 +82,7 @@ export function useCostAssumptions() {
         ...supplierSettings[supplierId],
       }
     },
-    [supplierSettings, distanceBySupplier],
+    [supplierSettings, distanceBySupplier, averageKm],
   )
 
   const updateSupplier = (supplierId, patch) =>

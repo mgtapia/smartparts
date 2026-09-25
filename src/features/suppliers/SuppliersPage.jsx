@@ -13,20 +13,10 @@ import { supplierLabel } from '@features/quotes/constants'
 import { QUALITY } from '@features/overview/analyticsModel'
 import { useAnalytics } from '@features/overview/hooks/useAnalytics'
 import { formatBp } from '@libs/percent'
-import { factOf, factText } from './constants'
+import FactCell from './components/FactCell'
 import { useSuppliers } from './hooks/useSuppliers'
 
 const normalize = (s) => (s ?? '').toString().toLowerCase()
-
-/** Un dato con fuente en una celda de lista: rojo si no está confirmado. */
-function FactCell({ supplier, factKey }) {
-  const fact = factOf(supplier, factKey)
-  return (
-    <UncertainValue verified={fact.confirmed} reason="Sin confirmar con una fuente">
-      {factText(factKey, fact.value) ?? 'Sin dato'}
-    </UncertainValue>
-  )
-}
 
 const COLUMNS = [
   {

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
-import { SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
+import FactCell from '@features/suppliers/components/FactCell'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
@@ -167,11 +167,7 @@ const LIST_COLUMNS = [
     id: 'type',
     label: 'Tipo',
     width: 100,
-    render: (q) => (
-      <UncertainValue verified={false} reason="Declarado por el proveedor, sin verificar">
-        {SUPPLIER_TYPE_LABELS_ES[q.supplier?.supplier_type] ?? 'Sin confirmar'}
-      </UncertainValue>
-    ),
+    render: (q) => <FactCell supplier={q.supplier} factKey="type" />,
   },
   {
     id: 'sells',

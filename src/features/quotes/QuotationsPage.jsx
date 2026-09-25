@@ -18,7 +18,7 @@ import { useUrlTab } from '@hooks/useUrlTab'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
-import { MATRIX_HELP, formatDate, supplierLabel } from './constants'
+import { MATRIX_HELP, supplierLabel } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
 import {
@@ -236,11 +236,5 @@ const LIST_COLUMNS = [
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
     render: (q) => q.partCount,
-  },
-  {
-    id: 'date',
-    label: 'Fecha',
-    width: 100,
-    render: (q) => formatDate(q.capturedAt),
   },
 ]

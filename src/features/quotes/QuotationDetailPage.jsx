@@ -261,7 +261,18 @@ export default function QuotationDetailPage() {
               {quotation.incoterms.join(', ') || 'Sin definir'}
             </UncertainValue>
           </InfoField>
-          <InfoField label="Origen" onEdit={() => setEditing(FIELDS.place)}>
+          <InfoField
+            label="Origen"
+            // Solo se edita si la cotización nombra su propio lugar; si no, es la ubicación del proveedor.
+            onEdit={
+              quotation.incotermPlaces.length > 0 ? () => setEditing(FIELDS.place) : undefined
+            }
+            hint={
+              quotation.incotermPlaces.length > 0
+                ? undefined
+                : 'Heredado de la ubicación del proveedor. Se cambia en su ficha.'
+            }
+          >
             <QuotationOrigin quotation={quotation} />
           </InfoField>
           <InfoField label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>

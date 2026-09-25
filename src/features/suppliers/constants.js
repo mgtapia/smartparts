@@ -37,6 +37,7 @@ export const FACTS = {
   },
   location: { label: 'Ubicación' },
   port: { label: 'Puerto de embarque' },
+  airport: { label: 'Aeropuerto de embarque' },
   moq: { label: 'MOQ' },
   payment: { label: 'Condiciones de pago' },
   leadTime: { label: 'Plazo de producción' },
@@ -78,14 +79,20 @@ export const labelOf = (labels, value) => (value ? (labels[value] ?? value) : nu
 export const getPath = (obj, path) => path.split('.').reduce((o, k) => o?.[k], obj) ?? null
 
 /**
- * Estado de un dato con fuente: `{ value, source, confirmed }`. Confirmado =
+ * Estado de un dato con fuente: `{ value, source, note, confirmed }`. Confirmado =
  * tiene valor y fuente. El tipo cae a `supplier_type` mientras no se confirme
  * (viene declarado por el proveedor).
  */
 export function factOf(supplier, key) {
   const fact = supplier?.facts?.[key]
   if (fact?.value)
-    return { value: fact.value, source: fact.source ?? null, confirmed: Boolean(fact.source) }
+    return {
+      value: fact.value,
+      source: fact.source ?? null,
+      // Por qué se propone el valor mientras no esté confirmado con una fuente.
+      note: fact.note ?? null,
+      confirmed: Boolean(fact.source),
+    }
   if (key === 'type' && supplier?.supplier_type) {
     return {
       value: supplier.supplier_type,

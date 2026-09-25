@@ -84,7 +84,7 @@ export default function SupplierDetailPage() {
           verified={fact.confirmed}
           reason={
             fact.value
-              ? 'Declarado, sin confirmar con una fuente'
+              ? (fact.note ?? 'Declarado, sin confirmar con una fuente')
               : 'Sin dato: pedirlo al proveedor'
           }
         >
@@ -177,11 +177,12 @@ export default function SupplierDetailPage() {
       ) : null}
 
       <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={6}>
+        <InfoGrid columns={7}>
           {factField('type')}
           {factField('formF')}
           {factField('location')}
           {factField('port')}
+          {factField('airport')}
           <InfoField label="Cotizaciones">{quotations.length}</InfoField>
           <InfoField label="Repuestos">{partCount}</InfoField>
         </InfoGrid>

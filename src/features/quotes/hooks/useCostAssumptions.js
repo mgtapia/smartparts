@@ -4,7 +4,6 @@ import { SHIPPING_MODES } from '@constants/enums'
 import { DEFAULT_UNIT_COST_ASSUMPTIONS, SHIPMENT_CHARGES } from '@mocks/costParams'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
-import { estimateOriginCostBp } from '@features/costing/originCost'
 
 const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_RATES } =
   DEFAULT_UNIT_COST_ASSUMPTIONS
@@ -75,8 +74,6 @@ export function useCostAssumptions() {
         // Sin distancia: el mayor entre el 3 % del precio y el transporte con la distancia
         // promedio. Con cero, el proveedor sin datos saldría más barato que los que sí tienen.
         originFallback: { bp: defaultOriginCostBp, averageKm },
-        // Solo para el simulador de pedidos, que todavía estima el origen como % del precio.
-        originCostBp: estimateOriginCostBp(distance.km ?? Number.NaN) ?? defaultOriginCostBp,
         // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
         assumedIncoterm: 'none',
         ...supplierSettings[supplierId],

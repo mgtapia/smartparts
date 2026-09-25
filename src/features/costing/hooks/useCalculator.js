@@ -10,8 +10,9 @@ export const DEFAULT_MARGIN_BP = 2000
 
 /**
  * Calculadora de costo de un repuesto: elige repuesto, cotización y cantidades, y
- * calcula el costo puesto en Chile de cada cantidad como una OC de una sola línea
- * (con los costos fijos por embarque). Comparte supuestos y parámetros con Cotizaciones.
+ * calcula el costo puesto en Chile de cada cantidad como una OC de un solo repuesto
+ * (`buildOrder` → `costShipment`, el mismo modelo del simulador de pedido completo, con los
+ * gastos por embarque enteros). Comparte supuestos y parámetros con Cotizaciones.
  */
 export function useCalculator(initialPartId) {
   const { lines, loading, error } = useQuotationsData()
@@ -44,12 +45,13 @@ export function useCalculator(initialPartId) {
         ? {
             qty,
             order: buildOrder({
-              orderLines: [{ id: 'linea', part, quote, qty }],
+              part,
+              quote,
+              qty,
               supplier: quote.supplier,
               mode,
               settings: settingsFor(quote.supplierId),
               assumptions: rates,
-              freightQuoteUsdMicro: null,
               marginBp,
               params: DEFAULT_PARAM_SET,
               fx: DEFAULT_FX,

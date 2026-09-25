@@ -31,12 +31,26 @@ const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM
 const QTY_COLUMN_WIDTH = 130
 
 const CALCULATOR_HELP = [
-  'Cada columna es una orden de compra de una sola línea con esa cantidad: incluye los costos fijos por embarque, como la prima mínima del seguro y el mínimo del agente de aduanas. Por eso una cantidad chica sale más cara por unidad.',
+  'Cada columna es una orden de compra de este repuesto a este proveedor con esa cantidad, costeada igual que el pedido completo: los gastos por embarque (despacho, documentos, reparto, mínimos del transporte en China, del seguro y del agente de aduanas) se cobran enteros una vez. Por eso una cantidad chica sale más cara por unidad.',
+  'Cada fila de gasto muestra lo que corresponde a una unidad; el costo final total es el de la orden completa.',
+  'Transporte en China: tarifa por tonelada-km × toneladas cobrables de la orden × la distancia del proveedor al puerto o aeropuerto, que se edita en su ficha. Sin distancia se usa el mayor entre un % del precio y el transporte con la distancia promedio de los proveedores con dato.',
   'Precio de venta: costo final más el margen elegido sobre el costo. El margen por defecto es 20 %.',
-  'Los gastos de origen y las tarifas de flete se definen en Parámetros y Supuestos. Sin ellos no se calcula: no se inventan tarifas.',
+  'Las tarifas de flete y los gastos por etapa se definen en Parámetros. Sin tarifa de flete no se calcula: no se inventan tarifas.',
 ]
 
 const perUnit = (micro, qty) => roundHalfUp(micro / qty)
+
+/** Componentes que suman el costo final: sus motivos de "no verificado" pasan al total. */
+const ALL_COMPONENTS = [
+  'goods',
+  'inland',
+  'export',
+  'freight',
+  'insurance',
+  'duty',
+  'chile',
+  'bank',
+]
 
 const number = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 3 })
 
@@ -76,85 +90,70 @@ function PartCalculator({ tabs }) {
     setQuantities((prev) => prev.map((q, i) => (i === index ? value : q)))
 
   /** Una celda de la tabla: el valor, o "Falta dato" en rojo con el motivo si no se puede calcular. */
-  const cell = (order, pick, { verified = null } = {}) => {
+  /**
+   * Una celda de la tabla: el valor en rojo con sus motivos si no está verificado, o "Falta
+   * dato" en rojo con el motivo si no se puede calcular. `keys`: de qué componentes sale el
+   * valor, para juntar sus motivos.
+   */
+  const cell = (order, pick, keys) => {
     if (!order) return '—'
-    const row = order.rows[0]
-    if (!row.cost) {
-      const reasons = [...order.result.blockers, ...row.blockers]
+    if (!order.cost) {
       return (
-        <UncertainValue verified={false} reason={reasons.join('; ') || 'Falta un dato'}>
+        <UncertainValue verified={false} reason={order.blockers.join('; ') || 'Falta un dato'}>
           Falta dato
         </UncertainValue>
       )
     }
-    const micro = pick(row)
+    const micro = pick(order)
     if (micro == null) return '—'
-    const isVerified = verified ?? order.unverified.length === 0
+    const reasons = [...new Set(keys.flatMap((k) => order.reasons[k] ?? []))]
     return (
-      <UncertainValue verified={isVerified} reason={order.unverified.join('; ')}>
+      <UncertainValue verified={reasons.length === 0} reason={reasons.join('; ')}>
         <MoneyFromMicros micros={micro} currency="USD" />
       </UncertainValue>
     )
   }
 
+  /** Fila de un componente del costo, por unidad. */
+  const componentRow = (id, label) => ({
+    id,
+    label,
+    value: (o) => cell(o, (r) => perUnit(r.cost[id], r.qty), [id]),
+  })
+
   const ROWS = [
-    {
-      id: 'price',
-      label: 'Precio del proveedor',
-      value: (o) =>
-        cell(o, (r) => perUnit(r.cost.priceMicro, r.qty), {
-          verified: quote.currencyConfirmed && !quote.inferred,
-        }),
-    },
-    {
-      id: 'origin',
-      label: 'Gasto de origen',
-      value: (o) => cell(o, (r) => perUnit(r.cost.originMicro, r.qty)),
-    },
-    {
-      id: 'freight',
-      label: 'Flete',
-      value: (o) => cell(o, (r) => perUnit(r.cost.freightMicro, r.qty)),
-    },
-    {
-      id: 'insurance',
-      label: 'Seguro',
-      value: (o) => cell(o, (r) => perUnit(r.cost.insuranceMicro, r.qty)),
-    },
-    {
-      id: 'duty',
-      label: 'Arancel',
-      value: (o) => cell(o, (r) => perUnit(r.cost.dutyMicro, r.qty)),
-    },
-    {
-      id: 'local',
-      label: 'Gastos locales',
-      value: (o) => cell(o, (r) => perUnit(r.cost.localCostsMicro, r.qty)),
-    },
+    componentRow('goods', 'Precio del proveedor'),
+    componentRow('inland', 'Transporte en China'),
+    componentRow('export', 'Gastos de exportación'),
+    componentRow('freight', 'Flete'),
+    componentRow('insurance', 'Seguro'),
+    componentRow('duty', 'Arancel'),
+    componentRow('chile', 'Gastos en Chile'),
+    componentRow('bank', 'Transferencia bancaria'),
     {
       id: 'unitCost',
       label: 'Costo final unitario',
-      value: (o) => cell(o, (r) => r.cost.unitLandedNetMicro),
+      value: (o) => cell(o, (r) => r.cost.unitLandedNet, ALL_COMPONENTS),
     },
     {
       id: 'totalCost',
       label: 'Costo final total',
-      value: (o) => cell(o, (r) => r.cost.landedNetMicro),
+      value: (o) => cell(o, (r) => r.cost.landedNet, ALL_COMPONENTS),
     },
     {
       id: 'vat',
-      label: 'IVA recuperable',
-      value: (o) => cell(o, (r) => r.cost.vatMicro),
+      label: 'IVA recuperable total',
+      value: (o) => cell(o, (r) => r.cost.vat, ['vat', 'duty']),
     },
     {
       id: 'unitSale',
       label: 'Precio de venta unitario',
-      value: (o) => cell(o, (r) => r.unitSaleMicro),
+      value: (o) => cell(o, (r) => r.unitSaleMicro, ALL_COMPONENTS),
     },
     {
       id: 'totalSale',
       label: 'Venta total',
-      value: (o) => cell(o, (r) => r.totalSaleMicro),
+      value: (o) => cell(o, (r) => r.totalSaleMicro, ALL_COMPONENTS),
     },
   ]
 

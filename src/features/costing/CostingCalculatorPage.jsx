@@ -199,11 +199,11 @@ export default function CostingCalculatorPage() {
           setMode={assumptions.setMode}
           rates={assumptions.rates}
           setRates={assumptions.setRates}
-          onReset={assumptions.reset}
         />
         <SupplierAssumptionsDialog
           supplierName={supplierLabel(quote.supplier, quote.supplierId)}
           settings={assumptions.settingsFor(quote.supplierId)}
+          isAir={assumptions.mode === 'air'}
           onChange={(patch) => assumptions.updateSupplier(quote.supplierId, patch)}
         />
         <InfoNote title="Cómo leer la calculadora" paragraphs={CALCULATOR_HELP} />

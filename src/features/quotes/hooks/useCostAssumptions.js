@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { SHIPPING_MODES } from '@constants/enums'
-import { DEFAULT_UNIT_COST_ASSUMPTIONS } from '@mocks/costParams'
+import { DEFAULT_UNIT_COST_ASSUMPTIONS, SHIPMENT_CHARGES } from '@mocks/costParams'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { estimateOriginCostBp } from '@features/costing/originCost'
@@ -11,6 +11,8 @@ const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_RATES } =
 // Los aranceles son parámetros globales fijos (no dependen del proveedor ni de la
 // cotización): no se editan ni se guardan por navegador.
 const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
+// Lo que se edita en pantalla y se guarda por navegador: tarifas, tamaño del embarque y gastos.
+const EDITABLE_KEYS = Object.keys(DEFAULT_RATES)
 
 /**
  * Supuestos editables del costo unitario: modo de envío, tarifas, arancel TLC
@@ -21,47 +23,64 @@ const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
  */
 export function useCostAssumptions() {
   const [mode, setMode] = usePersistentState('quotes.mode', SHIPPING_MODES.SEA_LCL)
-  const [storedRates, setRates] = usePersistentState('quotes.rates.v3', DEFAULT_RATES)
+  const [storedRates, setStoredRates] = usePersistentState('quotes.rates.v3', DEFAULT_RATES)
   const [supplierSettings, setSupplierSettings] = usePersistentState(
     'quotes.supplierSettings.v3',
     {},
   )
 
-  // Un valor guardado de una versión anterior puede no tener claves nuevas.
-  const rates = useMemo(
-    () => ({ ...DEFAULT_RATES, ...storedRates, ...FIXED_DUTIES }),
-    [storedRates],
-  )
+  // Un valor guardado de una versión anterior puede no tener claves nuevas. Los gastos por
+  // embarque son la lista de referencia con los valores editados en pantalla encima.
+  const rates = useMemo(() => {
+    const merged = { ...DEFAULT_RATES, ...storedRates, ...FIXED_DUTIES }
+    const overrides = merged.chargeOverrides ?? {}
+    return {
+      ...merged,
+      shipmentCharges: SHIPMENT_CHARGES.map((c) => ({ ...c, ...overrides[c.code] })),
+    }
+  }, [storedRates])
+
+  // Solo se guardan los valores editables; los aranceles fijos y la lista armada no.
+  const setRates = (next) =>
+    setStoredRates(Object.fromEntries(EDITABLE_KEYS.map((key) => [key, next[key]])))
 
   // Distancia de cada proveedor al puerto (marítimo) o aeropuerto (aéreo) de embarque, en km.
   const { data: suppliers } = useCachedQuery('suppliers', listSuppliers)
   const isAir = mode === SHIPPING_MODES.AIR || mode === SHIPPING_MODES.COURIER
-  const originBpBySupplier = useMemo(() => {
+  const distanceBySupplier = useMemo(() => {
     const key = isAir ? 'airportDistanceKm' : 'portDistanceKm'
     return new Map(
-      (suppliers ?? []).map((s) => [
-        s.id,
-        estimateOriginCostBp(Number(s.facts?.[key]?.value ?? Number.NaN)),
-      ]),
+      (suppliers ?? []).map((s) => {
+        const fact = s.facts?.[key]
+        const km = Number(fact?.value ?? Number.NaN)
+        return [s.id, { km: Number.isFinite(km) && km >= 0 ? km : null, confirmed: !!fact?.source }]
+      }),
     )
   }, [suppliers, isAir])
 
   const settingsFor = useCallback(
-    (supplierId) => ({
-      // Sin distancia conocida se usa el porcentaje por defecto.
-      originCostBp: originBpBySupplier.get(supplierId) ?? defaultOriginCostBp,
-      // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
-      assumedIncoterm: 'none',
-      ...supplierSettings[supplierId],
-    }),
-    [supplierSettings, originBpBySupplier],
+    (supplierId) => {
+      const distance = distanceBySupplier.get(supplierId) ?? { km: null, confirmed: false }
+      return {
+        // Distancia al puerto o aeropuerto, desde la ficha del proveedor: el costo unitario
+        // calcula con ella el transporte en China. Sin distancia, avisa que falta.
+        originDistanceKm: distance.km,
+        originDistanceConfirmed: distance.confirmed,
+        // Solo para el simulador de pedidos, que todavía estima el origen como % del precio.
+        originCostBp: estimateOriginCostBp(distance.km ?? Number.NaN) ?? defaultOriginCostBp,
+        // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
+        assumedIncoterm: 'none',
+        ...supplierSettings[supplierId],
+      }
+    },
+    [supplierSettings, distanceBySupplier],
   )
 
   const updateSupplier = (supplierId, patch) =>
     setSupplierSettings((prev) => ({ ...prev, [supplierId]: { ...prev[supplierId], ...patch } }))
 
   // Solo los parámetros generales: lo de cada proveedor se edita en su cotización.
-  const reset = () => setRates(DEFAULT_RATES)
+  const reset = () => setStoredRates(DEFAULT_RATES)
 
   return { mode, setMode, rates, setRates, settingsFor, updateSupplier, reset }
 }

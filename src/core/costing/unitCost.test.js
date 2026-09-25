@@ -1,14 +1,24 @@
 import { describe, it, expect } from 'vitest'
+import fc from 'fast-check'
 import { money } from '../../libs/money'
-import { DEFAULT_PARAM_SET, DEFAULT_FX } from '../../mocks/costParams'
+import { DEFAULT_PARAM_SET, DEFAULT_FX, SHIPMENT_CHARGES } from '../../mocks/costParams'
 import { computeUnitCost } from './unitCost'
+import { unitShipmentCharges } from './shipmentCharges'
 
-const ASSUMPTIONS = { airUsdPerKgCents: 600, seaUsdPerRtCents: 18000, ftaDutyBp: 0 }
+const ASSUMPTIONS = {
+  airUsdPerKgCents: 600,
+  seaUsdPerRtCents: 18000,
+  ftaDutyBp: 0,
+  shipmentCharges: SHIPMENT_CHARGES,
+  seaShipmentRt: 4,
+  airShipmentKg: 100,
+}
 
+// Pieza de 4 kg y 10.000 cm³: 0,01 R/T marítimo; ocupa 1/400 de un embarque de 4 m³.
 const base = {
   unitPrice: money(10000, 'USD'), // US$ 100,00
   incoterm: 'EXW',
-  originCostBp: 500,
+  originDistanceKm: 500,
   formF: 'no',
   weightG: 4000,
   volumeCm3: 10000,
@@ -20,38 +30,96 @@ const base = {
 }
 
 const byCode = (r) => Object.fromEntries(r.components.map((c) => [c.code, c]))
+const item = (component, code) => component.items.find((i) => i.code === code)
 
 describe('computeUnitCost', () => {
-  it('EXW suma el costo de origen (% del precio) antes del flete', () => {
-    const r = computeUnitCost(base)
-    const c = byCode(r)
-    // US$ 100 × 5% = US$ 5 de origen (en micros de USD).
-    expect(c.origin.usdMicro).toBe(5_000_000)
-    expect(c.price.usdMicro).toBe(100_000_000)
-  })
-
-  it('FOB/FCA no suma costo de origen', () => {
-    const r = computeUnitCost({ ...base, incoterm: 'FOB' })
-    expect(byCode(r).origin.usdMicro).toBe(0)
-    expect(byCode(r).origin.verified).toBe(true)
-  })
-
-  it('costo final = CIF + arancel + gastos locales (invariante de suma)', () => {
+  it('costo final = CIF + arancel + gastos en Chile + transferencia (invariante de suma)', () => {
     const c = byCode(computeUnitCost(base))
-    expect(c.landedNet.usdMicro).toBe(c.cif.usdMicro + c.duty.usdMicro + c.localCosts.usdMicro)
+    expect(c.landedNet.usdMicro).toBe(
+      c.cif.usdMicro + c.duty.usdMicro + c.localCosts.usdMicro + c.bank.usdMicro,
+    )
   })
 
-  it('CIF = FOB (precio + origen) + flete + seguro', () => {
+  it('CIF = FOB (precio + transporte en China + exportación) + flete + seguro', () => {
     const c = byCode(computeUnitCost(base))
-    const fob = c.price.usdMicro + c.origin.usdMicro
+    const fob = c.price.usdMicro + c.origin.usdMicro + c.originCharges.usdMicro
+    expect(c.originCharges.usdMicro).toBeGreaterThan(0)
     expect(c.cif.usdMicro).toBe(fob + c.freight.usdMicro + c.insurance.usdMicro)
   })
 
-  it('no aplica mínimos por embarque: una pieza barata no paga el piso del agente', () => {
-    const cheap = computeUnitCost({ ...base, unitPrice: money(500, 'USD') })
-    // El piso del agente en el param set es US$ 80: si se colara, el costo
-    // final de una pieza de US$ 5 sería mayor a US$ 80.
-    expect(byCode(cheap).landedNet.usdMicro).toBeLessThan(80_000_000)
+  it('el transporte en China depende de la distancia y el peso, no del precio', () => {
+    // 0,01 t cobrables × 500 km × US$0,278 = US$1,39.
+    expect(byCode(computeUnitCost(base)).origin.usdMicro).toBe(1_390_000)
+    const pricier = byCode(computeUnitCost({ ...base, unitPrice: money(100_000, 'USD') }))
+    expect(pricier.origin.usdMicro).toBe(1_390_000)
+    const farther = byCode(computeUnitCost({ ...base, originDistanceKm: 1000 }))
+    expect(farther.origin.usdMicro).toBe(2_780_000)
+  })
+
+  it('mismo precio, proveedor más lejos → costo final más alto', () => {
+    const near = computeUnitCost({ ...base, originDistanceKm: 60 })
+    const far = computeUnitCost({ ...base, originDistanceKm: 1700 })
+    expect(far.landedNetUsdMicro).toBeGreaterThan(near.landedNetUsdMicro)
+  })
+
+  it('cerca del puerto rige el mínimo del camión, prorrateado', () => {
+    // 0,01 × 10 km × 0,278 = US$0,0278 < mínimo US$16 / 400 = US$0,04.
+    expect(byCode(computeUnitCost({ ...base, originDistanceKm: 10 })).origin.usdMicro).toBe(40_000)
+  })
+
+  it('EXW sin distancia del proveedor no se costea: dice qué falta', () => {
+    const r = computeUnitCost({ ...base, originDistanceKm: null })
+    expect(r.landedNetUsdMicro).toBeNull()
+    expect(r.blockers[0]).toContain('distancia')
+  })
+
+  it('FOB/FCA no suma transporte en China ni gastos de exportación', () => {
+    const c = byCode(computeUnitCost({ ...base, incoterm: 'FOB', originDistanceKm: null }))
+    expect(c.origin.usdMicro).toBe(0)
+    expect(c.originCharges.usdMicro).toBe(0)
+    expect(c.origin.verified).toBe(true)
+  })
+
+  it('un gasto por embarque se prorratea según la parte del embarque que ocupa la pieza', () => {
+    const c = byCode(computeUnitCost(base))
+    // Reparto US$195,92 × 0,01 / 4 = US$0,4898 (los gastos en Chile no se redondean a centavos).
+    expect(item(c.localCosts, 'delivery_sea').usdMicro).toBe(489_800)
+    // Desconsolidación US$15 por m³ × 0,01 m³ = US$0,15.
+    expect(item(c.localCosts, 'deconsolidation').usdMicro).toBe(150_000)
+  })
+
+  it('prorratear da lo mismo que un embarque lleno de la pieza dividido por las piezas', () => {
+    const [delivery] = unitShipmentCharges({
+      charges: SHIPMENT_CHARGES.filter((c) => c.code === 'delivery_sea'),
+      isAir: false,
+      unitChargeable: 0.01,
+      shipmentChargeable: 4,
+    })
+    expect(delivery.usdMicro * 400).toBe(195_920_000)
+  })
+
+  it('el agente cobra el mayor entre su porcentaje y su mínimo prorrateado', () => {
+    const cheap = byCode(computeUnitCost({ ...base, unitPrice: money(100, 'USD') }))
+    // Mínimo US$210,67 / 400 = US$0,5267 > 1 % de un CIF de pocos dólares.
+    expect(item(cheap.localCosts, 'customs_agent').usdMicro).toBe(526_675)
+    const pricey = byCode(computeUnitCost({ ...base, unitPrice: money(1_000_000, 'USD') }))
+    expect(item(pricey.localCosts, 'customs_agent').usdMicro).toBe(
+      Math.round(pricey.cif.usdMicro / 100),
+    )
+  })
+
+  it('una pieza más grande que el embarque típico paga el embarque entero', () => {
+    const huge = byCode(computeUnitCost({ ...base, volumeCm3: 8_000_000 }))
+    expect(item(huge.localCosts, 'delivery_sea').usdMicro).toBe(195_920_000)
+  })
+
+  it('cada modo usa sus propios gastos', () => {
+    const sea = byCode(computeUnitCost(base))
+    const air = byCode(computeUnitCost({ ...base, mode: 'air' }))
+    const codes = (c) => c.items.map((i) => i.code)
+    expect(codes(sea.localCosts)).toContain('bonded_warehouse')
+    expect(codes(air.localCosts)).not.toContain('bonded_warehouse')
+    expect(codes(air.originCharges)).toContain('awb')
   })
 
   it('con Form F usa la tasa TLC supuesta; sin él, el arancel general', () => {
@@ -110,15 +178,59 @@ describe('computeUnitCost', () => {
   })
 
   it('nada sale verificado mientras los parámetros y tarifas sean estimaciones', () => {
-    const r = computeUnitCost({ ...base, unitPrice: money(10000, 'USD') })
+    const r = computeUnitCost(base)
     const unverified = r.components.filter((c) => !c.verified).map((c) => c.code)
     expect(unverified).toEqual(
-      expect.arrayContaining(['origin', 'freight', 'insurance', 'cif', 'duty', 'landedNet']),
+      expect.arrayContaining([
+        'origin',
+        'originCharges',
+        'freight',
+        'insurance',
+        'cif',
+        'duty',
+        'localCosts',
+        'bank',
+        'landedNet',
+      ]),
     )
   })
 
   it('precio en CNY queda marcado como no verificado', () => {
     const r = computeUnitCost({ ...base, unitPrice: money(70000, 'CNY') })
     expect(byCode(r).price.verified).toBe(false)
+  })
+
+  it('invariantes de suma para cualquier pieza, precio, distancia y modo', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 5_000_000 }),
+        fc.integer({ min: 1, max: 200_000 }),
+        fc.integer({ min: 1, max: 2_000_000 }),
+        fc.integer({ min: 0, max: 3000 }),
+        fc.constantFrom('sea_lcl', 'air'),
+        (cents, weightG, volumeCm3, km, mode) => {
+          const c = byCode(
+            computeUnitCost({
+              ...base,
+              unitPrice: money(cents, 'USD'),
+              weightG,
+              volumeCm3,
+              originDistanceKm: km,
+              mode,
+            }),
+          )
+          const sumItems = (x) => x.items.reduce((a, i) => a + i.usdMicro, 0)
+          const fob = c.price.usdMicro + c.origin.usdMicro + c.originCharges.usdMicro
+          return (
+            c.landedNet.usdMicro ===
+              c.cif.usdMicro + c.duty.usdMicro + c.localCosts.usdMicro + c.bank.usdMicro &&
+            c.cif.usdMicro === fob + c.freight.usdMicro + c.insurance.usdMicro &&
+            c.origin.usdMicro === sumItems(c.origin) &&
+            c.originCharges.usdMicro === sumItems(c.originCharges) &&
+            c.localCosts.usdMicro === sumItems(c.localCosts)
+          )
+        },
+      ),
+    )
   })
 })

@@ -72,11 +72,6 @@ export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
   chargeOverrides: {}, // Valores editados en pantalla, por código de SHIPMENT_CHARGES.
 }
 
-// Gasto de origen EXW → FOB como % del precio según la distancia: parte fija + variable por 100 km.
-// Estimación del equipo sin fuente. Solo lo usa todavía el simulador de pedidos; el costo unitario
-// calcula el transporte en China por distancia y peso (SHIPMENT_CHARGES, `inland_china`).
-export const ORIGIN_COST_ESTIMATE = { baseBp: 200, bpPer100Km: 30 }
-
 // Fuente de las tarifas de flete (ver los comentarios de DEFAULT_UNIT_COST_ASSUMPTIONS).
 export const FREIGHT_SOURCES = {
   sea: {

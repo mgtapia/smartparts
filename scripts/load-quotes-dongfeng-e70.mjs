@@ -73,7 +73,7 @@ const SOURCES = {
   // equipo como F/G × 1,03 ÷ 6,65 — moneda sin confirmar. I/J no se cargan
   // como precio: es un dato derivado, no del proveedor.
   dealer: {
-    supplierAlias: 'Dealer cqjfb',
+    supplierAlias: 'Chongqing Jinfubo',
     file: 'Cotización Dongfeng E70 - Dealer Alibaba cqjfb.xlsx',
     prices: [
       { col: 'F', partType: 'alternative' },

@@ -40,6 +40,8 @@ function shapeQuote(id, raw, suppliersById, quotationId) {
     // La calidad (OEM o AFM) que el proveedor indicó en su cotización queda confirmada con esa
     // cotización como fuente; una cotización inferida no la tiene.
     partTypeConfirmed: Boolean(raw.confirmations?.part_type),
+    // Por qué la calidad está sin confirmar cuando la eligió el equipo (ej. por parecido de precio).
+    partTypeNote: raw.part_type_note ?? null,
     // Money tal como se guardó (entero + moneda + scale); currency puede ser null.
     price: { amount: raw.price.amount, currency, scale },
     priceAmount,

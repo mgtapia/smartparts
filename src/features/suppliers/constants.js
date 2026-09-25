@@ -36,6 +36,7 @@ export const FACTS = {
     ],
   },
   location: { label: 'Ubicación' },
+  founded: { label: 'Año de fundación' },
   port: { label: 'Puerto de embarque' },
   airport: { label: 'Aeropuerto de embarque' },
   moq: { label: 'MOQ' },
@@ -59,6 +60,7 @@ export const CONTACT_FIELDS = [
   { path: 'contact.wechat', label: 'WeChat' },
   { path: 'contact.email', label: 'Correo' },
   { path: 'contact.address', label: 'Dirección' },
+  { path: 'contact.website', label: 'Sitio web' },
 ]
 
 // Etiquetas en español de los valores internos que se guardan en la base (en inglés o como códigos).

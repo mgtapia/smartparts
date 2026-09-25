@@ -201,6 +201,7 @@ export default function SupplierDetailPage() {
       {tab === SUPPLIER_TABS.IDENTITY ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <InfoGrid columns={3}>{IDENTITY_FIELDS.map(textField)}</InfoGrid>
+          <InfoGrid columns={3}>{factField('founded')}</InfoGrid>
           <InfoGrid columns={3}>
             <InfoField label="País">
               {labelOf(COUNTRY_LABELS_ES, supplier.country) ?? '—'}
@@ -229,8 +230,8 @@ export default function SupplierDetailPage() {
 
       {tab === SUPPLIER_TABS.CONTACT ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={3}>{CONTACT_FIELDS.slice(0, 3).map(textField)}</InfoGrid>
-          <InfoGrid columns={3}>{CONTACT_FIELDS.slice(3).map(textField)}</InfoGrid>
+          <InfoGrid columns={4}>{CONTACT_FIELDS.slice(0, 4).map(textField)}</InfoGrid>
+          <InfoGrid columns={4}>{CONTACT_FIELDS.slice(4).map(textField)}</InfoGrid>
         </Card>
       ) : null}
 

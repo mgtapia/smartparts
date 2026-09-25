@@ -155,7 +155,7 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 
 **`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.
 
-Regla dura: **nunca auto-confirmar `part_type: 'original'`.** Que un vendedor escriba 原厂 no significa nada — pasar a verificado requiere acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
+Regla: **la calidad no se confirma por inferencia.** La calidad que el proveedor indica en su propia cotización (Original/Alternative, OEM/AFM, original/copy) queda confirmada en `confirmations.part_type` con la cotización como fuente (`scripts/confirm-part-types.mjs`, decisión del usuario del 2026-09-25); las cotizaciones inferidas del lado opuesto no. Que un vendedor escriba 原厂 en un listado público no basta — pasar a verificado requiere la cotización del proveedor o una acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
 
 ## Índices compuestos (`firestore.indexes.json`)
 

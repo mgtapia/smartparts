@@ -54,7 +54,7 @@ Yonder no tiene tests — este proyecto sí, en `src/core/costing/`. Es una func
 - **Rojo = no verificado**, siempre, con el motivo (`UncertainValue`). Confirmar un dato exige fuente y lo saca del rojo.
 - **Reutilizar antes de crear**: catálogo de componentes y patrón de ficha en [[DESIGN]]. Rediseñar bien, no parchar.
 - **Español** salvo siglas universales; etiquetas precisas y sin paréntesis de relleno; explicaciones en un `InfoNote`.
-- **Nunca auto-confirmar** `part_type: 'original'` ni aceptar un código sin fuente citable.
+- **Nunca auto-confirmar por inferencia** la calidad (`part_type`) ni aceptar un código sin fuente citable. La calidad que el proveedor indica en su propia cotización sí está confirmada, con esa cotización como fuente (decisión del usuario, 2026-09-25); una cotización inferida no.
 - **Todo id de documento lo asigna Firestore.** Nunca un id inventado (`sup_…`, `q_…`, códigos, rutas, fechas); la clave natural va como campo y se busca por consulta. Lo que pertenece a otro documento va en una subcolección (ver [[MODELO-DE-DATOS]]). El hook lo bloquea en repos y scripts.
 - **Tareas grandes se planifican antes** y se commitean por tanda.
 

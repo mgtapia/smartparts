@@ -145,8 +145,8 @@ export default function PartDetailPage() {
       width: 90,
       render: ({ quote }) => (
         <UncertainValue
-          verified={quote.partType !== PART_TYPE.ORIGINAL}
-          reason="OEM declarado por el proveedor: se confirma con foto o muestra"
+          verified={quote.partTypeConfirmed}
+          reason="Calidad inferida del lado opuesto: el proveedor no la indicó"
         >
           {QUALITY_LABEL[quote.partType]}
         </UncertainValue>

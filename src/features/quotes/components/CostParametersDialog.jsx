@@ -42,6 +42,18 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
 const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_EDITABLE } =
   DEFAULT_UNIT_COST_ASSUMPTIONS
 
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+
+/** ¿Los parámetros editables difieren de los originales? Decide si "Restablecer" tiene algo que hacer. */
+function differsFromDefaults(rates) {
+  const { chargeOverrides, ...values } = DEFAULT_EDITABLE
+  const changedValue = Object.keys(values).some((key) => !same(rates[key], values[key]))
+  const changedCharge = SHIPMENT_CHARGES.some(
+    (c) => !same({ ...c, ...rates.chargeOverrides?.[c.code] }, c),
+  )
+  return changedValue || changedCharge
+}
+
 const TABS = { PARAMS: 'parametros', CONSTANTS: 'constantes' }
 
 // Valores que no se editan acá: los fija la ley, una convención del transporte o el set de
@@ -310,7 +322,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
             )}
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
-            {tab === TABS.PARAMS ? (
+            {tab === TABS.PARAMS && differsFromDefaults(draft.rates) ? (
               <ModalActionButton
                 label="Restablecer"
                 onClick={() => setDraft((d) => ({ ...d, rates: { ...DEFAULT_EDITABLE } }))}

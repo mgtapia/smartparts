@@ -20,6 +20,9 @@ import { updateSupplierFact, updateSupplierField } from '@libs/repos/suppliersRe
 import { formatDate, supplierLabel } from '@features/quotes/constants'
 import QualityChips from '@features/quotes/components/QualityChips'
 import {
+  COUNTRY_LABELS_ES,
+  PLATFORM_LABELS_ES,
+  labelOf,
   CONTACT_FIELDS,
   FACTS,
   IDENTITY_FIELDS,
@@ -200,8 +203,12 @@ export default function SupplierDetailPage() {
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <InfoGrid columns={3}>{IDENTITY_FIELDS.map(textField)}</InfoGrid>
           <InfoGrid columns={3}>
-            <InfoField label="País">{supplier.country ?? '—'}</InfoField>
-            <InfoField label="Plataforma">{supplier.platform ?? '—'}</InfoField>
+            <InfoField label="País">
+              {labelOf(COUNTRY_LABELS_ES, supplier.country) ?? '—'}
+            </InfoField>
+            <InfoField label="Plataforma">
+              {labelOf(PLATFORM_LABELS_ES, supplier.platform) ?? '—'}
+            </InfoField>
             <InfoField label="Enlace">
               {supplier.platform_url ? (
                 <Box

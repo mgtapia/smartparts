@@ -60,6 +60,20 @@ export const CONTACT_FIELDS = [
   { path: 'contact.address', label: 'Dirección' },
 ]
 
+// Etiquetas en español de los valores internos que se guardan en la base (en inglés o como códigos).
+export const PLATFORM_LABELS_ES = {
+  alibaba: 'Alibaba',
+  direct: 'Contacto directo',
+  other: 'Otra',
+}
+export const COUNTRY_LABELS_ES = {
+  CN: 'China',
+  KR: 'Corea del Sur',
+}
+
+/** Etiqueta en español de un valor interno; si no hay una definida, se muestra el valor tal cual. */
+export const labelOf = (labels, value) => (value ? (labels[value] ?? value) : null)
+
 /** Valor de un campo anidado por ruta ('contact.person'). */
 export const getPath = (obj, path) => path.split('.').reduce((o, k) => o?.[k], obj) ?? null
 

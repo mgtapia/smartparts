@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { cloneElement, isValidElement, useState } from 'react'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import Divider from '@mui/material/Divider'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import Link from '@mui/material/Link'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import LinkIcon from '@mui/icons-material/Link'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
@@ -155,7 +158,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
                 <>
                   <Field source={FREIGHT_SOURCES.air}>
                     <NumberField
-                      label="Flete aéreo (US$/kg cobrable)"
+                      label="Flete aéreo (US$/kg)"
                       adornment="US$"
                       value={fromCents(draft.rates.airUsdPerKgCents)}
                       onCommit={(n) => n != null && setRate({ airUsdPerKgCents: toCents(n) })}
@@ -163,7 +166,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
                   </Field>
                   <Field source={{ labelEs: 'Estándar IATA; algunos couriers usan 5000' }}>
                     <NumberField
-                      label="Factor volumétrico aéreo (cm³/kg)"
+                      label="Factor volumétrico (cm³/kg)"
                       adornment="cm³"
                       value={draft.rates.airVolumetricDivisor}
                       onCommit={(n) => n > 0 && setRate({ airVolumetricDivisor: Math.round(n) })}
@@ -181,7 +184,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
                 </Field>
               )}
               <FixedValue
-                label="Seguro (% del valor asegurado)"
+                label="Seguro (% FOB + flete)"
                 value={`${pct(DEFAULT_PARAM_SET.insurance.rateBp)} de (FOB + flete) + ${pct(DEFAULT_PARAM_SET.insurance.markupBp)}`}
                 reason="Tasa referencial, sin cotización de seguro"
               />
@@ -189,17 +192,17 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
 
             <Section title="Aduana">
               <FixedValue
-                label="Arancel ad valorem general (% CIF)"
+                label="Arancel general (% CIF)"
                 value={pct(generalDutyBp)}
                 reason="Fijo por ley, igual para todos los proveedores. Sin verificar con el agente de aduanas"
               />
               <FixedValue
-                label="Arancel TLC Chile-China (% CIF)"
+                label="Arancel TLC (% CIF)"
                 value={pct(ftaDutyBp)}
                 reason="Solo con Formulario F y partida elegible. Sin verificar por partida"
               />
               <FixedValue
-                label="IVA de importación (% de CIF + arancel)"
+                label="IVA (% CIF + arancel)"
                 value={pct(DEFAULT_PARAM_SET.vat.rateBp)}
                 reason="Crédito fiscal recuperable: no se suma al costo final. Sin verificar con el SII"
               />
@@ -243,29 +246,40 @@ function Section({ title, children }) {
   )
 }
 
-/** Campo editable con su fuente debajo, en rojo: es referencia, no cotización. */
+/** Campo editable; la fuente va como ícono junto a la etiqueta, no como texto debajo. */
 function Field({ source, children }) {
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-      {children}
-      {source ? <SourceLine source={source} /> : null}
-    </Box>
-  )
+  return source && isValidElement(children)
+    ? cloneElement(children, { labelSuffix: <SourceIcon source={source} /> })
+    : children
 }
 
-function SourceLine({ source }) {
+/** Ícono de la fuente en rojo (referencia, no cotización): detalle al pasar el mouse, enlace al clic. */
+function SourceIcon({ source }) {
+  const title = (
+    <>
+      {source.labelEs}
+      <br />
+      {source.noteEs ?? 'Referencia, sin cotización real'}
+    </>
+  )
+  const linkProps = source.url
+    ? { component: 'a', href: source.url, target: '_blank', rel: 'noopener noreferrer' }
+    : {}
   return (
-    <Typography variant="caption" sx={{ fontSize: 11, lineHeight: 1.3 }}>
-      <UncertainValue verified={false} reason={source.noteEs ?? 'Referencia, sin cotización real'}>
+    <Tooltip title={title}>
+      <IconButton
+        size="small"
+        aria-label="Fuente"
+        {...linkProps}
+        sx={{ p: 0, color: 'error.main', flexShrink: 0 }}
+      >
         {source.url ? (
-          <Link href={source.url} target="_blank" rel="noopener noreferrer" color="inherit">
-            {source.labelEs}
-          </Link>
+          <LinkIcon sx={{ fontSize: 14 }} />
         ) : (
-          source.labelEs
+          <InfoOutlinedIcon sx={{ fontSize: 14 }} />
         )}
-      </UncertainValue>
-    </Typography>
+      </IconButton>
+    </Tooltip>
   )
 }
 
@@ -289,7 +303,7 @@ function ChargeFields({ charge: c, isAir, onChange }) {
     case 'per_unit':
       return (
         <Field source={c.source}>
-          {money(`${c.labelEs} (US$/${isAir ? 'kg cobrable' : 'm³'})`, 'amountCents')}
+          {money(`${c.labelEs} (US$/${isAir ? 'kg' : 'm³'})`, 'amountCents')}
         </Field>
       )
     case 'distance_min':

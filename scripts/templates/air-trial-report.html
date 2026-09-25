@@ -484,7 +484,6 @@
   }
 
   function render() {
-    const high = d.anomalies.filter((a) => a.severity === 'alta').length
     const html = `
     <header>
       <div class="eyebrow">Cliente inicial · ${esc(d.vehicle)} · ${new Date(d.generatedAt).toLocaleDateString('es-CL')}</div>
@@ -570,57 +569,22 @@
       </div>
     </section>
 
-    <section>
-      <h2>Proveedores</h2>
-      <div class="card scroll">
-        <table>
-          <thead><tr><th>Sigla</th><th class="num">OEM</th><th class="num">AFM</th><th>Calidad</th><th>Moneda</th><th>Incoterm</th><th>Form. F</th><th>Aeropuerto</th></tr></thead>
-          <tbody>${d.supplierStats
-            .map((s, i) => {
-              const c = d.coverage[i]
-              const flag = (n) =>
-                n === 0
-                  ? '<span class="tag good">ok</span>'
-                  : `<span class="tag red">${n} sin confirmar</span>`
-              return `<tr><td><strong>${esc(abbrByName(s.supplier))}</strong><div class="note">${s.type === 'factory' ? 'fábrica declarada' : s.type === 'distributor' ? 'distribuidor' : ''}</div></td>
-                <td class="num">${c.original}</td><td class="num">${c.alternative}</td>
-                <td>${flag(s.qualityUnconfirmed)}</td><td>${s.currencies.join(' + ')} ${flag(s.currencyUnconfirmed)}</td><td>${flag(s.incotermUnconfirmed)}</td>
-                <td>${s.formF === 'unknown' ? '<span class="tag red">sin confirmar</span>' : esc(s.formF)}</td>
-                <td>${s.hasAirportDistance ? (s.airportDistanceConfirmed ? 'con fuente' : '<span class="tag red">sin fuente</span>') : '<span class="tag red">sin dato</span>'}</td></tr>`
-            })
-            .join('')}</tbody>
-        </table>
-      </div>
-    </section>
+    
 
     <section>
-      <h2>Anomalías <span class="muted">(${d.anomalies.length} en total, ${high} altas)</span></h2>
-      <div class="controls">
-        <label class="muted">Gravedad
-          <select id="sev">${['todas', 'alta', 'media'].map((x) => `<option ${x === state.sev ? 'selected' : ''}>${x}</option>`).join('')}</select>
-        </label>
-        <label class="muted">Área
-          <select id="area">${['todas', ...new Set(d.anomalies.map((a) => a.area))].map((x) => `<option ${x === state.area ? 'selected' : ''}>${x}</option>`).join('')}</select>
-        </label>
-      </div>
+      <h2>Anomalías <span class="muted">(${d.anomalies.length})</span></h2>
       <div class="groups">${anomalyGroups()}</div>
     </section>
 
     <section>
-      <h2>Qué falta para cerrar</h2>
+      <h2>Datos que faltan</h2>
       <div class="card">
-        <ul class="plain">
-          <li>Pedir al proveedor elegido el <strong>packing list</strong> de lo que se va a volar: es lo que más mueve el costo aéreo.</li>
-          <li>Confirmar por escrito la <strong>calidad</strong> y el <strong>precio</strong> de las piezas con precio atípico antes de pagar.</li>
-          <li>Pedir la <strong>hoja MSDS del compresor</strong> y consultar al forwarder si puede ir por avión.</li>
-          <li>Cotizar el flete aéreo con un forwarder real.</li>
-          <li>Conseguir los <strong>5 códigos</strong> que faltan por VIN con el proveedor elegido.</li>
+        <ul class="plain">${d.missingData.map((m) => `<li><strong>${esc(m.titleEs)}.</strong> ${esc(m.actionEs)}</li>`).join('')}
+          <li><strong>Hoja MSDS del compresor.</strong> Pedirla y consultar al forwarder si puede ir por avión.</li>
         </ul>
       </div>
     </section>`
     document.getElementById('app').innerHTML = html
-    document.getElementById('sev').onchange = (e) => ((state.sev = e.target.value), render())
-    document.getElementById('area').onchange = (e) => ((state.area = e.target.value), render())
   }
   render()
 </script>

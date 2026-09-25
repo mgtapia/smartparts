@@ -85,13 +85,6 @@ const KNOWN_FINDINGS = [
     titleEs: 'Disco de freno trasero: 4581005 frente a 4551007 del cliente',
     detailEs: 'Dos códigos posibles; el proveedor debe confirmar el que corresponde al VIN.',
   },
-  {
-    severity: 'media',
-    area: 'logística',
-    titleEs: 'Compresor de A/C posiblemente cargado con nitrógeno (UN1956)',
-    detailEs:
-      'Puede ser mercancía peligrosa por aire. Pedir la hoja MSDS antes de cotizarlo por avión.',
-  },
 ]
 
 // ── Utilidades de dinero (enteros) ──────────────────────────────────────────────────────────────
@@ -466,15 +459,6 @@ for (const p of parts) {
   const landedClp = usdMicroToClp(best.landedUsdMicro)
   if (landedClp <= base) continue
   notWorthFlying++
-  add({
-    severity: 'media',
-    area: 'logística',
-    partName: p.name_es,
-    supplier: sName.get(best.supplierId),
-    quality: QUALITY_ES[best.quality],
-    titleEs: 'No conviene traerlo por avión',
-    detailEs: `Costo puesto en Chile CLP ${landedClp.toLocaleString('es-CL')} contra CLP ${base.toLocaleString('es-CL')} que paga hoy el cliente, con ${best.chargeableKg.toFixed(1)} kg cobrables.`,
-  })
 }
 
 // Mercancía peligrosa y piezas fuera de medida.
@@ -488,30 +472,15 @@ for (const p of parts) {
       detailEs: 'Pedir la hoja MSDS y confirmar con el forwarder antes de incluirla en el pedido.',
     })
   }
-  if (oversize(p)) {
-    const pkg = research.get(p.name_es).package_cm
-    add({
-      severity: 'media',
-      area: 'logística',
-      partName: p.name_es,
-      titleEs: 'Fuera de medida para avión de pasajeros',
-      detailEs: `Bulto de ${pkg.join(' × ')} cm: puede exigir avión de carga y cobrar recargo.`,
-    })
-  }
 }
 
 // Códigos: repetidos entre repuestos distintos y repuestos sin código.
 const byCode = new Map()
+const missingCodes = []
 for (const p of parts) {
   const code = p.oem_codes?.[0]?.code
   if (!code) {
-    add({
-      severity: 'alta',
-      area: 'códigos',
-      partName: p.name_es,
-      titleEs: 'Repuesto sin código',
-      detailEs: 'No se puede cotizar con certeza: falta el código por VIN.',
-    })
+    missingCodes.push(p.name_es)
     continue
   }
   if (!byCode.has(code)) byCode.set(code, [])
@@ -519,6 +488,13 @@ for (const p of parts) {
 }
 for (const [code, list] of byCode) {
   if (list.length < 2) continue
+  // Lado izquierdo y derecho, o delantero y trasero, con el mismo código puede ser normal; solo importa si las piezas son distintas.
+  const bare = (n) =>
+    n
+      .replace(/\b(DER|IZQ|DEL|TRAS)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  if (new Set(list.map((x) => bare(x.name_es))).size === 1) continue
   add({
     severity: 'media',
     area: 'códigos',
@@ -546,59 +522,43 @@ const lineStats = suppliers.map((s) => {
     verified: !!s.verified,
   }
 })
+// Lo que falta no es una anomalía: es un dato por pedir.
+const missingData = []
+const gap = (titleEs, actionEs) => missingData.push({ titleEs, actionEs })
 for (const st of lineStats) {
   if (st.qualityUnconfirmed > 0) {
-    add({
-      severity: 'alta',
-      area: 'cotización',
-      supplier: st.supplier,
-      titleEs: `Calidad sin confirmar en ${st.qualityUnconfirmed} líneas`,
-      detailEs:
-        'La cotización no dice si es OEM o AFM: la calidad es una estimación. Pedirla por escrito antes de comprar.',
-    })
+    gap(
+      `${st.supplier}: la cotización no dice la calidad de ${st.qualityUnconfirmed} líneas`,
+      'Pedir por escrito si cada línea es OEM o AFM. Hasta entonces no se ofrece como original.',
+    )
   }
   if (!st.hasAirportDistance) {
-    add({
-      severity: 'media',
-      area: 'cotización',
-      supplier: st.supplier,
-      titleEs: 'Sin distancia al aeropuerto',
-      detailEs:
-        'El transporte en China se estima con el mayor entre 3 % del precio y la distancia promedio de los otros proveedores.',
-    })
-  }
-  if (st.formF === 'unknown') {
-    add({
-      severity: 'media',
-      area: 'cotización',
-      supplier: st.supplier,
-      titleEs: 'Sin confirmar si emite Formulario F',
-      detailEs: 'Sin Formulario F se paga el arancel general de 6 % en vez del TLC.',
-    })
+    gap(
+      `${st.supplier}: falta el aeropuerto de despacho`,
+      'Preguntarlo y cargarlo en su ficha; mientras, el transporte en China usa la distancia promedio.',
+    )
   }
 }
-const usedRows = allLines.filter(
-  (l) => l.source_raw?.col_I && /^used$/i.test(String(l.source_raw.col_I).trim()),
-)
-if (usedRows.length) {
-  add({
-    severity: 'media',
-    area: 'cotización',
-    supplier: 'Anhui Zuoheng',
-    titleEs: `${usedRows.length} filas marcadas "Used" (repuesto usado)`,
-    detailEs: 'No se cargaron como OEM ni AFM. Decidir si se quieren como tercera calidad.',
-  })
+if (lineStats.every((st) => st.formF === 'unknown')) {
+  gap(
+    'Ningún proveedor confirmó si emite Formulario F',
+    'Preguntar por proveedor y partidas: con él baja el arancel de 6 %.',
+  )
 }
-const estimatedLogistics = parts.filter(
-  (p) => !['supplier_confirmed', 'measured'].includes(p.logistics_status),
+if (missingCodes.length) {
+  gap(
+    `${missingCodes.length} repuestos sin código: ${missingCodes.join(', ')}`,
+    'Pedir el código por VIN al proveedor elegido, con foto del despiece.',
+  )
+}
+gap(
+  `Peso y volumen sin confirmar en ${parts.filter((p) => !['supplier_confirmed', 'measured'].includes(p.logistics_status)).length} de ${parts.length} repuestos`,
+  'Pedir el packing list al proveedor elegido antes de fijar el precio al cliente.',
 )
-add({
-  severity: 'alta',
-  area: 'logística',
-  titleEs: `Peso y volumen sin confirmar en ${estimatedLogistics.length} de ${parts.length} repuestos`,
-  detailEs:
-    'Son referencias de fichas de vendedores y piezas equivalentes. En avión el flete es lo que más pesa: pedir el packing list al proveedor elegido antes de cerrar el precio al cliente.',
-})
+gap(
+  'Flete aéreo sin cotización de forwarder',
+  'Cotizarlo con un forwarder real: hoy es una referencia publicada.',
+)
 for (const f of KNOWN_FINDINGS) add(f)
 
 // Qué hacer con cada tipo de anomalía; se busca por el título.
@@ -711,6 +671,7 @@ const report = {
   coverage,
   notWorthFlying,
   suspectOfferCount: suspectOffers.size,
+  missingData,
   anomalies,
   scenarios,
 }

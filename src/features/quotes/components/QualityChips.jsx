@@ -7,7 +7,8 @@ import Pill from '@components/common/Pill'
 /**
  * Qué calidades ofrece una cotización (OEM, AFM o ambas), como chips.
  * La calidad que el proveedor indicó en su cotización está confirmada; solo va en
- * rojo si la cotización no la confirma (por ejemplo, una inferida del lado opuesto).
+ * rojo si alguna línea cotizada por el proveedor no la tiene confirmada. Las líneas inferidas
+ * del lado opuesto no cuentan aquí: ya se marcan en rojo en el detalle.
  */
 export default function QualityChips({ quotation }) {
   return (
@@ -16,7 +17,7 @@ export default function QualityChips({ quotation }) {
         quotation.partTypeConfirmed ? (
           <Pill label="OEM" tone="neutral" />
         ) : (
-          <Tooltip title="Calidad sin confirmar: alguna línea es inferida del lado opuesto">
+          <Tooltip title="Calidad sin confirmar en alguna línea cotizada por el proveedor">
             <span>
               <Pill label="OEM" tone="error" />
             </span>

@@ -115,7 +115,8 @@ export function useQuotationsData() {
           ).values(),
         ],
         partCount: new Set(g.lines.map((l) => l.part.id)).size,
-        partTypeConfirmed: q.every((x) => x.partTypeConfirmed),
+        // Solo cuentan las líneas que el proveedor cotizó: las inferidas ya van en rojo por sí solas.
+        partTypeConfirmed: q.filter((x) => !x.inferred).every((x) => x.partTypeConfirmed),
         originalCount: q.filter((x) => x.partType === 'original').length,
         alternativeCount: q.filter((x) => x.partType === 'alternative').length,
         pendingCount: q.filter((x) => x.matchStatus === 'pending_review').length,

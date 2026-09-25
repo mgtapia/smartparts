@@ -9,7 +9,7 @@
     "build": "next build",
     "build:hosting": "node scripts/build-hosting.mjs",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "node scripts/lint.mjs",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",

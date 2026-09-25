@@ -56,3 +56,7 @@ Conventional Commits en español: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
 - Estados de carga/vacío/error explícitos.
 - Si toca dinero: pasa por `money.js`/`fx.js`, nunca un cálculo inline.
 - Build y lint verdes.
+
+## No tocar `.next` mientras corre `yarn dev`
+
+El servidor de desarrollo del usuario usa `.next`. Cualquier comando que escriba ahí (incluido `next lint`, que guarda caché y tipos en la carpeta de compilación) rompe su compilación en caliente ("Cannot read properties of undefined (reading 'call')", "Could not find the module … in the React Client Manifest"). Por eso `npm run lint` usa `.next-verify` (`scripts/lint.mjs`), las verificaciones de compilación llevan `NEXT_DIST_DIR=.next-verify` y la publicación usa `out/`. Nunca ejecutar `next build`, `next lint` ni `next dev` sin otra carpeta de compilación. Para levantar un servidor de prueba: `NEXT_DIST_DIR=.next-devtest npx next dev -p 3100`, y apagarlo al terminar.

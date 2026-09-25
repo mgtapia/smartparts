@@ -51,7 +51,8 @@ export function costLine(line, { mode, rates, settingsFor }) {
     unitPrice: unitPriceMoney(quote),
     incoterm: quote.incoterm ?? (incotermAssumed ? settings.assumedIncoterm : null),
     incotermAssumed,
-    originCostBp: settings.originCostBp,
+    originDistanceKm: settings.originDistanceKm,
+    originDistanceConfirmed: settings.originDistanceConfirmed,
     // Formulario F: dato del proveedor que se confirma en su ficha.
     formF: quote.supplier?.facts?.formF?.value ?? 'unknown',
     weightG: part.weightG,

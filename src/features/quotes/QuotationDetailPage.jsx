@@ -35,8 +35,10 @@ import {
   DEFAULT_HIDDEN,
   DETAIL_HELP,
   formatDate,
+  MODE_OPTIONS,
   supplierLabel,
 } from './constants'
+import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData, costLine, unitPriceMoney } from './hooks/useQuotations'
 
@@ -318,16 +320,22 @@ export default function QuotationDetailPage() {
           onChange={setSearch}
           placeholder="Buscar por pieza o código…"
         />
+        <ToolbarSelectBox
+          label="Modo de transporte"
+          value={mode}
+          onChange={assumptions.setMode}
+          options={MODE_OPTIONS}
+        />
         <CostParametersDialog
           mode={mode}
           setMode={assumptions.setMode}
           rates={rates}
           setRates={assumptions.setRates}
-          onReset={assumptions.reset}
         />
         <SupplierAssumptionsDialog
           supplierName={supplierLabel(supplier, quotation.supplierId)}
           settings={settingsFor(quotation.supplierId)}
+          isAir={mode === 'air'}
           onChange={(patch) => assumptions.updateSupplier(quotation.supplierId, patch)}
         />
         <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />

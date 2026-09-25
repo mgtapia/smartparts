@@ -2,12 +2,14 @@ import { SHIPPING_MODES, SHIPPING_MODE_LABELS_ES } from '@constants/enums'
 
 // Columnas de costo, en el orden de la cadena: precio → costo final.
 export const COST_COLUMNS = [
-  { code: 'origin', label: 'Origen' },
+  { code: 'origin', label: 'Transporte China' },
+  { code: 'originCharges', label: 'Exportación' },
   { code: 'freight', label: 'Flete' },
   { code: 'insurance', label: 'Seguro' },
   { code: 'cif', label: 'CIF' },
   { code: 'duty', label: 'Arancel' },
-  { code: 'localCosts', label: 'Gastos locales' },
+  { code: 'localCosts', label: 'Gastos Chile' },
+  { code: 'bank', label: 'Banco' },
   { code: 'landedNet', label: 'Costo final' },
   { code: 'vat', label: 'IVA' },
 ]
@@ -32,6 +34,8 @@ export const COLUMN_CHOICES = [
   ...COST_COLUMNS.map((c) => ({ id: c.code, label: c.label })),
 ]
 export const DEFAULT_HIDDEN = new Set([
+  'originCharges',
+  'bank',
   'category',
   'position',
   'variant',
@@ -61,14 +65,16 @@ export const supplierLabel = (supplier, fallbackId = '') =>
   supplier?.alias || supplier?.name || fallbackId
 
 export const PARAMETERS_HELP = [
-  'Flete aéreo: el transportista cobra el mayor entre el peso real y el peso volumétrico (volumen ÷ factor volumétrico, 6000 cm³ por kg es lo estándar; algunos couriers usan 5000). Flete marítimo LCL: el mayor entre las toneladas y los m³.',
-  'Estimaciones del equipo, sin verificar: reemplazar por cotizaciones reales de forwarder y del agente de aduanas. Por eso los costos calculados salen en rojo.',
-  'El arancel general (6 %) se aplica a los proveedores que no tienen certificado de origen (Formulario F). Los aranceles son fijos y no dependen del proveedor: lo que sí depende es si el proveedor emite el Formulario F, que se confirma en su ficha. Mientras no esté confirmado, se aplica el general.',
+  'Todo lo que se suma desde el precio del proveedor hasta el costo final en Chile, en el orden de la cadena. Cada valor muestra su fuente: son referencias públicas o estimaciones, no cotizaciones reales, por eso van en rojo.',
+  'Gastos por embarque: se reparten según la parte del embarque típico que ocupa cada pieza. Es lo mismo que un embarque lleno de esa pieza dividido por la cantidad de piezas.',
+  'Transporte en China: tarifa por tonelada-km × toneladas cobrables de la pieza (el mayor entre peso y m³) × la distancia de cada proveedor al puerto o aeropuerto, que se edita en su ficha. Así pesa distinto un proveedor cerca del puerto que uno a 1.700 km.',
+  'Flete aéreo: el transportista cobra el mayor entre el peso real y el volumétrico (volumen ÷ factor volumétrico). Marítimo LCL: el mayor entre toneladas y m³.',
+  'El arancel general (6 %) se aplica si el proveedor no tiene certificado de origen (Formulario F), que se confirma en su ficha. El IVA no se suma al costo final: es crédito fiscal recuperable.',
 ]
 
 export const SUPPLIER_ASSUMPTIONS_HELP = [
-  'Estimaciones sin verificar: se confirman con el proveedor y con un forwarder.',
-  'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm. El costo de origen (EXW → FOB) depende de dónde está el proveedor. El Formulario F no se supone: se confirma en la ficha del proveedor.',
+  'El Incoterm supuesto se usa solo en las líneas cuya cotización no indica Incoterm.',
+  'La distancia al puerto o aeropuerto define el transporte en China de este proveedor. Se edita en su ficha, igual que el Formulario F.',
 ]
 
 // Incoterms que el motor sabe llevar a FOB (ver src/core/costing/unitCost.js) y monedas con que se cotiza.

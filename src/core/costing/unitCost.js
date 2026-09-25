@@ -1,18 +1,19 @@
 // Costo unitario de UNA pieza, desde el precio del proveedor hasta el costo
 // final en Chile. Envoltura pura sobre `computeCosting` (mismas fórmulas de
-// arancel, seguro y gastos), con 1 unidad y sin los costos FIJOS por embarque
-// (mínimo del agente de aduanas, prima mínima de seguro): esos no se pueden
-// repartir por unidad sin inventar un tamaño de embarque, e inflarían cada
-// pieza suelta. El costo real de un embarque completo es la simulación por
-// cantidades (otra sección).
+// arancel, seguro e IVA), con 1 unidad. Los gastos que se cobran por embarque
+// (despacho, reparto, mínimos) se prorratean sobre un embarque típico según la
+// parte que ocupa la pieza (ver ./shipmentCharges.js): lo mismo que un
+// embarque lleno de esa pieza dividido por la cantidad de piezas. El costo de
+// un pedido real es la simulación por cantidades (otra sección).
 //
 // Nada de lo que devuelve es "definitivo": cada componente informa su fórmula
-// y si está verificado. Los supuestos (costo de origen, tarifas de flete,
-// arancel TLC) son estimaciones del equipo hasta tener cotizaciones reales.
+// y si está verificado. Tarifas, gastos y arancel TLC son referencias públicas
+// o estimaciones del equipo hasta tener cotizaciones reales.
 import { money, fromMicros, roundHalfUp } from '../../libs/money'
 import { toUsdMicro } from '../../libs/fx'
 import { computeCosting } from './engine'
 import { airChargeableWeight, seaLclChargeableRt } from './weights'
+import { unitShipmentCharges } from './shipmentCharges'
 
 const EXW = 'EXW'
 const FOB_EQUIVALENT_INCOTERMS = ['FOB', 'FCA']
@@ -30,6 +31,9 @@ const ASSUMED_HS = 'SUPUESTA-TLC'
  * @property {number} [airVolumetricDivisor]  cm³ por kg para el peso volumétrico aéreo; si falta, el del set de parámetros.
  * @property {number} [generalDutyBp]    Arancel general (sin Form F), en bp; si falta, el del set de parámetros.
  * @property {number} ftaDutyBp          Arancel con TLC (solo con Form F), en basis points.
+ * @property {import('./shipmentCharges').ShipmentCharge[]} [shipmentCharges]  Gastos por etapa (transporte en China, exportación, Chile, aduana, pago).
+ * @property {number} [seaShipmentRt]  Embarque típico marítimo, en R/T (m³), para prorratear los gastos por embarque.
+ * @property {number} [airShipmentKg]  Embarque típico aéreo, en kg cobrables.
  */
 
 /**
@@ -40,6 +44,7 @@ const ASSUMED_HS = 'SUPUESTA-TLC'
  * @property {string} formulaEs    Cómo se calcula, con los valores usados.
  * @property {boolean} verified    false → mostrar en rojo.
  * @property {string} [reasonEs]   Por qué no está verificado.
+ * @property {import('./shipmentCharges').UnitCharge[]} [items]  Detalle de gastos que suma el componente.
  */
 
 /**
@@ -65,7 +70,8 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
  * @param {import('../../libs/money').Money} input.unitPrice   Precio unitario del proveedor.
  * @param {string|null} input.incoterm
  * @param {boolean} [input.incotermAssumed]  El Incoterm no viene de la cotización: es un supuesto.
- * @param {number|null} input.originCostBp     Costo de origen EXW→FOB de ESTE proveedor, en bp del precio.
+ * @param {number|null} input.originDistanceKm  Distancia de ESTE proveedor al puerto (marítimo) o aeropuerto (aéreo), en km.
+ * @param {boolean} [input.originDistanceConfirmed]  ¿La distancia tiene fuente?
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
  * @param {number} input.weightG          Peso bruto por unidad (g).
  * @param {number} input.volumeCm3        Volumen por unidad (cm³).
@@ -95,7 +101,11 @@ export function computeUnitCost(input) {
   const isAir = mode === 'air' || mode === 'courier'
   // Sin dato no se inventa: se informa qué falta para poder calcular.
   const missing = []
-  if (isExw && input.originCostBp == null) missing.push('Falta el gasto de origen del proveedor')
+  if (isExw && input.originDistanceKm == null) {
+    missing.push(
+      `Falta la distancia del proveedor al ${isAir ? 'aeropuerto' : 'puerto'}: se carga en su ficha`,
+    )
+  }
   if ((isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents) == null) {
     missing.push(`Falta la tarifa de flete ${isAir ? 'aéreo' : 'marítimo'}`)
   }
@@ -103,18 +113,45 @@ export function computeUnitCost(input) {
 
   const priceUsdMicro = toUsdMicro(unitPrice, fx)
 
-  // 1) Costo de origen (solo EXW): % del precio, específico del proveedor.
-  const originMicro = isExw ? roundHalfUp((priceUsdMicro * input.originCostBp) / 10000) : 0
-  const fobMicro = priceUsdMicro + originMicro
+  // Unidades cobrables de la pieza: aéreo cobra el MAYOR entre el peso real y el volumétrico
+  // (volumen ÷ divisor); marítimo LCL, el mayor entre toneladas y m³. Por carretera se cobra
+  // como marítimo (el mayor entre t y m³).
+  const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor
+  const seaRt = seaLclChargeableRt(weightG, volumeCm3, params.freightDefaults.seaLclWmKgPerCbm)
+  const chargeable = isAir ? airChargeableWeight(weightG, volumeCm3, airDivisor) : seaRt
+  const chargeableUnits = isAir ? chargeable.chargeableKg : chargeable.chargeableRt
+
+  // Gastos por etapa (SHIPMENT_CHARGES), prorrateados sobre el embarque típico del modo.
+  const shipmentCharges = assumptions.shipmentCharges ?? []
+  const chargesOf = (stage, extra) =>
+    unitShipmentCharges({
+      charges: shipmentCharges.filter((c) => c.stage === stage),
+      isAir,
+      unitChargeable: chargeableUnits,
+      shipmentChargeable: isAir ? assumptions.airShipmentKg : assumptions.seaShipmentRt,
+      ...extra,
+    })
+  const sumOf = (list) => list.reduce((acc, c) => acc + c.usdMicro, 0)
+
+  // 1) Origen (solo EXW): transporte en China según la distancia de ESTE proveedor y el peso o
+  //    volumen de la pieza, y los gastos de exportación. Ambos son parte del FOB. Se redondean
+  //    a centavos: el motor recibe el FOB en centavos, y así CIF = FOB + flete + seguro cuadra
+  //    exacto con lo que se muestra.
+  const toCents = (micro) => roundHalfUp(micro / 10_000) * 10_000
+  const inCents = (list) => list.map((c) => ({ ...c, usdMicro: toCents(c.usdMicro) }))
+  const inlandCharges = isExw
+    ? inCents(
+        chargesOf('inland', { unitTons: seaRt.chargeableRt, distanceKm: input.originDistanceKm }),
+      )
+    : []
+  const originCharges = isExw
+    ? inCents(chargesOf('origin', { baseMicro: { price: priceUsdMicro } }))
+    : []
+  const inlandMicro = sumOf(inlandCharges)
+  const originChargesMicro = sumOf(originCharges)
+  const fobMicro = priceUsdMicro + inlandMicro + originChargesMicro
 
   // 2) Flete unitario: unidades cobrables × tarifa.
-  // Aéreo: el transportista cobra el MAYOR entre el peso real y el volumétrico
-  // (volumen ÷ divisor); marítimo LCL: el mayor entre toneladas y m³.
-  const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor
-  const chargeable = isAir
-    ? airChargeableWeight(weightG, volumeCm3, airDivisor)
-    : seaLclChargeableRt(weightG, volumeCm3, params.freightDefaults.seaLclWmKgPerCbm)
-  const chargeableUnits = isAir ? chargeable.chargeableKg : chargeable.chargeableRt
   const rateCents = isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents
   const freightMicro = roundHalfUp((chargeableUnits * 1e6 * rateCents) / 100)
 
@@ -145,7 +182,8 @@ export function computeUnitCost(input) {
       },
     ],
     freightQuote: fromMicros(freightMicro, 'USD'),
-    params: { ...stripShipmentFixedCosts(params), duty: dutyParams },
+    // Los gastos en Chile salen de SHIPMENT_CHARGES, no de los gastos locales del set de parámetros.
+    params: { ...stripShipmentFixedCosts(params), localCosts: [], duty: dutyParams },
     fx,
     options: { insured: true },
   })
@@ -171,6 +209,19 @@ export function computeUnitCost(input) {
     : `Marítimo LCL cobra el mayor entre el peso (${(weightG / 1e6).toFixed(4)} t) y el volumen (${(volumeCm3 / 1e6).toFixed(4)} m³).`
   const dutyRateBp = withFormF ? assumptions.ftaDutyBp : generalBp
 
+  // 4) Después del CIF: gastos en Chile (puerto o aeropuerto, reparto y agente de aduanas) y la
+  //    transferencia bancaria al proveedor. No son base del arancel ni del IVA de importación.
+  const cifBase = { baseMicro: { cif: line.cif.amount } }
+  const localCharges = [...chargesOf('destination', cifBase), ...chargesOf('customs', cifBase)]
+  const paymentCharges = chargesOf('payment', { baseMicro: { price: priceUsdMicro } })
+  const localMicro = sumOf(localCharges)
+  const bankMicro = sumOf(paymentCharges)
+  const landedNetMicro = line.landedNet.amount + localMicro + bankMicro
+  const itemsEs = (list) => list.map((c) => `${c.labelEs}: ${c.formulaEs}`).join('. ')
+  const chargesReason =
+    'referencias públicas, sin cotización real de forwarder ni agente de aduanas'
+  const notFob = 'No aplica: el precio ya es FOB/FCA.'
+
   /** @type {CostComponent[]} */
   const components = [
     {
@@ -183,16 +234,28 @@ export function computeUnitCost(input) {
     },
     {
       code: 'origin',
-      labelEs: 'Costo de origen',
-      usdMicro: originMicro,
+      labelEs: 'Transporte en China',
+      usdMicro: inlandMicro,
       formulaEs: isExw
-        ? `Precio EXW × ${pct(input.originCostBp)} (transporte interno hasta el puerto, despacho de exportación y manejo en origen). Depende de dónde está el proveedor. Estimación del equipo.`
-        : 'No aplica: el precio ya es FOB/FCA.',
+        ? `${itemsEs(inlandCharges)}. Depende de la distancia de cada proveedor y del peso o volumen de la pieza, no de su precio.`
+        : notFob,
       verified: !isExw && !input.incotermAssumed,
       reasonEs: join(
-        isExw ? 'estimación sin cotización real de forwarder' : undefined,
+        isExw ? 'tarifa de referencia, sin cotización real' : undefined,
+        isExw && !input.originDistanceConfirmed ? 'distancia estimada, sin fuente' : undefined,
         input.incotermAssumed ? 'Incoterm supuesto: la cotización no lo indica' : undefined,
+        isExw ? logisticsReason : undefined,
       ),
+      items: inlandCharges,
+    },
+    {
+      code: 'originCharges',
+      labelEs: 'Gastos de exportación',
+      usdMicro: originChargesMicro,
+      formulaEs: isExw ? `${itemsEs(originCharges)}. Son parte del FOB.` : notFob,
+      verified: !isExw,
+      reasonEs: isExw ? chargesReason : undefined,
+      items: originCharges,
     },
     {
       code: 'freight',
@@ -215,7 +278,7 @@ export function computeUnitCost(input) {
       labelEs: 'CIF',
       usdMicro: line.cif.amount,
       formulaEs:
-        'FOB (precio + origen) + flete + seguro. Base sobre la que Aduana calcula el arancel.',
+        'FOB (precio + transporte en China + gastos de exportación) + flete + seguro. Base sobre la que Aduana calcula el arancel.',
       verified: false,
       reasonEs: 'suma de componentes estimados',
     },
@@ -236,21 +299,28 @@ export function computeUnitCost(input) {
     },
     {
       code: 'localCosts',
-      labelEs: 'Gastos locales',
-      usdMicro: line.localCosts.amount,
-      formulaEs: `${params.localCosts
-        .filter((c) => c.type !== 'fixed')
-        .map((c) => `${c.labelEs} ${c.rateBp !== undefined ? pct(c.rateBp) : ''}`.trim())
-        .join(' + ')} del CIF. Sin los mínimos por embarque.`,
+      labelEs: 'Gastos en Chile',
+      usdMicro: localMicro,
+      formulaEs: `${itemsEs(localCharges)}.`,
       verified: false,
-      reasonEs: paramsReason ?? 'estimación sin validar con el agente de aduanas',
+      reasonEs: chargesReason,
+      items: localCharges,
+    },
+    {
+      code: 'bank',
+      labelEs: 'Transferencia bancaria',
+      usdMicro: bankMicro,
+      formulaEs: `${itemsEs(paymentCharges)}.`,
+      verified: false,
+      reasonEs: 'tarifa publicada del banco, sin confirmar con el banco que se use',
+      items: paymentCharges,
     },
     {
       code: 'landedNet',
       labelEs: 'Costo final (sin IVA)',
-      usdMicro: line.landedNet.amount,
+      usdMicro: landedNetMicro,
       formulaEs:
-        'CIF + arancel + gastos locales. El IVA no se suma: es crédito fiscal recuperable.',
+        'CIF + arancel + gastos en Chile + transferencia bancaria. El IVA no se suma: es crédito fiscal recuperable.',
       verified: false,
       reasonEs: 'suma de componentes estimados',
     },
@@ -264,5 +334,5 @@ export function computeUnitCost(input) {
     },
   ]
 
-  return { blockers: [], components, landedNetUsdMicro: line.landedNet.amount }
+  return { blockers: [], components, landedNetUsdMicro: landedNetMicro }
 }

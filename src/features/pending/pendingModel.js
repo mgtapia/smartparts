@@ -55,10 +55,11 @@ export function buildPending({
   const unconfirmedCodes = quotedParts.filter((p) => p.codeStatus !== 'confirmed')
   const withoutHs = quotedParts.filter((p) => !(p.hsCode && p.hsCodeSource))
 
-  // Datos de costo que hoy faltan: gasto de origen por proveedor con precio EXW y tarifa de flete.
+  // Datos de costo que hoy faltan: distancia al puerto o aeropuerto de cada proveedor con precio
+  // EXW (sin ella no se calcula el transporte en China) y tarifa de flete.
   const missingOrigin = activeSupplierIds.filter((supplierId) => {
     const settings = assumptions.settingsFor(supplierId)
-    if (settings.originCostBp != null) return false
+    if (settings.originDistanceKm != null) return false
     return quoteRows.some(
       (q) =>
         q.supplierId === supplierId &&
@@ -99,9 +100,9 @@ export function buildPending({
     },
     {
       id: 'origin',
-      label: 'Proveedores sin gasto de origen definido',
+      label: 'Proveedores EXW sin distancia al puerto o aeropuerto',
       count: missingOrigin.length,
-      href: '/quotes',
+      href: '/suppliers',
     },
     { id: 'freight', label: 'Tarifa de flete sin definir', count: freightMissing, href: '/quotes' },
     {

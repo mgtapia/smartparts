@@ -35,7 +35,7 @@ const quotation = (supplierId, lines, extra = {}) => ({
 const assumptionsWith = (over = {}) => ({
   mode: 'sea_lcl',
   rates: { seaUsdPerRtCents: 100, airUsdPerKgCents: 100 },
-  settingsFor: () => ({ originCostBp: 500, assumedIncoterm: 'none' }),
+  settingsFor: () => ({ originDistanceKm: 500, assumedIncoterm: 'none' }),
   ...over,
 })
 
@@ -104,11 +104,11 @@ describe('buildPending', () => {
     expect(build().pending.every((p) => p.count > 0)).toBe(true)
   })
 
-  it('marca el gasto de origen y la tarifa cuando faltan', () => {
+  it('marca la distancia del proveedor y la tarifa cuando faltan', () => {
     const d = build({
       assumptions: assumptionsWith({
         rates: { seaUsdPerRtCents: null, airUsdPerKgCents: null },
-        settingsFor: () => ({ originCostBp: null, assumedIncoterm: 'none' }),
+        settingsFor: () => ({ originDistanceKm: null, assumedIncoterm: 'none' }),
       }),
     })
     const byId = Object.fromEntries(d.pending.map((p) => [p.id, p.count]))

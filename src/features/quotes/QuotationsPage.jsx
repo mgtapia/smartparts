@@ -19,7 +19,7 @@ import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
 import QuotationOrigin from './components/QuotationOrigin'
-import { MATRIX_HELP, supplierLabel } from './constants'
+import { MATRIX_HELP, MODE_OPTIONS, supplierLabel } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
 import {
@@ -121,12 +121,17 @@ export default function QuotationsPage() {
             />
             {metric === METRICS.LANDED ? (
               <>
+                <ToolbarSelectBox
+                  label="Modo de transporte"
+                  value={assumptions.mode}
+                  onChange={assumptions.setMode}
+                  options={MODE_OPTIONS}
+                />
                 <CostParametersDialog
                   mode={assumptions.mode}
                   setMode={assumptions.setMode}
                   rates={assumptions.rates}
                   setRates={assumptions.setRates}
-                  onReset={assumptions.reset}
                 />
               </>
             ) : null}

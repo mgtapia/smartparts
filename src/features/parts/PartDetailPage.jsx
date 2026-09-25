@@ -133,12 +133,24 @@ export default function PartDetailPage() {
     )
   }
 
+  // Cuando un proveedor cotiza variantes de la misma pieza, la variante distingue las filas.
+  const hasVariants = rows.some((r) => r.quote.variant)
   const quoteColumns = [
     {
       id: 'supplier',
       label: 'Proveedor',
       render: ({ quote }) => supplierLabel(quote.supplier, quote.supplierId),
     },
+    ...(hasVariants
+      ? [
+          {
+            id: 'variant',
+            label: 'Variante',
+            width: 130,
+            render: ({ quote }) => quote.variant ?? '—',
+          },
+        ]
+      : []),
     {
       id: 'quality',
       label: 'Calidad',

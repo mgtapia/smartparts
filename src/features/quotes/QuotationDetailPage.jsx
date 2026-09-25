@@ -233,7 +233,10 @@ export default function QuotationDetailPage() {
       },
     })),
   ]
-  const columns = allColumns.filter((c) => !hidden.has(c.id))
+  // Si el proveedor cotiza variantes de una misma pieza (completo o solo, 12 mm o 14 mm), la
+  // variante es lo que distingue las filas: se muestra siempre, aunque la columna esté oculta.
+  const hasVariants = quotation.lines.some((l) => l.quote.variant)
+  const columns = allColumns.filter((c) => !hidden.has(c.id) || (c.id === 'variant' && hasVariants))
 
   return (
     <ContentWidth>

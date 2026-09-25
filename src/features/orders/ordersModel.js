@@ -208,7 +208,7 @@ export function clientOrderCoverage(order, purchaseOrders, fx) {
  * @param {number} costMicros
  * @param {string} currency
  */
-function marginOf(saleMicros, costMicros, currency) {
+export function marginOf(saleMicros, costMicros, currency) {
   const marginMicros = saleMicros - costMicros
   return {
     saleMicros,

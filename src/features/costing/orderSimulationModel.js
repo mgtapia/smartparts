@@ -21,13 +21,26 @@ function baselineUsdMicro(part, fx) {
 /**
  * @param {Object} input
  * @param {Array<{ part: any, quote: any }>} input.lines   Líneas de cotización con su repuesto.
- * @param {string} input.vehicleId
+ * @param {string} [input.vehicleId]  Canasta por vehículo: sus repuestos con la cantidad estimada.
+ * @param {Array<{ partId: string, qty: number, baselineUsdMicro?: number|null }>} [input.basket]
+ *   Canasta explícita (p. ej. lo que falta comprar de una OC del cliente): manda sobre
+ *   `vehicleId` y `quantitySource`; su cantidad decide el tramo de precio. Si trae
+ *   `baselineUsdMicro`, ese es el precio de venta unitario en vez del precio base del repuesto.
  * @param {string} input.quality          Ver QUALITY.
- * @param {string} input.quantitySource   Ver QUANTITY_SOURCE.
+ * @param {string} [input.quantitySource]   Ver QUANTITY_SOURCE.
  * @param {(supplierId: string) => any} input.settingsFor  Supuestos por proveedor (distancia, Incoterm supuesto).
  * @param {any} input.fx
  */
-export function buildPlanInputs({ lines, vehicleId, quality, quantitySource, settingsFor, fx }) {
+export function buildPlanInputs({
+  lines,
+  vehicleId,
+  basket,
+  quality,
+  quantitySource,
+  settingsFor,
+  fx,
+}) {
+  const basketByPart = basket ? new Map(basket.map((b) => [b.partId, b])) : null
   const partsById = new Map()
   const offers = []
   const supplierIds = new Set()
@@ -35,10 +48,14 @@ export function buildPlanInputs({ lines, vehicleId, quality, quantitySource, set
   let partsWithoutQty = 0
 
   for (const { part, quote } of lines) {
-    if (part.vehicleId !== vehicleId) continue
+    const inBasket = basketByPart?.get(part.id)
+    if (basketByPart ? !inBasket : part.vehicleId !== vehicleId) continue
     if (!partsById.has(part.id)) {
-      const qty =
-        quantitySource === QUANTITY_SOURCE.ONE_EACH ? 1 : Number(part.quantityEstimated) || 0
+      const qty = inBasket
+        ? inBasket.qty
+        : quantitySource === QUANTITY_SOURCE.ONE_EACH
+          ? 1
+          : Number(part.quantityEstimated) || 0
       if (qty <= 0) {
         partsWithoutQty += 1
         partsById.set(part.id, null)
@@ -49,7 +66,10 @@ export function buildPlanInputs({ lines, vehicleId, quality, quantitySource, set
           weightG: part.weightG,
           dgProfile: part.dgProfile ?? undefined,
           volumeCm3: part.volumeCm3,
-          baselineUsdMicro: baselineUsdMicro(part, fx),
+          baselineUsdMicro:
+            inBasket && 'baselineUsdMicro' in inBasket
+              ? (inBasket.baselineUsdMicro ?? null)
+              : baselineUsdMicro(part, fx),
         })
       }
     }
@@ -84,7 +104,11 @@ export function buildPlanInputs({ lines, vehicleId, quality, quantitySource, set
     }
   })
   const parts = [...partsById.values()].filter(Boolean)
-  return { parts, offers, suppliers, notes: { inferredOffers, partsWithoutQty } }
+  // Repuestos de la canasta que ningún proveedor cotizó: no entran a ningún escenario.
+  const partsWithoutQuote = basketByPart
+    ? [...basketByPart.keys()].filter((id) => !partsById.has(id))
+    : []
+  return { parts, offers, suppliers, notes: { inferredOffers, partsWithoutQty, partsWithoutQuote } }
 }
 
 /**

@@ -73,6 +73,47 @@ describe('computeUnitCost', () => {
     expect(r.blockers[0]).toContain('distancia')
   })
 
+  describe('sin distancia del proveedor, con supuesto conservador', () => {
+    const noDistance = { ...base, originDistanceKm: null }
+
+    it('cobra el mayor entre el % del precio y el transporte con la distancia promedio', () => {
+      // Promedio 800 km: 0,01 t × 800 × US$0,278 = US$2,22, menos que el 3 % de US$100 = US$3.
+      const c = byCode(
+        computeUnitCost({ ...noDistance, originFallback: { bp: 300, averageKm: 800 } }),
+      )
+      expect(c.origin.usdMicro).toBe(3_000_000)
+      // Con 2.000 km el promedio da US$5,56 y gana la distancia.
+      const far = byCode(
+        computeUnitCost({ ...noDistance, originFallback: { bp: 300, averageKm: 2000 } }),
+      )
+      expect(far.origin.usdMicro).toBe(5_560_000)
+    })
+
+    it('nunca queda más barato que un proveedor con la distancia promedio', () => {
+      const avg = computeUnitCost({ ...base, originDistanceKm: 800 })
+      const missing = computeUnitCost({
+        ...noDistance,
+        originFallback: { bp: 300, averageKm: 800 },
+      })
+      expect(missing.landedNetUsdMicro).toBeGreaterThanOrEqual(avg.landedNetUsdMicro)
+    })
+
+    it('sin distancias para promediar usa solo el % del precio', () => {
+      const c = byCode(
+        computeUnitCost({ ...noDistance, originFallback: { bp: 300, averageKm: null } }),
+      )
+      expect(c.origin.usdMicro).toBe(3_000_000)
+    })
+
+    it('queda en rojo con el motivo', () => {
+      const c = byCode(
+        computeUnitCost({ ...noDistance, originFallback: { bp: 300, averageKm: 800 } }),
+      )
+      expect(c.origin.verified).toBe(false)
+      expect(c.origin.reasonEs).toContain('sin distancia')
+    })
+  })
+
   it('FOB/FCA no suma transporte en China ni gastos de exportación', () => {
     const c = byCode(computeUnitCost({ ...base, incoterm: 'FOB', originDistanceKm: null }))
     expect(c.origin.usdMicro).toBe(0)

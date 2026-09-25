@@ -64,6 +64,40 @@ export function stripShipmentFixedCosts(params) {
 }
 
 const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
+const usd = (micro) =>
+  `US$ ${(micro / 1e6).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+/**
+ * Transporte en China de un proveedor sin distancia: el mayor entre un % del precio y el
+ * transporte con la distancia promedio de los proveedores con dato. Conservador a propósito:
+ * con cero, el proveedor sin datos saldría más barato que los que sí los tienen.
+ * @param {(km: number) => import('./shipmentCharges').UnitCharge[]} inlandAt
+ * @param {number} priceUsdMicro
+ * @param {{ bp: number, averageKm: number|null }} fallback
+ * @returns {import('./shipmentCharges').UnitCharge[]}
+ */
+function inlandFallback(inlandAt, priceUsdMicro, fallback) {
+  const byPriceMicro = roundHalfUp((priceUsdMicro * fallback.bp) / 10000)
+  const [byAverage] = fallback.averageKm != null ? inlandAt(fallback.averageKm) : []
+  if (!byAverage) {
+    return [
+      {
+        code: 'inland_china',
+        labelEs: 'Transporte en China, sin distancia del proveedor',
+        usdMicro: byPriceMicro,
+        formulaEs: `${pct(fallback.bp)} del precio EXW (${usd(byPriceMicro)}): no hay distancias de otros proveedores para promediar`,
+      },
+    ]
+  }
+  return [
+    {
+      ...byAverage,
+      labelEs: 'Transporte en China, sin distancia del proveedor',
+      usdMicro: Math.max(byPriceMicro, byAverage.usdMicro),
+      formulaEs: `el mayor entre ${pct(fallback.bp)} del precio EXW (${usd(byPriceMicro)}) y el transporte con la distancia promedio de los proveedores con dato, ${Math.round(fallback.averageKm).toLocaleString('es-CL')} km (${usd(byAverage.usdMicro)}: ${byAverage.formulaEs})`,
+    },
+  ]
+}
 
 /**
  * @param {Object} input
@@ -72,6 +106,9 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
  * @param {boolean} [input.incotermAssumed]  El Incoterm no viene de la cotización: es un supuesto.
  * @param {number|null} input.originDistanceKm  Distancia de ESTE proveedor al puerto (marítimo) o aeropuerto (aéreo), en km.
  * @param {boolean} [input.originDistanceConfirmed]  ¿La distancia tiene fuente?
+ * @param {{ bp: number, averageKm: number|null }} [input.originFallback]  Sin distancia del
+ *   proveedor: se cobra el mayor entre `bp` del precio y el transporte con `averageKm` (promedio
+ *   de los proveedores con dato). Sin esto, falta de distancia es un bloqueo.
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
  * @param {number} input.weightG          Peso bruto por unidad (g).
  * @param {number} input.volumeCm3        Volumen por unidad (cm³).
@@ -101,7 +138,7 @@ export function computeUnitCost(input) {
   const isAir = mode === 'air' || mode === 'courier'
   // Sin dato no se inventa: se informa qué falta para poder calcular.
   const missing = []
-  if (isExw && input.originDistanceKm == null) {
+  if (isExw && input.originDistanceKm == null && !input.originFallback) {
     missing.push(
       `Falta la distancia del proveedor al ${isAir ? 'aeropuerto' : 'puerto'}: se carga en su ficha`,
     )
@@ -139,11 +176,15 @@ export function computeUnitCost(input) {
   //    exacto con lo que se muestra.
   const toCents = (micro) => roundHalfUp(micro / 10_000) * 10_000
   const inCents = (list) => list.map((c) => ({ ...c, usdMicro: toCents(c.usdMicro) }))
-  const inlandCharges = isExw
-    ? inCents(
-        chargesOf('inland', { unitTons: seaRt.chargeableRt, distanceKm: input.originDistanceKm }),
+  const inlandAt = (distanceKm) => chargesOf('inland', { unitTons: seaRt.chargeableRt, distanceKm })
+  const usesFallback = isExw && input.originDistanceKm == null
+  const inlandCharges = !isExw
+    ? []
+    : inCents(
+        usesFallback
+          ? inlandFallback(inlandAt, priceUsdMicro, input.originFallback)
+          : inlandAt(input.originDistanceKm),
       )
-    : []
   const originCharges = isExw
     ? inCents(chargesOf('origin', { baseMicro: { price: priceUsdMicro } }))
     : []
@@ -242,7 +283,11 @@ export function computeUnitCost(input) {
       verified: !isExw && !input.incotermAssumed,
       reasonEs: join(
         isExw ? 'tarifa de referencia, sin cotización real' : undefined,
-        isExw && !input.originDistanceConfirmed ? 'distancia estimada, sin fuente' : undefined,
+        usesFallback
+          ? 'sin distancia del proveedor: supuesto conservador hasta cargarla en su ficha'
+          : isExw && !input.originDistanceConfirmed
+            ? 'distancia estimada, sin fuente'
+            : undefined,
         input.incotermAssumed ? 'Incoterm supuesto: la cotización no lo indica' : undefined,
         isExw ? logisticsReason : undefined,
       ),

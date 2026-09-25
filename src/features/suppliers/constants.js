@@ -39,6 +39,8 @@ export const FACTS = {
   founded: { label: 'Año de fundación' },
   port: { label: 'Puerto de embarque' },
   airport: { label: 'Aeropuerto de embarque' },
+  portDistanceKm: { label: 'Distancia al puerto', unit: 'km' },
+  airportDistanceKm: { label: 'Distancia al aeropuerto', unit: 'km' },
   moq: { label: 'MOQ' },
   payment: { label: 'Condiciones de pago' },
   leadTime: { label: 'Plazo de producción' },
@@ -108,5 +110,7 @@ export function factOf(supplier, key) {
 /** Texto a mostrar de un dato: la etiqueta de la opción, o el texto tal cual. */
 export function factText(key, value) {
   if (value === null) return null
-  return FACTS[key].options?.find((o) => o.value === value)?.label ?? value
+  const { options, unit } = FACTS[key]
+  const label = options?.find((o) => o.value === value)?.label ?? value
+  return unit ? `${label} ${unit}` : label
 }

@@ -240,7 +240,9 @@ export default function SupplierDetailPage() {
           <InfoGrid columns={4}>
             {['moq', 'payment', 'leadTime', 'license'].map(factField)}
           </InfoGrid>
-          <InfoGrid columns={4}>{['port', 'airport'].map(factField)}</InfoGrid>
+          <InfoGrid columns={4}>
+            {['port', 'airport', 'portDistanceKm', 'airportDistanceKm'].map(factField)}
+          </InfoGrid>
         </Card>
       ) : null}
 

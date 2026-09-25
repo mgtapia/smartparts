@@ -2,6 +2,9 @@ import { useCallback, useMemo } from 'react'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { SHIPPING_MODES } from '@constants/enums'
 import { DEFAULT_UNIT_COST_ASSUMPTIONS } from '@mocks/costParams'
+import { useCachedQuery } from '@hooks/useCachedQuery'
+import { listSuppliers } from '@libs/repos/suppliersRepo'
+import { estimateOriginCostBp } from '@features/costing/originCost'
 
 const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_RATES } =
   DEFAULT_UNIT_COST_ASSUMPTIONS
@@ -30,14 +33,28 @@ export function useCostAssumptions() {
     [storedRates],
   )
 
+  // Distancia de cada proveedor al puerto (marítimo) o aeropuerto (aéreo) de embarque, en km.
+  const { data: suppliers } = useCachedQuery('suppliers', listSuppliers)
+  const isAir = mode === SHIPPING_MODES.AIR || mode === SHIPPING_MODES.COURIER
+  const originBpBySupplier = useMemo(() => {
+    const key = isAir ? 'airportDistanceKm' : 'portDistanceKm'
+    return new Map(
+      (suppliers ?? []).map((s) => [
+        s.id,
+        estimateOriginCostBp(Number(s.facts?.[key]?.value ?? Number.NaN)),
+      ]),
+    )
+  }, [suppliers, isAir])
+
   const settingsFor = useCallback(
     (supplierId) => ({
-      originCostBp: defaultOriginCostBp,
+      // Sin distancia conocida se usa el porcentaje por defecto.
+      originCostBp: originBpBySupplier.get(supplierId) ?? defaultOriginCostBp,
       // Incoterm que se supone cuando la cotización no lo indica ('none' = no suponer).
       assumedIncoterm: 'none',
       ...supplierSettings[supplierId],
     }),
-    [supplierSettings],
+    [supplierSettings, originBpBySupplier],
   )
 
   const updateSupplier = (supplierId, patch) =>

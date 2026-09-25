@@ -156,7 +156,7 @@ export function buildPending({
     },
     {
       id: 'currency',
-      label: 'Moneda confirmada',
+      label: 'Moneda',
       ...ratio(confirmedCurrency, quoteRows.length),
       href: '/quotes',
     },

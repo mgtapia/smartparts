@@ -114,7 +114,7 @@ export default function OverviewPage() {
               : `${afmVsOem.medianBp <= 0 ? '−' : '+'}${formatBp(Math.abs(afmVsOem.medianBp))}`}
           </InfoField>
           <InfoField
-            label="Moneda confirmada"
+            label="Moneda"
             hint="Precios cuya moneda confirmó el proveedor. El resto se lleva a USD con el tipo de cambio de referencia."
           >
             <UncertainValue

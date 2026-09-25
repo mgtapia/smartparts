@@ -58,6 +58,10 @@ Yonder no tiene tests — este proyecto sí, en `src/core/costing/`. Es una func
 - **Todo id de documento lo asigna Firestore.** Nunca un id inventado (`sup_…`, `q_…`, códigos, rutas, fechas); la clave natural va como campo y se busca por consulta. Lo que pertenece a otro documento va en una subcolección (ver [[MODELO-DE-DATOS]]). El hook lo bloquea en repos y scripts.
 - **Tareas grandes se planifican antes** y se commitean por tanda.
 
+## Publicación a producción: solo con aprobación del usuario
+
+**Nunca** ejecutar `firebase deploy` (hosting, reglas ni índices) por iniciativa propia. Publicar exige, en este orden: tests, lint, prettier y build verdes; que el usuario revise el cambio; y su aprobación explícita para ESA publicación. Una aprobación anterior no vale para la siguiente. El agente puede preparar (`npm run build:hosting`) y ofrecer, pero no publica. `.claude/settings.json` fuerza una confirmación en todo `firebase deploy`.
+
 ## Hook de convenciones
 
 `.claude/hooks/check-conventions.mjs` (PostToolUse en `Edit|Write`) bloquea automáticamente:

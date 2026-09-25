@@ -1,4 +1,7 @@
 {
+  "permissions": {
+    "ask": ["Bash(firebase deploy*)", "Bash(npx firebase deploy*)", "Bash(*firebase deploy*)"]
+  },
   "hooks": {
     "PostToolUse": [
       {

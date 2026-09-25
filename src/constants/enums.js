@@ -117,3 +117,62 @@ export const SOURCE_PLATFORMS = Object.freeze({
   MANUAL: 'manual',
   OTHER: 'other',
 })
+
+// Incoterms 2020 completos, para las órdenes de compra a proveedores (`INCOTERMS`
+// de arriba es el subconjunto que conoce el motor de costos).
+export const INCOTERMS_2020 = Object.freeze([
+  'EXW',
+  'FCA',
+  'FAS',
+  'FOB',
+  'CFR',
+  'CIF',
+  'CPT',
+  'CIP',
+  'DAP',
+  'DPU',
+  'DDP',
+])
+
+// Orden de compra del cliente a SmartDeal (`client_orders.status`).
+export const CLIENT_ORDER_STATUS = Object.freeze({
+  DRAFT: 'draft',
+  RECEIVED: 'received',
+  CONFIRMED: 'confirmed',
+  PURCHASING: 'purchasing',
+  DELIVERED: 'delivered',
+  CANCELLED: 'cancelled',
+})
+export const CLIENT_ORDER_STATUS_LABELS_ES = Object.freeze({
+  draft: 'Borrador',
+  received: 'Recibida',
+  confirmed: 'Confirmada',
+  purchasing: 'En compra',
+  delivered: 'Entregada',
+  cancelled: 'Anulada',
+})
+
+// Orden de compra de SmartDeal a un proveedor (`purchase_orders.status`).
+export const PURCHASE_ORDER_STATUS = Object.freeze({
+  DRAFT: 'draft',
+  SENT: 'sent',
+  CONFIRMED: 'confirmed',
+  SHIPPED: 'shipped',
+  RECEIVED: 'received',
+  CANCELLED: 'cancelled',
+})
+export const PURCHASE_ORDER_STATUS_LABELS_ES = Object.freeze({
+  draft: 'Borrador',
+  sent: 'Enviada',
+  confirmed: 'Confirmada',
+  shipped: 'Embarcada',
+  received: 'Recibida',
+  cancelled: 'Anulada',
+})
+
+// Cómo se cumple una línea de la OC del cliente. Hoy siempre `purchase` (se
+// compra a un proveedor); `stock` queda reservado para cuando exista inventario.
+export const FULFILLMENT = Object.freeze({
+  PURCHASE: 'purchase',
+  STOCK: 'stock',
+})

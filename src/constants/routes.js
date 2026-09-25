@@ -66,7 +66,16 @@ export const RAIL_ITEMS = Object.freeze([
     icon: 'LocalShipping',
     implemented: false,
   },
-  { key: 'clients', path: '/clients', labelEs: 'Clientes', icon: 'Group', implemented: false },
+  {
+    key: 'orders',
+    path: '/orders',
+    // Las fichas de cada OC (de cliente y a proveedor) se abren desde Órdenes: mismo ítem activo.
+    alsoActiveOn: ['/client-orders', '/purchase-orders'],
+    labelEs: 'Órdenes de compra',
+    icon: 'ReceiptLong',
+    implemented: true,
+  },
+  { key: 'clients', path: '/clients', labelEs: 'Clientes', icon: 'Group', implemented: true },
   {
     key: 'pricing',
     path: '/pricing',

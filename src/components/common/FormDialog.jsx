@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -23,16 +24,69 @@ export function DialogField({ label, children }) {
   )
 }
 
-/** Input de texto con el alto estándar de los controles (44 px). */
-export function DialogTextInput({ value, onChange, placeholder }) {
+/** Grilla de dos columnas de igual ancho para los campos de un modal (ver DESIGN §Modales). */
+export function DialogGrid({ children }) {
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 2 }}>
+      {children}
+    </Box>
+  )
+}
+
+/**
+ * Input de texto con el alto estándar de los controles (44 px). `type="date"`
+ * da un selector de fecha con valor 'AAAA-MM-DD'.
+ */
+export function DialogTextInput({ value, onChange, placeholder, type = 'text' }) {
   return (
     <TextField
       size="small"
       fullWidth
+      type={type}
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       sx={{ '& .MuiInputBase-root': { height: 44 } }}
+    />
+  )
+}
+
+/**
+ * Selector con búsqueda para listas largas (ej. elegir un repuesto entre
+ * cientos), con el mismo alto y borde que `DialogTextInput`.
+ *
+ * @param {Object} props
+ * @param {Array<{ value: string, label: string }>} props.options
+ * @param {string|null} props.value
+ * @param {(value: string|null) => void} props.onChange
+ * @param {string} [props.placeholder]
+ * @param {string} [props.noOptionsText]
+ */
+export function DialogAutocomplete({
+  options,
+  value,
+  onChange,
+  placeholder,
+  noOptionsText = 'Sin resultados',
+}) {
+  const selected = options.find((o) => o.value === value) ?? null
+  return (
+    <Autocomplete
+      size="small"
+      fullWidth
+      options={options}
+      value={selected}
+      onChange={(_, option) => onChange(option?.value ?? null)}
+      isOptionEqualToValue={(a, b) => a.value === b.value}
+      getOptionLabel={(o) => o.label}
+      noOptionsText={noOptionsText}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          placeholder={placeholder}
+          sx={{ '& .MuiInputBase-root': { minHeight: 44 } }}
+        />
+      )}
     />
   )
 }
@@ -47,6 +101,7 @@ export function DialogTextInput({ value, onChange, placeholder }) {
  * @param {() => Promise<void>} props.onSave
  * @param {boolean} [props.canSave]
  * @param {string} [props.saveLabel]
+ * @param {boolean} [props.wide]  Modal más ancho, para un formulario con una lista adentro.
  */
 export default function FormDialog({
   title,
@@ -54,6 +109,7 @@ export default function FormDialog({
   onSave,
   canSave = true,
   saveLabel = 'Guardar',
+  wide = false,
   children,
 }) {
   const [saving, setSaving] = useState(false)
@@ -77,7 +133,7 @@ export default function FormDialog({
       open
       onClose={saving ? undefined : onClose}
       fullWidth
-      maxWidth="xs"
+      maxWidth={wide ? 'sm' : 'xs'}
       slotProps={{ paper: { sx: { borderRadius: `${RADIUS.input}px` } } }}
     >
       <DialogTitle variant="subtitle1">{title}</DialogTitle>

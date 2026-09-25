@@ -56,6 +56,71 @@ export function fromMicros(micros, currency, mode = 'half_up') {
 }
 
 /**
+ * Monto que escribe el usuario en un campo numérico (en unidad mayor: "12.34"
+ * dólares, "15990" pesos) → Money entero. Trabaja sobre los dígitos del texto,
+ * no multiplica floats: "0.1" + scale 2 da exactamente 10. Si trae más
+ * decimales que la moneda, redondea half-up. Null si no es un número válido no
+ * negativo.
+ * @param {number|string|null} value
+ * @param {string} currency
+ * @returns {Money|null}
+ */
+export function parseMoneyInput(value, currency) {
+  const scale = CURRENCY_SCALE[currency]
+  if (scale === undefined) throw new Error(`Moneda desconocida: ${currency}`)
+  if (value === null || value === undefined || value === '') return null
+  const text = String(value).trim().replace(',', '.')
+  const match = /^(\d+)(?:\.(\d*))?$/.exec(text)
+  if (!match) return null
+  const [, whole, fraction = ''] = match
+  const kept = (fraction + '0'.repeat(scale)).slice(0, scale)
+  const roundUp = fraction.length > scale && Number(fraction[scale]) >= 5 ? 1 : 0
+  const amount = Number(whole + kept) + roundUp
+  if (!Number.isSafeInteger(amount)) return null
+  return { amount, currency, scale }
+}
+
+/**
+ * Money → número en unidad mayor, solo para precargar un campo de formulario
+ * (nunca para calcular).
+ * @param {Money|null} m
+ * @returns {number|null}
+ */
+export function toInputNumber(m) {
+  if (!m) return null
+  return m.amount / 10 ** m.scale
+}
+
+/**
+ * Precio unitario × cantidad entera.
+ * @param {Money} unit
+ * @param {number} qty
+ * @returns {Money}
+ */
+export function multiplyMoney(unit, qty) {
+  if (!Number.isInteger(qty)) throw new Error(`multiplyMoney(): cantidad no entera ${qty}`)
+  return { amount: unit.amount * qty, currency: unit.currency, scale: unit.scale }
+}
+
+/**
+ * Suma de montos de una misma moneda. Lanza si se mezclan monedas: sumar CLP
+ * con USD es un error de programador, no de datos.
+ * @param {Money[]} list
+ * @param {string} currency
+ * @returns {Money}
+ */
+export function sumMoney(list, currency) {
+  let amount = 0
+  for (const m of list) {
+    if (m.currency !== currency) {
+      throw new Error(`sumMoney(): moneda ${m.currency} en una suma en ${currency}`)
+    }
+    amount += m.amount
+  }
+  return money(amount, currency)
+}
+
+/**
  * @param {number} value
  * @returns {number}
  */

@@ -25,7 +25,11 @@ shipments/           embarques (+ /lines, /events, /documents)
 costing_scenarios/   escenarios guardados
 cost_param_sets/     parámetros aduaneros versionados e inmutables
 fx_rates/            tipos de cambio por fecha
-clients/             flotas cliente con su parque y lista de precios
+clients/             clientes (razón social, RUT, contacto); los crea el usuario desde la UI
+client_orders/       OC del cliente a SmartDeal (client_id, número de OC, fecha, estado, moneda)
+  /client_order_lines/  repuesto, cantidad, precio de venta, fulfillment
+purchase_orders/     OC de SmartDeal a un proveedor (supplier_id, quotation_id, Incoterm, moneda)
+  /purchase_order_lines/  repuesto, cantidad, precio, enlaces a líneas de OC de clientes
 aggregates/          rollups del dashboard
 audit_log/ users/ translations/
 ```
@@ -156,6 +160,41 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 **`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.
 
 Regla: **la calidad no se confirma por inferencia.** La calidad que el proveedor indica en su propia cotización (Original/Alternative, OEM/AFM, original/copy) queda confirmada en `confirmations.part_type` con la cotización como fuente (`scripts/confirm-part-types.mjs`, decisión del usuario del 2026-09-25); las cotizaciones inferidas del lado opuesto no. Que un vendedor escriba 原厂 en un listado público no basta — pasar a verificado requiere la cotización del proveedor o una acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
+
+### Clientes y órdenes de compra (2026-09-25)
+
+Dos clases de OC enlazadas: la del **cliente a SmartDeal** (qué pide y a qué precio se le vende) y la de **SmartDeal a un proveedor** (qué se compra para cumplirla). Ids asignados por Firestore; el número de OC es un campo. Nada se siembra: el cliente inicial y sus OC los carga el usuario desde la UI (el nombre real del cliente vive solo en Firestore). Repos: `clientsRepo.js`, `clientOrdersRepo.js`, `purchaseOrdersRepo.js`; lógica pura en `src/features/orders/ordersModel.js`.
+
+**Las subcolecciones de líneas no se llaman `lines`**: `lines` ya es el grupo de colecciones de `quotations/{id}/lines`, y `quotesRepo` y varios scripts leen `collectionGroup('lines')` sin filtro — las líneas de un pedido aparecerían como cotizaciones.
+
+**`clients/{id}`**: `name` (razón social), `rut`, `contact: { person, email, phone }`, `notes`, `created_at`, `updated_at`.
+
+**`client_orders/{id}`**: `client_id`, `number` (N.º de OC del cliente), `date` (`'AAAA-MM-DD'`), `status` (`draft`|`received`|`confirmed`|`purchasing`|`delivered`|`cancelled` — Borrador, Recibida, Confirmada, En compra, Entregada, Anulada), `currency` (`CLP`|`USD`; normalmente CLP), `notes`, `created_at`, `updated_at`.
+
+**`client_orders/{id}/client_order_lines/{id}`**: `part_id`, `qty` (entero), `unit_price` (Money en la moneda de la OC, o `null` si aún no se acuerda), `fulfillment` (`purchase` hoy; `stock` reservado para cuando exista inventario — no hay inventario todavía), `created_at`. Es lo mínimo que consume el simulador de compra: `[{ partId, qty }]`.
+
+**`purchase_orders/{id}`**: `supplier_id`, `quotation_id` (opcional), `number`, `date`, `status` (`draft`|`sent`|`confirmed`|`shipped`|`received`|`cancelled` — Borrador, Enviada, Confirmada, Embarcada, Recibida, Anulada), `incoterm` (Incoterms 2020) e `incoterm_place`, `currency` (`USD`|`CNY`, la del proveedor), `notes`, `created_at`, `updated_at`.
+
+**`purchase_orders/{id}/purchase_order_lines/{id}`**:
+
+```json
+{
+  "part_id": "aB3xK9pQr2mZ7vLtYdN1",
+  "qty": 10,
+  "unit_price": { "amount": 4500, "currency": "USD", "scale": 2 },
+  "quote_line_id": "Zp81…",
+  "client_order_links": [{ "client_order_id": "Hq3…", "line_id": "Lm9…", "qty": 6 }],
+  "created_at": "…"
+}
+```
+
+`quote_line_id` = línea de cotización de la que salió el precio (tramo por volumen según la cantidad). `client_order_links` dice qué líneas de OC de clientes cubre esta compra; la UI no deja enlazar más de lo que falta cubrir de cada línea ni más de lo que se compra (`validateLinks`). Una OC anulada no cubre nada. Una línea de cliente enlazada no se puede borrar ni cambiar de repuesto.
+
+**Margen por pedido** (`clientOrderCoverage`): venta de lo cubierto − precio de compra de lo cubierto, en la moneda de la OC del cliente, en basis points sobre la venta. El precio de compra es el del proveedor con su Incoterm (normalmente EXW), **no** el costo puesto en Chile → siempre en rojo. Si la compra está en otra moneda se convierte con el tipo de cambio de referencia (`DEFAULT_FX`), sin confirmar.
+
+`createPurchaseOrder({ supplierId, quotationId, number, date, status, incoterm, incotermPlace, currency, notes, lines: [{ partId, qty, unitPrice, quoteLineId, clientOrderLinks: [{ clientOrderId, lineId, qty }] }] })` crea la OC y sus líneas en un solo lote; es el punto de entrada para que el simulador genere OC desde el reparto.
+
+Sin índices compuestos: las pantallas leen las colecciones completas y `collectionGroup('client_order_lines')` / `collectionGroup('purchase_order_lines')` sin filtros. Las Security Rules actuales (bootstrap, `{path=**}`) ya cubren estas colecciones.
 
 ## Índices compuestos (`firestore.indexes.json`)
 

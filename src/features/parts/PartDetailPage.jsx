@@ -44,10 +44,7 @@ const EDIT = {
 const QUALITY_LABEL = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 
 const formatKg = (g) => `${(g / 1000).toLocaleString('es-CL')} kg`
-const formatVolume = (cm3) =>
-  cm3 >= 1_000_000
-    ? `${(cm3 / 1_000_000).toLocaleString('es-CL')} m³`
-    : `${cm3.toLocaleString('es-CL')} cm³`
+const formatVolume = (cm3) => `${cm3.toLocaleString('es-CL')} cm³`
 
 export default function PartDetailPage() {
   const partId = useRouteId()

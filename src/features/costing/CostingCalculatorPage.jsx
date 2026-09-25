@@ -234,7 +234,7 @@ export default function CostingCalculatorPage() {
           </InfoField>
           <InfoField label="Volumen">
             <UncertainValue verified={logisticsConfirmed} reason="Volumen sin confirmar">
-              {number.format(part.volumeCm3 / 1_000_000)} m³
+              {number.format(part.volumeCm3)} cm³
             </UncertainValue>
           </InfoField>
           <InfoField label="Margen">

@@ -51,6 +51,9 @@ const OVERSIZE_CM = 150 // más de esto en un lado: exige avión de carga
 const DG_NAME = /compresor|bater[ií]a|airbag|pretensor|bolsa de aire|litio/i
 const QUALITIES = ['original', 'alternative']
 const QUALITY_ES = { original: 'OEM', alternative: 'AFM' }
+// Lo que el cliente elige: solo original, o lo más barato de cada repuesto sea cual sea su calidad.
+const OPTIONS = ['original', 'cheapest']
+const OPTION_ES = { original: 'Original', cheapest: 'Más barato' }
 const MAX_COMBO = 3
 const SCENARIOS = [
   { key: 'base', labelEs: 'Base', rate: 1, vol: 1, qty: 1 },
@@ -293,6 +296,15 @@ function evaluateSet(setIds, offersByPart, partList, qtyFactor) {
       MARGINS_BP.map((m) => [m, baseline - Math.round((costClp * (10_000 + m)) / 10_000)]),
     ),
     estimatedQualityLines: assigned.filter((a) => a.offer.qualityConfirmed === false).length,
+    items: assigned.map((a) => ({
+      name: a.part.name_es,
+      supplierId: a.offer.supplierId,
+      quality: QUALITY_ES[a.offer.quality],
+      qty: a.qty,
+      unitCostClp: usdMicroToClp(a.offer.landedUsdMicro),
+      unitBaselineClp: baselineClp(a.part),
+      kg: Math.round(a.offer.chargeableKg * 100) / 100,
+    })),
     perSupplier: cost.perSupplier.map((s) => ({
       supplierId: s.supplierId,
       parts: assigned.filter((a) => a.offer.supplierId === s.supplierId).length,
@@ -309,13 +321,21 @@ function analyzeScenario(offers, scenario) {
   )
   const supplierIds = suppliers.map((s) => s.id)
   const out = {}
-  for (const quality of QUALITIES) {
-    const qOffers = offers.filter(
+  for (const quality of OPTIONS) {
+    const usable = offers.filter(
       (o) =>
-        o.quality === quality &&
-        o.landedUsdMicro != null &&
-        !suspectOffers.has(`${o.partId}|${o.supplierId}|${o.quality}`),
+        o.landedUsdMicro != null && !suspectOffers.has(`${o.partId}|${o.supplierId}|${o.quality}`),
     )
+    let qOffers = usable.filter((o) => o.quality === quality)
+    if (quality === 'cheapest') {
+      // Por repuesto y proveedor, la calidad que salga más barata.
+      const min = new Map()
+      for (const o of usable) {
+        const k = `${o.partId}|${o.supplierId}`
+        if (!min.has(k) || o.landedUsdMicro < min.get(k).landedUsdMicro) min.set(k, o)
+      }
+      qOffers = [...min.values()]
+    }
     const offersByPart = new Map()
     for (const o of qOffers) {
       if (!offersByPart.has(o.partId)) offersByPart.set(o.partId, [])
@@ -341,6 +361,8 @@ function analyzeScenario(offers, scenario) {
       const focus = (r) => r.savingsClp[FOCUS_MARGIN_BP]
       results.sort((a, b) => focus(b) - focus(a))
       const single = results.filter((r) => r.supplierIds.length === 1)
+      // El detalle por repuesto solo se guarda para el caso que se compra; en el resto pesa de más.
+      if (!(caseKey === 'B' && scenario.key === 'base')) for (const r of results) delete r.items
       out[quality][caseKey] = {
         parts: list.length,
         baselineClp: list.reduce(
@@ -513,7 +535,9 @@ const lineStats = suppliers.map((s) => {
     supplier: supplierName(s),
     lines: ls.length,
     qualityUnconfirmed: ls.filter((l) => !l.confirmations?.part_type).length,
-    currencyUnconfirmed: ls.filter((l) => !l.confirmations?.currency).length,
+    // La moneda se confirma con `currency_status`, no con `confirmations`.
+    currencyUnconfirmed: ls.filter((l) => l.currency_status !== 'confirmed').length,
+    currencies: [...new Set(ls.map((l) => l.price.currency))],
     incotermUnconfirmed: ls.filter((l) => !l.confirmations?.incoterm).length,
     hasAirportDistance: distanceOf(s).km != null,
     airportDistanceConfirmed: distanceOf(s).confirmed,
@@ -577,6 +601,58 @@ add({
 })
 for (const f of KNOWN_FINDINGS) add(f)
 
+// Qué hacer con cada tipo de anomalía; se busca por el título.
+const ACTIONS = [
+  [
+    /Precio muy bajo/,
+    'Pedir al proveedor que confirme por escrito código, pieza completa y precio. Hasta entonces no se compra con ese precio.',
+  ],
+  [
+    /Precio muy alto/,
+    'Confirmar unidad y moneda con el proveedor; si no se aclara, comprar la pieza a otro proveedor.',
+  ],
+  [
+    /alternativa cuesta más/,
+    'Pedirle que confirme qué es cada precio; comprar la alternativa a otro proveedor.',
+  ],
+  [/No conviene traerlo por avión/, 'Sacarla del pedido aéreo y dejarla para una compra marítima.'],
+  [
+    /mercancía peligrosa/,
+    'Pedir la hoja MSDS y consultar al forwarder antes de incluirla; si no puede volar, enviarla por mar.',
+  ],
+  [
+    /Fuera de medida/,
+    'Preguntar al forwarder si hay avión de carga y el recargo; si sale caro, sacarla del pedido.',
+  ],
+  [/sin código/, 'Pedir el código por VIN al proveedor elegido, con foto del despiece.'],
+  [
+    /Mismo código/,
+    'Preguntar al proveedor si son piezas simétricas; si no lo son, pedir el código de cada una.',
+  ],
+  [
+    /Calidad sin confirmar/,
+    'Pedir por escrito si cada línea es OEM o AFM. Hasta entonces no se ofrece como original.',
+  ],
+  [
+    /Sin distancia al aeropuerto/,
+    'Preguntar desde qué aeropuerto despacha y cargarlo en su ficha.',
+  ],
+  [
+    /Formulario F/,
+    'Preguntar si emite Formulario F y para qué partidas: con él baja el arancel de 6 %.',
+  ],
+  [/"Used"/, 'Decidir si se aceptan como tercera calidad; por defecto se descartan.'],
+  [
+    /Peso y volumen sin confirmar/,
+    'Pedir el packing list al proveedor elegido antes de fijar el precio al cliente.',
+  ],
+  [/Tapabarro y Guardafango/, 'Pedir al proveedor una foto de la pieza cotizada antes de pagar.'],
+  [/Reflector Portal/, 'Confirmar con el cliente qué pieza quiere y cotizarla con foto.'],
+  [/Disco de freno/, 'Pedir al proveedor que confirme el código correcto con el VIN.'],
+  [/Compresor/, 'Pedir la hoja MSDS al proveedor y consultar al forwarder.'],
+]
+for (const a of anomalies) a.actionEs = ACTIONS.find(([re]) => re.test(a.titleEs))?.[1] ?? null
+
 const severityRank = { alta: 0, media: 1, baja: 2 }
 anomalies.sort((a, b) => severityRank[a.severity] - severityRank[b.severity])
 
@@ -619,7 +695,18 @@ const report = {
     topDemand: TOP_DEMAND,
     averageAirportKm: averageKm,
   },
-  suppliers: suppliers.map((s) => ({ id: s.id, name: supplierName(s) })),
+  suppliers: suppliers.map((s) => ({
+    id: s.id,
+    name: supplierName(s),
+    // Sigla para las tablas: "XM Industrial" ya empieza con la suya; el resto, las iniciales.
+    abbr: /^[A-Z]{2,4}$/.test(supplierName(s).split(' ')[0])
+      ? supplierName(s).split(' ')[0]
+      : supplierName(s)
+          .split(' ')
+          .map((w) => w[0])
+          .join('')
+          .toUpperCase(),
+  })),
   supplierStats: lineStats,
   coverage,
   notWorthFlying,
@@ -652,11 +739,11 @@ console.log(
   `Anomalías: ${anomalies.length} (${anomalies.filter((a) => a.severity === 'alta').length} altas). No conviene volar: ${notWorthFlying}.\n`,
 )
 for (const sc of scenarios.slice(0, 1)) {
-  for (const q of QUALITIES) {
+  for (const q of OPTIONS) {
     for (const c of ['A', 'B', 'C']) {
       const r = sc.results[q][c]
       console.log(
-        `[${QUALITY_ES[q]}] caso ${c}: ${r.parts} repuestos, base cliente ${clp(r.baselineClp)}`,
+        `[${OPTION_ES[q]}] caso ${c}: ${r.parts} repuestos, base cliente ${clp(r.baselineClp)}`,
       )
       for (const b of r.best.slice(0, 4)) {
         console.log(

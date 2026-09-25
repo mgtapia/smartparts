@@ -57,6 +57,7 @@ export function costLine(line, { mode, rates, settingsFor }) {
     // Formulario F: dato del proveedor que se confirma en su ficha.
     formF: quote.supplier?.facts?.formF?.value ?? 'unknown',
     weightG: part.weightG,
+    dgProfile: part.dgProfile ?? undefined,
     volumeCm3: part.volumeCm3,
     logisticsConfirmed: CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus),
     mode,

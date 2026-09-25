@@ -206,3 +206,32 @@ describe('planPurchase', () => {
     expect(byId(scenarios, 'best').baselineMicro).toBe(60_000_000)
   })
 })
+
+describe('planPurchase con mercancía peligrosa', () => {
+  const battery = {
+    unNumber: 'UN3480',
+    hazardClass: '9',
+    un383: { status: 'provided' },
+    airTransport: { allowed: false },
+    seaTransport: { allowed: true, lclAccepted: true },
+  }
+  const plan = (mode) =>
+    planPurchase({
+      parts: [{ ...part('p1'), dgProfile: battery }, part('p2')],
+      offers: [offer('p1', 'A', 1000), offer('p2', 'A', 1000)],
+      suppliers: [supplier('A')],
+      ...common,
+      mode,
+    })
+
+  it('por aire, el repuesto que no puede volar queda sin oferta y no se costea', () => {
+    const best = plan('air').scenarios.find((s) => s.id === 'best')
+    expect(best.missingPartIds).toEqual(['p1'])
+    expect(best.coveredPartIds).toEqual(['p2'])
+  })
+
+  it('por mar se cubre completo', () => {
+    const best = plan('sea_lcl').scenarios.find((s) => s.id === 'best')
+    expect(best.missingPartIds).toEqual([])
+  })
+})

@@ -115,7 +115,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'inland_china',
     stage: 'inland',
-    labelEs: 'Transporte en China hasta el puerto o aeropuerto',
+    labelEs: 'Transporte en China',
     modes: ['sea', 'air'],
     basis: 'distance_min',
     rateMicroPerTonKm: 278_000,
@@ -130,7 +130,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'export_customs',
     stage: 'origin',
-    labelEs: 'Despacho de exportación en China',
+    labelEs: 'Despacho de exportación',
     modes: ['sea', 'air'],
     basis: 'per_shipment',
     amountCents: 6000,
@@ -139,7 +139,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'origin_docs',
     stage: 'origin',
-    labelEs: 'Documentos y B/L en origen',
+    labelEs: 'Documentos y B/L',
     modes: ['sea'],
     basis: 'per_shipment',
     amountCents: 3750,
@@ -148,7 +148,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'origin_cfs',
     stage: 'origin',
-    labelEs: 'Consolidación en bodega de origen (CFS)',
+    labelEs: 'Consolidación CFS',
     modes: ['sea'],
     basis: 'per_unit',
     amountCents: 1150,
@@ -157,7 +157,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'origin_thc',
     stage: 'origin',
-    labelEs: 'Manipulación en puerto de origen (THC)',
+    labelEs: 'THC de origen',
     modes: ['sea'],
     basis: 'per_unit',
     amountCents: 1750,
@@ -166,7 +166,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'origin_air_handling',
     stage: 'origin',
-    labelEs: 'Manipulación en aeropuerto de origen',
+    labelEs: 'Manipulación en origen',
     modes: ['air'],
     basis: 'per_shipment',
     amountCents: 12500,
@@ -175,7 +175,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'awb',
     stage: 'origin',
-    labelEs: 'Emisión de guía aérea (AWB)',
+    labelEs: 'Guía aérea (AWB)',
     modes: ['air'],
     basis: 'per_shipment',
     amountCents: 7000,
@@ -210,7 +210,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'delivery_sea',
     stage: 'destination',
-    labelEs: 'Transporte de San Antonio a bodega',
+    labelEs: 'Reparto a bodega',
     modes: ['sea'],
     basis: 'per_shipment',
     amountCents: 19592,
@@ -219,7 +219,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'dest_air_handling',
     stage: 'destination',
-    labelEs: 'Manipulación en aeropuerto de Santiago',
+    labelEs: 'Manipulación en Santiago',
     modes: ['air'],
     basis: 'per_shipment',
     amountCents: 12500,
@@ -228,7 +228,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'delivery_air',
     stage: 'destination',
-    labelEs: 'Transporte del aeropuerto a bodega',
+    labelEs: 'Reparto a bodega',
     modes: ['air'],
     basis: 'per_shipment',
     amountCents: 10500,
@@ -241,7 +241,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'customs_agent',
     stage: 'customs',
-    labelEs: 'Honorario del agente de aduanas',
+    labelEs: 'Agente de aduanas',
     modes: ['sea', 'air'],
     basis: 'percent_min',
     base: 'cif',
@@ -258,7 +258,7 @@ export const SHIPMENT_CHARGES = [
   {
     code: 'bank_transfer',
     stage: 'payment',
-    labelEs: 'Transferencia bancaria al proveedor',
+    labelEs: 'Transferencia bancaria',
     modes: ['sea', 'air'],
     basis: 'percent_plus_fixed',
     base: 'price',

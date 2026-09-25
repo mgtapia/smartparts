@@ -15,7 +15,8 @@ const toNumber = (raw) => {
 /**
  * Campo numérico con el mismo estilo que los inputs de precio del filtro del
  * catálogo: caption arriba, input pequeño con prefijo (US$, %) y sin label
- * flotante. Solo confirma valores válidos y no negativos.
+ * flotante. Solo confirma valores válidos y no negativos. `labelSuffix` va junto a la
+ * etiqueta (ej. un ícono con la fuente del valor).
  */
 export default function NumberField({
   label,
@@ -23,12 +24,16 @@ export default function NumberField({
   onCommit,
   adornment,
   placeholder = 'Sin definir',
+  labelSuffix = null,
 }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+        <Typography variant="caption" color="text.secondary" noWrap title={label}>
+          {label}
+        </Typography>
+        {labelSuffix}
+      </Box>
       <TextField
         size="small"
         type="number"

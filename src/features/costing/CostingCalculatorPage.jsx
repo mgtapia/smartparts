@@ -3,254 +3,270 @@
 import { useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import Typography from '@mui/material/Typography'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import Slider from '@mui/material/Slider'
-import Divider from '@mui/material/Divider'
-import Button from '@mui/material/Button'
-import Tooltip from '@mui/material/Tooltip'
+import AddIcon from '@mui/icons-material/Add'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
-import MoneyValue from '@components/common/MoneyValue'
-import Pill from '@components/common/Pill'
-import {
-  CONFIRMED_LOGISTICS_STATUSES,
-  LOGISTICS_STATUS_LABELS_ES,
-  SHIPPING_MODE_LABELS_ES,
-  SHIPPING_MODES,
-} from '@constants/enums'
-import { LoadingState, ErrorState } from '@components/common/AsyncState'
-import { GRID_GAP, px } from '@constants/layout'
-import { useCostingCalculator } from './hooks/useCostingCalculator'
+import ListTable from '@components/common/ListTable'
+import InfoNote from '@components/common/InfoNote'
+import NumberField from '@components/common/NumberField'
+import ToolbarButton from '@components/common/ToolbarButton'
+import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import UncertainValue from '@components/common/UncertainValue'
+import { MoneyFromMicros } from '@components/common/MoneyValue'
+import { InfoGrid, InfoField } from '@components/common/InfoGrid'
+import { ErrorState } from '@components/common/AsyncState'
+import { DetailPageSkeleton } from '@components/common/Skeletons'
+import { GRID_GAP } from '@constants/layout'
+import { CONFIRMED_LOGISTICS_STATUSES, PART_TYPE } from '@constants/enums'
+import { roundHalfUp } from '@libs/money'
+import CostParametersDialog from '@features/quotes/components/CostParametersDialog'
+import SupplierAssumptionsDialog from '@features/quotes/components/SupplierAssumptionsDialog'
+import { MODE_OPTIONS, supplierLabel } from '@features/quotes/constants'
+import { useCalculator } from './hooks/useCalculator'
 
-function usdMoney(usdAmount) {
-  return { amount: Math.round(usdAmount * 100), currency: 'USD', scale: 2 }
-}
+const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
+const QTY_COLUMN_WIDTH = 130
+
+const CALCULATOR_HELP = [
+  'Cada columna es una orden de compra de una sola línea con esa cantidad: incluye los costos fijos por embarque, como la prima mínima del seguro y el mínimo del agente de aduanas. Por eso una cantidad chica sale más cara por unidad.',
+  'Precio de venta: costo final más el margen elegido sobre el costo. El margen por defecto es 20 %.',
+  'Los gastos de origen y las tarifas de flete se definen en Parámetros y Supuestos. Sin ellos no se calcula: no se inventan tarifas.',
+]
+
+const perUnit = (micro, qty) => roundHalfUp(micro / qty)
+
+const number = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 3 })
 
 export default function CostingCalculatorPage() {
   const initialPartId = useSearchParams().get('partId')
-  const {
-    partsWithQuotes,
-    part,
-    partId,
-    setPartId,
-    quote,
-    quoteId,
-    setQuoteId,
-    mode,
-    setMode,
-    marginBp,
-    setMarginBp,
-    tiers,
-    setFreightForTier,
-    loading,
-    error,
-  } = useCostingCalculator(initialPartId)
+  const calc = useCalculator(initialPartId)
+  const { part, quote, quantities, setQuantities, orders, marginBp, assumptions } = calc
 
-  if (loading) {
+  if (calc.loading) {
     return (
       <ContentWidth>
-        <LoadingState />
+        <DetailPageSkeleton rows={8} />
       </ContentWidth>
     )
   }
-
-  if (error) {
+  if (calc.error) {
     return (
       <ContentWidth>
         <ErrorState />
       </ContentWidth>
     )
   }
-
-  if (partsWithQuotes.length === 0) {
+  if (!part || !quote) {
     return (
       <ContentWidth>
-        <PageHeader title="Costeo" description="Sin cotizaciones cargadas para calcular todavía." />
+        <PageHeader title="Calculadora" />
+        <Card sx={{ p: 2, fontSize: 13, color: 'text.secondary' }}>
+          Sin cotizaciones cargadas para calcular todavía.
+        </Card>
       </ContentWidth>
     )
   }
 
+  const logisticsConfirmed = CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus)
+  const setQuantity = (index, value) =>
+    setQuantities((prev) => prev.map((q, i) => (i === index ? value : q)))
+
+  /** Una celda de la tabla: el valor, o "Falta dato" en rojo con el motivo si no se puede calcular. */
+  const cell = (order, pick, { verified = null } = {}) => {
+    if (!order) return '—'
+    const row = order.rows[0]
+    if (!row.cost) {
+      const reasons = [...order.result.blockers, ...row.blockers]
+      return (
+        <UncertainValue verified={false} reason={reasons.join('; ') || 'Falta un dato'}>
+          Falta dato
+        </UncertainValue>
+      )
+    }
+    const micro = pick(row)
+    if (micro == null) return '—'
+    const isVerified = verified ?? order.unverified.length === 0
+    return (
+      <UncertainValue verified={isVerified} reason={order.unverified.join('; ')}>
+        <MoneyFromMicros micros={micro} currency="USD" />
+      </UncertainValue>
+    )
+  }
+
+  const ROWS = [
+    {
+      id: 'price',
+      label: 'Precio del proveedor',
+      value: (o) =>
+        cell(o, (r) => perUnit(r.cost.priceMicro, r.qty), {
+          verified: quote.currencyConfirmed && !quote.inferred,
+        }),
+    },
+    {
+      id: 'origin',
+      label: 'Gasto de origen',
+      value: (o) => cell(o, (r) => perUnit(r.cost.originMicro, r.qty)),
+    },
+    {
+      id: 'freight',
+      label: 'Flete',
+      value: (o) => cell(o, (r) => perUnit(r.cost.freightMicro, r.qty)),
+    },
+    {
+      id: 'insurance',
+      label: 'Seguro',
+      value: (o) => cell(o, (r) => perUnit(r.cost.insuranceMicro, r.qty)),
+    },
+    {
+      id: 'duty',
+      label: 'Arancel',
+      value: (o) => cell(o, (r) => perUnit(r.cost.dutyMicro, r.qty)),
+    },
+    {
+      id: 'local',
+      label: 'Gastos locales',
+      value: (o) => cell(o, (r) => perUnit(r.cost.localCostsMicro, r.qty)),
+    },
+    {
+      id: 'unitCost',
+      label: 'Costo final unitario',
+      value: (o) => cell(o, (r) => r.cost.unitLandedNetMicro),
+    },
+    {
+      id: 'totalCost',
+      label: 'Costo final total',
+      value: (o) => cell(o, (r) => r.cost.landedNetMicro),
+    },
+    {
+      id: 'vat',
+      label: 'IVA recuperable',
+      value: (o) => cell(o, (r) => r.cost.vatMicro),
+    },
+    {
+      id: 'unitSale',
+      label: 'Precio de venta unitario',
+      value: (o) => cell(o, (r) => r.unitSaleMicro),
+    },
+    {
+      id: 'totalSale',
+      label: 'Venta total',
+      value: (o) => cell(o, (r) => r.totalSaleMicro),
+    },
+  ]
+
+  const columns = [
+    { id: 'concept', label: 'Concepto', render: (row) => row.label },
+    ...orders.map((entry, i) => ({
+      id: `qty-${i}`,
+      label: entry.qty ? `${entry.qty} u.` : 'Sin cantidad',
+      width: QTY_COLUMN_WIDTH,
+      align: 'right',
+      render: (row) => row.value(entry.order),
+    })),
+  ]
+
+  const partOptions = calc.parts.map((p) => ({ value: p.id, label: p.nameEs }))
+  const quoteOptions = calc.partQuotes.map((q) => ({
+    value: q.id,
+    label: `${supplierLabel(q.supplier, q.supplierId)} · ${QUALITY_TAG[q.partType] ?? q.partType}`,
+  }))
+
   return (
     <ContentWidth>
-      <PageHeader
-        title="Costeo"
-        description="Landed cost real (motor de costos) + margen → precio de venta unitario y por volumen para ofrecer al cliente."
-      />
+      <PageHeader title="Calculadora" />
 
-      <Box sx={{ display: 'flex', gap: px(GRID_GAP), flexWrap: 'wrap', mb: px(GRID_GAP) }}>
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 260 }}>
-          <Typography variant="overline" color="text.secondary">
-            Repuesto
-          </Typography>
-          <Select
-            fullWidth
-            size="small"
-            value={partId || ''}
-            onChange={(e) => setPartId(e.target.value)}
-            sx={{ mt: 1 }}
-          >
-            {partsWithQuotes.map((p) => (
-              <MenuItem key={p.id} value={p.id}>
-                {p.nameEs}
-              </MenuItem>
-            ))}
-          </Select>
-        </Card>
-
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 260 }}>
-          <Typography variant="overline" color="text.secondary">
-            Cotización FOB
-          </Typography>
-          <Select
-            fullWidth
-            size="small"
-            value={quoteId || ''}
-            onChange={(e) => setQuoteId(e.target.value)}
-            sx={{ mt: 1 }}
-          >
-            {part?.quotes.map((q) => (
-              <MenuItem key={q.id} value={q.id}>
-                {q.supplier?.name} —{' '}
-                <MoneyValue money={usdMoney(q.unitPriceUsd)} sx={{ ml: 0.5 }} /> (
-                {q.partType === 'original' ? 'original' : 'alternativo'})
-              </MenuItem>
-            ))}
-          </Select>
-        </Card>
-
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 220 }}>
-          <Typography variant="overline" color="text.secondary">
-            Modo de envío
-          </Typography>
-          <Select
-            fullWidth
-            size="small"
-            value={mode}
-            onChange={(e) => setMode(e.target.value)}
-            sx={{ mt: 1 }}
-          >
-            {Object.values(SHIPPING_MODES).map((m) => (
-              <MenuItem key={m} value={m}>
-                {SHIPPING_MODE_LABELS_ES[m]}
-              </MenuItem>
-            ))}
-          </Select>
-        </Card>
-
-        <Card sx={{ p: 2.5, flex: 1, minWidth: 220 }}>
-          <Typography variant="overline" color="text.secondary">
-            Margen: {(marginBp / 100).toFixed(0)}%
-          </Typography>
-          <Slider
-            value={marginBp}
-            onChange={(_, v) => setMarginBp(v)}
-            min={0}
-            max={10000}
-            step={100}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(v) => `${(v / 100).toFixed(0)}%`}
-            sx={{ mt: 2 }}
-          />
-        </Card>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
+        <ToolbarSelectBox
+          label="Repuesto"
+          value={part.id}
+          onChange={calc.setPartId}
+          options={partOptions}
+        />
+        <ToolbarSelectBox
+          label="Cotización"
+          value={quote.id}
+          onChange={calc.setQuoteId}
+          options={quoteOptions}
+        />
+        <ToolbarSelectBox
+          label="Modo de envío"
+          value={assumptions.mode}
+          onChange={assumptions.setMode}
+          options={MODE_OPTIONS}
+        />
+        <CostParametersDialog
+          mode={assumptions.mode}
+          setMode={assumptions.setMode}
+          rates={assumptions.rates}
+          setRates={assumptions.setRates}
+          onReset={assumptions.reset}
+        />
+        <SupplierAssumptionsDialog
+          supplierName={supplierLabel(quote.supplier, quote.supplierId)}
+          settings={assumptions.settingsFor(quote.supplierId)}
+          onChange={(patch) => assumptions.updateSupplier(quote.supplierId, patch)}
+        />
+        <InfoNote title="Cómo leer la calculadora" paragraphs={CALCULATOR_HELP} />
       </Box>
 
-      <Card sx={{ p: 2.5 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
-          Precio por volumen — {part?.nameEs}
-        </Typography>
-        {part && !CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus) ? (
-          <Typography variant="caption" color="warning.main" sx={{ display: 'block', mb: 1 }}>
-            Peso y volumen sin confirmar ({LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}): el
-            flete y el costo puesto en Chile son orientativos.
-          </Typography>
-        ) : null}
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-          landedNet (sin IVA) + margen. El flete es editable por tramo — el valor sugerido es una
-          referencia, no una cotización real (ver docs/MOTOR-DE-COSTOS.md).
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: px(GRID_GAP), flexWrap: 'wrap' }}>
-          {tiers.map((tier) => (
-            <Box
-              key={tier.qty}
-              sx={{
-                flex: 1,
-                minWidth: 220,
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 1.5,
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-              }}
+      <Card sx={{ p: 2, mb: `${GRID_GAP}px` }}>
+        <InfoGrid columns={5}>
+          <InfoField label="Código">
+            <UncertainValue
+              verified={Boolean(part.code) && part.codeStatus === 'confirmed'}
+              reason={part.code ? 'Código sin confirmar' : 'Sin código'}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {tier.qty} unidades
-              </Typography>
-
-              {tier.blocked ? (
-                <>
-                  <Pill label="Bloqueado" tone="error" />
-                  <Typography variant="caption" color="error.main">
-                    {tier.blockReasons.join(' ')}
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <TextField
-                    label="Flete cotizado (USD)"
-                    type="number"
-                    size="small"
-                    value={tier.freightUsd}
-                    onChange={(e) => setFreightForTier(tier.qty, Number(e.target.value))}
-                    helperText={`Sugerido: $${tier.suggestedFreightUsd}`}
-                  />
-                  <Divider sx={{ my: 0.5 }} />
-                  <Row label="Landed cost unitario">
-                    <MoneyValue money={usdMoney(tier.unitLandedNetUsd)} />
-                  </Row>
-                  <Row label="Precio de venta unitario">
-                    <MoneyValue
-                      money={usdMoney(tier.unitSalePriceUsd)}
-                      sx={{ fontWeight: 700, color: 'success.main' }}
-                    />
-                  </Row>
-                  <Row label="Total de venta">
-                    <MoneyValue money={usdMoney(tier.totalSalePriceUsd)} sx={{ fontWeight: 700 }} />
-                  </Row>
-                  <Row label="Margen por unidad">
-                    <MoneyValue money={usdMoney(tier.marginUsdPerUnit)} />
-                  </Row>
-                </>
-              )}
-            </Box>
-          ))}
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-        <Tooltip title="Disponible en Fase 2 — requiere escritura a Firestore (costing_scenarios)">
-          <span>
-            <Button variant="contained" disabled>
-              Guardar escenario
-            </Button>
-          </span>
-        </Tooltip>
+              {part.code ?? 'Sin código'}
+            </UncertainValue>
+          </InfoField>
+          <InfoField label="Incoterm">
+            <UncertainValue
+              verified={quote.incotermConfirmed && Boolean(quote.incoterm)}
+              reason={quote.incoterm ? 'Incoterm sin confirmar' : 'La cotización no lo indica'}
+            >
+              {quote.incoterm ?? 'Sin definir'}
+            </UncertainValue>
+          </InfoField>
+          <InfoField label="Peso">
+            <UncertainValue verified={logisticsConfirmed} reason="Peso sin confirmar">
+              {number.format(part.weightG / 1000)} kg
+            </UncertainValue>
+          </InfoField>
+          <InfoField label="Volumen">
+            <UncertainValue verified={logisticsConfirmed} reason="Volumen sin confirmar">
+              {number.format(part.volumeCm3 / 1_000_000)} m³
+            </UncertainValue>
+          </InfoField>
+          <InfoField label="Margen">
+            <NumberField
+              label=""
+              adornment="%"
+              value={marginBp / 100}
+              onCommit={(n) => calc.setMarginBp(n === null ? 0 : Math.round(n * 100))}
+            />
+          </InfoField>
+        </InfoGrid>
       </Card>
-    </ContentWidth>
-  )
-}
 
-function Row({ label, children }) {
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Box sx={{ typography: 'body2' }}>{children}</Box>
-    </Box>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', flexWrap: 'wrap', mb: 1.5 }}>
+        {quantities.map((qty, i) => (
+          <Box key={i} sx={{ width: QTY_COLUMN_WIDTH }}>
+            <NumberField
+              label={`Cantidad ${i + 1}`}
+              value={qty}
+              placeholder="Unidades"
+              onCommit={(n) => setQuantity(i, n === null ? null : Math.max(1, Math.round(n)))}
+            />
+          </Box>
+        ))}
+        <ToolbarButton
+          label="Agregar cantidad"
+          startIcon={<AddIcon fontSize="small" />}
+          onClick={() => setQuantities((prev) => [...prev, null])}
+        />
+      </Box>
+
+      <ListTable columns={columns} rows={ROWS} getRowKey={(row) => row.id} />
+    </ContentWidth>
   )
 }

@@ -52,7 +52,13 @@ export const RAIL_ITEMS = Object.freeze([
     implemented: true,
   },
   { key: 'sourcing', path: '/sourcing', labelEs: 'Sourcing', icon: 'Search', implemented: false },
-  { key: 'costing', path: '/costing', labelEs: 'Costeo', icon: 'Calculate', implemented: true },
+  {
+    key: 'costing',
+    path: '/costing',
+    labelEs: 'Calculadora',
+    icon: 'Calculate',
+    implemented: true,
+  },
   {
     key: 'shipments',
     path: '/shipments',

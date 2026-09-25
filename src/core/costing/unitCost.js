@@ -13,7 +13,8 @@ import { money, fromMicros, roundHalfUp } from '../../libs/money'
 import { toUsdMicro } from '../../libs/fx'
 import { computeCosting } from './engine'
 import { airChargeableWeight, seaLclChargeableRt } from './weights'
-import { unitShipmentCharges } from './shipmentCharges'
+import { chargeModeKey, unitShipmentCharges } from './shipmentCharges'
+import { containerShare, isFclMode } from './containers'
 
 const EXW = 'EXW'
 const FOB_EQUIVALENT_INCOTERMS = ['FOB', 'FCA']
@@ -34,6 +35,10 @@ const ASSUMED_HS = 'SUPUESTA-TLC'
  * @property {import('./shipmentCharges').ShipmentCharge[]} [shipmentCharges]  Gastos por etapa (transporte en China, exportación, Chile, aduana, pago).
  * @property {number} [seaShipmentRt]  Embarque típico marítimo, en R/T (m³), para prorratear los gastos por embarque.
  * @property {number} [airShipmentKg]  Embarque típico aéreo, en kg cobrables.
+ * @property {Record<string, import('./containers').ContainerSpec>} [fclContainers]  Flete y
+ *   capacidad por tipo de contenedor, con la clave del modo (`sea_fcl_20`, `sea_fcl_40hq`).
+ * @property {number} [fclShipmentContainers]  Embarque típico en contenedor completo, en
+ *   contenedores: sobre él se prorratean los gastos por embarque.
  */
 
 /**
@@ -136,6 +141,9 @@ export function computeUnitCost(input) {
   }
 
   const isAir = mode === 'air' || mode === 'courier'
+  const isFcl = isFclMode(mode)
+  const modeKey = chargeModeKey(mode)
+  const container = isFcl ? assumptions.fclContainers?.[mode] : null
   // Sin dato no se inventa: se informa qué falta para poder calcular.
   const missing = []
   if (isExw && input.originDistanceKm == null && !input.originFallback) {
@@ -143,7 +151,15 @@ export function computeUnitCost(input) {
       `Falta la distancia del proveedor al ${isAir ? 'aeropuerto' : 'puerto'}: se carga en su ficha`,
     )
   }
-  if ((isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents) == null) {
+  if (isFcl) {
+    if (!(
+      container?.freightCents != null &&
+      container.capacityM3 > 0 &&
+      container.capacityKg > 0
+    )) {
+      missing.push('Falta el flete o la capacidad del contenedor')
+    }
+  } else if ((isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents) == null) {
     missing.push(`Falta la tarifa de flete ${isAir ? 'aéreo' : 'marítimo'}`)
   }
   if (missing.length > 0) return { blockers: missing, components: [], landedNetUsdMicro: null }
@@ -152,20 +168,31 @@ export function computeUnitCost(input) {
 
   // Unidades cobrables de la pieza: aéreo cobra el MAYOR entre el peso real y el volumétrico
   // (volumen ÷ divisor); marítimo LCL, el mayor entre toneladas y m³. Por carretera se cobra
-  // como marítimo (el mayor entre t y m³).
+  // como marítimo (el mayor entre t y m³). En contenedor completo, la parte del contenedor que
+  // ocupa la pieza: el mayor entre su volumen y su peso sobre la capacidad útil.
   const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor
   const seaRt = seaLclChargeableRt(weightG, volumeCm3, params.freightDefaults.seaLclWmKgPerCbm)
+  const fclShare = isFcl ? containerShare(weightG, volumeCm3, container) : null
   const chargeable = isAir ? airChargeableWeight(weightG, volumeCm3, airDivisor) : seaRt
-  const chargeableUnits = isAir ? chargeable.chargeableKg : chargeable.chargeableRt
+  const chargeableUnits = isFcl
+    ? fclShare.share
+    : isAir
+      ? chargeable.chargeableKg
+      : chargeable.chargeableRt
+  const shipmentChargeable = isFcl
+    ? (assumptions.fclShipmentContainers ?? 1)
+    : isAir
+      ? assumptions.airShipmentKg
+      : assumptions.seaShipmentRt
 
   // Gastos por etapa (SHIPMENT_CHARGES), prorrateados sobre el embarque típico del modo.
   const shipmentCharges = assumptions.shipmentCharges ?? []
   const chargesOf = (stage, extra) =>
     unitShipmentCharges({
       charges: shipmentCharges.filter((c) => c.stage === stage),
-      isAir,
+      modeKey,
       unitChargeable: chargeableUnits,
-      shipmentChargeable: isAir ? assumptions.airShipmentKg : assumptions.seaShipmentRt,
+      shipmentChargeable,
       ...extra,
     })
   const sumOf = (list) => list.reduce((acc, c) => acc + c.usdMicro, 0)
@@ -192,8 +219,13 @@ export function computeUnitCost(input) {
   const originChargesMicro = sumOf(originCharges)
   const fobMicro = priceUsdMicro + inlandMicro + originChargesMicro
 
-  // 2) Flete unitario: unidades cobrables × tarifa.
-  const rateCents = isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents
+  // 2) Flete unitario: unidades cobrables × tarifa (en FCL, parte del contenedor × flete por
+  //    contenedor).
+  const rateCents = isFcl
+    ? container.freightCents
+    : isAir
+      ? assumptions.airUsdPerKgCents
+      : assumptions.seaUsdPerRtCents
   const freightMicro = roundHalfUp((chargeableUnits * 1e6 * rateCents) / 100)
 
   // 3) Arancel: con Form F usamos la tasa TLC supuesta (vía la partida
@@ -243,11 +275,17 @@ export function computeUnitCost(input) {
     : 'parámetros fiscales sin verificar contra Aduana/SII'
   const logisticsReason = input.logisticsConfirmed ? undefined : 'peso/volumen sin confirmar'
   const join = (...reasons) => reasons.filter(Boolean).join('; ') || undefined
-  const unitLabel = isAir ? 'kg cobrables' : 'R/T (m³ o t)'
-  const basisEs = chargeable.basis === 'volumetric' ? 'volumétrico' : 'real'
-  const freightBasisEs = isAir
-    ? `Aéreo cobra el mayor entre el peso real (${(weightG / 1000).toFixed(3)} kg) y el volumétrico (${(volumeCm3 / airDivisor).toFixed(3)} kg = ${volumeCm3} cm³ ÷ ${airDivisor}).`
-    : `Marítimo LCL cobra el mayor entre el peso (${(weightG / 1e6).toFixed(4)} t) y el volumen (${(volumeCm3 / 1e6).toFixed(4)} m³).`
+  const unitLabel = isFcl ? 'contenedores' : isAir ? 'kg cobrables' : 'R/T (m³ o t)'
+  const fclBasisEs = fclShare?.basis === 'weight' ? 'por peso' : 'por volumen'
+  const basisEs = isFcl ? fclBasisEs : chargeable.basis === 'volumetric' ? 'volumétrico' : 'real'
+  const fclBasisTextEs = isFcl
+    ? `Contenedor completo de ${container.capacityM3} m³ útiles y ${container.capacityKg.toLocaleString('es-CL')} kg: la pieza paga la parte que ocupa, el mayor entre su volumen (${(volumeCm3 / 1e6).toFixed(4)} m³) y su peso (${(weightG / 1000).toFixed(3)} kg).`
+    : ''
+  const freightBasisEs = isFcl
+    ? fclBasisTextEs
+    : isAir
+      ? `Aéreo cobra el mayor entre el peso real (${(weightG / 1000).toFixed(3)} kg) y el volumétrico (${(volumeCm3 / airDivisor).toFixed(3)} kg = ${volumeCm3} cm³ ÷ ${airDivisor}).`
+      : `Marítimo LCL cobra el mayor entre el peso (${(weightG / 1e6).toFixed(4)} t) y el volumen (${(volumeCm3 / 1e6).toFixed(4)} m³).`
   const dutyRateBp = withFormF ? assumptions.ftaDutyBp : generalBp
 
   // 4) Después del CIF: gastos en Chile (puerto o aeropuerto, reparto y agente de aduanas) y la
@@ -306,7 +344,7 @@ export function computeUnitCost(input) {
       code: 'freight',
       labelEs: 'Flete internacional',
       usdMicro: line.freight.amount,
-      formulaEs: `${freightBasisEs} Cobra ${chargeableUnits.toFixed(4)} ${unitLabel} (${basisEs}) × US$ ${(rateCents / 100).toFixed(2)} por ${isAir ? 'kg' : 'R/T'}. Tarifa estimada.`,
+      formulaEs: `${freightBasisEs} Cobra ${chargeableUnits.toFixed(isFcl ? 6 : 4)} ${unitLabel} (${basisEs}) × US$ ${(rateCents / 100).toFixed(2)} por ${isFcl ? 'contenedor' : isAir ? 'kg' : 'R/T'}. Tarifa estimada.`,
       verified: false,
       reasonEs: join('tarifa sin cotización real de forwarder', logisticsReason),
     },

@@ -16,7 +16,12 @@ export const COST_COLUMNS = [
 
 export { formatDate, formatIsoDate } from '@libs/dates'
 
-export const MODE_OPTIONS = [SHIPPING_MODES.SEA_LCL, SHIPPING_MODES.AIR].map((m) => ({
+export const MODE_OPTIONS = [
+  SHIPPING_MODES.SEA_LCL,
+  SHIPPING_MODES.SEA_FCL_20,
+  SHIPPING_MODES.SEA_FCL_40HQ,
+  SHIPPING_MODES.AIR,
+].map((m) => ({
   value: m,
   label: SHIPPING_MODE_LABELS_ES[m],
 }))
@@ -69,6 +74,7 @@ export const PARAMETERS_HELP = [
   'Gastos por embarque: se reparten según la parte del embarque típico que ocupa cada pieza. Es lo mismo que un embarque lleno de esa pieza dividido por la cantidad de piezas.',
   'Transporte en China: tarifa por tonelada-km × toneladas cobrables de la pieza (el mayor entre peso y m³) × la distancia de cada proveedor al puerto o aeropuerto, que se edita en su ficha. Así pesa distinto un proveedor cerca del puerto que uno a 1.700 km.',
   'Flete aéreo: el transportista cobra el mayor entre el peso real y el volumétrico (volumen ÷ factor volumétrico). Marítimo LCL: el mayor entre toneladas y m³.',
+  "Contenedor completo, FCL 20' o 40' HC: flete y gastos por contenedor, sin consolidación ni desconsolidación. Cada pieza paga la parte del contenedor que ocupa, el mayor entre su volumen y su peso sobre la capacidad útil; un pedido completo paga los contenedores que alcanzan para su volumen y su peso. Conviene en pedidos grandes: en uno chico sale más caro que LCL.",
   'El arancel general (6 %) se aplica si el proveedor no tiene certificado de origen (Formulario F), que se confirma en su ficha. El IVA no se suma al costo final: es crédito fiscal recuperable.',
 ]
 

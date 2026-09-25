@@ -12,7 +12,7 @@ export const SHIPPING_MODES = Object.freeze({
 export const SHIPPING_MODE_LABELS_ES = Object.freeze({
   [SHIPPING_MODES.SEA_LCL]: 'Marítimo LCL',
   [SHIPPING_MODES.SEA_FCL_20]: "Marítimo FCL 20'",
-  [SHIPPING_MODES.SEA_FCL_40HQ]: "Marítimo FCL 40' HQ",
+  [SHIPPING_MODES.SEA_FCL_40HQ]: "Marítimo FCL 40' HC",
   [SHIPPING_MODES.AIR]: 'Aéreo',
   [SHIPPING_MODES.COURIER]: 'Courier',
 })

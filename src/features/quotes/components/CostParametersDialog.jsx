@@ -24,9 +24,11 @@ import { RADIUS } from '@constants/colors'
 import {
   DEFAULT_PARAM_SET,
   DEFAULT_UNIT_COST_ASSUMPTIONS,
+  FCL_SOURCES,
   FREIGHT_SOURCES,
   SHIPMENT_CHARGES,
 } from '@mocks/costParams'
+import { chargeModeKey } from '@core/costing/shipmentCharges'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
 
 const fromCents = (c) => (c == null ? null : c / 100)
@@ -95,7 +97,11 @@ const SHIPMENT_SIZE_SOURCES = {
     noteEs:
       'Los gastos por embarque se reparten según la parte del embarque que ocupa cada pieza. Ajustar al pedido real.',
   },
+  fcl: FCL_SOURCES.shipment,
 }
+
+// Unidad de los gastos por unidad según el modo.
+const UNIT_ES = { air: 'kg', sea: 'm³', fcl: 'contenedor' }
 
 /**
  * Todos los parámetros y supuestos del costo final, en el orden de la cadena: tamaño del
@@ -107,8 +113,10 @@ const SHIPMENT_SIZE_SOURCES = {
 export default function CostParametersDialog({ mode, setMode, rates, setRates }) {
   const [draft, setDraft] = useState(null)
   const [tab, setTab] = useState(TABS.PARAMS)
-  const isAir = draft?.mode === 'air' || draft?.mode === 'courier'
-  const modeKey = isAir ? 'air' : 'sea'
+  const modeKey = chargeModeKey(draft?.mode)
+  const isAir = modeKey === 'air'
+  const isFcl = modeKey === 'fcl'
+  const container = isFcl ? draft.rates.fclContainers?.[draft.mode] : null
 
   const openDialog = () => {
     setTab(TABS.PARAMS)
@@ -121,6 +129,18 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
     close()
   }
   const setRate = (patch) => setDraft((d) => ({ ...d, rates: { ...d.rates, ...patch } }))
+  // Flete y capacidad del contenedor del modo elegido (20' o 40' HC).
+  const setContainer = (patch) =>
+    setDraft((d) => ({
+      ...d,
+      rates: {
+        ...d.rates,
+        fclContainers: {
+          ...d.rates.fclContainers,
+          [d.mode]: { ...d.rates.fclContainers?.[d.mode], ...patch },
+        },
+      },
+    }))
   const setCharge = (code, patch) =>
     setDraft((d) => ({
       ...d,
@@ -137,7 +157,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
       <ChargeFields
         key={c.code}
         charge={{ ...c, ...draft.rates.chargeOverrides?.[c.code] }}
-        isAir={isAir}
+        modeKey={modeKey}
         onChange={setCharge}
       />
     ))
@@ -193,7 +213,13 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
                     />
                   </Box>
                   <Field source={SHIPMENT_SIZE_SOURCES[modeKey]}>
-                    {isAir ? (
+                    {isFcl ? (
+                      <NumberField
+                        label="Embarque típico (contenedores)"
+                        value={draft.rates.fclShipmentContainers}
+                        onCommit={(n) => n > 0 && setRate({ fclShipmentContainers: n })}
+                      />
+                    ) : isAir ? (
                       <NumberField
                         label="Embarque típico (kg cobrables)"
                         adornment="kg"
@@ -217,7 +243,34 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
                 </Section>
 
                 <Section title="Transporte">
-                  {isAir ? (
+                  {isFcl ? (
+                    <>
+                      <Field source={FCL_SOURCES.freight[draft.mode]}>
+                        <NumberField
+                          label="Flete (US$/contenedor)"
+                          adornment="US$"
+                          value={fromCents(container?.freightCents)}
+                          onCommit={(n) => n != null && setContainer({ freightCents: toCents(n) })}
+                        />
+                      </Field>
+                      <Field source={FCL_SOURCES.capacity[draft.mode]}>
+                        <NumberField
+                          label="Volumen útil (m³)"
+                          adornment="m³"
+                          value={container?.capacityM3}
+                          onCommit={(n) => n > 0 && setContainer({ capacityM3: n })}
+                        />
+                      </Field>
+                      <Field source={FCL_SOURCES.capacity[draft.mode]}>
+                        <NumberField
+                          label="Carga útil (kg)"
+                          adornment="kg"
+                          value={container?.capacityKg}
+                          onCommit={(n) => n > 0 && setContainer({ capacityKg: Math.round(n) })}
+                        />
+                      </Field>
+                    </>
+                  ) : isAir ? (
                     <>
                       <Field source={FREIGHT_SOURCES.air}>
                         <NumberField
@@ -336,7 +389,7 @@ function SourceIcon({ source }) {
 const BASE_ES = { cif: 'CIF', price: 'precio' }
 
 /** Campos de un gasto según cómo se cobra: monto, por unidad, por distancia o porcentaje. */
-function ChargeFields({ charge: c, isAir, onChange }) {
+function ChargeFields({ charge: c, modeKey, onChange }) {
   // Un campo vacío no borra el gasto: se ignora hasta que haya un número.
   const set = (patch) => Object.values(patch).every((v) => v != null) && onChange(c.code, patch)
   const money = (label, key) => (
@@ -353,8 +406,22 @@ function ChargeFields({ charge: c, isAir, onChange }) {
     case 'per_unit':
       return (
         <Field source={c.source}>
-          {money(`${c.labelEs} (US$/${isAir ? 'kg' : 'm³'})`, 'amountCents')}
+          {money(`${c.labelEs} (US$/${UNIT_ES[modeKey]})`, 'amountCents')}
         </Field>
+      )
+    case 'container_km':
+      return (
+        <>
+          <Field source={c.source}>
+            <NumberField
+              label={`${c.labelEs} (US$/km)`}
+              adornment="US$"
+              value={fromMicro(c.rateMicroPerKm)}
+              onCommit={(n) => set({ rateMicroPerKm: toMicro(n) })}
+            />
+          </Field>
+          <Field>{money(`${c.labelEs}, mínimo (US$/contenedor)`, 'minCents')}</Field>
+        </>
       )
     case 'distance_min':
       return (

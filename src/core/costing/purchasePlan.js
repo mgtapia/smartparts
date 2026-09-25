@@ -6,6 +6,8 @@
 //      - por proveedor: transporte en China (su distancia y sus toneladas), gastos de
 //        exportación y transferencia bancaria. Cada proveedor extra los suma de nuevo;
 //      - por embarque consolidado: flete, seguro, gastos en Chile y agente de aduanas, una vez.
+//    En contenedor completo (FCL) el embarque consolidado son N contenedores, los que alcanzan
+//    para el volumen y el peso de todo el pedido: flete y gastos por contenedor van × N.
 // 2. `planPurchase`: prueba todas las combinaciones de proveedores y, en cada una, le asigna
 //    cada repuesto al proveedor con menor costo unitario final; después costea el reparto
 //    completo. Así se ve el costo de comprarle todo a cada uno y la mejor combinación, con los
@@ -16,7 +18,8 @@ import { allocateByWeights, fromMicros, roundHalfUp } from '../../libs/money'
 import { toUsdMicro } from '../../libs/fx'
 import { computeCosting } from './engine'
 import { airChargeableWeight, seaLclChargeableRt } from './weights'
-import { unitShipmentCharges } from './shipmentCharges'
+import { chargeModeKey, unitShipmentCharges } from './shipmentCharges'
+import { containerShare, containersNeeded, isFclMode } from './containers'
 import { computeUnitCost } from './unitCost'
 
 const EXW = 'EXW'
@@ -58,18 +61,19 @@ const MAX_SUPPLIERS_TO_COMBINE = 12
  *   insurance, cif, duty, chile, bank, landedNet, vat.
  * @property {Array<{ supplierId: string, goods: number, inland: number, export: number, bank: number, parts: number, units: number }>} bySupplier
  * @property {Array<{ partId: string, supplierId: string, offerId: string, qty: number, goods: number, landedNet: number, unitLandedNet: number }>} lines
+ * @property {number|null} [containers]  Contenedores del embarque (solo en contenedor completo).
  */
 
 const sum = (list, key) => list.reduce((acc, x) => acc + (key ? x[key] : x), 0)
 const toCents = (micro) => roundHalfUp(micro / 10_000) * 10_000
 
 /** Transporte en China de un proveedor por todo lo que despacha. */
-function inlandFor({ supplier, tons, goodsMicro, isAir, chargeable, charges }) {
+function inlandFor({ supplier, tons, goodsMicro, modeKey, chargeable, charges }) {
   const at = (km) =>
     sum(
       unitShipmentCharges({
         charges,
-        isAir,
+        modeKey,
         unitChargeable: chargeable,
         shipmentChargeable: chargeable,
         unitTons: tons,
@@ -98,26 +102,45 @@ function inlandFor({ supplier, tons, goodsMicro, isAir, chargeable, charges }) {
  */
 export function costShipment({ assignments, suppliers, mode, assumptions, params, fx }) {
   const isAir = mode === 'air' || mode === 'courier'
-  const rateCents = isAir ? assumptions.airUsdPerKgCents : assumptions.seaUsdPerRtCents
-  if (rateCents == null) {
+  const isFcl = isFclMode(mode)
+  const modeKey = chargeModeKey(mode)
+  const container = isFcl ? assumptions.fclContainers?.[mode] : null
+  const rateCents = isFcl
+    ? container?.freightCents
+    : isAir
+      ? assumptions.airUsdPerKgCents
+      : assumptions.seaUsdPerRtCents
+  const containerReady = !isFcl || (container?.capacityM3 > 0 && container?.capacityKg > 0)
+  if (rateCents == null || !containerReady) {
     return {
-      blockers: [`Falta la tarifa de flete ${isAir ? 'aéreo' : 'marítimo'}`],
+      blockers: [
+        isFcl
+          ? 'Falta el flete o la capacidad del contenedor'
+          : `Falta la tarifa de flete ${isAir ? 'aéreo' : 'marítimo'}`,
+      ],
       totals: {},
       bySupplier: [],
       lines: [],
+      containers: null,
     }
   }
-  const empty = { blockers: [], totals: {}, bySupplier: [], lines: [] }
+  const empty = { blockers: [], totals: {}, bySupplier: [], lines: [], containers: null }
   if (assignments.length === 0) return empty
 
   const airDivisor = assumptions.airVolumetricDivisor ?? params.freightDefaults.airVolumetricDivisor
   const wm = params.freightDefaults.seaLclWmKgPerCbm
   const charges = assumptions.shipmentCharges ?? []
   const stage = (s) => charges.filter((c) => c.stage === s)
-  const chargeableOf = (weightG, volumeCm3) =>
-    isAir
+  // Unidad cobrable: kg (aéreo), R/T (LCL) o parte de un contenedor (FCL).
+  const chargeableOf = (weightG, volumeCm3) => {
+    if (isFcl) return containerShare(weightG, volumeCm3, container).share
+    return isAir
       ? airChargeableWeight(weightG, volumeCm3, airDivisor).chargeableKg
       : seaLclChargeableRt(weightG, volumeCm3, wm).chargeableRt
+  }
+  // En FCL los gastos de origen por contenedor (THC, VGM, sello) se cobran por contenedor
+  // físico del embarque, no por proveedor: van aparte, sobre los N contenedores.
+  const perContainer = (c) => isFcl && c.basis === 'per_unit'
 
   const lines = assignments.map(({ part, offer }) => {
     const weightG = part.weightG * part.qty
@@ -132,26 +155,69 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
     }
   })
 
+  // Contenedores del pedido consolidado (solo FCL): los que alcanzan para el volumen y el peso.
+  const totalWeight = sum(lines, 'weightG')
+  const totalVolume = sum(lines, 'volumeCm3')
+  const containers = isFcl ? containersNeeded(totalWeight, totalVolume, container) : null
+  const totalChargeable = chargeableOf(totalWeight, totalVolume)
+
+  // Gastos de origen por contenedor (FCL): × N contenedores, solo por la parte EXW del pedido
+  // (en FOB/FCA el proveedor ya los incluye en su precio). Se reparten entre los proveedores
+  // EXW según la parte de contenedor que ocupa cada uno.
+  const exwLines = lines.filter((l) => l.offer.incoterm === EXW)
+  let containerOriginCents = 0
+  if (isFcl && exwLines.length > 0) {
+    const perContainers = sum(
+      unitShipmentCharges({
+        charges: stage('origin').filter(perContainer),
+        modeKey,
+        unitChargeable: containers,
+        shipmentChargeable: containers,
+      }),
+      'usdMicro',
+    )
+    const exwShare = Math.min(
+      1,
+      chargeableOf(sum(exwLines, 'weightG'), sum(exwLines, 'volumeCm3')) / totalChargeable,
+    )
+    containerOriginCents = roundHalfUp((perContainers * exwShare) / 10_000)
+  }
+
   // 1) Por proveedor: transporte en China, exportación (solo EXW) y banco.
   const groups = new Map()
   for (const l of lines) {
     if (!groups.has(l.offer.supplierId)) groups.set(l.offer.supplierId, [])
     groups.get(l.offer.supplierId).push(l)
   }
+  const groupList = [...groups]
+  const exwChargeableOf = (group) => {
+    const exw = group.filter((l) => l.offer.incoterm === EXW)
+    return exw.length ? chargeableOf(sum(exw, 'weightG'), sum(exw, 'volumeCm3')) : 0
+  }
+  const containerOriginShare = allocateByWeights(
+    containerOriginCents,
+    groupList.map(([, group]) => Math.round(exwChargeableOf(group) * 1e9)),
+  )
   const bySupplier = []
-  for (const [supplierId, group] of groups) {
+  for (const [index, [supplierId, group]] of groupList.entries()) {
     const supplier = suppliers.get(supplierId)
     const goods = sum(group, 'goods')
     const exw = group.filter((l) => l.offer.incoterm === EXW)
     const exwGoods = sum(exw, 'goods')
-    const chargeable = chargeableOf(sum(exw, 'weightG'), sum(exw, 'volumeCm3'))
+    const chargeable = exwChargeableOf(group)
+    // En FCL el camión en China se cobra por contenedor × km según la parte de contenedor que
+    // ocupa lo que despacha el proveedor: contenedores completos más la fracción del último. La
+    // fracción no paga un camión entero porque en un pedido consolidado ese saldo viaja junto
+    // con el de otros proveedores (el forwarder lo junta en su ruta o en su bodega); cobrarle un
+    // contenedor entero a cada saldo castigaría dos veces combinar proveedores, ya que los
+    // contenedores del embarque se redondean hacia arriba sobre el pedido completo.
     const inland = exw.length
       ? toCents(
           inlandFor({
             supplier,
             tons: sum(exw, 'tons'),
             goodsMicro: exwGoods,
-            isAir,
+            modeKey,
             chargeable,
             charges: stage('inland'),
           }),
@@ -161,20 +227,21 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
       ? toCents(
           sum(
             unitShipmentCharges({
-              charges: stage('origin'),
-              isAir,
+              charges: stage('origin').filter((c) => !perContainer(c)),
+              modeKey,
               unitChargeable: chargeable,
               shipmentChargeable: chargeable,
               baseMicro: { price: exwGoods },
             }),
             'usdMicro',
           ),
-        )
+        ) +
+        containerOriginShare[index] * 10_000
       : 0
     const bank = sum(
       unitShipmentCharges({
         charges: stage('payment'),
-        isAir,
+        modeKey,
         unitChargeable: 1,
         shipmentChargeable: 1,
         baseMicro: { price: goods },
@@ -207,11 +274,11 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
     })
   }
 
-  // 2) Embarque consolidado: flete sobre el total cobrable, seguro, CIF y arancel por línea.
-  const totalWeight = sum(lines, 'weightG')
-  const totalVolume = sum(lines, 'volumeCm3')
-  const totalChargeable = chargeableOf(totalWeight, totalVolume)
-  const freight = roundHalfUp((totalChargeable * 1e6 * rateCents) / 100)
+  // 2) Embarque consolidado: flete sobre el total cobrable (FCL: N contenedores), seguro, CIF y
+  //    arancel por línea.
+  const freight = isFcl
+    ? containers * rateCents * 10_000
+    : roundHalfUp((totalChargeable * 1e6 * rateCents) / 100)
   const generalBp = assumptions.generalDutyBp ?? params.duty.generalAdValoremBp
   const result = computeCosting({
     mode,
@@ -242,14 +309,16 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
   })
   if (result.blockers.length > 0) return { ...empty, blockers: result.blockers }
 
-  // 3) Gastos en Chile y agente de aduanas, una vez por embarque, repartidos por línea.
+  // 3) Gastos en Chile y agente de aduanas, una vez por embarque, repartidos por línea. En FCL
+  //    los gastos por contenedor (THC, retiro, reparto) van × N contenedores.
   const cifTotal = result.totals.cif.amount
+  const shipmentUnits = isFcl ? containers : totalChargeable
   const chile = sum(
     unitShipmentCharges({
       charges: [...stage('destination'), ...stage('customs')],
-      isAir,
-      unitChargeable: totalChargeable,
-      shipmentChargeable: totalChargeable,
+      modeKey,
+      unitChargeable: shipmentUnits,
+      shipmentChargeable: shipmentUnits,
       baseMicro: { cif: cifTotal },
     }),
     'usdMicro',
@@ -286,7 +355,7 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
     landedNet: sum(outLines, 'landedNet'),
     vat: result.totals.vat.amount,
   }
-  return { blockers: [], totals, bySupplier, lines: outLines }
+  return { blockers: [], totals, bySupplier, lines: outLines, containers }
 }
 
 /**

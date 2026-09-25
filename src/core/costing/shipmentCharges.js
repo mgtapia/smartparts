@@ -2,8 +2,11 @@
 // documentos, reparto, mínimos) se prorratean según la parte del embarque que ocupa la pieza:
 // da lo mismo que un embarque lleno solo de esa pieza dividido por la cantidad de piezas.
 // Los que se cobran por m³, kg o t·km se aplican directo a lo que cobra la pieza.
+// En contenedor completo (FCL) la unidad es el contenedor: la pieza ocupa una parte del
+// contenedor (ver ./containers.js) y los gastos por contenedor se le aplican en esa proporción.
 // Función pura: montos en micros de USD, sin floats de dinero.
 import { roundHalfUp } from '../../libs/money'
+import { isFclMode } from './containers'
 
 /**
  * @typedef {Object} ChargeSource
@@ -12,23 +15,28 @@ import { roundHalfUp } from '../../libs/money'
  * @property {string} [noteEs]
  */
 
+/** @typedef {'sea'|'air'|'fcl'} ChargeModeKey  'sea' = marítimo LCL, 'fcl' = contenedor completo. */
+
 /**
  * @typedef {Object} ShipmentCharge
  * @property {string} code
  * @property {'inland'|'origin'|'destination'|'customs'|'payment'} stage
  * @property {string} labelEs
- * @property {Array<'sea'|'air'>} modes
- * @property {'per_shipment'|'per_unit'|'percent_min'|'percent_plus_fixed'|'distance_min'} basis
- *   per_shipment: `amountCents` por embarque. per_unit: `amountCents` por R/T (marítimo) o kg
- *   cobrable (aéreo). percent_min: `rateBp` de `base` con mínimo `minCents` por embarque.
- *   percent_plus_fixed: `rateBp` de `base` más `amountCents` fijo por embarque.
+ * @property {ChargeModeKey[]} modes
+ * @property {'per_shipment'|'per_unit'|'percent_min'|'percent_plus_fixed'|'distance_min'|'container_km'} basis
+ *   per_shipment: `amountCents` por embarque. per_unit: `amountCents` por R/T (LCL), kg
+ *   cobrable (aéreo) o contenedor (FCL). percent_min: `rateBp` de `base` con mínimo `minCents`
+ *   por embarque. percent_plus_fixed: `rateBp` de `base` más `amountCents` fijo por embarque.
  *   distance_min: `rateMicroPerTonKm` × toneladas cobrables de la pieza por carretera × distancia
  *   del proveedor, con mínimo `minCents` por embarque.
+ *   container_km: camión por contenedor, `rateMicroPerKm` × distancia del proveedor (mínimo
+ *   `minCents` por contenedor), × los contenedores o la parte de uno que ocupa la carga.
  * @property {'price'|'cif'} [base]
  * @property {number} [amountCents]
  * @property {number} [rateBp]
  * @property {number} [minCents]
  * @property {number} [rateMicroPerTonKm]  Micros de USD por tonelada cobrable y km.
+ * @property {number} [rateMicroPerKm]     Micros de USD por contenedor y km.
  * @property {ChargeSource} [source]
  */
 
@@ -40,7 +48,19 @@ import { roundHalfUp } from '../../libs/money'
  * @property {string} formulaEs
  */
 
+/**
+ * Qué gastos aplican a un modo de envío: aéreo (y courier), contenedor completo o LCL.
+ * @param {import('./types').ShippingMode} mode
+ * @returns {ChargeModeKey}
+ */
+export function chargeModeKey(mode) {
+  if (mode === 'air' || mode === 'courier') return 'air'
+  return isFclMode(mode) ? 'fcl' : 'sea'
+}
+
 const CENT_MICRO = 10_000
+const UNIT_LABEL = { air: 'kg cobrable', sea: 'm³ (R/T)', fcl: 'contenedor' }
+const SHIPMENT_UNIT = { air: 'kg', sea: 'm³', fcl: 'contenedores' }
 const usd = (cents) =>
   `US$ ${(cents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
@@ -49,8 +69,8 @@ const qty = (n) => n.toLocaleString('es-CL', { maximumFractionDigits: 4 })
 /**
  * Parte del embarque que ocupa una pieza (0–1). Una pieza más grande que el embarque típico
  * es el embarque entero.
- * @param {number} unitChargeable   R/T o kg cobrables de la pieza.
- * @param {number} shipmentChargeable  R/T o kg cobrables del embarque típico.
+ * @param {number} unitChargeable   R/T, kg cobrables o contenedores de la pieza.
+ * @param {number} shipmentChargeable  Del embarque típico, en la misma unidad.
  */
 export function shipmentShare(unitChargeable, shipmentChargeable) {
   if (!(shipmentChargeable > 0)) return 1
@@ -60,8 +80,10 @@ export function shipmentShare(unitChargeable, shipmentChargeable) {
 /**
  * @param {Object} input
  * @param {ShipmentCharge[]} input.charges       Gastos de la etapa (ya filtrados por etapa).
- * @param {boolean} input.isAir
- * @param {number} input.unitChargeable          R/T (marítimo) o kg cobrables (aéreo) de la pieza.
+ * @param {boolean} [input.isAir]                Atajo para LCL o aéreo si falta `modeKey`.
+ * @param {ChargeModeKey} [input.modeKey]
+ * @param {number} input.unitChargeable          R/T (LCL), kg cobrables (aéreo) o contenedores
+ *   (FCL, puede ser una fracción) de la pieza.
  * @param {number} input.shipmentChargeable      Del embarque típico, en la misma unidad.
  * @param {{ price?: number, cif?: number }} [input.baseMicro]  Bases de los porcentajes, micros de USD.
  * @param {number} [input.unitTons]              Toneladas cobrables por carretera (el mayor entre t y m³).
@@ -70,20 +92,21 @@ export function shipmentShare(unitChargeable, shipmentChargeable) {
  */
 export function unitShipmentCharges({
   charges,
-  isAir,
+  isAir = false,
+  modeKey: givenModeKey,
   unitChargeable,
   shipmentChargeable,
   baseMicro = {},
   unitTons = 0,
   distanceKm = null,
 }) {
-  const modeKey = isAir ? 'air' : 'sea'
+  const modeKey = givenModeKey ?? (isAir ? 'air' : 'sea')
   if (!charges.some((c) => c.modes.includes(modeKey))) return []
   const share = shipmentShare(unitChargeable, shipmentChargeable)
-  const unitLabel = isAir ? 'kg cobrable' : 'm³ (R/T)'
+  const unitLabel = UNIT_LABEL[modeKey]
   const shipmentLabel =
     shipmentChargeable > 0
-      ? `${qty(shipmentChargeable)} ${isAir ? 'kg' : 'm³'}`
+      ? `${qty(shipmentChargeable)} ${SHIPMENT_UNIT[modeKey]}`
       : 'tamaño sin definir'
   const prorated = (cents) => roundHalfUp(cents * CENT_MICRO * share)
   const shareEs = `la pieza ocupa ${qty(unitChargeable)} de un embarque de ${shipmentLabel}`
@@ -128,6 +151,21 @@ export function unitShipmentCharges({
             labelEs: c.labelEs,
             usdMicro: Math.max(byDistance, prorated(c.minCents)),
             formulaEs: `US$ ${rateEs} por t·km × ${qty(unitTons)} t cobrables × ${qty(km)} km, con mínimo de ${usd(c.minCents)} por embarque prorrateado (${shareEs}); se usa el mayor`,
+          }
+        }
+        case 'container_km': {
+          const km = distanceKm ?? 0
+          const minMicro = (c.minCents ?? 0) * CENT_MICRO
+          const perContainer = Math.max(roundHalfUp(c.rateMicroPerKm * km), minMicro)
+          const rateEs = (c.rateMicroPerKm / 1e6).toLocaleString('es-CL', {
+            maximumFractionDigits: 3,
+          })
+          const minEs = minMicro > 0 ? `, con mínimo de ${usd(c.minCents)} por contenedor` : ''
+          return {
+            code: c.code,
+            labelEs: c.labelEs,
+            usdMicro: roundHalfUp(perContainer * unitChargeable),
+            formulaEs: `US$ ${rateEs} por km × ${qty(km)} km por contenedor${minEs}, × ${qty(unitChargeable)} contenedores`,
           }
         }
         default:

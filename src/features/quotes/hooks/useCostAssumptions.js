@@ -33,8 +33,16 @@ export function useCostAssumptions() {
   const rates = useMemo(() => {
     const merged = { ...DEFAULT_RATES, ...storedRates, ...FIXED_DUTIES }
     const overrides = merged.chargeOverrides ?? {}
+    // Contenedores: los tipos que falten en lo guardado toman el valor de referencia.
+    const fclContainers = Object.fromEntries(
+      Object.entries(DEFAULT_RATES.fclContainers).map(([key, spec]) => [
+        key,
+        { ...spec, ...storedRates?.fclContainers?.[key] },
+      ]),
+    )
     return {
       ...merged,
+      fclContainers,
       shipmentCharges: SHIPMENT_CHARGES.map((c) => ({ ...c, ...overrides[c.code] })),
     }
   }, [storedRates])

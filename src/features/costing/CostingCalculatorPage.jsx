@@ -23,6 +23,9 @@ import CostParametersDialog from '@features/quotes/components/CostParametersDial
 import SupplierAssumptionsDialog from '@features/quotes/components/SupplierAssumptionsDialog'
 import { MODE_OPTIONS, supplierLabel } from '@features/quotes/constants'
 import { useCalculator } from './hooks/useCalculator'
+import ViewTabs from '@components/common/ViewTabs'
+import { useUrlTab } from '@hooks/useUrlTab'
+import OrderSimulation from './components/OrderSimulation'
 
 const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 const QTY_COLUMN_WIDTH = 130
@@ -37,7 +40,7 @@ const perUnit = (micro, qty) => roundHalfUp(micro / qty)
 
 const number = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 3 })
 
-export default function CostingCalculatorPage() {
+function PartCalculator({ tabs }) {
   const initialPartId = useSearchParams().get('partId')
   const calc = useCalculator(initialPartId)
   const { part, quote, quantities, setQuantities, orders, marginBp, assumptions } = calc
@@ -60,6 +63,7 @@ export default function CostingCalculatorPage() {
     return (
       <ContentWidth>
         <PageHeader title="Calculadora" />
+        {tabs}
         <Card sx={{ p: 2, fontSize: 13, color: 'text.secondary' }}>
           Sin cotizaciones cargadas para calcular todavía.
         </Card>
@@ -174,6 +178,7 @@ export default function CostingCalculatorPage() {
   return (
     <ContentWidth>
       <PageHeader title="Calculadora" />
+      {tabs}
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
         <ToolbarSelectBox
@@ -269,4 +274,25 @@ export default function CostingCalculatorPage() {
       <ListTable columns={columns} rows={ROWS} getRowKey={(row) => row.id} />
     </ContentWidth>
   )
+}
+
+const VIEWS = { PART: 'repuesto', ORDER: 'pedido' }
+
+/**
+ * Calculadora con dos vistas: el costo de un repuesto por cantidades, y la simulación de un
+ * pedido completo del cliente repartido entre proveedores.
+ */
+export default function CostingCalculatorPage() {
+  const [view, setView] = useUrlTab(Object.values(VIEWS))
+  const tabs = (
+    <ViewTabs
+      value={view}
+      onChange={setView}
+      tabs={[
+        { value: VIEWS.PART, label: 'Por repuesto' },
+        { value: VIEWS.ORDER, label: 'Pedido completo' },
+      ]}
+    />
+  )
+  return view === VIEWS.ORDER ? <OrderSimulation tabs={tabs} /> : <PartCalculator tabs={tabs} />
 }

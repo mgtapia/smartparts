@@ -267,11 +267,6 @@ export default function QuotationDetailPage() {
             onEdit={
               quotation.incotermPlaces.length > 0 ? () => setEditing(FIELDS.place) : undefined
             }
-            hint={
-              quotation.incotermPlaces.length > 0
-                ? undefined
-                : 'Heredado de la ubicación del proveedor. Se cambia en su ficha.'
-            }
           >
             <QuotationOrigin quotation={quotation} />
           </InfoField>

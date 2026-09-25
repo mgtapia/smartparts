@@ -47,7 +47,7 @@ export const MATRIX_HELP = [
   'Cualquier calidad: se muestra el más barato sin importar si es OEM o AFM (la etiqueta indica cuál es). Solo OEM: piezas de fábrica. Solo AFM: sirve para ver si hay alternativa para cada repuesto — la columna Ofertas en rojo indica que no la hay.',
   'Va marcado el proveedor más barato de cada fila. Un asterisco indica que ofrece varias variantes de la pieza y se muestra la más barata.',
   'Precio del proveedor = lo que cotizó, en USD, con su Incoterm (un EXW no incluye lo que falta para llegar a Chile). Costo final = puesto en Chile y sin IVA; es lo que hay que comparar para decidir.',
-  'Rojo = estimado, sin verificar (moneda sin confirmar, OEM declarado por el proveedor, tarifas y parámetros supuestos).',
+  'Rojo = estimado, sin verificar (moneda sin confirmar, cotizaciones inferidas, tarifas y parámetros supuestos).',
 ]
 
 export const DETAIL_HELP = [

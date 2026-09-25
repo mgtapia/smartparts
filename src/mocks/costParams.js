@@ -69,6 +69,14 @@ export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
   // del embarque que ocupa, como si el embarque fuera solo de esa pieza dividido por las piezas.
   seaShipmentRt: 4, // 4 m³ LCL: el ejemplo real de interbal.cl (agosto 2026). Ajustar al pedido real.
   airShipmentKg: 100, // 100 kg cobrables. Supuesto del equipo, sin fuente. Ajustar al pedido real.
+  // Contenedor completo (FCL), por tipo: flete China → San Antonio por contenedor y capacidad
+  // útil. Fuentes en FCL_SOURCES. La pieza paga la parte del contenedor que ocupa (el mayor entre
+  // volumen y peso); el pedido completo, los contenedores que alcanzan (redondeo hacia arriba).
+  fclContainers: {
+    sea_fcl_20: { freightCents: 770_000, capacityM3: 28, capacityKg: 28_000 }, // US$7.700, seimex.cl (sept 2026).
+    sea_fcl_40hq: { freightCents: 855_000, capacityM3: 68, capacityKg: 26_330 }, // US$8.550 por 40', seimex.cl (sept 2026).
+  },
+  fclShipmentContainers: 1, // Un contenedor por embarque: sobre él se prorratean los gastos por embarque. Supuesto del equipo.
   chargeOverrides: {}, // Valores editados en pantalla, por código de SHIPMENT_CHARGES.
 }
 
@@ -89,6 +97,57 @@ export const FREIGHT_SOURCES = {
     url: 'https://www.sino-shipping.com/shipping-tax-import-china/',
     noteEs: 'Otras fuentes van de US$7 a US$11 por kg.',
   },
+}
+
+const SEIMEX = {
+  labelEs: 'seimex.cl, flete China → Chile por contenedor (septiembre 2026)',
+  url: 'https://seimex.cl/flete-china-chile-hoy',
+}
+const CBM_CALCULATOR = {
+  labelEs: 'cbmcalculator.com, capacidad de contenedores 20 y 40 HC (abril 2026)',
+  url: 'https://www.cbmcalculator.com/blog/how-many-cbm-in-a-shipping-container-20ft-40ft-40hc/',
+}
+
+// Fuentes del contenedor completo (ver `fclContainers` en DEFAULT_UNIT_COST_ASSUMPTIONS).
+export const FCL_SOURCES = {
+  freight: {
+    sea_fcl_20: {
+      ...SEIMEX,
+      noteEs:
+        'US$7.700 por contenedor de 20 pies desde Shanghai, Ningbo o Shenzhen; solo flete marítimo. Muy volátil: en julio 2026 el 40 pies costaba US$4.300–4.900 y en agosto US$7.300–7.900.',
+    },
+    sea_fcl_40hq: {
+      ...SEIMEX,
+      noteEs:
+        'US$8.550 por contenedor de 40 pies; la fuente no distingue el High Cube, que suele cotizarse igual. Solo flete marítimo. Muy volátil: en julio 2026 costaba US$4.300–4.900 y en agosto US$7.300–7.900.',
+    },
+  },
+  capacity: {
+    sea_fcl_20: {
+      ...CBM_CALCULATOR,
+      noteEs:
+        'Interior de ~33 m³; carga útil real de 28–30 m³ con 85–90 % de aprovechamiento, se usa 28. Carga máxima ~28.000 kg.',
+    },
+    sea_fcl_40hq: {
+      ...CBM_CALCULATOR,
+      noteEs:
+        'Interior de ~76 m³; carga útil real de 65–68 m³ con 85–90 % de aprovechamiento, se usa 68. Carga máxima ~26.330 kg.',
+    },
+  },
+  shipment: {
+    labelEs: 'Supuesto del equipo, sin fuente',
+    noteEs:
+      'Los gastos por embarque (documentos, despacho, mínimo del agente) se reparten sobre este número de contenedores. Ajustar al pedido real.',
+  },
+}
+
+const GREATHENSEN_FCL = {
+  labelEs: 'Great Hensen, gastos FCL en origen en China (julio 2026)',
+  url: 'https://www.greathensen.com/en/guide/china-to-europe-sea-freight-costs-breakdown.html',
+}
+const HENCARGO = {
+  labelEs: 'Hencargo Chile, gastos locales de importación en San Antonio y Valparaíso (julio 2026)',
+  url: 'https://hencargochile.com/gastos-locales-de-importacion-la-guia-definitiva-para-entender-que-te-cobran-en-los-puertos-de-chile/',
 }
 
 const INTERBAL = {
@@ -238,11 +297,125 @@ export const SHIPMENT_CHARGES = [
       noteEs: 'CLP 100.000 promedio, llevado a US$105 con el tipo de cambio de referencia.',
     },
   },
+  // Contenedor completo (FCL). Sin consolidación, THC por m³, desconsolidación ni almacén LCL:
+  // los gastos van por contenedor o por embarque.
+  {
+    code: 'fcl_inland_china',
+    stage: 'inland',
+    labelEs: 'Camión en China',
+    modes: ['fcl'],
+    basis: 'container_km',
+    rateMicroPerKm: 3_010_000,
+    minCents: 0,
+    source: {
+      labelEs: 'FreightAmigo, camión vs. tren en China (marzo 2026)',
+      url: 'https://www.freightamigo.com/en/blog/logistics/is-trucking-cheaper-than-rail-for-domestic-china-first-mile-logistics-2025/',
+      noteEs:
+        'Un contenedor de 20 pies Shanghai → Ningbo, unos 300 km, cuesta RMB 5.000–8.000: se usa RMB 6.500, RMB 21,7 por km, US$3,01 con el tipo de cambio de referencia. Mismo valor para el de 40 pies. Sin fuente para el mínimo de un tramo corto.',
+    },
+  },
+  {
+    code: 'fcl_export_customs',
+    stage: 'origin',
+    labelEs: 'Despacho de exportación',
+    modes: ['fcl'],
+    basis: 'per_shipment',
+    amountCents: 10000,
+    source: { ...GREATHENSEN_FCL, noteEs: 'RMB 350–800 por embarque; se usa US$100.' },
+  },
+  {
+    code: 'fcl_origin_docs',
+    stage: 'origin',
+    labelEs: 'B/L',
+    modes: ['fcl'],
+    basis: 'per_shipment',
+    amountCents: 6000,
+    source: { ...GREATHENSEN_FCL, noteEs: 'RMB 200–450 por embarque; se usa US$60.' },
+  },
+  {
+    code: 'fcl_origin_thc',
+    stage: 'origin',
+    labelEs: 'THC de origen',
+    modes: ['fcl'],
+    basis: 'per_unit',
+    amountCents: 11500,
+    source: {
+      ...GREATHENSEN_FCL,
+      noteEs:
+        'RMB 600–1.000 por contenedor; se usa US$115, el ejemplo de la fuente para un 40 HC, también para el de 20.',
+    },
+  },
+  {
+    code: 'fcl_vgm',
+    stage: 'origin',
+    labelEs: 'VGM y sello',
+    modes: ['fcl'],
+    basis: 'per_unit',
+    amountCents: 2500,
+    source: {
+      ...GREATHENSEN_FCL,
+      noteEs: 'Verificación de peso (VGM) US$20 y sello US$5 por contenedor.',
+    },
+  },
+  {
+    code: 'fcl_dest_thc',
+    stage: 'destination',
+    labelEs: 'THC de destino',
+    modes: ['fcl'],
+    basis: 'per_unit',
+    amountCents: 15000,
+    source: { ...HENCARGO, noteEs: 'US$120–180 por contenedor; se usa el punto medio.' },
+  },
+  {
+    code: 'fcl_dest_docs',
+    stage: 'destination',
+    labelEs: 'B/L en destino',
+    modes: ['fcl'],
+    basis: 'per_shipment',
+    amountCents: 9500,
+    source: { ...HENCARGO, noteEs: 'US$75–115 por B/L; se usa el punto medio.' },
+  },
+  {
+    code: 'fcl_dest_handling',
+    stage: 'destination',
+    labelEs: 'Handling local',
+    modes: ['fcl'],
+    basis: 'per_shipment',
+    amountCents: 10000,
+    source: { ...HENCARGO, noteEs: 'US$80–120 por despacho; se usa el punto medio.' },
+  },
+  {
+    code: 'fcl_gate_out',
+    stage: 'destination',
+    labelEs: 'Retiro del contenedor',
+    modes: ['fcl'],
+    basis: 'per_unit',
+    amountCents: 11500,
+    source: {
+      ...HENCARGO,
+      noteEs:
+        'Gate out: US$90–140 por camión, se usa el punto medio. Sin almacenaje: supone retiro dentro de los días libres.',
+    },
+  },
+  {
+    code: 'fcl_delivery',
+    stage: 'destination',
+    labelEs: 'Reparto a bodega',
+    modes: ['fcl'],
+    basis: 'per_unit',
+    amountCents: 40000,
+    source: {
+      labelEs: 'seimex.cl, costo de importar un contenedor de China a Chile (septiembre 2026)',
+      url: 'https://seimex.cl/guias/costo-importar-contenedor-china-chile',
+      noteEs:
+        'Camión de San Antonio a una bodega en Santiago: ≈ US$400 por un contenedor de 40 pies; se usa también para el de 20. Se supone que incluye la devolución del vacío: no hay tarifa pública aparte.',
+    },
+  },
   {
     code: 'customs_agent',
     stage: 'customs',
     labelEs: 'Agente de aduanas',
-    modes: ['sea', 'air'],
+    modes: ['sea', 'air', 'fcl'],
     basis: 'percent_min',
     base: 'cif',
     rateBp: 100,
@@ -259,7 +432,7 @@ export const SHIPMENT_CHARGES = [
     code: 'bank_transfer',
     stage: 'payment',
     labelEs: 'Transferencia bancaria',
-    modes: ['sea', 'air'],
+    modes: ['sea', 'air', 'fcl'],
     basis: 'percent_plus_fixed',
     base: 'price',
     rateBp: 60,

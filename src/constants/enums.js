@@ -57,16 +57,16 @@ export const CONFIRMED_LOGISTICS_STATUSES = Object.freeze([
 
 // Tipo de proveedor. Es lo que el proveedor dice ser: hasta verificarlo (licencia
 // comercial, origen de las piezas) se muestra como no confirmado.
-// Solo dos tipos: quien produce y quien no. Distribuidor, revendedor y comercializadora se
-// agrupan como intermediario; el detalle de cada uno va en la fuente del dato.
+// Solo dos tipos: quien produce y quien no. Distribuidor incluye a comercializadoras y
+// revendedores; el detalle de cada uno va en la fuente del dato.
 export const SUPPLIER_TYPE = Object.freeze({
   FACTORY: 'factory',
-  INTERMEDIARY: 'intermediary',
+  DISTRIBUTOR: 'distributor',
 })
 
 export const SUPPLIER_TYPE_LABELS_ES = Object.freeze({
   [SUPPLIER_TYPE.FACTORY]: 'Fábrica',
-  [SUPPLIER_TYPE.INTERMEDIARY]: 'Intermediario',
+  [SUPPLIER_TYPE.DISTRIBUTOR]: 'Distribuidor',
 })
 
 export const DEMAND_BASIS = Object.freeze({

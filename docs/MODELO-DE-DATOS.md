@@ -141,7 +141,7 @@ Inmutable. Cada costeo guardado referencia su `id`, nunca "el vigente" — así 
 
 Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confirmed`|`unconfirmed`), `incoterm_place` (lugar nombrado, ej. Guangzhou), `price_tiers[{min_qty, amount}]` (tramos por volumen; `price` = tramo de 1 unidad), `variant` (cuando lo cotizado no calza 1:1 con la ficha, ej. terminal 12 mm / 14 mm), `supplier_item`, `source_file`, `source_raw` (columnas sin interpretar), `shipping_included`, `packaging`, `supplier_declaration`. Las cotizaciones son datos reales de proveedores; no se siembran mocks.
 
-**`suppliers/{id}`** agrega `alias` (nombre corto para mostrar), `supplier_type` (`factory`|`intermediary`: quien produce y quien no; declarado por el proveedor, sin verificar), `declarations[]` (lo que dijo textualmente), `is_placeholder`, `contact`.
+**`suppliers/{id}`** agrega `alias` (nombre corto para mostrar), `supplier_type` (`factory`|`distributor`: quien produce y quien no; declarado por el proveedor, sin verificar), `declarations[]` (lo que dijo textualmente), `is_placeholder`, `contact`.
 
 **`suppliers/{id}.facts`** (ficha del proveedor): datos que se confirman con fuente, cada uno `{ value, source, at }`. Claves: `type`, `formF` (`yes`|`no`), `location`, `founded`, `port`, `airport`, `moq`, `payment`, `leadTime`, `license`. Un dato está **confirmado** si tiene valor y fuente; si no, la UI lo muestra en rojo. `type` se replica en `supplier_type` y `supplier_type_source`. El Formulario F que usa el motor de costos sale de `facts.formF.value`; sin dato se trata como desconocido y se aplica el arancel general. Campos simples sin confirmación: `alias`, `name`, `name_zh`, `contact.*`.
 

@@ -177,12 +177,10 @@ export default function SupplierDetailPage() {
       ) : null}
 
       <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={7}>
+        <InfoGrid columns={5}>
           {factField('type')}
           {factField('formF')}
           {factField('location')}
-          {factField('port')}
-          {factField('airport')}
           <InfoField label="Cotizaciones">{quotations.length}</InfoField>
           <InfoField label="Repuestos">{partCount}</InfoField>
         </InfoGrid>
@@ -237,10 +235,11 @@ export default function SupplierDetailPage() {
       ) : null}
 
       {tab === SUPPLIER_TABS.TERMS ? (
-        <Card sx={{ p: 2 }}>
+        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <InfoGrid columns={4}>
             {['moq', 'payment', 'leadTime', 'license'].map(factField)}
           </InfoGrid>
+          <InfoGrid columns={4}>{['port', 'airport'].map(factField)}</InfoGrid>
         </Card>
       ) : null}
 

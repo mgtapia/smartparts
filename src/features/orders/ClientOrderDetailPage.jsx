@@ -23,6 +23,7 @@ import { deleteClientOrderLine } from '@libs/repos/clientOrdersRepo'
 import { supplierLabel } from '@features/quotes/constants'
 import ClientOrderDialog from './components/ClientOrderDialog'
 import ClientOrderLineDialog from './components/ClientOrderLineDialog'
+import ClientOrderSimulation from './components/ClientOrderSimulation'
 import DeleteLineDialog from './components/DeleteLineDialog'
 import MarginValue from './components/MarginValue'
 import RowActions from './components/RowActions'
@@ -34,7 +35,6 @@ import {
   CLIENT_ORDER_TABS,
   CLIENT_ORDER_TAB_LIST,
   COVERAGE_LABELS_ES,
-  SIMULATOR_PENDING,
   formatIsoDate,
   orderLabel,
   partLabel,
@@ -52,6 +52,8 @@ export default function ClientOrderDetailPage() {
   const [tab, setTab] = useUrlTab(Object.values(CLIENT_ORDER_TABS))
   // { kind: 'order' } | { kind: 'line', line? } | { kind: 'delete', line }
   const [editing, setEditing] = useState(null)
+  // Simulación de compra abierta: reemplaza las pestañas hasta que se cierra o se crean las OC.
+  const [simulating, setSimulating] = useState(false)
 
   if (data.loading) {
     return (
@@ -221,7 +223,12 @@ export default function ClientOrderDetailPage() {
         back={{ href: '/orders', label: 'Órdenes' }}
         title={orderLabel(order)}
         description={client?.name}
-        actions={<ToolbarButton label="Simular compra" disabled tooltip={SIMULATOR_PENDING} />}
+        actions={
+          <ToolbarButton
+            label={simulating ? 'Cerrar simulación' : 'Simular compra'}
+            onClick={() => setSimulating((on) => !on)}
+          />
+        }
       />
 
       {editing?.kind === 'order' ? (
@@ -282,9 +289,22 @@ export default function ClientOrderDetailPage() {
         </InfoGrid>
       </Card>
 
-      <ViewTabs value={tab} onChange={setTab} tabs={CLIENT_ORDER_TAB_LIST} />
+      {simulating ? (
+        <ClientOrderSimulation
+          order={order}
+          purchaseOrders={data.purchaseOrders}
+          partsById={data.partsById}
+          onCreated={async () => {
+            setSimulating(false)
+            setTab(CLIENT_ORDER_TABS.PURCHASES)
+            await data.reload()
+          }}
+        />
+      ) : (
+        <ViewTabs value={tab} onChange={setTab} tabs={CLIENT_ORDER_TAB_LIST} />
+      )}
 
-      {tab === CLIENT_ORDER_TABS.LINES ? (
+      {!simulating && tab === CLIENT_ORDER_TABS.LINES ? (
         <>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
             <ToolbarButton label="Agregar línea" onClick={() => setEditing({ kind: 'line' })} />
@@ -299,7 +319,7 @@ export default function ClientOrderDetailPage() {
         </>
       ) : null}
 
-      {tab === CLIENT_ORDER_TABS.PURCHASES ? (
+      {!simulating && tab === CLIENT_ORDER_TABS.PURCHASES ? (
         <ListTable
           columns={purchaseColumns}
           rows={purchaseRows}
@@ -309,7 +329,7 @@ export default function ClientOrderDetailPage() {
         />
       ) : null}
 
-      {tab === CLIENT_ORDER_TABS.DATA ? (
+      {!simulating && tab === CLIENT_ORDER_TABS.DATA ? (
         <Card sx={{ p: 2 }}>
           <InfoGrid columns={3}>
             <InfoField label="N.º OC" onEdit={editOrder}>

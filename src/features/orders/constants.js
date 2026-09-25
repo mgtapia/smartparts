@@ -97,5 +97,3 @@ export const PURCHASE_ORDER_HELP = [
   'Cada línea de compra puede enlazarse a líneas de OC de clientes del mismo repuesto: así se ve qué compra cubre qué pedido.',
   'El precio es el del proveedor, en la moneda de la OC. Al elegir un repuesto de la cotización enlazada, se propone su precio para la cantidad.',
 ]
-
-export const SIMULATOR_PENDING = 'Disponible cuando se integre el simulador'

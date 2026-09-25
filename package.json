@@ -5,6 +5,7 @@
   "description": "SmartParts — importación de repuestos de vehículos eléctricos China → Chile. Next.js + Material UI + Firebase.",
   "scripts": {
     "dev": "next dev",
+    "dev:limpio": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev",
     "build": "next build",
     "build:hosting": "node scripts/build-hosting.mjs",
     "start": "next start",

@@ -1,8 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
+import fc from 'fast-check'
+import {
+  DEFAULT_PARAM_SET,
+  DEFAULT_FX,
+  DEFAULT_UNIT_COST_ASSUMPTIONS,
+  SHIPMENT_CHARGES,
+} from '@mocks/costParams'
+import { costShipment } from '@core/costing/purchasePlan'
+import { money } from '@libs/money'
 import { buildOrder, unitPriceForQty, withMargin } from './orderModel'
 
 const quote = (extra = {}) => ({
+  id: 'q1',
+  supplierId: 's1',
+  partType: 'original',
   currency: 'USD',
   currencyConfirmed: true,
   price: { amount: 10000, currency: 'USD', scale: 2 },
@@ -11,14 +22,23 @@ const quote = (extra = {}) => ({
   moq: null,
   ...extra,
 })
-const part = { weightG: 4000, volumeCm3: 10000, logisticsStatus: 'estimated' }
+const part = { id: 'p1', weightG: 4000, volumeCm3: 10000, logisticsStatus: 'estimated' }
+const settings = (extra = {}) => ({
+  originDistanceKm: 500,
+  originDistanceConfirmed: true,
+  originFallback: { bp: 300, averageKm: 500 },
+  assumedIncoterm: 'none',
+  ...extra,
+})
 
 const base = {
+  part,
+  quote: quote(),
+  qty: 10,
   supplier: { facts: { formF: { value: 'no' } } },
   mode: 'sea_lcl',
-  settings: { originCostBp: 500, assumedIncoterm: 'none' },
-  assumptions: { airUsdPerKgCents: 600, seaUsdPerRtCents: 18000, ftaDutyBp: 0 },
-  freightQuoteUsdMicro: null,
+  settings: settings(),
+  assumptions: { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES },
   marginBp: 2000,
   params: DEFAULT_PARAM_SET,
   fx: DEFAULT_FX,
@@ -45,56 +65,152 @@ describe('unitPriceForQty', () => {
 })
 
 describe('buildOrder', () => {
-  const orderLines = [
-    { id: 'a', part, quote: quote(), qty: 10 },
-    { id: 'b', part, quote: quote({ price: { amount: 2500, currency: 'USD', scale: 2 } }), qty: 4 },
-  ]
+  it('da el mismo costo que costShipment para el mismo repuesto, cantidad y tramo', () => {
+    const tiered = quote({ priceTiers: [{ minQty: 10, amountMinor: 9000 }] })
+    const o = buildOrder({ ...base, quote: tiered, qty: 12 })
+    const shipment = costShipment({
+      assignments: [
+        {
+          part: { partId: 'p1', qty: 12, weightG: 4000, volumeCm3: 10000 },
+          offer: {
+            offerId: 'q1',
+            partId: 'p1',
+            supplierId: 's1',
+            partType: 'original',
+            unitPrice: money(9000, 'USD'),
+            incoterm: 'EXW',
+          },
+        },
+      ],
+      suppliers: new Map([
+        [
+          's1',
+          {
+            id: 's1',
+            originDistanceKm: 500,
+            originFallback: { bp: 300, averageKm: 500 },
+            formF: 'no',
+          },
+        ],
+      ]),
+      mode: base.mode,
+      assumptions: base.assumptions,
+      params: base.params,
+      fx: base.fx,
+    })
+    expect(o.cost.landedNet).toBe(shipment.totals.landedNet)
+    expect(o.cost.unitLandedNet).toBe(shipment.lines[0].unitLandedNet)
+    for (const key of ['goods', 'inland', 'export', 'freight', 'insurance', 'duty', 'chile']) {
+      expect(o.cost[key]).toBe(shipment.totals[key])
+    }
+    expect(o.cost.goods).toBe(12 * 90_000_000)
+  })
 
-  it('el precio de venta es el costo más el margen y suma línea a línea', () => {
-    const o = buildOrder({ ...base, orderLines })
-    const sum = o.rows.reduce((s, r) => s + r.totalSaleMicro, 0)
-    expect(o.saleTotalMicro).toBe(sum)
-    expect(o.rows[0].totalSaleMicro).toBe(withMargin(o.rows[0].cost.landedNetMicro, 2000))
+  it('el costo final suma sus componentes y el precio de venta es costo más margen', () => {
+    const o = buildOrder(base)
+    const c = o.cost
+    expect(c.landedNet).toBe(
+      c.goods + c.inland + c.export + c.freight + c.insurance + c.duty + c.chile + c.bank,
+    )
+    expect(o.totalSaleMicro).toBe(withMargin(c.landedNet, 2000))
+    expect(o.unitSaleMicro).toBe(withMargin(c.unitLandedNet, 2000))
+  })
+
+  it('más cantidad baja el costo unitario: los gastos por embarque se diluyen', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 200 }), fc.integer({ min: 2, max: 10 }), (q, k) => {
+        const small = buildOrder({ ...base, qty: q }).cost.unitLandedNet
+        const large = buildOrder({ ...base, qty: q * k }).cost.unitLandedNet
+        return large < small
+      }),
+      { numRuns: 40 },
+    )
+  })
+
+  it('el proveedor más lejos del puerto cuesta más', () => {
+    const near = buildOrder({ ...base, qty: 50, settings: settings({ originDistanceKm: 100 }) })
+    const far = buildOrder({ ...base, qty: 50, settings: settings({ originDistanceKm: 1500 }) })
+    expect(far.cost.inland).toBeGreaterThan(near.cost.inland)
+    expect(far.cost.landedNet).toBeGreaterThan(near.cost.landedNet)
+  })
+
+  it('sin distancia usa el supuesto conservador y lo marca como no verificado', () => {
+    const o = buildOrder({ ...base, settings: settings({ originDistanceKm: null }) })
+    const withAverage = buildOrder({ ...base, settings: settings({ originDistanceKm: 500 }) })
+    expect(o.cost.inland).toBeGreaterThanOrEqual(withAverage.cost.inland)
+    expect(o.reasons.inland.join(' ')).toMatch(/sin distancia/)
+  })
+
+  it('un precio FOB no paga transporte en China ni exportación', () => {
+    const o = buildOrder({ ...base, quote: quote({ incoterm: 'FOB' }) })
+    expect(o.cost.inland).toBe(0)
+    expect(o.cost.export).toBe(0)
   })
 
   it('sin margen no hay precio de venta', () => {
-    const o = buildOrder({ ...base, orderLines, marginBp: null })
-    expect(o.saleTotalMicro).toBeNull()
-    expect(o.rows[0].cost).not.toBeNull()
+    const o = buildOrder({ ...base, marginBp: null })
+    expect(o.totalSaleMicro).toBeNull()
+    expect(o.cost).not.toBeNull()
   })
 
-  it('compara marítimo y aéreo; el flete cotizado solo aplica al modo elegido', () => {
-    const o = buildOrder({ ...base, orderLines, freightQuoteUsdMicro: 500_000_000 })
+  it('compara marítimo y aéreo con los mismos supuestos', () => {
+    const o = buildOrder(base)
     const sea = o.comparison.find((c) => c.mode === 'sea_lcl')
     const air = o.comparison.find((c) => c.mode === 'air')
-    expect(sea.result.totals.freightMicro).toBe(500_000_000)
-    expect(air.result.totals.freightMicro).not.toBe(500_000_000)
+    expect(sea.cost).toEqual(o.cost)
+    expect(air.cost.freight).not.toBe(sea.cost.freight)
+    expect(air.totalSaleMicro).toBe(withMargin(air.cost.landedNet, 2000))
   })
 
-  it('una cotización sin moneda bloquea su línea y dice por qué', () => {
-    const o = buildOrder({
-      ...base,
-      orderLines: [{ id: 'x', part, quote: quote({ currency: null }), qty: 1 }],
-    })
-    expect(o.rows[0].blockers[0]).toMatch(/Moneda sin definir/)
+  it('una cotización sin moneda no se costea y dice por qué', () => {
+    const o = buildOrder({ ...base, quote: quote({ currency: null }) })
+    expect(o.cost).toBeNull()
+    expect(o.blockers[0]).toMatch(/Moneda sin definir/)
   })
 
-  it('marca como sin verificar la moneda sin confirmar y las inferidas', () => {
+  it('sin Incoterm no se costea, salvo que se suponga uno', () => {
+    expect(buildOrder({ ...base, quote: quote({ incoterm: null }) }).blockers[0]).toMatch(
+      /Sin Incoterm/,
+    )
+    const assumed = buildOrder({
+      ...base,
+      quote: quote({ incoterm: null }),
+      settings: settings({ assumedIncoterm: 'EXW' }),
+    })
+    expect(assumed.cost).not.toBeNull()
+    expect(assumed.reasons.inland).toContain('Incoterm supuesto: la cotización no lo indica')
+  })
+
+  it('una batería que no puede volar bloquea el aéreo, no da un número', () => {
+    const dgProfile = {
+      unNumber: 'UN3480',
+      un383: { status: 'provided' },
+      airTransport: { allowed: false },
+      seaTransport: { allowed: true },
+    }
+    const o = buildOrder({ ...base, mode: 'air', part: { ...part, dgProfile } })
+    expect(o.cost).toBeNull()
+    expect(o.blockers[0]).toMatch(/UN3480/)
+  })
+
+  it('sin tarifa de flete no se calcula', () => {
     const o = buildOrder({
       ...base,
-      orderLines: [
-        { id: 'x', part, quote: quote({ currencyConfirmed: false, inferred: true }), qty: 1 },
-      ],
+      assumptions: { ...base.assumptions, seaUsdPerRtCents: null },
     })
-    expect(o.unverified).toContain('Moneda sin confirmar en alguna cotización')
-    expect(o.unverified).toContain('Incluye cotizaciones inferidas del lado opuesto, no ofertadas')
+    expect(o.cost).toBeNull()
+    expect(o.blockers[0]).toMatch(/tarifa de flete/)
+  })
+
+  it('marca como no verificadas la moneda sin confirmar y las cotizaciones inferidas', () => {
+    const o = buildOrder({ ...base, quote: quote({ currencyConfirmed: false, inferred: true }) })
+    expect(o.reasons.goods).toContain('Moneda sin confirmar')
+    expect(o.reasons.goods).toContain('Cotización inferida del lado opuesto, no ofertada')
+    expect(buildOrder(base).reasons.goods).toEqual([])
   })
 
   it('avisa cuando la cantidad no alcanza el mínimo del proveedor', () => {
-    const o = buildOrder({
-      ...base,
-      orderLines: [{ id: 'x', part, quote: quote({ moq: 20 }), qty: 5 }],
-    })
-    expect(o.rows[0].moqShort).toBe(true)
+    const o = buildOrder({ ...base, quote: quote({ moq: 20 }), qty: 5 })
+    expect(o.moqShort).toBe(true)
   })
 })

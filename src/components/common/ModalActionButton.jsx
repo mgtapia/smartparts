@@ -5,19 +5,20 @@ import { RADIUS } from '@constants/colors'
 
 /**
  * Botón de acción al pie de un modal — más chico que los botones de la barra
- * de herramientas (32 px) y con dos jerarquías para distinguirlos: `primary`
- * (la acción principal, relleno) y `ghost` (acción secundaria, solo texto).
+ * de herramientas (32 px) y con tres jerarquías para distinguirlos: `primary`
+ * (la acción principal, relleno), `outlined` (la alternativa de cierre, con borde,
+ * ej. Cancelar) y `ghost` (acción auxiliar, solo texto, ej. Restablecer).
  *
  * @param {Object} props
  * @param {string} props.label
  * @param {() => void} props.onClick
- * @param {'primary'|'ghost'} [props.kind]
+ * @param {'primary'|'outlined'|'ghost'} [props.kind]
  */
 export default function ModalActionButton({ label, onClick, kind = 'ghost' }) {
   return (
     <Button
       onClick={onClick}
-      variant={kind === 'primary' ? 'contained' : 'text'}
+      variant={{ primary: 'contained', outlined: 'outlined', ghost: 'text' }[kind]}
       disableElevation
       sx={{
         borderRadius: `${RADIUS.pill}px`,
@@ -28,7 +29,8 @@ export default function ModalActionButton({ label, onClick, kind = 'ghost' }) {
         fontWeight: 400,
         textTransform: 'none',
         whiteSpace: 'nowrap',
-        color: kind === 'primary' ? undefined : 'text.secondary',
+        ...(kind === 'outlined' ? { borderColor: 'divider' } : {}),
+        color: { primary: undefined, outlined: 'text.primary', ghost: 'text.secondary' }[kind],
       }}
     >
       {label}

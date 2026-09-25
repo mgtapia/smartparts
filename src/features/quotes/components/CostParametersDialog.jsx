@@ -18,6 +18,7 @@ import ModalActionButton from '@components/common/ModalActionButton'
 import TuneIcon from '@mui/icons-material/Tune'
 import ToolbarIconButton from '@components/common/ToolbarIconButton'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import ViewTabs from '@components/common/ViewTabs'
 import NumberField from '@components/common/NumberField'
 import { RADIUS } from '@constants/colors'
 import {
@@ -40,6 +41,49 @@ const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
 
 const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_EDITABLE } =
   DEFAULT_UNIT_COST_ASSUMPTIONS
+
+const TABS = { PARAMS: 'parametros', CONSTANTS: 'constantes' }
+
+// Valores que no se editan acá: los fija la ley, una convención del transporte o el set de
+// parámetros. `verified: false` los muestra en rojo con el motivo.
+const CONSTANTS = [
+  {
+    label: 'Arancel general (% CIF)',
+    value: pct(generalDutyBp),
+    verified: false,
+    note: 'Fijo por ley, igual para todos los proveedores. Sin verificar con el agente de aduanas',
+  },
+  {
+    label: 'Arancel TLC (% CIF)',
+    value: pct(ftaDutyBp),
+    verified: false,
+    note: 'Solo con Formulario F y partida elegible. Sin verificar por partida',
+  },
+  {
+    label: 'IVA (% CIF + arancel)',
+    value: pct(DEFAULT_PARAM_SET.vat.rateBp),
+    verified: false,
+    note: 'Crédito fiscal recuperable: no se suma al costo final. Sin verificar con el SII',
+  },
+  {
+    label: 'Seguro (% del valor asegurado)',
+    value: pct(DEFAULT_PARAM_SET.insurance.rateBp),
+    verified: false,
+    note: 'Tasa referencial, sin cotización de seguro',
+  },
+  {
+    label: 'Valor asegurado (% sobre FOB + flete)',
+    value: pct(DEFAULT_PARAM_SET.insurance.markupBp),
+    verified: false,
+    note: 'Referencial: se asegura un 10 % más que FOB + flete',
+  },
+  {
+    label: 'Peso por m³ marítimo (kg/m³)',
+    value: DEFAULT_PARAM_SET.freightDefaults.seaLclWmKgPerCbm.toLocaleString('es-CL'),
+    verified: true,
+    note: 'Convención del transporte marítimo: se cobra el mayor entre toneladas y m³',
+  },
+]
 
 const SHIPMENT_SIZE_SOURCES = {
   sea: {
@@ -68,13 +112,16 @@ const UNIT_ES = { air: 'kg', sea: 'm³', fcl: 'contenedor' }
  */
 export default function CostParametersDialog({ mode, setMode, rates, setRates }) {
   const [draft, setDraft] = useState(null)
+  const [tab, setTab] = useState(TABS.PARAMS)
   const modeKey = chargeModeKey(draft?.mode)
   const isAir = modeKey === 'air'
   const isFcl = modeKey === 'fcl'
   const container = isFcl ? draft.rates.fclContainers?.[draft.mode] : null
 
-  const openDialog = () =>
+  const openDialog = () => {
+    setTab(TABS.PARAMS)
     setDraft({ mode, rates: { ...rates, chargeOverrides: { ...rates.chargeOverrides } } })
+  }
   const close = () => setDraft(null)
   const apply = () => {
     setMode(draft.mode)
@@ -136,142 +183,145 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
             <InfoNote dense title="Sobre estos parámetros" paragraphs={PARAMETERS_HELP} />
           </DialogTitle>
           <DialogContent>
-            <Grid>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                <Typography variant="caption" color="text.secondary">
-                  Modo de transporte
-                </Typography>
-                <ToolbarSelectBox
-                  fullWidth
-                  label="Modo de transporte"
-                  value={draft.mode}
-                  onChange={(m) => setDraft((d) => ({ ...d, mode: m }))}
-                  options={MODE_OPTIONS}
-                />
-              </Box>
-              <Field source={SHIPMENT_SIZE_SOURCES[modeKey]}>
-                {isFcl ? (
-                  <NumberField
-                    label="Embarque típico (contenedores)"
-                    value={draft.rates.fclShipmentContainers}
-                    onCommit={(n) => n > 0 && setRate({ fclShipmentContainers: n })}
-                  />
-                ) : isAir ? (
-                  <NumberField
-                    label="Embarque típico (kg cobrables)"
-                    adornment="kg"
-                    value={draft.rates.airShipmentKg}
-                    onCommit={(n) => n > 0 && setRate({ airShipmentKg: n })}
-                  />
-                ) : (
-                  <NumberField
-                    label="Embarque típico (m³)"
-                    adornment="m³"
-                    value={draft.rates.seaShipmentRt}
-                    onCommit={(n) => n > 0 && setRate({ seaShipmentRt: n })}
-                  />
-                )}
-              </Field>
-            </Grid>
-
-            <Section title="Origen">
-              {chargesOf('inland')}
-              {chargesOf('origin')}
-            </Section>
-
-            <Section title="Transporte">
-              {isFcl ? (
-                <>
-                  <Field source={FCL_SOURCES.freight[draft.mode]}>
-                    <NumberField
-                      label="Flete (US$/contenedor)"
-                      adornment="US$"
-                      value={fromCents(container?.freightCents)}
-                      onCommit={(n) => n != null && setContainer({ freightCents: toCents(n) })}
-                    />
-                  </Field>
-                  <Field source={FCL_SOURCES.capacity[draft.mode]}>
-                    <NumberField
-                      label="Volumen útil (m³)"
-                      adornment="m³"
-                      value={container?.capacityM3}
-                      onCommit={(n) => n > 0 && setContainer({ capacityM3: n })}
-                    />
-                  </Field>
-                  <Field source={FCL_SOURCES.capacity[draft.mode]}>
-                    <NumberField
-                      label="Carga útil (kg)"
-                      adornment="kg"
-                      value={container?.capacityKg}
-                      onCommit={(n) => n > 0 && setContainer({ capacityKg: Math.round(n) })}
-                    />
-                  </Field>
-                </>
-              ) : isAir ? (
-                <>
-                  <Field source={FREIGHT_SOURCES.air}>
-                    <NumberField
-                      label="Flete aéreo (US$/kg)"
-                      adornment="US$"
-                      value={fromCents(draft.rates.airUsdPerKgCents)}
-                      onCommit={(n) => n != null && setRate({ airUsdPerKgCents: toCents(n) })}
-                    />
-                  </Field>
-                  <Field source={{ labelEs: 'Estándar IATA; algunos couriers usan 5000' }}>
-                    <NumberField
-                      label="Factor volumétrico (cm³/kg)"
-                      adornment="cm³"
-                      value={draft.rates.airVolumetricDivisor}
-                      onCommit={(n) => n > 0 && setRate({ airVolumetricDivisor: Math.round(n) })}
-                    />
-                  </Field>
-                </>
-              ) : (
-                <Field source={FREIGHT_SOURCES.sea}>
-                  <NumberField
-                    label="Flete marítimo LCL (US$/W-M)"
-                    adornment="US$"
-                    value={fromCents(draft.rates.seaUsdPerRtCents)}
-                    onCommit={(n) => n != null && setRate({ seaUsdPerRtCents: toCents(n) })}
-                  />
-                </Field>
-              )}
-              <FixedValue
-                label="Seguro (% FOB + flete)"
-                value={`${pct(DEFAULT_PARAM_SET.insurance.rateBp)} de (FOB + flete) + ${pct(DEFAULT_PARAM_SET.insurance.markupBp)}`}
-                reason="Tasa referencial, sin cotización de seguro"
-              />
-            </Section>
-
-            <Section title="Aduana">
-              <FixedValue
-                label="Arancel general (% CIF)"
-                value={pct(generalDutyBp)}
-                reason="Fijo por ley, igual para todos los proveedores. Sin verificar con el agente de aduanas"
-              />
-              <FixedValue
-                label="Arancel TLC (% CIF)"
-                value={pct(ftaDutyBp)}
-                reason="Solo con Formulario F y partida elegible. Sin verificar por partida"
-              />
-              <FixedValue
-                label="IVA (% CIF + arancel)"
-                value={pct(DEFAULT_PARAM_SET.vat.rateBp)}
-                reason="Crédito fiscal recuperable: no se suma al costo final. Sin verificar con el SII"
-              />
-              {chargesOf('customs')}
-            </Section>
-
-            <Section title="Chile">{chargesOf('destination')}</Section>
-            <Section title="Pago">{chargesOf('payment')}</Section>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <ModalActionButton
-              label="Restablecer"
-              onClick={() => setDraft((d) => ({ ...d, rates: { ...DEFAULT_EDITABLE } }))}
+            <ViewTabs
+              value={tab}
+              onChange={setTab}
+              tabs={[
+                { value: TABS.PARAMS, label: 'Parámetros' },
+                { value: TABS.CONSTANTS, label: 'Constantes' },
+              ]}
             />
-            <ModalActionButton label="Cancelar" onClick={close} />
-            <ModalActionButton kind="primary" label="Aplicar" onClick={apply} />
+            {tab === TABS.CONSTANTS ? (
+              <Grid>
+                {CONSTANTS.map((c) => (
+                  <ConstantValue key={c.label} {...c} />
+                ))}
+              </Grid>
+            ) : (
+              <>
+                <Grid>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Modo de transporte
+                    </Typography>
+                    <ToolbarSelectBox
+                      fullWidth
+                      label="Modo de transporte"
+                      value={draft.mode}
+                      onChange={(m) => setDraft((d) => ({ ...d, mode: m }))}
+                      options={MODE_OPTIONS}
+                    />
+                  </Box>
+                  <Field source={SHIPMENT_SIZE_SOURCES[modeKey]}>
+                    {isFcl ? (
+                      <NumberField
+                        label="Embarque típico (contenedores)"
+                        value={draft.rates.fclShipmentContainers}
+                        onCommit={(n) => n > 0 && setRate({ fclShipmentContainers: n })}
+                      />
+                    ) : isAir ? (
+                      <NumberField
+                        label="Embarque típico (kg cobrables)"
+                        adornment="kg"
+                        value={draft.rates.airShipmentKg}
+                        onCommit={(n) => n > 0 && setRate({ airShipmentKg: n })}
+                      />
+                    ) : (
+                      <NumberField
+                        label="Embarque típico (m³)"
+                        adornment="m³"
+                        value={draft.rates.seaShipmentRt}
+                        onCommit={(n) => n > 0 && setRate({ seaShipmentRt: n })}
+                      />
+                    )}
+                  </Field>
+                </Grid>
+
+                <Section title="Origen">
+                  {chargesOf('inland')}
+                  {chargesOf('origin')}
+                </Section>
+
+                <Section title="Transporte">
+                  {isFcl ? (
+                    <>
+                      <Field source={FCL_SOURCES.freight[draft.mode]}>
+                        <NumberField
+                          label="Flete (US$/contenedor)"
+                          adornment="US$"
+                          value={fromCents(container?.freightCents)}
+                          onCommit={(n) => n != null && setContainer({ freightCents: toCents(n) })}
+                        />
+                      </Field>
+                      <Field source={FCL_SOURCES.capacity[draft.mode]}>
+                        <NumberField
+                          label="Volumen útil (m³)"
+                          adornment="m³"
+                          value={container?.capacityM3}
+                          onCommit={(n) => n > 0 && setContainer({ capacityM3: n })}
+                        />
+                      </Field>
+                      <Field source={FCL_SOURCES.capacity[draft.mode]}>
+                        <NumberField
+                          label="Carga útil (kg)"
+                          adornment="kg"
+                          value={container?.capacityKg}
+                          onCommit={(n) => n > 0 && setContainer({ capacityKg: Math.round(n) })}
+                        />
+                      </Field>
+                    </>
+                  ) : isAir ? (
+                    <>
+                      <Field source={FREIGHT_SOURCES.air}>
+                        <NumberField
+                          label="Flete aéreo (US$/kg)"
+                          adornment="US$"
+                          value={fromCents(draft.rates.airUsdPerKgCents)}
+                          onCommit={(n) => n != null && setRate({ airUsdPerKgCents: toCents(n) })}
+                        />
+                      </Field>
+                      <Field source={{ labelEs: 'Estándar IATA; algunos couriers usan 5000' }}>
+                        <NumberField
+                          label="Factor volumétrico (cm³/kg)"
+                          adornment="cm³"
+                          value={draft.rates.airVolumetricDivisor}
+                          onCommit={(n) =>
+                            n > 0 && setRate({ airVolumetricDivisor: Math.round(n) })
+                          }
+                        />
+                      </Field>
+                    </>
+                  ) : (
+                    <Field source={FREIGHT_SOURCES.sea}>
+                      <NumberField
+                        label="Flete marítimo LCL (US$/W-M)"
+                        adornment="US$"
+                        value={fromCents(draft.rates.seaUsdPerRtCents)}
+                        onCommit={(n) => n != null && setRate({ seaUsdPerRtCents: toCents(n) })}
+                      />
+                    </Field>
+                  )}
+                </Section>
+
+                <Section title="Aduana">{chargesOf('customs')}</Section>
+                <Section title="Chile">{chargesOf('destination')}</Section>
+                <Section title="Pago">{chargesOf('payment')}</Section>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+            {tab === TABS.PARAMS ? (
+              <ModalActionButton
+                label="Restablecer"
+                onClick={() => setDraft((d) => ({ ...d, rates: { ...DEFAULT_EDITABLE } }))}
+              />
+            ) : (
+              <span />
+            )}
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <ModalActionButton kind="outlined" label="Cancelar" onClick={close} />
+              <ModalActionButton kind="primary" label="Aplicar" onClick={apply} />
+            </Box>
           </DialogActions>
         </Dialog>
       ) : null}
@@ -411,15 +461,15 @@ function ChargeFields({ charge: c, modeKey, onChange }) {
   }
 }
 
-/** Parámetro que no se edita acá; sin verificar, con el motivo en el tooltip. */
-function FixedValue({ label, value, reason }) {
+/** Constante de solo lectura; en rojo con el motivo si no está verificada. */
+function ConstantValue({ label, value, verified, note }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>
       <Typography variant="body2" sx={{ fontSize: 13, height: 44, lineHeight: '44px' }}>
-        <UncertainValue verified={false} reason={reason}>
+        <UncertainValue verified={verified} reason={note}>
           {value}
         </UncertainValue>
       </Typography>

@@ -1,0 +1,589 @@
+<title>Compra aérea de prueba E70</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+/>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --ink: #1b2130;
+    --muted: #5d6779;
+    --line: #dde1e8;
+    --accent: #2a4bd7;
+    --accent-soft: #e6ebfb;
+    --unverified: #c8202a;
+    --unverified-soft: #fdeceb;
+    --good: #1c7a4d;
+    --good-soft: #e3f4ea;
+    --warn: #a86400;
+    --warn-soft: #fdf1dc;
+    --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+      --bg: #12151c;
+      --surface: #1a1f2a;
+      --ink: #e7eaf1;
+      --muted: #a0a9ba;
+      --line: #2c3342;
+      --accent: #8ea4ff;
+      --accent-soft: #232b4a;
+      --unverified: #ff7a80;
+      --unverified-soft: #3a1c20;
+      --good: #63d29b;
+      --good-soft: #17301f;
+      --warn: #f0b552;
+      --warn-soft: #33270f;
+    }
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #12151c;
+    --surface: #1a1f2a;
+    --ink: #e7eaf1;
+    --muted: #a0a9ba;
+    --line: #2c3342;
+    --accent: #8ea4ff;
+    --accent-soft: #232b4a;
+    --unverified: #ff7a80;
+    --unverified-soft: #3a1c20;
+    --good: #63d29b;
+    --good-soft: #17301f;
+    --warn: #f0b552;
+    --warn-soft: #33270f;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    padding-inline: 16px;
+    padding-block: 32px 64px;
+  }
+  main {
+    max-width: 1040px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.2;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  p {
+    margin: 0;
+    max-width: 68ch;
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 16px;
+  }
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .verdict {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .verdict .card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .big {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .who {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .red {
+    color: var(--unverified);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 500;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .tag.red {
+    background: var(--unverified-soft);
+    color: var(--unverified);
+  }
+  .tag.warn {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+  .tag.good {
+    background: var(--good-soft);
+    color: var(--good);
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    align-items: center;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .seg button {
+    font: inherit;
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 0;
+    border-right: 1px solid var(--line);
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  .seg button:last-child {
+    border-right: 0;
+  }
+  .seg button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--surface);
+  }
+  button:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  select {
+    font: inherit;
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .scroll {
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  td.num,
+  th.num {
+    text-align: right;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  tr.top td {
+    background: var(--accent-soft);
+  }
+  .assump {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px 24px;
+  }
+  .assump div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .assump .v {
+    font-family: var(--mono);
+    font-size: 16px;
+  }
+  .assump .why {
+    font-size: 13px;
+  }
+  ul.plain {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 72ch;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+</style>
+
+<main id="app"></main>
+
+<script>
+  const DATA = /*__DATA__*/ null
+</script>
+<script>
+  const d = DATA
+  const Q = { original: 'OEM', alternative: 'AFM' }
+  const CASES = {
+    A: { label: 'Todos los repuestos', help: 'Los 143 repuestos, se puedan volar o no.' },
+    B: {
+      label: 'Solo los que conviene volar',
+      help: 'Repuestos donde el mejor costo puesto en Chile es menor que lo que paga hoy el cliente y que no son mercancía peligrosa ni fuera de medida.',
+    },
+    C: {
+      label: 'Top de demanda',
+      help: 'Los ' + d.assumptions.topDemand + ' de mayor cantidad × precio actual del cliente.',
+    },
+  }
+  const state = { quality: 'original', caseKey: 'B', scenario: 'base', sev: 'todas', area: 'todas' }
+  const nameOf = (id) => d.suppliers.find((s) => s.id === id)?.name ?? id
+  const clp = (n) => 'CLP ' + Math.round(n).toLocaleString('es-CL')
+  const mm = (n) => {
+    const m = n / 1e6
+    return (
+      (m < 0 ? '−' : '') +
+      'CLP ' +
+      Math.abs(m).toLocaleString('es-CL', { maximumFractionDigits: 1 }) +
+      ' M'
+    )
+  }
+  const esc = (s) =>
+    String(s ?? '').replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    )
+  const FOCUS = String(d.assumptions.focusMarginPct * 100)
+  const setNames = (ids) => ids.map(nameOf).join(' + ')
+  const scen = (key) => d.scenarios.find((s) => s.key === key)
+  const res = (key, q, c) => scen(key).results[q][c]
+
+  // Recomendación: el mejor proveedor solo y cuánto agrega sumar más, en el caso B y la base.
+  function verdictFor(q) {
+    const r = res('base', q, 'B')
+    const [one, two, three] = r.bestPerSize
+    const gain2 = two.savingsClp[FOCUS] - one.savingsClp[FOCUS]
+    const gain3 = three ? three.savingsClp[FOCUS] - two.savingsClp[FOCUS] : 0
+    return { r, one, two, three, gain2, gain3 }
+  }
+
+  function render() {
+    const v = { original: verdictFor('original'), alternative: verdictFor('alternative') }
+    const A = d.assumptions
+    const nSusp = d.suspectOfferCount
+    const high = d.anomalies.filter((a) => a.severity === 'alta').length
+    const html = []
+    html.push(`
+    <header>
+      <div class="eyebrow">Cliente inicial · ${esc(d.vehicle)} · ${new Date(d.generatedAt).toLocaleDateString('es-CL')}</div>
+      <h1>Compra aérea de prueba: con qué proveedor quedarnos</h1>
+      <p class="lede">Comparación de los cinco proveedores del ${esc(d.vehicle)} para una primera compra por avión que pagamos nosotros, sin usar el simulador de pedidos. Todos los montos son estimaciones con tarifas de referencia y van marcados en rojo hasta que haya cotizaciones reales.</p>
+    </header>
+
+    <section>
+      <h2>Recomendación</h2>
+      <div class="verdict">
+        ${['original', 'alternative']
+          .map((q) => {
+            const x = v[q]
+            return `<div class="card">
+              <div class="eyebrow">Calidad ${Q[q]}</div>
+              <div class="who">${esc(setNames(x.one.supplierIds))}</div>
+              <div class="big red">${mm(x.one.savingsClp[FOCUS])}</div>
+              <p class="muted">Ahorro estimado para el cliente con un margen nuestro de ${d.assumptions.focusMarginPct} %, volando solo los ${x.r.parts} repuestos que conviene volar y cubriendo ${x.one.covered}. La mejor pareja, ${esc(setNames(x.two.supplierIds))}, agrega ${mm(x.gain2)}${x.three ? `, y la mejor terna, ${esc(setNames(x.three.supplierIds))}, ${mm(x.gain3)} más` : ''}.</p>
+              <p class="note red">Sin confirmar: precios de flete, gastos de origen, arancel y peso y volumen de cada pieza.</p>
+            </div>`
+          })
+          .join('')}
+      </div>
+      <div class="card">
+        <h3>Por qué</h3>
+        <ul class="plain">
+          <li>Para una prueba conviene <strong>un solo proveedor por calidad</strong>. Cada proveedor extra suma unos US$ ${Math.round(A.perShipmentUsd)} de despacho, guía aérea y reparto, y otra guía que coordinar. El aporte de un segundo y un tercero es chico frente al ahorro total.</li>
+          <li><strong>No volar todo.</strong> ${d.notWorthFlying} repuestos cuestan más puestos en Chile por avión que lo que paga hoy el cliente. Se dejan para una compra marítima posterior.</li>
+          <li><strong>Guangzhou Youman queda fuera</strong>: su cotización no indica la calidad de ninguna línea, y esa calidad es una estimación nuestra. Se puede reconsiderar cuando la confirme por escrito.</li>
+          <li>Se excluyeron de la recomendación <strong>${nSusp} ofertas con precio atípico</strong> (más de ${'3'}× o menos de 1/3 de la mediana). Un precio que parece error no debe decidir la compra.</li>
+          <li>La recomendación se mantiene con la tarifa aérea ±30 %, con el volumen real al doble y con un pedido de solo 10 % a 25 % de la cantidad estimada: ver la tabla de sensibilidad.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Supuestos</h2>
+      <div class="card assump">
+        ${[
+          [
+            'Flete aéreo',
+            'US$ ' +
+              A.airUsdPerKg.toLocaleString('es-CL', { minimumFractionDigits: 2 }) +
+              ' por kg cobrable',
+            'tarifa de referencia publicada, sin cotización de forwarder',
+          ],
+          [
+            'Peso cobrable',
+            'El mayor entre kg y cm³ ÷ ' + A.airDivisor.toLocaleString('es-CL'),
+            'estándar IATA',
+          ],
+          [
+            'Arancel',
+            A.generalDutyPct + ' % general',
+            'parámetros sin verificar contra Aduana; ningún proveedor confirmó Formulario F',
+          ],
+          [
+            'Gastos por embarque',
+            'US$ ' + Math.round(A.perShipmentUsd) + ' por proveedor',
+            'despacho, guía aérea, manipulación y reparto: referencias públicas, sin cotización real',
+          ],
+          [
+            'Transporte en China',
+            'Por distancia al aeropuerto',
+            'distancias estimadas sin fuente; Youman sin dato usa el promedio, ' +
+              Math.round(A.averageAirportKm) +
+              ' km',
+          ],
+          [
+            'Margen nuestro',
+            A.marginsPct.join(' %, ') + ' %',
+            'markup sobre el costo puesto en Chile; el enfoque es ' +
+              d.assumptions.focusMarginPct +
+              ' %',
+          ],
+          [
+            'Tipo de cambio',
+            'CLP ' +
+              Math.round(d.fx.usdClp / 1e6) +
+              ' por US$; CNY ' +
+              (d.fx.cnyUsd / 1e6).toLocaleString('es-CL') +
+              ' por US$',
+            'referencia del ' + d.fx.asOf,
+          ],
+          [
+            'Peso y volumen',
+            d.partCount + ' repuestos',
+            'referencias de vendedores y piezas equivalentes, ninguno medido ni confirmado',
+          ],
+        ]
+          .map(
+            ([k, val, why]) =>
+              `<div><span class="muted">${k}</span><span class="v red">${esc(val)}</span><span class="why muted">${esc(why)}</span></div>`,
+          )
+          .join('')}
+      </div>
+    </section>
+
+    <section>
+      <h2>Comparación de proveedores</h2>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Calidad">${Object.entries(Q)
+          .map(
+            ([k, l]) => `<button data-q="${k}" aria-pressed="${state.quality === k}">${l}</button>`,
+          )
+          .join('')}</div>
+        <div class="seg" role="group" aria-label="Caso">${Object.entries(CASES)
+          .map(
+            ([k, c]) =>
+              `<button data-c="${k}" aria-pressed="${state.caseKey === k}">${k} · ${c.label}</button>`,
+          )
+          .join('')}</div>
+        <label class="muted">Escenario
+          <select id="scenario">${d.scenarios.map((s) => `<option value="${s.key}" ${s.key === state.scenario ? 'selected' : ''}>${esc(s.labelEs)}</option>`).join('')}</select>
+        </label>
+      </div>
+      <p class="note">${esc(CASES[state.caseKey].help)} Ordenado por el ahorro del cliente con margen ${d.assumptions.focusMarginPct} %. La cobertura es sobre los repuestos del caso; lo que no cubre un proveedor no entra en su costo ni en su ahorro.</p>
+      ${comparisonTable()}
+    </section>
+
+    <section>
+      <h2>Sensibilidad</h2>
+      <p class="note">Mejor proveedor solo y mejor combinación de tres, en el caso B, para cada escenario. Si el proveedor no cambia, la recomendación es robusta.</p>
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>Escenario</th><th>OEM, solo</th><th class="num">Ahorro</th><th>AFM, solo</th><th class="num">Ahorro</th></tr></thead>
+          <tbody>${d.scenarios
+            .map((s) => {
+              const o = s.results.original.B.bestPerSize[0]
+              const a = s.results.alternative.B.bestPerSize[0]
+              const cell = (b) =>
+                b
+                  ? `<td>${esc(setNames(b.supplierIds))}<div class="note">cubre ${b.covered}</div></td><td class="num red">${mm(b.savingsClp[FOCUS])}</td>`
+                  : '<td>—</td><td></td>'
+              return `<tr><td>${esc(s.labelEs)}</td>${cell(o)}${cell(a)}</tr>`
+            })
+            .join('')}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Proveedores</h2>
+      <div class="card scroll">
+        <table>
+          <thead><tr><th>Proveedor</th><th class="num">OEM</th><th class="num">AFM</th><th>Calidad</th><th>Moneda</th><th>Incoterm</th><th>Formulario F</th><th>Distancia al aeropuerto</th></tr></thead>
+          <tbody>${d.supplierStats
+            .map((s, i) => {
+              const c = d.coverage[i]
+              const flag = (n, ok) =>
+                n === 0
+                  ? `<span class="tag good">${ok}</span>`
+                  : `<span class="tag red">${n} sin confirmar</span>`
+              return `<tr><td>${esc(s.supplier)}<div class="note">${s.type === 'factory' ? 'fábrica declarada' : s.type === 'distributor' ? 'distribuidor' : ''}${s.verified ? '' : ' · sin verificar'}</div></td>
+                <td class="num">${c.original}</td><td class="num">${c.alternative}</td>
+                <td>${flag(s.qualityUnconfirmed, 'confirmada')}</td><td>${flag(s.currencyUnconfirmed, 'confirmada')}</td><td>${flag(s.incotermUnconfirmed, 'confirmado')}</td>
+                <td>${s.formF === 'unknown' ? '<span class="tag red">sin confirmar</span>' : esc(s.formF)}</td>
+                <td>${s.hasAirportDistance ? (s.airportDistanceConfirmed ? 'con fuente' : '<span class="tag red">sin fuente</span>') : '<span class="tag red">sin dato</span>'}</td></tr>`
+            })
+            .join('')}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Anomalías <span class="muted">(${d.anomalies.length}, ${high} altas)</span></h2>
+      <div class="controls">
+        <label class="muted">Gravedad
+          <select id="sev">${['todas', 'alta', 'media'].map((x) => `<option ${x === state.sev ? 'selected' : ''}>${x}</option>`).join('')}</select>
+        </label>
+        <label class="muted">Área
+          <select id="area">${['todas', ...new Set(d.anomalies.map((a) => a.area))].map((x) => `<option ${x === state.area ? 'selected' : ''}>${x}</option>`).join('')}</select>
+        </label>
+      </div>
+      <div class="card scroll">${anomalyTable()}</div>
+    </section>
+
+    <section>
+      <h2>Qué falta para cerrar</h2>
+      <div class="card">
+        <ul class="plain">
+          <li>Pedir al proveedor elegido el <strong>packing list</strong> de los repuestos que se van a volar: es el dato que más mueve el costo aéreo.</li>
+          <li>Confirmar por escrito la <strong>calidad</strong> y el <strong>precio</strong> de las piezas con precio atípico antes de pagar.</li>
+          <li>Pedir la <strong>hoja MSDS del compresor</strong> y consultar al forwarder si puede ir por avión.</li>
+          <li>Cotizar el flete aéreo con un forwarder real: hoy la tarifa es una referencia publicada.</li>
+          <li>Conseguir los <strong>5 códigos</strong> que faltan por VIN con el proveedor elegido.</li>
+        </ul>
+      </div>
+    </section>`)
+    document.getElementById('app').innerHTML = html.join('')
+    bind()
+  }
+
+  function comparisonTable() {
+    const r = res(state.scenario, state.quality, state.caseKey)
+    const rows = [
+      ...r.single.map((x) => ({ ...x, kind: 'solo' })),
+      ...r.best.filter((x) => x.supplierIds.length > 1).map((x) => ({ ...x, kind: 'combo' })),
+    ]
+    rows.sort((a, b) => b.savingsClp[FOCUS] - a.savingsClp[FOCUS])
+    const best = rows[0]
+    return `<div class="card scroll"><table>
+      <thead><tr><th>Proveedores</th><th class="num">Cubre</th><th class="num">Costo en Chile</th><th class="num">Base cliente</th>${d.assumptions.marginsPct.map((m) => `<th class="num">Ahorro ${m} %</th>`).join('')}<th>Calidad estimada</th></tr></thead>
+      <tbody>${rows
+        .map(
+          (x) => `<tr class="${x === best ? 'top' : ''}">
+          <td>${esc(setNames(x.supplierIds))}${x === best ? ' <span class="tag">mejor</span>' : ''}</td>
+          <td class="num">${x.covered}/${r.parts}</td>
+          <td class="num red">${mm(x.costClp)}</td>
+          <td class="num">${mm(x.baselineClp)}</td>
+          ${d.assumptions.marginsPct.map((m) => `<td class="num red">${mm(x.savingsClp[String(m * 100)])}</td>`).join('')}
+          <td>${x.estimatedQualityLines ? `<span class="tag red">${x.estimatedQualityLines} líneas</span>` : '<span class="tag good">no</span>'}</td>
+        </tr>`,
+        )
+        .join('')}</tbody></table></div>`
+  }
+
+  function anomalyTable() {
+    const rows = d.anomalies.filter(
+      (a) =>
+        (state.sev === 'todas' || a.severity === state.sev) &&
+        (state.area === 'todas' || a.area === state.area),
+    )
+    const cls = { alta: 'red', media: 'warn' }
+    return `<table><thead><tr><th>Gravedad</th><th>Área</th><th>Qué</th><th>Detalle</th></tr></thead><tbody>${rows
+      .map(
+        (
+          a,
+        ) => `<tr><td><span class="tag ${cls[a.severity] ?? ''}">${a.severity}</span></td><td>${esc(a.area)}</td>
+        <td><strong>${esc(a.titleEs)}</strong><div class="note">${esc([a.partName, a.supplier, a.quality].filter(Boolean).join(' · '))}</div></td>
+        <td>${esc(a.detailEs)}</td></tr>`,
+      )
+      .join('')}</tbody></table>`
+  }
+
+  function bind() {
+    document
+      .querySelectorAll('button[data-q]')
+      .forEach((b) => (b.onclick = () => ((state.quality = b.dataset.q), render())))
+    document
+      .querySelectorAll('button[data-c]')
+      .forEach((b) => (b.onclick = () => ((state.caseKey = b.dataset.c), render())))
+    document.getElementById('scenario').onchange = (e) => (
+      (state.scenario = e.target.value),
+      render()
+    )
+    document.getElementById('sev').onchange = (e) => ((state.sev = e.target.value), render())
+    document.getElementById('area').onchange = (e) => ((state.area = e.target.value), render())
+  }
+  render()
+</script>

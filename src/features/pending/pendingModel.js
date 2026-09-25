@@ -3,6 +3,7 @@
 // proveedores que cotizan y los pasos del hito hacia la primera OC. Nada de
 // acá estima un ahorro del cliente ni inventa cantidades: cuenta hechos.
 import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
+import { isFclMode } from '@core/costing/containers'
 import { factOf } from '@features/suppliers/constants'
 import { EXPIRING_DAYS, MANUAL_STEPS, MIN_SUPPLIERS_TO_COMPARE } from './constants'
 
@@ -68,7 +69,9 @@ export function buildPending({
   })
   const freightRate = isAirMode(assumptions.mode)
     ? assumptions.rates.airUsdPerKgCents
-    : assumptions.rates.seaUsdPerRtCents
+    : isFclMode(assumptions.mode)
+      ? assumptions.rates.fclContainers?.[assumptions.mode]?.freightCents
+      : assumptions.rates.seaUsdPerRtCents
   const freightMissing = freightRate == null ? 1 : 0
 
   const inferredLines = quoteRows.flatMap((q) => q.lines).filter((l) => l.quote.inferred)

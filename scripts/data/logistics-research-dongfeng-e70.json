@@ -32,22 +32,22 @@
   {
     "name": "Amortiguador DEL DER",
     "codes": ["4141013"],
-    "weight_g": 5000,
-    "volume_cm3": 14625,
-    "package_cm": [65, 15, 15],
+    "weight_g": 6000,
+    "volume_cm3": 73920,
+    "package_cm": [55, 32, 42],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/JxtprqiOVYWH/China-Wholesale-Car-Spare-Parts-Auto-Part-Suspension-Parts-Shock-Absorber-for-Toyota-Corolla-Levin-Zre152-Zre182-48510-8z145.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Amortiguador delantero de Toyota Corolla. Ficha: \"Wholesale Car Spare Parts Auto Part Suspension Parts Shock Absorber for Toyota Corolla Levin Zre152 Zre182 48510-8z145 - Toyota and Autopart\". Paquete por unidad 65×15×15 cm y 5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R33: Amortiguador del. izq. OLIVER E140010J-G0102 para Dongfeng E70 (Alibaba, 55×32×42, 5,2 kg); R34: Amortiguadores (varios) (Alibaba, 70×17×17 / 51×19×19, 7,0 / 3,5 kg)",
+    "note": "Bulto de 55×32×42 cm y 6.0 kg brutos (Caja individual). Base: E70 exacto. Amortiguador del. E70 (E140010J-G0102, Alibaba): 55×32×42 cm / 5,2 kg. Se sube a 6 kg por margen."
   },
   {
     "name": "Amortiguador DEL IZQ",
     "codes": ["4142013"],
-    "weight_g": 5000,
-    "volume_cm3": 14625,
-    "package_cm": [65, 15, 15],
+    "weight_g": 6000,
+    "volume_cm3": 73920,
+    "package_cm": [55, 32, 42],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/JxtprqiOVYWH/China-Wholesale-Car-Spare-Parts-Auto-Part-Suspension-Parts-Shock-Absorber-for-Toyota-Corolla-Levin-Zre152-Zre182-48510-8z145.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Amortiguador delantero de Toyota Corolla. Ficha: \"Wholesale Car Spare Parts Auto Part Suspension Parts Shock Absorber for Toyota Corolla Levin Zre152 Zre182 48510-8z145 - Toyota and Autopart\". Paquete por unidad 65×15×15 cm y 5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R33: Amortiguador del. izq. OLIVER E140010J-G0102 para Dongfeng E70 (Alibaba, 55×32×42, 5,2 kg); R34: Amortiguadores (varios) (Alibaba, 70×17×17 / 51×19×19, 7,0 / 3,5 kg)",
+    "note": "Bulto de 55×32×42 cm y 6.0 kg brutos (Caja individual). Base: E70 exacto. Amortiguador del. E70 (E140010J-G0102, Alibaba): 55×32×42 cm / 5,2 kg. Se sube a 6 kg por margen."
   },
   {
     "name": "Amortiguador TRAS DER",
@@ -88,6 +88,16 @@
     "status": "seller_listing",
     "source": "https://chanshinautoparts.en.made-in-china.com/product/pJiRUTlyHKVd/China-Wholesale-Car-Spare-Parts-Auto-Part-Suspension-Parts-Control-Arm-for-Toyota-Corolla-48068-02180-48069-02180.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Bandeja (brazo de control) de Toyota Corolla. Ficha: \"Wholesale Car Spare Parts Auto Part Suspension Parts Control Arm for Toyota Corolla 48068-02180 48069-02180 - 48068-02180 48069-02180 and Co\". Paquete por unidad 40×40×10 cm y 5 kg brutos según el vendedor."
+  },
+  {
+    "name": "Barra estabilizadora DEL",
+    "codes": ["4151005"],
+    "weight_g": 6000,
+    "volume_cm3": 80500,
+    "package_cm": [115, 35, 20],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R37: Barra estabilizadora trasera (Alibaba, 90×25×45, 4,5 kg)",
+    "note": "Bulto de 115×35×20 cm y 6.0 kg brutos (Caja cartón larga). Base: Análogo. Ref barra estabilizadora 90×25×45/4,5 kg. La barra delantera del E70 cubre el ancho entre ruedas (~1,1 m)."
   },
   {
     "name": "Bieleta DEL DER",
@@ -190,6 +200,16 @@
     "note": "Pieza equivalente, no del E70: Bisagra de puerta de Toyota Reiz. Ficha: \"Original Part Rear Left Door Hinge Assembly for Toyota Reiz 687600p011 2010-2017 Replacement Door Hinge - Original Part Door Hinge and Toyot\". Paquete por unidad 15×13×5 cm y 0.36 kg brutos según el vendedor."
   },
   {
+    "name": "Bocina alerta movimiento",
+    "codes": ["B016025"],
+    "weight_g": 1500,
+    "volume_cm3": 5400,
+    "package_cm": [20, 18, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 20×18×15 cm y 1.5 kg brutos (Caja chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Bocina vehículo",
     "codes": ["B012697"],
     "weight_g": 600,
@@ -202,12 +222,12 @@
   {
     "name": "Caja Reductora",
     "codes": ["B018580"],
-    "weight_g": 20000,
-    "volume_cm3": 150000,
-    "package_cm": [60, 50, 50],
-    "status": "seller_listing",
-    "source": "https://nanjingido.en.made-in-china.com/product/zGYrTyVKgpcX/China-Perfectrail-Electric-Car-Auto-Transmission-Parts-Differential-Assembly-for-Wuling-Hongguang-Mini-EV.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Reductor/diferencial de EV Wuling (la ficha más cercana encontrada; el reductor del E70 puede pesar más). Ficha: \"Perfectrail Electric Car Auto Transmission Parts Differential Assembly for Wuling Hongguang Mini EV - Final Drive and Differential\". Paquete por unidad 60×50×50 cm y 20 kg brutos según el vendedor."
+    "weight_g": 35000,
+    "volume_cm3": 111375,
+    "package_cm": [55, 45, 45],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D. Referencias: R50: Reductora EV 1 velocidad (mediana n=5) (Made-in-China, 100×100×80, 50 kg)",
+    "note": "Bulto de 55×45×45 cm y 35.0 kg brutos (Cajón de madera). Base: Estimación. Reductora de 1 velocidad (motor 120 kW / 230 Nm): ~20–30 kg neto. Refs Made-in-China de conjuntos EV son mayores (100×100×80/50 kg). Pedir packing list. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Caliper DEL DER",
@@ -238,6 +258,36 @@
     "status": "seller_listing",
     "source": "https://chanshinautoparts.en.made-in-china.com/product/rGCYNOByyikb/China-Wholesale-Car-Spare-Parts-Car-Accessories-Auto-Parts-Body-Parts-Metal-Part-Car-Hood-Bonnet-for-Toyota-Corolla-2014-2019-53301-02340.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Capó de Toyota Corolla 2014-2019, sedán de tamaño similar. Ficha: \"Wholesale Car Spare Parts Car Accessories Auto-Parts Body Parts Metal Part Car Hood Bonnet for Toyota Corolla 2014-2019 53301-02340 - Coroll\". Paquete por unidad 120×150×35 cm y 35 kg brutos según el vendedor."
+  },
+  {
+    "name": "Capó bisagra DER",
+    "codes": ["5286602"],
+    "weight_g": 600,
+    "volume_cm3": 4500,
+    "package_cm": [30, 15, 10],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R16: Bisagra de puerta (mediana n=4) (Made-in-China, 40×24×20, 1,1 kg)",
+    "note": "Bulto de 30×15×10 cm y 0.6 kg brutos (Caja cartón chica). Base: Análogo."
+  },
+  {
+    "name": "Capó bisagra IZQ",
+    "codes": ["5286501"],
+    "weight_g": 600,
+    "volume_cm3": 4500,
+    "package_cm": [30, 15, 10],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R16: Bisagra de puerta (mediana n=4) (Made-in-China, 40×24×20, 1,1 kg)",
+    "note": "Bulto de 30×15×10 cm y 0.6 kg brutos (Caja cartón chica). Base: Análogo."
+  },
+  {
+    "name": "Careta Frontal puerto de carga",
+    "codes": ["B020626"],
+    "weight_g": 800,
+    "volume_cm3": 14400,
+    "package_cm": [40, 30, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×30×12 cm y 0.8 kg brutos (Caja cartón chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Cazoleta DER",
@@ -310,6 +360,26 @@
     "note": "Pieza equivalente, no del E70: Condensador de A/C de Toyota Corolla. Ficha: \"Wholesale Car Spare Parts Auto Part Cooling System Car Air Condenser for Toyota Corolla Vios Yaris Zre152 Zre182 88450-02320 - 2026 Toyota, \". Paquete por unidad 70×80×15 cm y 2 kg brutos según el vendedor."
   },
   {
+    "name": "Deflector plastico A ACOND DEL DER",
+    "codes": ["2844206"],
+    "weight_g": 500,
+    "volume_cm3": 10000,
+    "package_cm": [40, 25, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×25×10 cm y 0.5 kg brutos (Bolsa + caja chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Deflector plastico A ACOND DEL IZQ",
+    "codes": ["2844105"],
+    "weight_g": 500,
+    "volume_cm3": 10000,
+    "package_cm": [40, 25, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×25×10 cm y 0.5 kg brutos (Bolsa + caja chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Depósito plastico limpia parabrisas",
     "codes": ["6271008"],
     "weight_g": 2000,
@@ -380,6 +450,16 @@
     "note": "Pieza equivalente, no del E70: Palier (eje con homocinéticas) delantero de Toyota Corolla. Ficha: \"Front Left CV Axle for Toyota Corolla 2zr-Fe Fwd 43420-02320 - 2026 Front Left CV Axle, Toyota CV Axle price | Made-in-china.com\". Paquete por unidad 85×18×18 cm y 8 kg brutos según el vendedor."
   },
   {
+    "name": "Eje Trasero",
+    "codes": ["4958006"],
+    "weight_g": 45000,
+    "volume_cm3": 348000,
+    "package_cm": [145, 60, 40],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D. Referencias: R43: Eje trasero (mediana n=7) (Made-in-China, 120×70×70, 360 kg)",
+    "note": "Bulto de 145×60×40 cm y 45.0 kg brutos (Cajón de madera / pallet). Base: Estimación. Viga de torsión de sedán C: 20–30 kg neto + cajón. Solo encontré refs en pallet de varias unidades. PRIORIDAD: pedir packing list al proveedor. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Electroventilador",
     "codes": ["B020156"],
     "weight_g": 1500,
@@ -388,6 +468,16 @@
     "status": "seller_listing",
     "source": "https://chanshinautoparts.en.made-in-china.com/product/EnJYXCzvapVS/China-Wholesale-Car-Spare-Parts-Auto-Part-Cooling-System-Fan-Assembly-Fan-Blade-for-Toyota-Corolla-Levin.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Electroventilador de Toyota Corolla Levin. Ficha: \"Wholesale Car Spare Parts Auto Part Cooling System Fan Assembly Fan Blade for Toyota Corolla Levin - Toyota and Autoparts\". Paquete por unidad 50×40×15 cm y 1.5 kg brutos según el vendedor."
+  },
+  {
+    "name": "Estructura interior plastica parrilla puerto carga",
+    "codes": ["B004642"],
+    "weight_g": 1000,
+    "volume_cm3": 20250,
+    "package_cm": [45, 30, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 45×30×15 cm y 1.0 kg brutos (Caja cartón). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Foco TRAS DER externo",
@@ -412,22 +502,52 @@
   {
     "name": "Frontal metalico inferior radiador",
     "codes": ["5226403"],
-    "weight_g": 15000,
-    "volume_cm3": 432000,
-    "package_cm": [160, 45, 60],
+    "weight_g": 5000,
+    "volume_cm3": 78000,
+    "package_cm": [130, 30, 20],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/sAyrBtCKAIWx/China-Wholesale-Car-Spare-Parts-Car-Accessories-Auto-Part-Body-Parts-Metal-Part-Radiator-Support-Assembly-for-Toyota-Corolla-2014-2019-53201-02410.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Soporte metálico de radiador completo (Toyota, Chanshin); conservador: la pieza del E70 es solo una parte. Ficha: \"Wholesale Car Spare Parts Car Accessories Auto Part Body Parts Metal Part Radiator Support Assembly for Toyota Corolla 2014-2019 53201-02410\". Paquete por unidad 160×45×60 cm y 15 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R14: Soporte de radiador (mediana n=2) (Made-in-China, 120×50×30, 7 kg)",
+    "note": "Bulto de 130×30×20 cm y 5.0 kg brutos (Caja cartón alargada). Base: Análogo. Travesaño inferior, algo menor que el superior."
   },
   {
     "name": "Frontal metalico superior radiador",
     "codes": ["B004281"],
-    "weight_g": 15000,
-    "volume_cm3": 432000,
-    "package_cm": [160, 45, 60],
+    "weight_g": 6000,
+    "volume_cm3": 104000,
+    "package_cm": [130, 40, 20],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/sAyrBtCKAIWx/China-Wholesale-Car-Spare-Parts-Car-Accessories-Auto-Part-Body-Parts-Metal-Part-Radiator-Support-Assembly-for-Toyota-Corolla-2014-2019-53201-02410.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Soporte metálico de radiador completo (Toyota, Chanshin); conservador: la pieza del E70 es solo una parte. Ficha: \"Wholesale Car Spare Parts Car Accessories Auto Part Body Parts Metal Part Radiator Support Assembly for Toyota Corolla 2014-2019 53201-02410\". Paquete por unidad 160×45×60 cm y 15 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R14: Soporte de radiador (mediana n=2) (Made-in-China, 120×50×30, 7 kg)",
+    "note": "Bulto de 130×40×20 cm y 6.0 kg brutos (Caja cartón alargada). Base: Análogo. Refs Made-in-China de soporte de radiador: mediana 120×50×30/7 kg (pieza completa)."
+  },
+  {
+    "name": "Frontal plastico superior radiador",
+    "codes": ["B019672"],
+    "weight_g": 2500,
+    "volume_cm3": 54000,
+    "package_cm": [120, 30, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 120×30×15 cm y 2.5 kg brutos (Caja cartón alargada). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Fuelle Axial DER",
+    "codes": ["4424006"],
+    "weight_g": 300,
+    "volume_cm3": 2400,
+    "package_cm": [20, 12, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 20×12×10 cm y 0.3 kg brutos (Bolsa). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Fuelle Axial IZQ",
+    "codes": ["4424006"],
+    "weight_g": 300,
+    "volume_cm3": 2400,
+    "package_cm": [20, 12, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 20×12×10 cm y 0.3 kg brutos (Bolsa). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Guardafango DEL DER",
@@ -470,6 +590,16 @@
     "note": "Pieza equivalente, no del E70: Forro plástico de rueda delantero de Hyundai Elantra (sedán compacto); se usa también para el trasero, más chico: conservador. En nuestra ficha Guardafango está traducido como panel, pero por precio es el forro. Ficha: \"Car Mud-Guard Front Inner Fender Liner for Hy Elantra/Avanta 2011 OEM#86811-3X000/86812-3X000 - Inner Lining and Guardafango\". Paquete por unidad 80×38×28 cm y 0.5 kg brutos según el vendedor."
   },
   {
+    "name": "Inferior metálico tapa de carga",
+    "codes": ["B004156"],
+    "weight_g": 1000,
+    "volume_cm3": 12000,
+    "package_cm": [40, 25, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×25×12 cm y 1.0 kg brutos (Caja cartón chica). Base: Estimación. Pieza metálica pequeña específica del EV. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Luneta espejo DER",
     "codes": ["B004180"],
     "weight_g": 220,
@@ -498,6 +628,26 @@
     "status": "seller_listing",
     "source": "https://dongxu.en.made-in-china.com/product/EqxnMPJrjCAR/China-Front-Windshield-for-Toyota-Camry.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: parabrisas de Toyota Camry de Dongxu Auto Glass, que embala en jabas de madera de 165×53×110 cm y 570 kg con 30 a 40 piezas. Se prorratea por 30 piezas (lo más conservador); en una compra de pocas unidades la jaba es proporcionalmente mayor."
+  },
+  {
+    "name": "Luneta TRAS DER",
+    "codes": ["5422003"],
+    "weight_g": 2000,
+    "volume_cm3": 17500,
+    "package_cm": [50, 35, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 50×35×10 cm y 2.0 kg brutos (Caja cartón + espuma). Base: Estimación. Vidrio fijo chico (aleta) de puerta trasera. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Luneta TRAS IZQ",
+    "codes": ["5421003"],
+    "weight_g": 2000,
+    "volume_cm3": 17500,
+    "package_cm": [50, 35, 10],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 50×35×10 cm y 2.0 kg brutos (Caja cartón + espuma). Base: Estimación. Vidrio fijo chico (aleta) de puerta trasera. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Manilla DEL DER",
@@ -548,6 +698,46 @@
     "status": "seller_listing",
     "source": "https://chanshinautoparts.en.made-in-china.com/product/yTrYsDRHbkWV/China-Wholesale-Car-Spare-Parts-Car-Accessories-Auto-Parts-Body-Parts-Car-Radiator-Grille-for-Toyota-Corolla-Altis-2008-2011-53100-02310.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Parrilla frontal de Toyota Corolla Altis. Ficha: \"Wholesale Car Spare Parts Car Accessories Auto-Parts Body Parts Car Radiator Grille for Toyota Corolla Altis 2008-2011 53100-02310 - 2026 To\". Paquete por unidad 100×15×35 cm y 1.5 kg brutos según el vendedor."
+  },
+  {
+    "name": "Ménsula DEL DER",
+    "codes": ["6102105"],
+    "weight_g": 400,
+    "volume_cm3": 7200,
+    "package_cm": [30, 20, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 30×20×12 cm y 0.4 kg brutos (Caja cartón chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Ménsula DEL IZQ",
+    "codes": ["6102205"],
+    "weight_g": 400,
+    "volume_cm3": 7200,
+    "package_cm": [30, 20, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 30×20×12 cm y 0.4 kg brutos (Caja cartón chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Ménsula TRAS DER",
+    "codes": ["6442204"],
+    "weight_g": 400,
+    "volume_cm3": 7200,
+    "package_cm": [30, 20, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 30×20×12 cm y 0.4 kg brutos (Caja cartón chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Ménsula TRAS IZQ",
+    "codes": ["6442104"],
+    "weight_g": 400,
+    "volume_cm3": 7200,
+    "package_cm": [30, 20, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 30×20×12 cm y 0.4 kg brutos (Caja cartón chica). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Moldura puerta DEL DER",
@@ -672,22 +862,72 @@
   {
     "name": "Parachoques DEL parte superior",
     "codes": ["61010099Z"],
-    "weight_g": 5000,
-    "volume_cm3": 840000,
-    "package_cm": [200, 60, 70],
+    "weight_g": 12000,
+    "volume_cm3": 540000,
+    "package_cm": [180, 60, 50],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/POTtsxbohjGY/China-Wholesale-Car-Spare-Parts-Auto-Parts-Car-Accessories-Body-Parts-Front-Bumper-for-Toyota-Corolla-2019-2023-52119-F2929-Nre210-Mzea11.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Parachoques delantero completo de Toyota Corolla 2019-2023; conservador si la pieza del E70 es solo la parte superior. Ficha: \"Wholesale Car Spare Parts Auto-Parts Car Accessories Body Parts Front Bumper for Toyota Corolla 2019-2023 52119-F2929 Nre210 Mzea11 - 2026 C\". Paquete por unidad 200×60×70 cm y 5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R17: Parachoques delantero Dongfeng Aeolus E70 (R110101J-G0102-9Z) (Alibaba 1601002637636, no visible, no visible kg); R18: Repuestos carrocería Changan BenBen (parachoques) (Alibaba, 150×50×25, 8,0 kg); R19: Parachoques delantero Nissan (Alibaba, 210×60×60, 10,0 kg); R20: Parachoques Nissan Sylphy (mediana n=9) (Made-in-China, 180×60×50, 14 kg)",
+    "note": "Bulto de 180×60×50 cm y 12.0 kg brutos (Caja cartón larga + film burbuja). Base: Análogo + E70 exacto (sin datos). Existe listado Alibaba del parachoques E70 exacto (R110101J-G0102-9Z) pero sin datos visibles. Refs: Changan BenBen 150×50×25/8 kg; Nissan 210×60×60/10 kg; mediana Made-in-China parachoques 180×60×50/14 kg. El ancho del auto (1,72 m) obliga a caja ≥175 cm."
   },
   {
     "name": "Parachoques TRAS parte superior",
     "codes": ["B020713"],
-    "weight_g": 5000,
-    "volume_cm3": 840000,
-    "package_cm": [200, 60, 70],
+    "weight_g": 11000,
+    "volume_cm3": 445500,
+    "package_cm": [180, 55, 45],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/VdbapBfzgjtE/China-Wholesale-Car-Spare-Parts-Auto-Parts-Car-Accessories-Body-Parts-Rear-Bumper-for-Toyota-Corolla-2019-2023-52159-0z965-Nre.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Parachoques trasero completo de Toyota Corolla 2019-2023; conservador si la pieza del E70 es solo la parte superior. Ficha: \"Wholesale Car Spare Parts Auto-Parts Car Accessories Body Parts Rear Bumper for Toyota Corolla 2019-2023 52159-0z965 Nre - Car Bumper and To\". Paquete por unidad 200×60×70 cm y 5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R19: Parachoques delantero Nissan (Alibaba, 210×60×60, 10,0 kg); R20: Parachoques Nissan Sylphy (mediana n=9) (Made-in-China, 180×60×50, 14 kg)",
+    "note": "Bulto de 180×55×45 cm y 11.0 kg brutos (Caja cartón larga + film burbuja). Base: Análogo. Igual lógica que el delantero."
+  },
+  {
+    "name": "Pedal de Acelerador",
+    "codes": ["2307001"],
+    "weight_g": 900,
+    "volume_cm3": 7128,
+    "package_cm": [33, 18, 12],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R48: Pedal acelerador electrónico (mediana n=4) (Made-in-China, 33×18×12, 0,8 kg)",
+    "note": "Bulto de 33×18×12 cm y 0.9 kg brutos (Caja cartón). Base: Análogo. Mediana Made-in-China de pedal: 33×18×12 / 0,8 kg."
+  },
+  {
+    "name": "Platina superior puerta DEL DER",
+    "codes": ["B002842"],
+    "weight_g": 500,
+    "volume_cm3": 3150,
+    "package_cm": [35, 15, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 35×15×6 cm y 0.5 kg brutos (Caja cartón chica). Base: Estimación. Pieza sin identificar con precisión; validar. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Platina superior puerta DEL IZQ",
+    "codes": ["SIN CODIGO"],
+    "weight_g": 500,
+    "volume_cm3": 3150,
+    "package_cm": [35, 15, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 35×15×6 cm y 0.5 kg brutos (Caja cartón chica). Base: Estimación. Pieza sin identificar con precisión; validar. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Platina superior puerta TRAS DER",
+    "codes": ["SIN CODIGO"],
+    "weight_g": 500,
+    "volume_cm3": 3150,
+    "package_cm": [35, 15, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 35×15×6 cm y 0.5 kg brutos (Caja cartón chica). Base: Estimación. Pieza sin identificar con precisión; validar. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Platina superior puerta TRAS IZQ",
+    "codes": ["SIN CODIGO"],
+    "weight_g": 500,
+    "volume_cm3": 3150,
+    "package_cm": [35, 15, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 35×15×6 cm y 0.5 kg brutos (Caja cartón chica). Base: Estimación. Pieza sin identificar con precisión; validar. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Portalón y/o maleta",
@@ -780,6 +1020,46 @@
     "note": "Pieza equivalente, no del E70: Es el foco trasero interior de la tapa de maleta (igm-avto.ru vende B018561 como \"Фонарь задний правый внутренний\"), no un reflector. Referencia: foco interior de Toyota Vios. Ficha: \"Wholesale Car Spare Parts Auto-Parts Body Part Taillight Tail Lamp Inner for Toyota Yaris Vios 2018-2022 81590-0d540 81580-0d540 - Toyota Ya\". Paquete por unidad 35×20×20 cm y 2 kg brutos según el vendedor."
   },
   {
+    "name": "Refuerzo metálico DEL DER",
+    "codes": ["B015942"],
+    "weight_g": 2000,
+    "volume_cm3": 18750,
+    "package_cm": [50, 25, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 50×25×15 cm y 2.0 kg brutos (Caja cartón). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Refuerzo metálico DEL IZQ",
+    "codes": ["SIN CODIGO"],
+    "weight_g": 2000,
+    "volume_cm3": 18750,
+    "package_cm": [50, 25, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 50×25×15 cm y 2.0 kg brutos (Caja cartón). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Refuerzo metalico interno Tapabarro DEL DER",
+    "codes": ["5322303"],
+    "weight_g": 2000,
+    "volume_cm3": 22500,
+    "package_cm": [60, 25, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 60×25×15 cm y 2.0 kg brutos (Caja cartón chica). Base: Estimación. Soporte estampado. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Refuerzo metalico interno Tapabarro DEL IZQ",
+    "codes": ["5322303"],
+    "weight_g": 2000,
+    "volume_cm3": 22500,
+    "package_cm": [60, 25, 15],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 60×25×15 cm y 2.0 kg brutos (Caja cartón chica). Base: Estimación. Soporte estampado. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Refuerzo metalico Parachoque Del",
     "codes": ["B004155"],
     "weight_g": 10000,
@@ -812,42 +1092,52 @@
   {
     "name": "Rodamiento de maza DEL DER",
     "codes": ["B013621"],
-    "weight_g": 3500,
-    "volume_cm3": 1500,
-    "package_cm": [10, 10, 15],
+    "weight_g": 2500,
+    "volume_cm3": 4800,
+    "package_cm": [20, 20, 12],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/WJeRNywbEYhf/China-Wholesale-Auto-Spare-Parts-Car-Part-Suspension-Parts-Front-Wheel-Hub-Bearing-for-Toyota-Corolla-Levin-RAV4-43550-02050.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Maza con rodamiento delantera de Toyota Corolla. Ficha: \"Wholesale Auto Spare Parts Car Part Suspension Parts Front Wheel Hub Bearing for Toyota Corolla Levin RAV4 43550-02050 - Toyota and Autopart\". Paquete por unidad 10×10×15 cm y 3.5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R44: Rodamiento maza DI-SOLIK E130310J-G0105 (Dongfeng E70) (Alibaba 1601047991334, no visible, no visible kg)",
+    "note": "Bulto de 20×20×12 cm y 2.5 kg brutos (Caja individual). Base: Análogo + E70 exacto (sin datos). Existe rodamiento del. E70 exacto (E130310J-G0105, Alibaba). Maza tipo buje ~1,5–2,5 kg."
   },
   {
     "name": "Rodamiento de maza DEL IZQ",
     "codes": ["B013621"],
-    "weight_g": 3500,
-    "volume_cm3": 1500,
-    "package_cm": [10, 10, 15],
+    "weight_g": 2500,
+    "volume_cm3": 4800,
+    "package_cm": [20, 20, 12],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/WJeRNywbEYhf/China-Wholesale-Auto-Spare-Parts-Car-Part-Suspension-Parts-Front-Wheel-Hub-Bearing-for-Toyota-Corolla-Levin-RAV4-43550-02050.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Maza con rodamiento delantera de Toyota Corolla. Ficha: \"Wholesale Auto Spare Parts Car Part Suspension Parts Front Wheel Hub Bearing for Toyota Corolla Levin RAV4 43550-02050 - Toyota and Autopart\". Paquete por unidad 10×10×15 cm y 3.5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R44: Rodamiento maza DI-SOLIK E130310J-G0105 (Dongfeng E70) (Alibaba 1601047991334, no visible, no visible kg)",
+    "note": "Bulto de 20×20×12 cm y 2.5 kg brutos (Caja individual). Base: Análogo + E70 exacto (sin datos). Existe rodamiento del. E70 exacto (E130310J-G0105, Alibaba). Maza tipo buje ~1,5–2,5 kg."
   },
   {
     "name": "Rodamiento de maza TRAS DER",
     "codes": ["B013546"],
-    "weight_g": 3500,
-    "volume_cm3": 1500,
-    "package_cm": [15, 10, 10],
+    "weight_g": 3800,
+    "volume_cm3": 7260,
+    "package_cm": [22, 22, 15],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/ymupZfQUVYWz/China-Wholesale-Auto-Spare-Parts-Auto-Parts-Car-Accessories-Car-Part-Suspension-Parts-Wheel-Hub-for-Toyota-Prius-Corolla-Altis-Zze122-43502-12140.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Maza de rueda de Toyota Corolla. Ficha: \"Wholesale Auto Spare Parts Auto-Parts Car Accessories Car Part Suspension Parts Wheel Hub for Toyota Prius Corolla Altis Zze122 43502-12140 \". Paquete por unidad 15×10×10 cm y 3.5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R45: Maza trasera E240310J-G0101 (Dongfeng E70) (Made-in-China, —, 3,3 kg)",
+    "note": "Bulto de 22×22×15 cm y 3.8 kg brutos (Caja individual). Base: E70 exacto. Maza trasera E70 exacta (E240310J-G0101, Made-in-China): 3,3 kg."
   },
   {
     "name": "Rodamiento de maza TRAS IZQ",
     "codes": ["B013546"],
-    "weight_g": 3500,
-    "volume_cm3": 1500,
-    "package_cm": [15, 10, 10],
+    "weight_g": 3800,
+    "volume_cm3": 7260,
+    "package_cm": [22, 22, 15],
     "status": "seller_listing",
-    "source": "https://chanshinautoparts.en.made-in-china.com/product/ymupZfQUVYWz/China-Wholesale-Auto-Spare-Parts-Auto-Parts-Car-Accessories-Car-Part-Suspension-Parts-Wheel-Hub-for-Toyota-Prius-Corolla-Altis-Zze122-43502-12140.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Maza de rueda de Toyota Corolla. Ficha: \"Wholesale Auto Spare Parts Auto-Parts Car Accessories Car Part Suspension Parts Wheel Hub for Toyota Prius Corolla Altis Zze122 43502-12140 \". Paquete por unidad 15×10×10 cm y 3.5 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza B. Referencias: R45: Maza trasera E240310J-G0101 (Dongfeng E70) (Made-in-China, —, 3,3 kg)",
+    "note": "Bulto de 22×22×15 cm y 3.8 kg brutos (Caja individual). Base: E70 exacto. Maza trasera E70 exacta (E240310J-G0101, Made-in-China): 3,3 kg."
+  },
+  {
+    "name": "Sensores de acercamiento TRAS",
+    "codes": ["B016341"],
+    "weight_g": 200,
+    "volume_cm3": 1200,
+    "package_cm": [15, 10, 8],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 15×10×8 cm y 0.2 kg brutos (Caja chica). Base: Estimación. Confirmar si es 1 sensor o kit. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Sistema Sensor de freno DEL DER",
@@ -900,14 +1190,34 @@
     "note": "Pieza equivalente, no del E70: Soporte de transmisión de Toyota. El valor anterior (18 kg) estaba copiado de la caja reductora completa. Ficha: \"Engine Mount Auto Parts 12372-36080 Transmission Mount Support Engine Mounting for Toyota Harrier - Engine Mounting and Engine Mount\". Paquete por unidad 27×20×24 cm y 2.6 kg brutos según el vendedor."
   },
   {
+    "name": "Soporte metalico superior Optico DER",
+    "codes": ["5227402"],
+    "weight_g": 1000,
+    "volume_cm3": 12000,
+    "package_cm": [40, 25, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×25×12 cm y 1.0 kg brutos (Caja cartón chica). Base: Estimación. Soporte estampado pequeño. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Soporte metalico superior Optico IZQ",
+    "codes": ["5227305"],
+    "weight_g": 1000,
+    "volume_cm3": 12000,
+    "package_cm": [40, 25, 12],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 40×25×12 cm y 1.0 kg brutos (Caja cartón chica). Base: Estimación. Soporte estampado pequeño. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
     "name": "Tapa cubre radiador inferior",
     "codes": ["6101501"],
-    "weight_g": 3200,
-    "volume_cm3": 180000,
-    "package_cm": [150, 80, 15],
+    "weight_g": 2500,
+    "volume_cm3": 43200,
+    "package_cm": [90, 40, 12],
     "status": "seller_listing",
-    "source": "https://changzhoudingfeng.en.made-in-china.com/product/drRpuWNlnTkw/China-Auto-Parts-Engine-Cover-for-Toyota-Corolla-2020-USA-51451-12120-.html (consultado 2026-09-25)",
-    "note": "Pieza equivalente, no del E70: Tapa inferior de motor de Toyota Corolla 2020; conservador para la tapa inferior del radiador. Ficha: \"Auto Parts Engine Cover for Toyota Corolla 2020 USA (51451-12120) - Engine Cover and Toyota Corolla\". Paquete por unidad 150×80×15 cm y 3.2 kg brutos según el vendedor."
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R49: Cubre-carter 3D / protector inferior (Alibaba / Made-in-China, 160×100×14 / 100×45×14, 7,5 / 7 kg)",
+    "note": "Bulto de 90×40×12 cm y 2.5 kg brutos (Caja cartón plana). Base: Estimación."
   },
   {
     "name": "Tapa cubremotor inferior",
@@ -918,6 +1228,16 @@
     "status": "seller_listing",
     "source": "https://changzhoudingfeng.en.made-in-china.com/product/drRpuWNlnTkw/China-Auto-Parts-Engine-Cover-for-Toyota-Corolla-2020-USA-51451-12120-.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Tapa inferior de motor de Toyota Corolla 2020; conservador para la tapa inferior del radiador. Ficha: \"Auto Parts Engine Cover for Toyota Corolla 2020 USA (51451-12120) - Engine Cover and Toyota Corolla\". Paquete por unidad 150×80×15 cm y 3.2 kg brutos según el vendedor."
+  },
+  {
+    "name": "Tapa DEL Gancho de remolque",
+    "codes": ["61051079Z"],
+    "weight_g": 100,
+    "volume_cm3": 720,
+    "package_cm": [12, 10, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 12×10×6 cm y 0.1 kg brutos (Bolsa). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
   },
   {
     "name": "Tapabarro DER DEL",
@@ -950,6 +1270,46 @@
     "note": "Pieza equivalente, no del E70: Tapiz interior de tapa trasera (Tesla, única ficha con medidas por unidad). Ficha: \"PERFECTRAIL 1090455-00-I Factory Auto Car Body Parts Trunk Lid Liftgate Trim Cover Panel for Tesla Model 3 - Trunk Lid Trim Panel and Car Tr\". Paquete por unidad 90×60×20 cm y 3 kg brutos según el vendedor."
   },
   {
+    "name": "Tapiz interior puerta DEL DER",
+    "codes": ["B019653"],
+    "weight_g": 5000,
+    "volume_cm3": 110250,
+    "package_cm": [105, 70, 15],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R25: Tapiz de puerta (mediana n=7) (Made-in-China, 100×25×10, 3 kg)",
+    "note": "Bulto de 105×70×15 cm y 5.0 kg brutos (Caja cartón plana + film). Base: Análogo. Refs Made-in-China de tapiz: mediana 100×25×10/3 kg (incompleto). Tapiz delantero de sedán ~95×65."
+  },
+  {
+    "name": "Tapiz interior puerta DEL IZQ",
+    "codes": ["B019652"],
+    "weight_g": 5000,
+    "volume_cm3": 110250,
+    "package_cm": [105, 70, 15],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R25: Tapiz de puerta (mediana n=7) (Made-in-China, 100×25×10, 3 kg)",
+    "note": "Bulto de 105×70×15 cm y 5.0 kg brutos (Caja cartón plana + film). Base: Análogo. Refs Made-in-China de tapiz: mediana 100×25×10/3 kg (incompleto). Tapiz delantero de sedán ~95×65."
+  },
+  {
+    "name": "Tapiz interior puerta TRAS DER",
+    "codes": ["B019656"],
+    "weight_g": 4500,
+    "volume_cm3": 92625,
+    "package_cm": [95, 65, 15],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R25: Tapiz de puerta (mediana n=7) (Made-in-China, 100×25×10, 3 kg)",
+    "note": "Bulto de 95×65×15 cm y 4.5 kg brutos (Caja cartón plana + film). Base: Análogo."
+  },
+  {
+    "name": "Tapiz interior puerta TRAS IZQ",
+    "codes": ["B019655"],
+    "weight_g": 4500,
+    "volume_cm3": 92625,
+    "package_cm": [95, 65, 15],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R25: Tapiz de puerta (mediana n=7) (Made-in-China, 100×25×10, 3 kg)",
+    "note": "Bulto de 95×65×15 cm y 4.5 kg brutos (Caja cartón plana + film). Base: Análogo."
+  },
+  {
     "name": "Terminal Exterior DEL DER",
     "codes": ["B013771"],
     "weight_g": 1000,
@@ -968,6 +1328,86 @@
     "status": "seller_listing",
     "source": "https://psqautoparts.en.made-in-china.com/product/KUirjpgJqThY/China-High-Quality-Outer-Ball-Joint-for-Dongfeng-Fengshen-E70-Car-Steering-Auto-Part-Assembly-Tie-Rod-End.html (consultado 2026-09-25)",
     "note": "Pieza equivalente, no del E70: Terminal de dirección exterior para Dongfeng Fengshen E70: ficha del mismo vehículo. Ficha: \"High-Quality Outer Ball Joint for Dongfeng Fengshen E70 Car Steering Auto Part Assembly Tie Rod End - Durable Joint and Suspension System Jo\". Paquete por unidad 20×4×5 cm y 1 kg brutos según el vendedor."
+  },
+  {
+    "name": "Terminal Interior DEL DER (Axial)",
+    "codes": ["B003197"],
+    "weight_g": 800,
+    "volume_cm3": 3200,
+    "package_cm": [40, 10, 8],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 40×10×8 cm y 0.8 kg brutos (Caja cartón). Base: Análogo. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Terminal Interior DEL IZQ (Axial)",
+    "codes": ["B003196"],
+    "weight_g": 800,
+    "volume_cm3": 3200,
+    "package_cm": [40, 10, 8],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C",
+    "note": "Bulto de 40×10×8 cm y 0.8 kg brutos (Caja cartón). Base: Análogo. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Terminales enchufes puerto carga, incl. cableado",
+    "codes": ["B018324"],
+    "weight_g": 6000,
+    "volume_cm3": 39375,
+    "package_cm": [45, 35, 25],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R56: Conector de carga GB/T (mediana n=2) (Made-in-China, 30×30×25, 10 kg)",
+    "note": "Bulto de 45×35×25 cm y 6.0 kg brutos (Caja cartón (cableado enrollado)). Base: Análogo. Conector GB/T AC+DC con cables de potencia DC. Ref Made-in-China 30×30×25 / 10 kg."
+  },
+  {
+    "name": "Varilla Capo",
+    "codes": ["5287201"],
+    "weight_g": 300,
+    "volume_cm3": 3360,
+    "package_cm": [70, 8, 6],
+    "status": "estimated",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza D",
+    "note": "Bulto de 70×8×6 cm y 0.3 kg brutos (Caja/tubo cartón). Base: Estimación. Estimación sin referencia directa: confirmar con el proveedor."
+  },
+  {
+    "name": "Vidrio puerta DEL DER",
+    "codes": ["5742003"],
+    "weight_g": 7500,
+    "volume_cm3": 78000,
+    "package_cm": [100, 65, 12],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R60: Vidrio de puerta del. izq. (conjunto) (Alibaba, 100×50×50, 10,0 kg)",
+    "note": "Bulto de 100×65×12 cm y 7.5 kg brutos (Caja cartón + terciado). Base: Análogo. Vidrio templado de puerta ~4 kg neto. Ref vidrio de puerta con marco: 100×50×50/10 kg."
+  },
+  {
+    "name": "Vidrio puerta DEL IZQ",
+    "codes": ["5741003"],
+    "weight_g": 7500,
+    "volume_cm3": 78000,
+    "package_cm": [100, 65, 12],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R60: Vidrio de puerta del. izq. (conjunto) (Alibaba, 100×50×50, 10,0 kg)",
+    "note": "Bulto de 100×65×12 cm y 7.5 kg brutos (Caja cartón + terciado). Base: Análogo. Vidrio templado de puerta ~4 kg neto. Ref vidrio de puerta con marco: 100×50×50/10 kg."
+  },
+  {
+    "name": "Vidrio puerta TRAS DER",
+    "codes": ["5842003"],
+    "weight_g": 6500,
+    "volume_cm3": 64800,
+    "package_cm": [90, 60, 12],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R60: Vidrio de puerta del. izq. (conjunto) (Alibaba, 100×50×50, 10,0 kg)",
+    "note": "Bulto de 90×60×12 cm y 6.5 kg brutos (Caja cartón + terciado). Base: Análogo."
+  },
+  {
+    "name": "Vidrio puerta TRAS IZQ",
+    "codes": ["5841003"],
+    "weight_g": 6500,
+    "volume_cm3": 64800,
+    "package_cm": [90, 60, 12],
+    "status": "seller_listing",
+    "source": "Planilla \"Dongfeng_E70_Embalajes_y_Pesos.xlsx\" (investigación de otro agente de IA, 2026-09-25), confianza C. Referencias: R60: Vidrio de puerta del. izq. (conjunto) (Alibaba, 100×50×50, 10,0 kg)",
+    "note": "Bulto de 90×60×12 cm y 6.5 kg brutos (Caja cartón + terciado). Base: Análogo."
   },
   {
     "name": "Zocalo plastico costado DER",

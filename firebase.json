@@ -11,10 +11,16 @@
       { "source": "/quotes/*/index.txt", "destination": "/quotes/_/index.txt" },
       { "source": "/suppliers/*/index.txt", "destination": "/suppliers/_/index.txt" },
       { "source": "/vehicles/*/index.txt", "destination": "/vehicles/_/index.txt" },
+      { "source": "/clients/*/index.txt", "destination": "/clients/_/index.txt" },
+      { "source": "/client-orders/*/index.txt", "destination": "/client-orders/_/index.txt" },
+      { "source": "/purchase-orders/*/index.txt", "destination": "/purchase-orders/_/index.txt" },
       { "source": "/parts/**", "destination": "/parts/_/index.html" },
       { "source": "/quotes/**", "destination": "/quotes/_/index.html" },
       { "source": "/suppliers/**", "destination": "/suppliers/_/index.html" },
-      { "source": "/vehicles/**", "destination": "/vehicles/_/index.html" }
+      { "source": "/vehicles/**", "destination": "/vehicles/_/index.html" },
+      { "source": "/clients/**", "destination": "/clients/_/index.html" },
+      { "source": "/client-orders/**", "destination": "/client-orders/_/index.html" },
+      { "source": "/purchase-orders/**", "destination": "/purchase-orders/_/index.html" }
     ],
     "headers": [
       {

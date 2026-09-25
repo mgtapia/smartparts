@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
-import ClientsPage from '@features/clients/ClientsPage'
+import OrdersPage from '@features/orders/OrdersPage'
 
 export default function Page() {
   return (
     <Suspense>
-      <ClientsPage />
+      <OrdersPage />
     </Suspense>
   )
 }

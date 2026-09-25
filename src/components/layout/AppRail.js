@@ -19,6 +19,7 @@ import SellIcon from '@mui/icons-material/Sell'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import TuneIcon from '@mui/icons-material/Tune'
 import ChecklistIcon from '@mui/icons-material/Checklist'
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import { RAIL_ITEMS } from '@constants/routes'
 import { RAIL_WIDTH } from '@constants/layout'
 
@@ -40,6 +41,7 @@ const ICONS = {
   UploadFile: UploadFileIcon,
   Tune: TuneIcon,
   Checklist: ChecklistIcon,
+  ReceiptLong: ReceiptLongIcon,
 }
 
 /**

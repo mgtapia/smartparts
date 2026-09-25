@@ -25,6 +25,7 @@ import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostParametersDialog from './components/CostParametersDialog'
 import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
 import QualityChips from './components/QualityChips'
+import QuotationOrigin from './components/QuotationOrigin'
 import VehicleLinks from '@features/vehicles/components/VehicleLinks'
 import {
   COLUMN_CHOICES,
@@ -261,16 +262,7 @@ export default function QuotationDetailPage() {
             </UncertainValue>
           </InfoField>
           <InfoField label="Origen" onEdit={() => setEditing(FIELDS.place)}>
-            <UncertainValue
-              verified={quotation.incotermPlaceConfirmed && quotation.incotermPlaces.length > 0}
-              reason={
-                quotation.incotermPlaces.length > 0
-                  ? 'Lugar del Incoterm sin confirmar'
-                  : 'La cotización no indica el lugar del Incoterm'
-              }
-            >
-              {quotation.incotermPlaces.join(', ') || 'Sin lugar'}
-            </UncertainValue>
+            <QuotationOrigin quotation={quotation} />
           </InfoField>
           <InfoField label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
             <UncertainValue

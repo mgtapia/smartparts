@@ -18,6 +18,7 @@ import { useUrlTab } from '@hooks/useUrlTab'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
 import QualityChips from './components/QualityChips'
+import QuotationOrigin from './components/QuotationOrigin'
 import { MATRIX_HELP, supplierLabel } from './constants'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
 import { useQuotationsData } from './hooks/useQuotations'
@@ -198,20 +199,8 @@ const LIST_COLUMNS = [
     id: 'origin',
     label: 'Origen',
     width: 110,
-    tooltip: 'Lugar nombrado del Incoterm (ej. EXW Guangzhou).',
-    render: (q) =>
-      q.incotermPlaces.length > 0 ? (
-        <UncertainValue
-          verified={q.incotermPlaceConfirmed}
-          reason="Lugar del Incoterm sin confirmar"
-        >
-          {q.incotermPlaces.join(', ')}
-        </UncertainValue>
-      ) : (
-        <UncertainValue verified={false} reason="La cotización no indica el lugar del Incoterm">
-          Sin lugar
-        </UncertainValue>
-      ),
+    tooltip: 'Lugar del Incoterm si la cotización lo nombra; si no, la ubicación del proveedor.',
+    render: (q) => <QuotationOrigin quotation={q} />,
   },
   {
     id: 'currency',

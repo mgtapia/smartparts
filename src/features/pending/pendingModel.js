@@ -42,7 +42,10 @@ export function buildPending({
 
   // ---- Conteos base de lo que falta confirmar ----
   const unconfirmedTerms = quoteRows.filter(
-    (q) => !q.incotermConfirmed || !q.incotermPlaceConfirmed,
+    // El origen sale del lugar del Incoterm o, si falta, de la ubicación confirmada del proveedor.
+    (q) =>
+      !q.incotermConfirmed ||
+      !(q.incotermPlaceConfirmed || factOf(q.supplier, 'location').confirmed),
   )
   const unconfirmedCurrency = quoteRows.filter((q) => !q.currencyConfirmed)
   const unconfirmedFormF = activeSuppliers.filter((s) => !factOf(s, 'formF').confirmed)

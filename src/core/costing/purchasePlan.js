@@ -33,6 +33,7 @@ const MAX_SUPPLIERS_TO_COMBINE = 12
  * @property {number} qty
  * @property {number} weightG      Peso bruto por unidad.
  * @property {number} volumeCm3    Volumen por unidad.
+ * @property {import('./types').DgProfile} [dgProfile]  Mercancía peligrosa: sin oferta en el modo donde no puede ir.
  * @property {number|null} [baselineUsdMicro]  Precio unitario que paga hoy el cliente, en USD.
  */
 
@@ -401,6 +402,7 @@ export function planPurchase({ parts, offers, suppliers, mode, assumptions, para
       originFallback: supplier.originFallback,
       formF: supplier.formF,
       weightG: part.weightG,
+      dgProfile: part.dgProfile,
       volumeCm3: part.volumeCm3,
       logisticsConfirmed: false,
       mode,

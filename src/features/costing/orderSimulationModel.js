@@ -47,6 +47,7 @@ export function buildPlanInputs({ lines, vehicleId, quality, quantitySource, set
           partId: part.id,
           qty,
           weightG: part.weightG,
+          dgProfile: part.dgProfile ?? undefined,
           volumeCm3: part.volumeCm3,
           baselineUsdMicro: baselineUsdMicro(part, fx),
         })

@@ -15,6 +15,7 @@ import { computeCosting } from './engine'
 import { airChargeableWeight, seaLclChargeableRt } from './weights'
 import { chargeModeKey, unitShipmentCharges } from './shipmentCharges'
 import { containerShare, isFclMode } from './containers'
+import { checkDgBlockers } from './dgBlocker'
 
 const EXW = 'EXW'
 const FOB_EQUIVALENT_INCOTERMS = ['FOB', 'FCA']
@@ -115,6 +116,7 @@ function inlandFallback(inlandAt, priceUsdMicro, fallback) {
  *   proveedor: se cobra el mayor entre `bp` del precio y el transporte con `averageKm` (promedio
  *   de los proveedores con dato). Sin esto, falta de distancia es un bloqueo.
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
+ * @param {import('./types').DgProfile} [input.dgProfile]  Mercancía peligrosa: si no puede ir en el modo elegido, no se costea.
  * @param {number} input.weightG          Peso bruto por unidad (g).
  * @param {number} input.volumeCm3        Volumen por unidad (cm³).
  * @param {boolean} input.logisticsConfirmed  ¿Peso/volumen confirmados?
@@ -138,6 +140,11 @@ export function computeUnitCost(input) {
       components: [],
       landedNetUsdMicro: null,
     }
+  }
+
+  const dg = checkDgBlockers(mode, input.dgProfile)
+  if (dg.blockers.length > 0) {
+    return { blockers: dg.blockers, components: [], landedNetUsdMicro: null }
   }
 
   const isAir = mode === 'air' || mode === 'courier'

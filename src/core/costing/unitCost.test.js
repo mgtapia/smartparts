@@ -275,3 +275,24 @@ describe('computeUnitCost', () => {
     )
   })
 })
+
+describe('computeUnitCost con mercancía peligrosa', () => {
+  const battery = {
+    unNumber: 'UN3480',
+    hazardClass: '9',
+    un383: { status: 'provided' },
+    airTransport: { allowed: false, reasonNote: 'Prohibido en avión de pasajeros' },
+    seaTransport: { allowed: true, lclAccepted: true },
+  }
+
+  it('por aire devuelve bloqueo, no un costo', () => {
+    const r = computeUnitCost({ ...base, mode: 'air', dgProfile: battery })
+    expect(r.landedNetUsdMicro).toBeNull()
+    expect(r.blockers[0]).toContain('UN3480')
+  })
+
+  it('por mar, donde sí puede ir, se costea normal', () => {
+    const r = computeUnitCost({ ...base, dgProfile: battery })
+    expect(r.landedNetUsdMicro).toBeGreaterThan(0)
+  })
+})

@@ -16,6 +16,7 @@ import SimulationResults, { supplierNameFrom } from '@features/costing/component
 import { useClientOrderSimulation } from '../hooks/useClientOrderSimulation'
 import { partLabel } from '../constants'
 import CreatePurchaseOrdersDialog from './CreatePurchaseOrdersDialog'
+import CustomScenarioEditor from '@features/costing/components/CustomScenarioEditor'
 
 const HELP = [
   'Simula la compra de lo que falta de esta OC: las unidades de cada línea que ninguna compra vigente cubre todavía. La cantidad decide el tramo de precio del proveedor.',
@@ -89,6 +90,12 @@ export default function ClientOrderSimulation({ order, purchaseOrders, partsById
           </UncertainValue>
         </Box>
       ) : null}
+
+      <CustomScenarioEditor
+        custom={sim.custom}
+        onChange={sim.setCustom}
+        suppliers={sim.supplierOptions}
+      />
 
       {simulation ? (
         <SimulationResults

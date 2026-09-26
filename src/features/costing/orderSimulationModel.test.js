@@ -10,6 +10,8 @@ import {
 import {
   buildPlanInputs,
   cheapestScenario,
+  CUSTOM_SHIPPING,
+  DEFAULT_CUSTOM,
   defaultQuantity,
   QUALITY,
   QUANTITY_SOURCE,
@@ -204,5 +206,64 @@ describe('escenarios por estrategia', () => {
     const fast = computeUnitCost({ ...args, summaryOnly: true })
     expect(fast.landedNetUsdMicro).toBe(full.landedNetUsdMicro)
     expect(fast.components).toEqual([])
+  })
+})
+
+describe('escenario personalizado', () => {
+  const s2 = (id, partId, amount) => ({
+    ...quote(id, partId),
+    supplierId: 's2',
+    supplier: { id: 's2', facts: {} },
+    price: { amount, currency: 'USD', scale: 2 },
+  })
+  const customLines = [
+    { part: pA, quote: quote('qa', 'a') },
+    { part: pB, quote: quote('qb', 'b') },
+    { part: pA, quote: s2('qa2', 'a', 500) },
+    { part: pB, quote: s2('qb2', 'b', 400) },
+  ]
+  const run = (custom) =>
+    simulateStrategies({
+      ...base,
+      lines: customLines,
+      custom,
+      assumptions: { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES },
+      params: DEFAULT_PARAM_SET,
+    })
+  const custom = (r) => r.scenarios.find((s) => s.id === 'custom')
+
+  it('sin configuración no agrega el escenario', () => {
+    expect(run(undefined).scenarios.some((s) => s.id === 'custom')).toBe(false)
+  })
+
+  it('con la configuración inicial coincide con Más económico · Marítimo', () => {
+    const r = run(DEFAULT_CUSTOM)
+    const cheapest = r.scenarios.find((s) => s.id === 'cheapest-sea')
+    expect(custom(r).cost.totals.landedNet).toBe(cheapest.cost.totals.landedNet)
+    expect(custom(r).label).toBe('Personalizado · Más económico')
+  })
+
+  it('el formato de envío fijado se respeta', () => {
+    const r = run({ ...DEFAULT_CUSTOM, shipping: CUSTOM_SHIPPING.FCL_40 })
+    expect(custom(r).mode).toBe('sea_fcl_40hq')
+    expect(run({ ...DEFAULT_CUSTOM, shipping: CUSTOM_SHIPPING.AIR }).scenarios.at(-1).mode).toBe(
+      'air',
+    )
+  })
+
+  it('solo usa los proveedores incluidos', () => {
+    const r = run({ ...DEFAULT_CUSTOM, supplierIds: ['s2'] })
+    expect(custom(r).supplierIds).toEqual(['s2'])
+  })
+
+  it('excluir al proveedor más barato no baja el costo', () => {
+    const all = custom(run(DEFAULT_CUSTOM)).cost.totals.landedNet
+    const onlyS2 = custom(run({ ...DEFAULT_CUSTOM, supplierIds: ['s2'] })).cost.totals.landedNet
+    expect(onlyS2).toBeGreaterThanOrEqual(all)
+  })
+
+  it('con un proveedor que no cotiza lo pedido queda con repuestos sin cubrir', () => {
+    const r = run({ ...DEFAULT_CUSTOM, quality: QUALITY.AFM })
+    expect(custom(r)?.coveredPartIds ?? []).toEqual([])
   })
 })

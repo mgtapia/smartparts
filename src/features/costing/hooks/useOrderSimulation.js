@@ -1,9 +1,11 @@
 import { useDeferredValue, useMemo, useState } from 'react'
+import { supplierLabel } from '@features/quotes/constants'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
 import {
+  DEFAULT_CUSTOM,
   cheapestScenario,
   QUANTITY_SOURCE,
   simulateStrategies,
@@ -32,6 +34,9 @@ export function useOrderSimulation() {
   const deferredOverrides = useDeferredValue(quantityOverrides)
   const [chosenVehicleId, setVehicleId] = useState(null)
   const [scenarioId, setScenarioId] = useState(null)
+  // Escenario personalizado (calidad, envío y proveedores), guardado en el navegador.
+  const [custom, setCustom] = usePersistentState('order.custom.v1', DEFAULT_CUSTOM)
+  const deferredCustom = useDeferredValue(custom)
 
   // Vehículos con cotizaciones, del que tiene más repuestos cotizados al que menos.
   const vehicles = useMemo(() => {
@@ -51,6 +56,7 @@ export function useOrderSimulation() {
   const simulation = useMemo(() => {
     if (!vehicleId) return null
     return simulateStrategies({
+      custom: deferredCustom,
       lines,
       vehicleId,
       quantitySource,
@@ -60,7 +66,7 @@ export function useOrderSimulation() {
       params: DEFAULT_PARAM_SET,
       fx: DEFAULT_FX,
     })
-  }, [lines, vehicleId, quantitySource, deferredOverrides, settingsFor, rates])
+  }, [lines, vehicleId, quantitySource, deferredOverrides, deferredCustom, settingsFor, rates])
 
   const quantityRows = useMemo(
     () => vehicleQuantityRows({ lines, vehicleId, quantitySource, quantityOverrides }),
@@ -77,6 +83,20 @@ export function useOrderSimulation() {
   const resetQuantities = () => setQuantityOverrides({})
 
   // Sin elección, el escenario más barato entre los que cubren más repuestos.
+  // Proveedores con cotizaciones, para elegir cuáles incluir en el escenario personalizado.
+  const supplierOptions = useMemo(
+    () =>
+      [
+        ...new Map(
+          lines.map((l) => [
+            l.quote.supplierId,
+            supplierLabel(l.quote.supplier, l.quote.supplierId),
+          ]),
+        ),
+      ].map(([id, name]) => ({ id, name })),
+    [lines],
+  )
+
   const scenario =
     simulation?.scenarios.find((s) => s.id === scenarioId) ??
     (simulation ? cheapestScenario(simulation.scenarios) : null)
@@ -102,6 +122,9 @@ export function useOrderSimulation() {
     quantitySource,
     setQuantitySource,
     simulation,
+    custom,
+    setCustom,
+    supplierOptions,
     quantityRows,
     setQuantity,
     resetQuantities,

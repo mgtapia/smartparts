@@ -21,6 +21,7 @@ import {
   LOGISTICS_STATUS_LABELS_ES,
   PART_TYPE,
 } from '@constants/enums'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import { PART_IMAGE_SIZE } from '@constants/layout'
 import { getPartImage, updatePartCustoms } from '@libs/repos/partsRepo'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
@@ -295,9 +296,7 @@ export default function PartDetailPage() {
               sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
-            <Typography variant="caption" color="error.main">
-              Sin imagen
-            </Typography>
+            <ImageOutlinedIcon aria-label="Sin imagen" sx={{ color: 'text.disabled' }} />
           )}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>

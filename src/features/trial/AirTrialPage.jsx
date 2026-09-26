@@ -199,7 +199,6 @@ export default function AirTrialPage() {
     <ContentWidth>
       <PageHeader
         title="Compra de prueba"
-        meta={`${data.partCount} repuestos, vía aérea.`}
         actions={<InfoNote title="Cómo se calcula" paragraphs={headerNotes} />}
       />
 

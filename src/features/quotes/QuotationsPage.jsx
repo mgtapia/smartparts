@@ -31,7 +31,6 @@ import {
 } from './partMatrix'
 
 const VIEWS = { LIST: 'proveedor', MATRIX: 'repuesto' }
-const countSuppliers = (list) => new Set(list.map((q) => q.supplierId)).size
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationsPage() {
@@ -81,14 +80,7 @@ export default function QuotationsPage() {
 
   return (
     <ContentWidth>
-      <PageHeader
-        title="Cotizaciones"
-        meta={
-          isMatrix
-            ? `${matrix.rows.length} repuestos cotizados${quality === QUALITY_FILTERS.ANY ? '' : ` · ${matrix.rows.filter((r) => r.offers > 0).length} con oferta ${quality === QUALITY_FILTERS.OEM ? 'OEM' : 'AFM'}`}.`
-            : `${countSuppliers(filteredQuotations)} de ${countSuppliers(quotations)} proveedores.`
-        }
-      />
+      <PageHeader title="Cotizaciones" />
 
       <ViewTabs
         value={view}

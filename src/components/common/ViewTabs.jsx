@@ -15,11 +15,10 @@ import { RADIUS } from '@constants/colors'
  * @param {string} props.value
  * @param {(value: string) => void} props.onChange
  * @param {Array<{ value: string, label: string }>} props.tabs
- * @param {Object} [props.sx]  Ajustes de posición (ej. `mb: 0` para alinearlas con el título).
  */
-export default function ViewTabs({ value, onChange, tabs, sx }) {
+export default function ViewTabs({ value, onChange, tabs }) {
   return (
-    <Box role="tablist" sx={{ display: 'flex', gap: 1, mb: 2, ...sx }}>
+    <Box role="tablist" sx={{ display: 'flex', gap: 1, mb: 2 }}>
       {tabs.map((t) => {
         const active = t.value === value
         return (

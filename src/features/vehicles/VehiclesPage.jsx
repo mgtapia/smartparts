@@ -57,7 +57,7 @@ export default function VehiclesPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Vehículos" meta={`${rows.length} vehículos.`} />
+      <PageHeader title="Vehículos" />
       <ListTable
         columns={COLUMNS}
         rows={rows}

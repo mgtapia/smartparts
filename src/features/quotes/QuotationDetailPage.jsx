@@ -249,7 +249,6 @@ export default function QuotationDetailPage() {
         back={{ href: '/quotes', label: 'Cotizaciones' }}
         title={supplierLabel(supplier, 'Proveedor')}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
-        meta={`${rows.length} de ${quotation.lineCount} SKU.`}
         actions={
           <ToolbarButton label="Ficha del proveedor" href={`/suppliers/${quotation.supplierId}`} />
         }

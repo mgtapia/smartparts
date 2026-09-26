@@ -193,8 +193,6 @@ function CatalogRow({ r, isColumnVisible, currency }) {
 export default function CatalogPage() {
   const {
     rows,
-    filteredCount,
-    totalCount,
     page,
     setPage,
     pageCount,
@@ -268,7 +266,7 @@ export default function CatalogPage() {
 
   return (
     <ContentWidth full>
-      <PageHeader title="Catálogo" meta={`${filteredCount} de ${totalCount} repuestos.`} />
+      <PageHeader title="Catálogo" />
 
       {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
           columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).

@@ -128,7 +128,7 @@ export default function SuppliersPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Proveedores" meta={`${filtered.length} de ${rows.length} proveedores.`} />
+      <PageHeader title="Proveedores" />
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
         <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por proveedor…" />
       </Box>

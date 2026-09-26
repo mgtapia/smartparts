@@ -12,8 +12,8 @@ import { toUsdMicro } from '@libs/fx'
 import { computeUnitCost } from '@core/costing/unitCost'
 
 /** Márgenes sobre el costo puesto en Chile, en basis points. */
-export const MARGINS_BP = [0, 1000, 1500, 2000]
-export const FOCUS_MARGIN_BP = 1500
+export const MARGINS_BP = Array.from({ length: 9 }, (_, i) => i * 500)
+export const FOCUS_MARGIN_BP = 2000
 export const TOP_DEMAND = 30
 /** Un precio es atípico si pasa de 3 veces la mediana entre proveedores o queda bajo un tercio. */
 const OUTLIER_FACTOR = 3

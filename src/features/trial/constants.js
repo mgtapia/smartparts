@@ -24,7 +24,9 @@ export const CASE_LABELS_ES = {
   C: 'Volar solo el top de demanda',
 }
 
-export const MARGIN_OPTIONS = [0, 1000, 1500, 2000].map((bp) => ({
+import { MARGINS_BP } from './airTrialModel'
+
+export const MARGIN_OPTIONS = MARGINS_BP.map((bp) => ({
   value: bp,
   label: `Margen ${bp / 100} %`,
 }))

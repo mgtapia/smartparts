@@ -27,6 +27,7 @@ export default function PlanCard({ option, data, marginBp }) {
   const supplier = data.suppliers.find((s) => s.id === best.supplierIds[0])
   const price = priceWithMargin(best.costClp, marginBp)
   const saving = best.savingsClp[marginBp]
+  const profit = price - best.costClp
   const abbrs = (ids) => ids.map((id) => data.suppliers.find((s) => s.id === id).abbr).join(' + ')
   const gainPair = plan.pair
     ? plan.pair.savingsClp[FOCUS_MARGIN_BP] - best.savingsClp[FOCUS_MARGIN_BP]
@@ -67,8 +68,16 @@ export default function PlanCard({ option, data, marginBp }) {
           <InfoField label="Precio al cliente" hint="Costo en Chile más el margen elegido.">
             {red(formatClp(price))}
           </InfoField>
-          <InfoField label="Ahorro del cliente">
-            {red(`${formatClp(saving)} · ${Math.round((saving / best.baselineClp) * 100)} %`)}
+          <InfoField label="Ganancia nuestra" hint="Precio al cliente menos el costo en Chile.">
+            {red(formatClp(profit))}
+          </InfoField>
+        </InfoGrid>
+      </Box>
+      <Box sx={{ mt: 2 }}>
+        <InfoGrid columns={3}>
+          <InfoField label="Ahorro del cliente">{red(formatClp(saving))}</InfoField>
+          <InfoField label="Ahorro sobre lo de hoy">
+            {red(`${Math.round((saving / best.baselineClp) * 100)} %`)}
           </InfoField>
         </InfoGrid>
       </Box>

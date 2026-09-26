@@ -89,6 +89,10 @@ const bpOf = (value, bp) => Math.round((value * bp) / 10000)
 /** Micros de USD a centavos, para mostrar. */
 const centsOf = (micro) => Math.round(micro / 10_000)
 
+/** Los gastos por embarque no van en el costo de la pieza: se cobran una vez por proveedor. */
+const PER_SHIPMENT_NOTE =
+  'Los gastos que se cobran por embarque (despacho, manipulación, guía aérea) no se reparten entre piezas: se cobran una sola vez por proveedor, en el paso 2.'
+
 /** Componentes del costo unitario que se suman (el resto, como CIF, son subtotales). */
 const UNIT_LINES = [
   'price',
@@ -349,7 +353,10 @@ export function buildAirTrial({
           a.offer.landedUsdMicro,
           UNIT_LINES.map((code) => a.offer.components.find((c) => c.code === code)).map((c) => ({
             labelEs: c.labelEs,
-            formulaEs: c.formulaEs,
+            formulaEs:
+              c.code === 'originCharges'
+                ? PER_SHIPMENT_NOTE
+                : c.formulaEs + (c.code === 'localCosts' ? ` ${PER_SHIPMENT_NOTE}` : ''),
             usdMicro: c.usdMicro,
           })),
         ),

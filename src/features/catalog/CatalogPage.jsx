@@ -21,6 +21,7 @@ import Link from 'next/link'
 import UncertainValue from '@components/common/UncertainValue'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
@@ -178,13 +179,15 @@ function CatalogRow({ r, isColumnVisible, currency }) {
         </Box>
       ) : null}
       {isColumnVisible('supplier') ? (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ flex: `0 1 ${COL_WIDTH.supplier}px` }}
-        >
-          {r.pvpSupplier ?? '—'}
-        </Typography>
+        <Box sx={{ flex: `0 1 ${COL_WIDTH.supplier}px`, minWidth: 0, display: 'flex' }}>
+          {r.pvpSupplier ? (
+            <Pill label={r.pvpSupplier} />
+          ) : (
+            <Typography variant="caption" color="text.secondary">
+              —
+            </Typography>
+          )}
+        </Box>
       ) : null}
     </Box>
   )

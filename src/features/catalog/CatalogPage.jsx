@@ -461,24 +461,22 @@ export default function CatalogPage() {
                 </Typography>
               ) : null}
               {isColumnVisible('baseline') ? (
-                <Tooltip title="Precio neto que paga hoy el cliente en Chile — no es un precio FOB ni CIF de sourcing.">
-                  <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    sx={{
-                      flex: `0 1 ${COL_WIDTH.baseline}px`,
-                      lineHeight: 1,
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      textAlign: 'right',
-                      cursor: 'help',
-                    }}
-                  >
-                    Precio REF
-                  </Typography>
-                </Tooltip>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.baseline}px`,
+                    lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right',
+                    cursor: 'help',
+                  }}
+                >
+                  Precio REF
+                </Typography>
               ) : null}
               {isColumnVisible('pvp') ? (
                 <Tooltip title="Nuestro precio de venta: mejor costo original puesto en Chile más 30 % de margen.">

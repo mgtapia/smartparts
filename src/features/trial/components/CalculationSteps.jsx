@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import SectionTitle from '@components/common/SectionTitle'
 import ListTable from '@components/common/ListTable'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import UncertainValue from '@components/common/UncertainValue'
@@ -20,15 +21,7 @@ const priceWithMargin = (cost, bp) => Math.round((cost * (10000 + bp)) / 10000)
 function Step({ number, title, note, children }) {
   return (
     <Card sx={{ p: 2 }}>
-      <Typography variant="overline" color="text.secondary">
-        Paso {number}
-      </Typography>
-      <Typography variant="h6" sx={{ mb: 0.5 }}>
-        {title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        {note}
-      </Typography>
+      <SectionTitle title={`${number}. ${title}`} description={note} />
       {children}
     </Card>
   )

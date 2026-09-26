@@ -5,6 +5,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionTitle from '@components/common/SectionTitle'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import InfoNote from '@components/common/InfoNote'
@@ -251,15 +252,17 @@ export default function AirTrialPage() {
       {tab === TRIAL_TABS.SENSITIVITY ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Box>
-            <Typography variant="overline" color="text.secondary">
-              Qué volar
-            </Typography>
+            <SectionTitle
+              title="Qué volar"
+              description="Cuánto ahorra el cliente según qué repuestos se compran por avión."
+            />
             <ListTable columns={casesColumns} rows={CASES} getRowKey={(c) => c} />
           </Box>
           <Box>
-            <Typography variant="overline" color="text.secondary">
-              Recomendación
-            </Typography>
+            <SectionTitle
+              title="Recomendación"
+              description="Si cambia un supuesto, qué proveedor conviene y cuánto se ahorra."
+            />
             <ListTable columns={scenarioColumns} rows={data.scenarios} getRowKey={(sc) => sc.key} />
           </Box>
         </Box>

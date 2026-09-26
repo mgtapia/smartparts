@@ -233,11 +233,7 @@ export default function PartDetailPage() {
 
   return (
     <ContentWidth>
-      <PageHeader
-        back={{ href: '/catalog', label: 'Catálogo' }}
-        title={part.nameEs}
-        description={`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''} · ${part.category?.labelEs ?? part.categoryPath}`}
-      />
+      <PageHeader back={{ href: '/catalog', label: 'Catálogo' }} title={part.nameEs} />
 
       {editing === EDIT.CODE ? (
         <CodeDialog part={part} onSaved={saved} onClose={closeEditor} />
@@ -315,18 +311,12 @@ export default function PartDetailPage() {
                 </Box>
               </UncertainValue>
             </InfoField>
+            <InfoField label="Vehículo">
+              {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
+            </InfoField>
+            <InfoField label="Categoría">{part.category?.labelEs ?? part.categoryPath}</InfoField>
             <InfoField label="Precio referencia">
               <MoneyValue money={part.baselinePrice} />
-            </InfoField>
-            <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
-              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
-                {formatKg(part.weightG)}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Volumen" onEdit={() => setEditing(EDIT.LOGISTICS)}>
-              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
-                {formatVolume(part.volumeCm3)}
-              </UncertainValue>
             </InfoField>
             {bestCostField(PART_TYPE.ORIGINAL, 'Mejor costo OEM')}
             {bestCostField(PART_TYPE.ALTERNATIVE, 'Mejor costo AFM')}

@@ -17,6 +17,7 @@ import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { CLIENT_ORDER_STATUS_LABELS_ES, PURCHASE_ORDER_STATUS_LABELS_ES } from '@constants/enums'
+import { makeMatcher } from '@libs/textSearch'
 import { supplierLabel } from '@features/quotes/constants'
 import ClientOrderDialog from './components/ClientOrderDialog'
 import PurchaseOrderDialog from './components/PurchaseOrderDialog'
@@ -35,7 +36,6 @@ import {
   orderLabel,
 } from './constants'
 
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 const CLIENT_COLUMNS = [
   { id: 'number', label: 'OC', render: ({ order }) => orderLabel(order) },
@@ -154,36 +154,41 @@ export default function OrdersPage() {
   const [status, setStatus] = useState(ALL_STATUSES)
   const [creating, setCreating] = useState(false)
   const isClients = view === ORDER_VIEWS.CLIENTS
-  const term = normalize(search.trim())
 
   const changeView = (next) => {
     setView(next)
     setStatus(ALL_STATUSES)
   }
 
-  const clientRows = useMemo(
-    () =>
-      data.clientOrderRows.filter(
-        ({ order, client }) =>
-          (status === ALL_STATUSES || order.status === status) &&
-          (!term ||
-            normalize(order.number).includes(term) ||
-            normalize(client?.name).includes(term)),
-      ),
-    [data.clientOrderRows, status, term],
-  )
-  const purchaseRows = useMemo(
-    () =>
-      data.purchaseOrderRows.filter(
-        ({ order, supplier }) =>
-          (status === ALL_STATUSES || order.status === status) &&
-          (!term ||
-            normalize(order.number).includes(term) ||
-            normalize(supplier?.name).includes(term) ||
-            normalize(supplier?.alias).includes(term)),
-      ),
-    [data.purchaseOrderRows, status, term],
-  )
+  const clientRows = useMemo(() => {
+    const matches = makeMatcher(search)
+    return data.clientOrderRows.filter(
+      ({ order, client }) =>
+        (status === ALL_STATUSES || order.status === status) &&
+        matches([
+          order.number,
+          orderLabel(order),
+          client?.name,
+          client?.rut,
+          CLIENT_ORDER_STATUS_LABELS_ES[order.status],
+        ]),
+    )
+  }, [data.clientOrderRows, status, search])
+  const purchaseRows = useMemo(() => {
+    const matches = makeMatcher(search)
+    return data.purchaseOrderRows.filter(
+      ({ order, supplier }) =>
+        (status === ALL_STATUSES || order.status === status) &&
+        matches([
+          order.number,
+          orderLabel(order),
+          supplier?.alias,
+          supplier?.name,
+          order.incoterm,
+          PURCHASE_ORDER_STATUS_LABELS_ES[order.status],
+        ]),
+    )
+  }, [data.purchaseOrderRows, status, search])
 
   if (data.loading) {
     return (
@@ -236,7 +241,7 @@ export default function OrdersPage() {
         <ToolbarSearch
           value={search}
           onChange={setSearch}
-          placeholder={isClients ? 'Buscar por OC o cliente…' : 'Buscar por OC o proveedor…'}
+          placeholder={isClients ? 'Buscar por OC, cliente, RUT o estado…' : 'Buscar por OC, proveedor, incoterm o estado…'}
         />
         <ToolbarSelectBox
           label="Estado"

@@ -12,10 +12,11 @@ import { supplierLabel } from '@features/quotes/constants'
 import { QUALITY } from '@features/overview/analyticsModel'
 import { useAnalytics } from '@features/overview/hooks/useAnalytics'
 import { formatBp } from '@libs/percent'
+import { makeMatcher } from '@libs/textSearch'
+import { SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
 import FactCell from './components/FactCell'
 import { useSuppliers } from './hooks/useSuppliers'
 
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 const COLUMNS = [
   {
@@ -98,18 +99,18 @@ export default function SuppliersPage() {
     return supplierRows.map((r) => ({ ...r, stats: stats.get(r.supplier.id) ?? null }))
   }, [supplierRows, analytics.data])
   const [search, setSearch] = useState('')
-  const term = normalize(search.trim())
 
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        ({ supplier }) =>
-          !term ||
-          normalize(supplier.name).includes(term) ||
-          normalize(supplier.alias).includes(term),
-      ),
-    [rows, term],
-  )
+  const filtered = useMemo(() => {
+    const matches = makeMatcher(search)
+    return rows.filter(({ supplier }) =>
+      matches([
+        supplier.alias,
+        supplier.name,
+        SUPPLIER_TYPE_LABELS_ES[supplier.facts?.type?.value],
+        supplier.facts?.formF?.value === 'yes' ? 'formulario f' : null,
+      ]),
+    )
+  }, [rows, search])
 
   if (loading) {
     return (
@@ -130,7 +131,7 @@ export default function SuppliersPage() {
     <ContentWidth>
       <PageHeader title="Proveedores" />
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por proveedor…" />
+        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por proveedor, alias o tipo…" />
       </Box>
       <ListTable
         columns={COLUMNS}

@@ -1,4 +1,5 @@
 import { supplierLabel } from '@features/quotes/constants'
+import { matchScore, matchesParsed, normalizeText, parseQuery } from '@libs/textSearch'
 import { orderLabel } from '@features/orders/constants'
 
 /** Cantidad máxima de resultados por grupo en el buscador global. */
@@ -12,9 +13,7 @@ export const SEARCH_GROUP = {
   PURCHASE_ORDER: 'OC a proveedores',
 }
 
-/** Minúsculas y sin tildes, para que "camara" encuentre "Cámara". */
-export const normalizeText = (s) =>
-  (s ?? '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+export { normalizeText }
 
 /**
  * Elementos buscables a partir de los datos ya cargados. Cada uno lleva su
@@ -37,6 +36,7 @@ export function buildSearchItems({
       label,
       detail,
       haystack: normalizeText([label, detail, ...extra].filter(Boolean).join(' ')),
+      fields: [label, detail, ...extra],
     })
 
   parts.forEach((p) =>
@@ -72,16 +72,27 @@ export function buildSearchItems({
  * orden de `SEARCH_GROUP` y con un tope por grupo. Consulta vacía → nada.
  */
 export function searchItems(items, query) {
-  const words = normalizeText(query).split(/\s+/).filter(Boolean)
-  if (words.length === 0) return []
+  const parsed = parseQuery(query)
+  if (!parsed) return []
   const counts = new Map()
   const groupOrder = Object.values(SEARCH_GROUP)
-  return items
-    .filter((item) => words.every((w) => item.haystack.includes(w)))
-    .filter((item) => {
-      const n = counts.get(item.group) ?? 0
-      counts.set(item.group, n + 1)
-      return n < RESULTS_PER_GROUP
-    })
-    .sort((a, b) => groupOrder.indexOf(a.group) - groupOrder.indexOf(b.group))
+  return (
+    items
+      .filter((item) =>
+        matchesParsed(parsed, {
+          text: item.haystack,
+          compact: item.haystack.replace(/[^a-z0-9]/g, ''),
+        }),
+      )
+      // Dentro de cada grupo, primero las mejores coincidencias (código o nombre exacto).
+      .map((item) => ({ item, score: matchScore(query, item.fields) }))
+      .sort((a, b) => b.score - a.score)
+      .map(({ item }) => item)
+      .filter((item) => {
+        const n = counts.get(item.group) ?? 0
+        counts.set(item.group, n + 1)
+        return n < RESULTS_PER_GROUP
+      })
+      .sort((a, b) => groupOrder.indexOf(a.group) - groupOrder.indexOf(b.group))
+  )
 }

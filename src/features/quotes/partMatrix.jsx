@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { makeMatcher } from '@libs/textSearch'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { MoneyFromMicros } from '@components/common/MoneyValue'
@@ -33,7 +34,6 @@ export const shortReason = (reason) => {
 }
 
 const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 /**
  * Valor de una línea según la métrica elegida:
@@ -75,15 +75,20 @@ function valueOf(line, metric, costCtx) {
  * con la columna "Ofertas" en rojo — así se ve qué falta.
  */
 export function buildMatrix(lines, metric, term, quality, costCtx) {
+  const matches = makeMatcher(term)
   const accepts = (type) => quality === QUALITY_FILTERS.ANY || type === quality
   const supplierMap = new Map()
   const byPart = new Map()
 
   for (const line of lines) {
     if (
-      term &&
-      !normalize(line.part.nameEs).includes(term) &&
-      !normalize(line.part.code).includes(term)
+      !matches([
+        line.part.nameEs,
+        line.part.nameEn,
+        line.part.code,
+        line.part.categoryLabel,
+        line.part.position,
+      ])
     ) {
       continue
     }

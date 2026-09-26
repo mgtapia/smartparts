@@ -17,6 +17,7 @@ import { ListPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import CostParametersDialog from './components/CostParametersDialog'
 import InfoNote from '@components/common/InfoNote'
+import { makeMatcher } from '@libs/textSearch'
 import QualityChips from './components/QualityChips'
 import QuotationOrigin from './components/QuotationOrigin'
 import { MATRIX_HELP, MODE_OPTIONS, supplierLabel } from './constants'
@@ -31,7 +32,6 @@ import {
 } from './partMatrix'
 
 const VIEWS = { LIST: 'proveedor', MATRIX: 'repuesto' }
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationsPage() {
   const { lines, quotations, loading, error } = useQuotationsData()
@@ -42,20 +42,21 @@ export default function QuotationsPage() {
   const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
   const [search, setSearch] = useState('')
 
-  const term = normalize(search.trim())
+  const term = search
   const isMatrix = view === VIEWS.MATRIX
 
-  const filteredQuotations = useMemo(
-    () =>
-      quotations.filter(
-        (q) =>
-          !term ||
-          normalize(q.supplier?.name).includes(term) ||
-          normalize(q.supplier?.alias).includes(term) ||
-          normalize(q.sourceFile).includes(term),
-      ),
-    [quotations, term],
-  )
+  const filteredQuotations = useMemo(() => {
+    const matches = makeMatcher(term)
+    return quotations.filter((q) =>
+      matches([
+        q.supplier?.alias,
+        q.supplier?.name,
+        q.sourceFile,
+        ...(q.incoterms ?? []),
+        ...(q.currencies ?? []),
+      ]),
+    )
+  }, [quotations, term])
 
   const matrix = useMemo(
     () =>
@@ -97,7 +98,7 @@ export default function QuotationsPage() {
         <ToolbarSearch
           value={search}
           onChange={setSearch}
-          placeholder={isMatrix ? 'Buscar por repuesto o código…' : 'Buscar por proveedor…'}
+          placeholder={isMatrix ? 'Buscar por repuesto, código o categoría…' : 'Buscar por proveedor, archivo o incoterm…'}
         />
         {isMatrix ? (
           <>

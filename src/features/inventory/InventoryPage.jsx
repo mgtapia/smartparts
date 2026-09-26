@@ -6,6 +6,7 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
+import { makeMatcher } from '@libs/textSearch'
 import ToolbarButton from '@components/common/ToolbarButton'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
@@ -13,7 +14,6 @@ import { formatIsoDate } from '@libs/dates'
 import InventoryDialog from './components/InventoryDialog'
 import { useInventory } from './hooks/useInventory'
 
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 const COLUMNS = [
   { id: 'part', label: 'Repuesto', render: ({ entry, part }) => part?.nameEs ?? entry.partId },
@@ -48,20 +48,20 @@ export default function InventoryPage() {
   const [search, setSearch] = useState('')
   // `true` = agregar; una fila = editar ese stock.
   const [dialog, setDialog] = useState(null)
-  const term = normalize(search.trim())
 
   const usedPartIds = useMemo(() => new Set(rows.map(({ entry }) => entry.partId)), [rows])
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        ({ part, entry }) =>
-          !term ||
-          normalize(part?.nameEs ?? entry.partId).includes(term) ||
-          normalize(part?.code).includes(term) ||
-          normalize(entry.location).includes(term),
-      ),
-    [rows, term],
-  )
+  const filtered = useMemo(() => {
+    const matches = makeMatcher(search)
+    return rows.filter(({ part, entry }) =>
+      matches([
+        part?.nameEs ?? entry.partId,
+        part?.nameEn,
+        part?.code,
+        entry.location,
+        part?.categoryPath?.split('__')[0],
+      ]),
+    )
+  }, [rows, search])
 
   if (loading) {
     return (

@@ -7,6 +7,7 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
+import { makeMatcher } from '@libs/textSearch'
 import ToolbarButton from '@components/common/ToolbarButton'
 import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
@@ -15,7 +16,6 @@ import { formatIsoDate } from '@libs/dates'
 import ClientDialog from './components/ClientDialog'
 import { useClients } from './hooks/useClients'
 
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 const COLUMNS = [
   { id: 'name', label: 'Cliente', render: ({ client }) => client.name },
@@ -65,16 +65,19 @@ export default function ClientsPage() {
   const { rows, loading, error, reload } = useClients()
   const [search, setSearch] = useState('')
   const [creating, setCreating] = useState(false)
-  const term = normalize(search.trim())
 
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        ({ client }) =>
-          !term || normalize(client.name).includes(term) || normalize(client.rut).includes(term),
-      ),
-    [rows, term],
-  )
+  const filtered = useMemo(() => {
+    const matches = makeMatcher(search)
+    return rows.filter(({ client }) =>
+      matches([
+        client.name,
+        client.rut,
+        client.contact?.person,
+        client.contact?.email,
+        client.contact?.phone,
+      ]),
+    )
+  }, [rows, search])
 
   if (loading) {
     return (
@@ -104,7 +107,7 @@ export default function ClientsPage() {
         />
       ) : null}
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por nombre o RUT…" />
+        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por nombre, RUT o contacto…" />
         <ToolbarButton label="Nuevo cliente" onClick={() => setCreating(true)} />
       </Box>
       <ListTable

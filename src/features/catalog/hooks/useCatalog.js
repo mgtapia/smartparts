@@ -5,6 +5,7 @@ import { listParts } from '@libs/repos/partsRepo'
 import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
+import { makeMatcher } from '@libs/textSearch'
 import { DEFAULT_FX } from '@mocks/costParams'
 import { CODE_STATUS } from '@constants/enums'
 import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
@@ -125,6 +126,9 @@ export function useCatalog() {
       return {
         id: p.id,
         nameEs: p.nameEs,
+        nameEn: p.nameEn,
+        nameZh: p.nameZh,
+        position: p.position,
         // Nivel superior — el mismo que usa el filtro, para que la fila
         // calce visualmente con la categoría elegida.
         categoryLabel: getCategory(categoryTopPath)?.labelEs || categoryTopPath,
@@ -156,7 +160,7 @@ export function useCatalog() {
   const categories = getTopLevelCategories()
 
   const filteredRows = useMemo(() => {
-    const term = search.trim().toLowerCase()
+    const matches = makeMatcher(search)
     const [minPrice, maxPrice] = effectivePriceRange
     const filtered = allRows.filter((r) => {
       if (categoryFilters.length && !categoryFilters.includes(r.categoryTopPath)) return false
@@ -164,14 +168,17 @@ export function useCatalog() {
       if (codeStatusFilters.length && !codeStatusFilters.includes(r.codeStatus)) return false
       const baselineUsd = r.baselinePriceUsd.amount / 100
       if (baselineUsd < minPrice || baselineUsd > maxPrice) return false
-      if (
-        term &&
-        !r.nameEs.toLowerCase().includes(term) &&
-        !(r.code || '').toLowerCase().includes(term)
-      ) {
-        return false
-      }
-      return true
+      return matches([
+        r.nameEs,
+        r.nameEn,
+        r.nameZh,
+        r.code,
+        r.categoryLabel,
+        r.vehicleLabel,
+        r.position,
+        r.pvpAir.supplier,
+        r.pvpSea.supplier,
+      ])
     })
     return filtered.sort((a, b) => compareRows(a, b, sortField, sortDir))
   }, [

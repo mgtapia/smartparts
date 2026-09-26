@@ -300,7 +300,7 @@ export default function CatalogPage() {
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
         <TextField
           size="small"
-          placeholder="Buscar por nombre o código…"
+          placeholder="Buscar por nombre, código, categoría, vehículo o proveedor…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}

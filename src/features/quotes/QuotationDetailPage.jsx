@@ -15,6 +15,7 @@ import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import InfoNote from '@components/common/InfoNote'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
+import { makeMatcher } from '@libs/textSearch'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
 import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
@@ -62,7 +63,6 @@ const FIELDS = {
   },
 }
 
-const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationDetailPage() {
   const quotationId = useRouteId()
@@ -86,21 +86,27 @@ export default function QuotationDetailPage() {
   const [editing, setEditing] = useState(null)
 
   const quotation = quotations.find((q) => q.id === quotationId) ?? null
-  const term = normalize(search.trim())
 
   const rows = useMemo(() => {
     if (!quotation) return []
+    const matches = makeMatcher(search)
     return quotation.lines
-      .filter(
-        ({ part }) =>
-          !term || normalize(part.nameEs).includes(term) || normalize(part.code).includes(term),
+      .filter(({ part, quote }) =>
+        matches([
+          part.nameEs,
+          part.nameEn,
+          part.code,
+          part.category?.labelEs,
+          part.position,
+          quote?.partType === 'original' ? 'OEM' : 'AFM',
+        ]),
       )
       .map((line) => {
         const cost = costLine(line, { mode, rates, params, settingsFor })
         return { line, cost, byCode: Object.fromEntries(cost.components.map((c) => [c.code, c])) }
       })
       .sort((a, b) => a.line.part.nameEs.localeCompare(b.line.part.nameEs, 'es'))
-  }, [quotation, term, mode, rates, params, settingsFor])
+  }, [quotation, search, mode, rates, params, settingsFor])
 
   if (loading) {
     return (
@@ -317,7 +323,7 @@ export default function QuotationDetailPage() {
         <ToolbarSearch
           value={search}
           onChange={setSearch}
-          placeholder="Buscar por pieza o código…"
+          placeholder="Buscar por pieza, código, categoría o calidad…"
         />
         <ToolbarSelectBox
           label="Modo de transporte"

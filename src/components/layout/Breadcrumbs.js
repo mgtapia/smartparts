@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { findNavTrail } from '@constants/routes'
 
 /** Migas de pan: Grupo / Módulo (/ Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
@@ -18,7 +19,11 @@ export default function Breadcrumbs() {
   ].filter(Boolean)
 
   return (
-    <MuiBreadcrumbs aria-label="Ubicación" sx={{ mt: 0.5 }}>
+    <MuiBreadcrumbs
+      aria-label="Ubicación"
+      separator={<ChevronRightIcon sx={{ fontSize: 16 }} />}
+      sx={{ mt: 0.5 }}
+    >
       {crumbs.map((c) =>
         c.href ? (
           <Typography

@@ -266,7 +266,7 @@ export default function CatalogPage() {
 
   return (
     <ContentWidth full>
-      <PageHeader title="Catálogo" />
+      <PageHeader title="Repuestos" />
 
       {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
           columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).

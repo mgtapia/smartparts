@@ -44,7 +44,11 @@ export default function SectionTabs() {
           color: 'text.primary',
           whiteSpace: 'nowrap',
           '&:not(:first-of-type)': { borderLeft: 1, borderLeftColor: 'divider' },
-          '&.Mui-selected': { bgcolor: 'action.selected', fontWeight: 600 },
+          '&.Mui-selected': {
+            bgcolor: 'action.selected',
+            fontWeight: 600,
+            boxShadow: (t) => `inset 0 0 0 1px ${t.palette.text.disabled}`,
+          },
         },
       }}
     >

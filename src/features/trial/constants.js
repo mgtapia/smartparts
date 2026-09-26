@@ -1,6 +1,7 @@
 export const TRIAL_TABS = {
   PLAN: 'recomendacion',
   PURCHASE: 'compra',
+  CALCULATION: 'calculo',
   SENSITIVITY: 'sensibilidad',
   EXCLUDED: 'fuera',
   ANOMALIES: 'anomalias',
@@ -10,6 +11,7 @@ export const TRIAL_TABS = {
 export const TAB_LIST = [
   { value: TRIAL_TABS.PLAN, label: 'Recomendación' },
   { value: TRIAL_TABS.PURCHASE, label: 'Lista de compra' },
+  { value: TRIAL_TABS.CALCULATION, label: 'Cálculo' },
   { value: TRIAL_TABS.SENSITIVITY, label: 'Sensibilidad' },
   { value: TRIAL_TABS.EXCLUDED, label: 'Fuera del pedido' },
   { value: TRIAL_TABS.ANOMALIES, label: 'Anomalías' },
@@ -41,3 +43,7 @@ export const formatClpMillions = (n) => {
   const m = n / 1_000_000
   return `${m < 0 ? '−' : ''}CLP ${Math.abs(m).toLocaleString('es-CL', { maximumFractionDigits: 1 })} M`
 }
+
+/** Dólares en texto desde centavos enteros. */
+export const formatUsdCents = (cents) =>
+  `US$ ${(cents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

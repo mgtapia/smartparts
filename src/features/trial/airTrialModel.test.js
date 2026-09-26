@@ -72,6 +72,22 @@ describe('buildAirTrial', () => {
     expect(base(r, 'original').single[0].supplierIds).toEqual(['s2'])
   })
 
+  it('el detalle del cálculo suma exacto: por repuesto y por pedido', () => {
+    const r = run([
+      part('p1', 'Óptico DEL DER', [quote('s1', 3000), quote('s2', 2000)]),
+      part('p2', 'Bandeja DEL DER', [quote('s1', 3000), quote('s2', 2500)]),
+    ])
+    const best = base(r, 'original').single[0]
+    for (const i of best.items) {
+      const total = i.breakdown.reduce((sum, l) => sum + l.cents, 0)
+      expect(total).toBe(Math.round(i.unitCostUsdMicro / 10_000))
+    }
+    const calc = best.calc[0]
+    expect(calc.lines.reduce((sum, l) => sum + l.cents, 0)).toBe(
+      Math.round(calc.totalUsdMicro / 10_000),
+    )
+  })
+
   it('saca de la recomendación un precio atípico y lo informa como anomalía', () => {
     const parts = [
       part('p1', 'Caja Reductora', [quote('s1', 100_000), quote('s2', 4100), quote('s3', 110_000)]),

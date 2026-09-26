@@ -29,6 +29,7 @@ import { useAirTrial } from './hooks/useAirTrial'
 import PlanCard from './components/PlanCard'
 import AnomalyGroups from './components/AnomalyGroups'
 import ExcludedParts from './components/ExcludedParts'
+import CalculationSteps from './components/CalculationSteps'
 
 const red = (children) => (
   <UncertainValue verified={false} reason={RED_REASON}>
@@ -224,6 +225,26 @@ export default function AirTrialPage() {
             getRowKey={(i) => i.partId}
             emptyText="Sin repuestos."
           />
+        </Box>
+      ) : null}
+
+      {tab === TRIAL_TABS.CALCULATION ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <ToolbarSelectBox
+              label="Opción"
+              value={option}
+              onChange={setOption}
+              options={OPTION_OPTIONS}
+            />
+            <ToolbarSelectBox
+              label="Margen sobre el costo en Chile"
+              value={marginBp}
+              onChange={setMarginBp}
+              options={MARGIN_OPTIONS}
+            />
+          </Box>
+          <CalculationSteps key={option} option={option} data={data} marginBp={marginBp} />
         </Box>
       ) : null}
 

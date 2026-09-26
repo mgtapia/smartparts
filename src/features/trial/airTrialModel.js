@@ -7,7 +7,7 @@
 // mínimos) no se prorratean entre piezas: se cobran una vez por cada proveedor que se use, porque
 // cada proveedor despacha por separado. Todo el dinero va en micros de USD (enteros) y el CLP se
 // obtiene solo para mostrar.
-import { money } from '@libs/money'
+import { money, allocateByWeights } from '@libs/money'
 import { toUsdMicro } from '@libs/fx'
 import { computeUnitCost } from '@core/costing/unitCost'
 
@@ -86,6 +86,34 @@ const median = (nums) => {
   return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2)
 }
 const bpOf = (value, bp) => Math.round((value * bp) / 10000)
+/** Micros de USD a centavos, para mostrar. */
+const centsOf = (micro) => Math.round(micro / 10_000)
+
+/** Componentes del costo unitario que se suman (el resto, como CIF, son subtotales). */
+const UNIT_LINES = [
+  'price',
+  'origin',
+  'originCharges',
+  'freight',
+  'insurance',
+  'duty',
+  'localCosts',
+  'bank',
+]
+
+/**
+ * Reparte un total en centavos entre las líneas que lo suman, con el método del resto mayor: lo
+ * que se muestra suma exacto, sin diferencia de redondeo.
+ * @param {number} totalMicro
+ * @param {Array<{ labelEs: string, usdMicro: number }>} lines
+ */
+function withCents(totalMicro, lines) {
+  const cents = allocateByWeights(
+    centsOf(totalMicro),
+    lines.map((l) => l.usdMicro),
+  )
+  return lines.map((l, i) => ({ ...l, cents: cents[i] }))
+}
 
 /** Sigla para las tablas: "XM Industrial" ya empieza con la suya; el resto, las iniciales. */
 export function supplierAbbr(name) {
@@ -188,6 +216,7 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         qualityConfirmed: q.partTypeConfirmed,
         priceUsdMicro: usdMicro,
         landedUsdMicro: unit.landedNetUsdMicro, // sin gastos por embarque
+        components: unit.components,
         agentMicro: item('localCosts', 'customs_agent'),
         inlandMicro: item('origin', 'inland_china'),
         insuranceMicro: comp('insurance').usdMicro,
@@ -217,6 +246,9 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
     }
     let total = 0
     const perSupplier = []
+    const shipmentLines = airCharges
+      .filter(isShipmentFee)
+      .map((c) => ({ labelEs: c.labelEs, usdMicro: c.amountCents * 10_000 }))
     for (const [supplierId, g] of bySupplier) {
       // Los mínimos por embarque solo suman lo que falta para llegar al mínimo.
       const topUps =
@@ -225,7 +257,24 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         Math.max(0, insuranceMin - g.ins)
       const fixed = perShipmentMicro + topUps
       total += g.variable + fixed
-      perSupplier.push({ supplierId, variable: g.variable, fixed, kg: g.kg })
+      const topUpLines = [
+        ['Completar el mínimo del agente de aduanas', Math.max(0, agentMin - g.agent)],
+        ['Completar el mínimo del transporte en China', Math.max(0, inlandMin - g.inland)],
+        ['Completar la prima mínima del seguro', Math.max(0, insuranceMin - g.ins)],
+      ]
+        .filter(([, usdMicro]) => usdMicro > 0)
+        .map(([labelEs, usdMicro]) => ({ labelEs, usdMicro }))
+      perSupplier.push({
+        supplierId,
+        variable: g.variable,
+        fixed,
+        kg: g.kg,
+        lines: [
+          { labelEs: 'Costo de las piezas puestas en Chile', usdMicro: g.variable },
+          ...shipmentLines,
+          ...topUpLines,
+        ],
+      })
     }
     return { totalUsdMicro: total, perSupplier }
   }
@@ -265,6 +314,12 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         MARGINS_BP.map((m) => [m, baseline - bpOf(costClp, 10000 + m)]),
       ),
       estimatedQualityLines: assigned.filter((a) => !a.offer.qualityConfirmed).length,
+      calc: cost.perSupplier.map((x) => ({
+        supplierId: x.supplierId,
+        kg: Math.round(x.kg * 10) / 10,
+        totalUsdMicro: x.variable + x.fixed,
+        lines: withCents(x.variable + x.fixed, x.lines),
+      })),
       items: assigned.map((a) => ({
         partId: a.part.id,
         name: a.part.nameEs,
@@ -272,6 +327,16 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         quality: QUALITY_ES[a.offer.quality],
         qty: a.qty,
         unitCostClp: clpOf(a.offer.landedUsdMicro),
+        unitCostUsdMicro: a.offer.landedUsdMicro,
+        chargeableKg: Math.round(a.offer.chargeableKg * 1000) / 1000,
+        breakdown: withCents(
+          a.offer.landedUsdMicro,
+          UNIT_LINES.map((code) => a.offer.components.find((c) => c.code === code)).map((c) => ({
+            labelEs: c.labelEs,
+            formulaEs: c.formulaEs,
+            usdMicro: c.usdMicro,
+          })),
+        ),
         unitBaselineClp: baselineOf(a.part),
       })),
     }
@@ -495,7 +560,11 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
           .filter((r) => r.covered > 0)
           .sort((a, b) => b.savingsClp[FOCUS_MARGIN_BP] - a.savingsClp[FOCUS_MARGIN_BP])
         // El detalle por repuesto solo se guarda para lo que se compra; en el resto pesa de más.
-        if (!(caseKey === 'B' && scenario.key === 'base')) for (const r of results) delete r.items
+        if (!(caseKey === 'B' && scenario.key === 'base'))
+          for (const r of results) {
+            delete r.items
+            delete r.calc
+          }
         out[option][caseKey] = {
           parts: list.length,
           single: results.filter((r) => r.supplierIds.length === 1),

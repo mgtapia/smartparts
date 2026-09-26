@@ -108,7 +108,7 @@ export default function GlobalSearch() {
               input: {
                 ...params.slotProps?.input,
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position="start" sx={{ ml: 1.5 }}>
                     <SearchIcon fontSize="small" sx={{ color: 'rgba(255,255,255,0.65)' }} />
                   </InputAdornment>
                 ),

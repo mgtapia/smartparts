@@ -45,10 +45,10 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
             component="img"
             src="/assets/brand/logo-smartdeal-white.svg"
             alt="SmartDeal"
-            sx={{ height: 16, width: 'auto', display: 'block' }}
+            sx={{ height: 14.4, width: 'auto', display: 'block' }}
           />
         </Box>
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
           <GlobalSearch />
         </Box>
         {user ? (

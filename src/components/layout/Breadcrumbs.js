@@ -6,10 +6,11 @@ import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import { findNavTrail } from '@constants/routes'
 
-/** Migas de pan: Grupo / Módulo (/ Detalle en una ficha). Sin ruta en el menú no muestra nada. */
+/** Migas de pan: Grupo / Módulo (/ Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
 export default function Breadcrumbs() {
   const trail = findNavTrail(usePathname())
-  if (!trail) return null
+  // Sin grupo ni ficha es un módulo de primer nivel (Vista general): no hay ruta que mostrar.
+  if (!trail || (!trail.group && !trail.detail)) return null
   const crumbs = [
     trail.group ? { label: trail.group } : null,
     { label: trail.item.labelEs, href: trail.detail ? trail.item.path : null },
@@ -17,7 +18,7 @@ export default function Breadcrumbs() {
   ].filter(Boolean)
 
   return (
-    <MuiBreadcrumbs aria-label="Ubicación" sx={{ mb: 2 }}>
+    <MuiBreadcrumbs aria-label="Ubicación" sx={{ mt: 0.5 }}>
       {crumbs.map((c) =>
         c.href ? (
           <Typography

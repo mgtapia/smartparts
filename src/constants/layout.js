@@ -26,3 +26,5 @@ export function px(value) {
 export const VEHICLE_IMAGE_WIDTH = 120 // ancho de la imagen del vehículo en su ficha
 export const TOPBAR_HEIGHT = 56 // alto de la barra superior
 export const SEARCH_MAX_WIDTH = 640 // ancho máximo del buscador global de la barra superior
+export const CONTENT_GAP = 12 // separación entre la ventana de contenido y los bordes de la barra y el menú
+export const CONTENT_RADIUS = 16 // esquinas redondeadas de la ventana de contenido

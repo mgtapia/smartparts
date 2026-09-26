@@ -158,6 +158,9 @@ export function visibleNavEntries() {
   ).filter((entry) => (entry.children ? entry.children.length > 0 : entry.implemented))
 }
 
+/** Ruta a la que lleva una entrada del menú: la propia o, en un grupo, la de su primer módulo. */
+export const entryPath = (entry) => entry.path ?? entry.children[0].path
+
 /** ¿La ruta actual pertenece a este ítem (o a una ficha que se abre desde él)? */
 export function isNavItemActive(item, pathname) {
   return [item.path, ...(item.alsoActiveOn ?? [])].some((p) => pathname?.startsWith(p))
@@ -174,6 +177,7 @@ export function findNavTrail(pathname) {
       if (!isNavItemActive(item, pathname)) continue
       return {
         group: entry.children ? entry.labelEs : null,
+        siblings: entry.children ?? [],
         item,
         detail: !pathname.startsWith(item.path),
       }

@@ -7,7 +7,7 @@ export const POPOVER_TEXT_WIDTH = 360 // ancho máximo del texto en un popover i
 export const RAIL_WIDTH = 68
 export const RAIL_WIDTH_EXPANDED = 208
 export const IMAGE_PREVIEW_HEIGHT = 240 // alto máximo de la vista previa de una imagen en un modal
-export const PART_IMAGE_SIZE = 96 // lado de la miniatura del repuesto en su ficha
+export const PART_IMAGE_SIZE = 72 // lado de la miniatura del repuesto en su ficha
 
 export const GRID_GAP = 16
 export const SIDEBAR_GAP = 14

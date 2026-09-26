@@ -6,11 +6,23 @@ import { CONTENT_GAP, CONTENT_RADIUS, px } from '@constants/layout'
 import AppRail from './AppRail'
 import AppTopBar from './AppTopBar'
 
-// Barra de desplazamiento fina y sin flechas (estándar: Chrome ≥ 121 ignora los
-// pseudo-elementos ::-webkit-scrollbar cuando estas propiedades están definidas).
+// Barra de desplazamiento dentro de la ventana redondeada: pulgar fino y redondeado,
+// sin flechas ni pista, separado de las esquinas. Chrome ignora ::-webkit-scrollbar si
+// están definidas las propiedades estándar, así que estas solo van donde no hay -webkit.
 const scrollbarSx = {
-  scrollbarWidth: 'thin',
-  scrollbarColor: (theme) => `${theme.palette.text.disabled} transparent`,
+  '&::-webkit-scrollbar': { width: 14 },
+  '&::-webkit-scrollbar-track': { background: 'transparent', marginBlock: px(CONTENT_RADIUS) },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: (theme) => theme.palette.text.disabled,
+    borderRadius: px(7),
+    border: '4px solid transparent',
+    backgroundClip: 'padding-box',
+  },
+  '&::-webkit-scrollbar-button': { display: 'none' },
+  '@supports not selector(::-webkit-scrollbar)': {
+    scrollbarWidth: 'thin',
+    scrollbarColor: (theme) => `${theme.palette.text.disabled} transparent`,
+  },
 }
 
 export default function AppShell({ children }) {
@@ -35,6 +47,7 @@ export default function AppShell({ children }) {
             flex: 1,
             minWidth: 0,
             display: 'flex',
+            mt: px(CONTENT_GAP),
             mr: px(CONTENT_GAP),
             mb: px(CONTENT_GAP),
             borderRadius: px(CONTENT_RADIUS),

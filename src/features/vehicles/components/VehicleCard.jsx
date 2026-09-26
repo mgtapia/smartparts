@@ -7,7 +7,6 @@ import { vehicleLabel } from '../constants'
 const STATS = [
   { label: 'Repuestos', value: (r) => r.parts.length },
   { label: 'Cotizados', value: (r) => r.quotedIds.size },
-  { label: 'Proveedores', value: (r) => r.supplierCount },
 ]
 
 /** Tarjeta de un vehículo en la grilla: imagen, nombre, origen y año, y conteos clave. */

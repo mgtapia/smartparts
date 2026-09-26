@@ -5,11 +5,7 @@ import { DEFAULT_UNIT_COST_ASSUMPTIONS, SHIPMENT_CHARGES } from '@mocks/costPara
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
 
-const { defaultOriginCostBp, generalDutyBp, ftaDutyBp, ...DEFAULT_RATES } =
-  DEFAULT_UNIT_COST_ASSUMPTIONS
-// Los aranceles son parámetros globales fijos (no dependen del proveedor ni de la
-// cotización): no se editan ni se guardan por navegador.
-const FIXED_DUTIES = { generalDutyBp, ftaDutyBp }
+const { defaultOriginCostBp, ...DEFAULT_RATES } = DEFAULT_UNIT_COST_ASSUMPTIONS
 // Lo que se edita en pantalla y se guarda por navegador: tarifas, tamaño del embarque y gastos.
 const EDITABLE_KEYS = Object.keys(DEFAULT_RATES)
 
@@ -64,7 +60,7 @@ export function useCostAssumptions() {
   // Un valor guardado de una versión anterior puede no tener claves nuevas. Los gastos por
   // embarque son la lista de referencia con los valores editados en pantalla encima.
   const rates = useMemo(() => {
-    const merged = { ...DEFAULT_RATES, ...storedRates, ...FIXED_DUTIES }
+    const merged = { ...DEFAULT_RATES, ...storedRates }
     const overrides = merged.chargeOverrides ?? {}
     // Contenedores: los tipos que falten en lo guardado toman el valor de referencia.
     const fclContainers = Object.fromEntries(
@@ -80,7 +76,7 @@ export function useCostAssumptions() {
     }
   }, [storedRates])
 
-  // Solo se guardan los valores editables; los aranceles fijos y la lista armada no.
+  // Solo se guardan los valores editables; la lista de gastos armada no.
   const setRates = (next) =>
     setStoredRates(Object.fromEntries(EDITABLE_KEYS.map((key) => [key, next[key]])))
 

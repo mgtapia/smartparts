@@ -42,5 +42,5 @@ export function usePartCosts() {
     }
   }, [parts.data, suppliers.data, trial, rates, settingsForAir, settingsForSea])
 
-  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp }
+  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates }
 }

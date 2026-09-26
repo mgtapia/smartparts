@@ -12,6 +12,8 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/Menu'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
+import SettingsIcon from '@mui/icons-material/Settings'
+import Tooltip from '@mui/material/Tooltip'
 import { useAuth } from '@contexts/AuthContext'
 import GlobalSearch from '@features/search/GlobalSearch'
 import { TOPBAR_HEIGHT } from '@constants/layout'
@@ -51,6 +53,16 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
           <GlobalSearch />
         </Box>
+        <Tooltip title="Ajustes">
+          <IconButton
+            component={Link}
+            href="/settings"
+            aria-label="Ajustes"
+            sx={{ color: 'common.white' }}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>
         {user ? (
           <>
             <IconButton

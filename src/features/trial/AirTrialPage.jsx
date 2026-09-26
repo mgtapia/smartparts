@@ -28,6 +28,7 @@ import {
 import { useAirTrial } from './hooks/useAirTrial'
 import PlanCard from './components/PlanCard'
 import AnomalyGroups from './components/AnomalyGroups'
+import ExcludedParts from './components/ExcludedParts'
 
 const red = (children) => (
   <UncertainValue verified={false} reason={RED_REASON}>
@@ -66,7 +67,7 @@ export default function AirTrialPage() {
 
   const headerNotes = [
     `Primera compra por avión, pagada por nosotros. El cliente elige entre Original y Más barato; para cada una hay un proveedor recomendado. Proveedores: ${data.suppliers.map((s) => `${s.abbr} ${s.name}`).join(', ')}.`,
-    `Flete aéreo US$ ${(a.airUsdPerKgCents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2 })} por kg cobrable, el mayor entre kg y cm³ ÷ ${a.airDivisor.toLocaleString('es-CL')}. Arancel general ${a.generalDutyBp / 100} %. Despacho, guía aérea y reparto: US$ ${Math.round(a.perShipmentUsdCents / 100)} por proveedor. Tipo de cambio CLP ${a.usdClp} por US$ (${a.fxAsOf}). Se editan en la Calculadora.`,
+    `Flete aéreo US$ ${(a.airUsdPerKgCents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2 })} por kg cobrable, el mayor entre kg y cm³ ÷ ${a.airDivisor.toLocaleString('es-CL')}. Arancel general ${a.generalDutyBp / 100} %. Despacho, guía aérea y reparto: US$ ${Math.round(a.perShipmentUsdCents / 100)} por proveedor. Tipo de cambio CLP ${a.usdClp} por US$ (${a.fxAsOf}). Se editan en Ajustes.`,
     'Los márgenes son sobre el costo puesto en Chile. Las piezas peligrosas o fuera de medida no entran en el pedido.',
   ]
 
@@ -163,33 +164,6 @@ export default function AirTrialPage() {
     ]),
   ]
 
-  const dash = (value, format) => (value == null ? '—' : format(value))
-  const excludedColumns = [
-    { id: 'name', label: 'Repuesto', render: (l) => l.name },
-    { id: 'reasons', label: 'Motivo', width: 300, render: (l) => l.reasons.join('; ') },
-    {
-      id: 'kg',
-      label: 'Kg cobrables',
-      width: 110,
-      align: 'right',
-      render: (l) => dash(l.kg, (v) => v.toLocaleString('es-CL')),
-    },
-    {
-      id: 'cost',
-      label: 'Costo en Chile',
-      width: 130,
-      align: 'right',
-      render: (l) => dash(l.costClp, (v) => red(formatClp(v))),
-    },
-    {
-      id: 'baseline',
-      label: 'Cliente hoy',
-      width: 130,
-      align: 'right',
-      render: (l) => dash(l.baselineClp, formatClp),
-    },
-  ]
-
   const missingColumns = [
     { id: 'what', label: 'Dato', render: (m) => m.titleEs },
     { id: 'todo', label: 'Qué hacer', width: 420, render: (m) => m.actionEs },
@@ -270,14 +244,7 @@ export default function AirTrialPage() {
         </Box>
       ) : null}
 
-      {tab === TRIAL_TABS.EXCLUDED ? (
-        <ListTable
-          columns={excludedColumns}
-          rows={data.logistics}
-          getRowKey={(l) => l.partId}
-          emptyText="Todos los repuestos entran en el pedido aéreo."
-        />
-      ) : null}
+      {tab === TRIAL_TABS.EXCLUDED ? <ExcludedParts logistics={data.logistics} /> : null}
 
       {tab === TRIAL_TABS.ANOMALIES ? (
         <AnomalyGroups anomalies={data.anomalies} suppliers={data.suppliers} />

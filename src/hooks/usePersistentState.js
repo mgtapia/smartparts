@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const SYNC_EVENT = 'smartparts:persistent-state'
 
 /** Opciones para persistir un `Set` (se guarda como lista). */
 export const SET_STORAGE = {
@@ -30,6 +32,8 @@ export function usePersistentState(
   const storageKey = `smartparts.${key}`
   const [value, setValue] = useState(initialValue)
   const [restored, setRestored] = useState(false)
+  const valueRef = useRef(value)
+  valueRef.current = value
 
   useEffect(() => {
     try {
@@ -44,11 +48,30 @@ export function usePersistentState(
   useEffect(() => {
     if (!restored) return
     try {
-      window.localStorage.setItem(storageKey, serialize(value))
+      const raw = serialize(value)
+      if (window.localStorage.getItem(storageKey) === raw) return
+      window.localStorage.setItem(storageKey, raw)
+      // Avisa a las otras copias de este mismo valor en la página (otro componente, la barra
+      // superior…) para que no queden con el valor viejo.
+      window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: { storageKey, raw } }))
     } catch {
       // Cuota llena o storage bloqueado: la preferencia solo dura la sesión.
     }
   }, [restored, storageKey, serialize, value])
+
+  useEffect(() => {
+    const onSync = (event) => {
+      if (event.detail?.storageKey !== storageKey) return
+      try {
+        if (serialize(valueRef.current) !== event.detail.raw)
+          setValue(deserialize(event.detail.raw))
+      } catch {
+        // Valor corrupto: se ignora.
+      }
+    }
+    window.addEventListener(SYNC_EVENT, onSync)
+    return () => window.removeEventListener(SYNC_EVENT, onSync)
+  }, [storageKey, serialize, deserialize])
 
   return [value, setValue]
 }

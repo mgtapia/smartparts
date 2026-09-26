@@ -5,6 +5,7 @@ import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { DEFAULT_FX } from '@mocks/costParams'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
+import { pricingFor } from '@features/costing/pricingModel'
 import { buildAirTrial } from '../airTrialModel'
 
 /**
@@ -21,6 +22,8 @@ export function useAirTrial() {
   const loading = parts.loading || suppliers.loading || sourcing.loading
   const error = parts.error || suppliers.error || sourcing.error
 
+  const pricing = useMemo(() => pricingFor(rates, 'air'), [rates])
+
   const data = useMemo(() => {
     if (loading || error || !sourcing.vehicleId) return null
     return buildAirTrial({
@@ -30,9 +33,19 @@ export function useAirTrial() {
       rates,
       params,
       fx: DEFAULT_FX,
-      focusMarginBp: rates.pvpMarginAirBp,
+      pricing,
     })
-  }, [loading, error, sourcing.vehicleId, parts.data, suppliers.data, settingsFor, rates, params])
+  }, [
+    loading,
+    error,
+    sourcing.vehicleId,
+    parts.data,
+    suppliers.data,
+    settingsFor,
+    rates,
+    params,
+    pricing,
+  ])
 
   return { data, loading, error }
 }

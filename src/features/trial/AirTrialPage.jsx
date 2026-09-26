@@ -16,6 +16,7 @@ import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { OPTIONS } from './airTrialModel'
+import { TIER_LABELS_ES } from '@features/costing/pricingModel'
 import {
   CASE_LABELS_ES,
   OPTION_LABELS_ES,
@@ -43,9 +44,6 @@ const CASES = ['A', 'B', 'C']
 export default function AirTrialPage() {
   const { data, loading, error } = useAirTrial()
   const [tab, setTab] = useUrlTab(Object.values(TRIAL_TABS))
-  // Sin elegir otro, rige el margen aéreo global de Ajustes.
-  const [chosenMarginBp, setMarginBp] = useState(null)
-  const marginBp = chosenMarginBp ?? data?.focusMarginBp
   const [option, setOption] = useState(OPTIONS[0])
 
   if (loading) {
@@ -71,11 +69,10 @@ export default function AirTrialPage() {
   const headerNotes = [
     `Primera compra por avión, pagada por nosotros. El cliente elige entre Original y Más barato; para cada una hay un proveedor recomendado. Proveedores: ${data.suppliers.map((s) => `${s.abbr} ${s.name}`).join(', ')}.`,
     `Flete aéreo US$ ${(a.airUsdPerKgCents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2 })} por kg cobrable, el mayor entre kg y cm³ ÷ ${a.airDivisor.toLocaleString('es-CL')}. Arancel general ${a.generalDutyBp / 100} %. Despacho, guía aérea y reparto: US$ ${Math.round(a.perShipmentUsdCents / 100)} por proveedor. Tipo de cambio CLP ${a.usdClp} por US$ (${a.fxAsOf}). Se editan en Ajustes.`,
-    'Los márgenes son sobre el costo puesto en Chile. Las piezas peligrosas o fuera de medida no entran en el pedido.',
+    `Precio de venta de cada repuesto: el mayor entre lo que paga hoy el cliente menos el ahorro máximo (${data.pricing.maxSavingOemBp / 100} % en original, ${data.pricing.maxSavingAltBp / 100} % en alternativo) y el costo puesto en Chile dividido por (1 − ${data.pricing.minMarginBp / 100} %), el margen mínimo sobre la venta. Solo se ofrecen las líneas donde el cliente ahorra al menos ${data.pricing.minSavingBp / 100} %. Los parámetros se editan en Ajustes.`,
+    'El costo incluye la parte de cada repuesto en los gastos por embarque. Las piezas peligrosas o fuera de medida no entran en el pedido.',
   ]
 
-  const marginOptions = data.marginsBp.map((bp) => ({ value: bp, label: `Margen ${bp / 100} %` }))
-  const withMargin = (cost) => Math.round((cost * (10000 + marginBp)) / 10000)
   const purchaseColumns = [
     { id: 'name', label: 'Repuesto', render: (i) => i.name },
     { id: 'supplier', label: 'Proveedor', width: 90, render: (i) => abbr(i.supplierId) },
@@ -86,14 +83,14 @@ export default function AirTrialPage() {
       label: 'Costo aéreo',
       width: 125,
       align: 'right',
-      render: (i) => red(formatClp(i.unitCostClp)),
+      render: (i) => red(formatClp(i.fullUnitCostClp)),
     },
     {
       id: 'price',
       label: 'PVP neto',
       width: 125,
       align: 'right',
-      render: (i) => red(formatClp(withMargin(i.unitCostClp))),
+      render: (i) => red(formatClp(i.sale.priceClp)),
     },
     {
       id: 'baseline',
@@ -107,7 +104,13 @@ export default function AirTrialPage() {
       label: 'Ahorro',
       width: 125,
       align: 'right',
-      render: (i) => red(formatClp(i.unitBaselineClp - withMargin(i.unitCostClp))),
+      render: (i) => red(formatClp(i.unitBaselineClp - i.sale.priceClp)),
+    },
+    {
+      id: 'tier',
+      label: 'Tramo',
+      width: 120,
+      render: (i) => TIER_LABELS_ES[i.sale.tier],
     },
   ]
   const purchase = [...planOf(option).items].sort(
@@ -125,14 +128,14 @@ export default function AirTrialPage() {
       },
       {
         id: `${opt}-s`,
-        label: 'Ahorro',
+        label: 'Ganancia',
         width: 130,
         align: 'right',
         render: (c) => {
           const same = base[opt][c].single.find(
             (x) => x.supplierIds[0] === planOf(opt).supplierIds[0],
           )
-          return same ? red(formatClpMillions(same.savingsClp[data.focusMarginBp])) : '—'
+          return same ? red(formatClpMillions(same.profitClp)) : '—'
         },
       },
     ]),
@@ -160,11 +163,10 @@ export default function AirTrialPage() {
       },
       {
         id: `${opt}-s`,
-        label: 'Ahorro',
+        label: 'Ganancia',
         width: 130,
         align: 'right',
-        render: (sc) =>
-          red(formatClpMillions(scenarioCell(sc, opt).top.savingsClp[data.focusMarginBp])),
+        render: (sc) => red(formatClpMillions(scenarioCell(sc, opt).top.profitClp)),
       },
     ]),
   ]
@@ -185,14 +187,6 @@ export default function AirTrialPage() {
 
       {tab === TRIAL_TABS.PLAN ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box>
-            <ToolbarSelectBox
-              label="Margen sobre el costo en Chile"
-              value={marginBp}
-              onChange={setMarginBp}
-              options={marginOptions}
-            />
-          </Box>
           <Box
             sx={{
               display: 'grid',
@@ -201,7 +195,7 @@ export default function AirTrialPage() {
             }}
           >
             {OPTIONS.map((opt) => (
-              <PlanCard key={opt} option={opt} data={data} marginBp={marginBp} />
+              <PlanCard key={opt} option={opt} data={data} />
             ))}
           </Box>
         </Box>
@@ -215,12 +209,6 @@ export default function AirTrialPage() {
               value={option}
               onChange={setOption}
               options={OPTION_OPTIONS}
-            />
-            <ToolbarSelectBox
-              label="Margen sobre el costo en Chile"
-              value={marginBp}
-              onChange={setMarginBp}
-              options={marginOptions}
             />
           </Box>
           <ListTable
@@ -241,14 +229,8 @@ export default function AirTrialPage() {
               onChange={setOption}
               options={OPTION_OPTIONS}
             />
-            <ToolbarSelectBox
-              label="Margen sobre el costo en Chile"
-              value={marginBp}
-              onChange={setMarginBp}
-              options={marginOptions}
-            />
           </Box>
-          <CalculationSteps key={option} option={option} data={data} marginBp={marginBp} />
+          <CalculationSteps key={option} option={option} data={data} />
         </Box>
       ) : null}
 
@@ -257,14 +239,14 @@ export default function AirTrialPage() {
           <Box>
             <SectionTitle
               title="Qué volar"
-              description="Cuánto ahorra el cliente según qué repuestos se compran por avión."
+              description="Cuánto ganamos según qué repuestos se compran por avión."
             />
             <ListTable columns={casesColumns} rows={CASES} getRowKey={(c) => c} />
           </Box>
           <Box>
             <SectionTitle
               title="Recomendación"
-              description="Si cambia un supuesto, qué proveedor conviene y cuánto se ahorra."
+              description="Si cambia un supuesto, qué proveedor conviene y cuánto ganamos."
             />
             <ListTable columns={scenarioColumns} rows={data.scenarios} getRowKey={(sc) => sc.key} />
           </Box>

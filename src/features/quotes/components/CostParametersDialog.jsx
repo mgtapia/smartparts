@@ -101,7 +101,8 @@ const PARAM_SOURCES = {
 }
 const MARGIN_SOURCE = {
   labelEs: 'Decisión del equipo, sin fuente',
-  noteEs: 'Se aplica sobre el costo puesto en Chile de la pieza original para calcular el PVP',
+  noteEs:
+    'Fórmula de Diego: el PVP es el mayor entre lo que paga hoy el cliente menos el ahorro máximo, y el costo puesto en Chile dividido por (1 − margen mínimo)',
 }
 
 const SHIPMENT_SIZE_SOURCES = {
@@ -421,10 +422,10 @@ export function GlobalRatesFields({ draft, setDraft }) {
         </Field>
       </Section>
 
-      <Section title="Margen de venta (PVP)">
+      <Section title="Precio de venta (PVP)">
         <Field source={MARGIN_SOURCE}>
           <NumberField
-            label="Margen aéreo (% sobre costo en Chile)"
+            label="Margen mínimo aéreo (% sobre la venta)"
             adornment="%"
             value={fromBp(draft.rates.pvpMarginAirBp)}
             onCommit={(n) => n != null && n >= 0 && setRate({ pvpMarginAirBp: toBp(n) })}
@@ -432,10 +433,34 @@ export function GlobalRatesFields({ draft, setDraft }) {
         </Field>
         <Field source={MARGIN_SOURCE}>
           <NumberField
-            label="Margen marítimo (% sobre costo en Chile)"
+            label="Margen mínimo marítimo (% sobre la venta)"
             adornment="%"
             value={fromBp(draft.rates.pvpMarginSeaBp)}
             onCommit={(n) => n != null && n >= 0 && setRate({ pvpMarginSeaBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={MARGIN_SOURCE}>
+          <NumberField
+            label="Ahorro máximo del cliente, original (%)"
+            adornment="%"
+            value={fromBp(draft.rates.pvpMaxSavingOemBp)}
+            onCommit={(n) => n != null && n >= 0 && setRate({ pvpMaxSavingOemBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={MARGIN_SOURCE}>
+          <NumberField
+            label="Ahorro máximo del cliente, alternativo (%)"
+            adornment="%"
+            value={fromBp(draft.rates.pvpMaxSavingAltBp)}
+            onCommit={(n) => n != null && n >= 0 && setRate({ pvpMaxSavingAltBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={MARGIN_SOURCE}>
+          <NumberField
+            label="Ahorro mínimo para ofrecer (%)"
+            adornment="%"
+            value={fromBp(draft.rates.pvpMinSavingBp)}
+            onCommit={(n) => n != null && n >= 0 && setRate({ pvpMinSavingBp: toBp(n) })}
           />
         </Field>
       </Section>

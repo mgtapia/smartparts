@@ -10,10 +10,8 @@
 import { money, allocateByWeights } from '@libs/money'
 import { toUsdMicro } from '@libs/fx'
 import { computeUnitCost } from '@core/costing/unitCost'
+import { TIERS, isOffered, salePrice } from '@features/costing/pricingModel'
 
-/** Márgenes sobre el costo puesto en Chile, en basis points. */
-export const MARGINS_BP = Array.from({ length: 5 }, (_, i) => i * 1000)
-export const FOCUS_MARGIN_BP = 2000
 export const TOP_DEMAND = 30
 /** Un precio es atípico si pasa de 3 veces la mediana entre proveedores o queda bajo un tercio. */
 const OUTLIER_FACTOR = 3
@@ -138,18 +136,10 @@ export function supplierAbbr(name) {
  * @param {any} input.rates         Supuestos de costo unitario (tarifa aérea, gastos por embarque).
  * @param {any} input.params        Set de parámetros fiscales.
  * @param {any} input.fx
- * @param {number} [input.focusMarginBp]  Margen con el que se ordena y se resume el ahorro; el aéreo global.
+ * @param {{ minMarginBp: number, maxSavingOemBp: number, maxSavingAltBp: number, minSavingBp: number }} input.pricing
+ *   Fórmula de precio de venta (ver `salePrice`): margen mínimo aéreo y ahorros máximo y mínimo del cliente.
  */
-export function buildAirTrial({
-  parts,
-  suppliers,
-  settingsFor,
-  rates,
-  params,
-  fx,
-  focusMarginBp = FOCUS_MARGIN_BP,
-}) {
-  const margins = [...new Set([...MARGINS_BP, focusMarginBp])].sort((a, b) => a - b)
+export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx, pricing }) {
   const partById = new Map(parts.map((p) => [p.id, p]))
   const nameOf = new Map(suppliers.map((s) => [s.id, s.alias || s.name]))
   const abbrOf = new Map([...nameOf].map(([id, name]) => [id, supplierAbbr(name)]))
@@ -321,6 +311,39 @@ export function buildAirTrial({
     }
     const cost = costAssignments(assigned)
     const costClp = clpOf(cost.totalUsdMicro)
+
+    // Los gastos por embarque de cada proveedor se reparten entre sus líneas según su costo, para
+    // que el precio de cada una cubra su parte. Así el piso de margen incluye lo que Diego omitía.
+    const fixedShare = new Map()
+    for (const { supplierId, fixed } of cost.perSupplier) {
+      const mine = assigned.filter((a) => a.offer.supplierId === supplierId)
+      const shares = allocateByWeights(
+        fixed,
+        mine.map((a) => a.offer.landedUsdMicro * a.qty),
+      )
+      mine.forEach((a, i) => fixedShare.set(a, shares[i]))
+    }
+    const priced = assigned.map((a) => {
+      const fullUnitMicro = a.offer.landedUsdMicro + Math.ceil(fixedShare.get(a) / a.qty)
+      const unitBaseline = baselineOf(a.part)
+      return {
+        a,
+        fullUnitMicro,
+        sale: salePrice({
+          costClp: clpOf(fullUnitMicro),
+          baselineClp: unitBaseline,
+          quality: a.offer.quality,
+          pricing,
+        }),
+      }
+    })
+    const saleClp = priced.reduce((sum, x) => sum + x.sale.priceClp * x.a.qty, 0)
+    const withBaseline = priced.filter((x) => baselineOf(x.a.part) != null)
+    const savingClp = withBaseline.reduce(
+      (sum, x) => sum + (baselineOf(x.a.part) - x.sale.priceClp) * x.a.qty,
+      0,
+    )
+    const tierCount = (tier) => priced.filter((x) => x.sale.tier === tier).length
     const sumOver = (pick) => assigned.reduce((sum, a) => sum + pick(a.offer) * a.qty, 0)
     return {
       supplierIds: setIds,
@@ -332,7 +355,17 @@ export function buildAirTrial({
       baselineClp: baseline,
       costClp,
       kg: Math.round(cost.perSupplier.reduce((s, x) => s + x.kg, 0) * 10) / 10,
-      savingsClp: Object.fromEntries(margins.map((m) => [m, baseline - bpOf(costClp, 10000 + m)])),
+      saleClp,
+      profitClp: saleClp - costClp,
+      // Lo que se gana en total entre las dos partes: lo que paga hoy el cliente menos lo que nos cuesta.
+      // Ordena los proveedores sin favorecer al más caro, cuyo margen sobre el costo sería mayor.
+      surplusClp: baseline - costClp,
+      savingClp,
+      tiers: {
+        [TIERS.MAX_SAVING]: tierCount(TIERS.MAX_SAVING),
+        [TIERS.MIN_MARGIN]: tierCount(TIERS.MIN_MARGIN),
+        [TIERS.NOT_COMPETITIVE]: tierCount(TIERS.NOT_COMPETITIVE),
+      },
       estimatedQualityLines: assigned.filter((a) => !a.offer.qualityConfirmed).length,
       calc: cost.perSupplier.map((x) => ({
         supplierId: x.supplierId,
@@ -340,7 +373,7 @@ export function buildAirTrial({
         totalUsdMicro: x.variable + x.fixed,
         lines: withCents(x.variable + x.fixed, x.lines),
       })),
-      items: assigned.map((a) => ({
+      items: priced.map(({ a, fullUnitMicro, sale }) => ({
         partId: a.part.id,
         name: a.part.nameEs,
         supplierId: a.offer.supplierId,
@@ -348,6 +381,9 @@ export function buildAirTrial({
         qty: a.qty,
         unitCostClp: clpOf(a.offer.landedUsdMicro),
         unitCostUsdMicro: a.offer.landedUsdMicro,
+        fullUnitCostUsdMicro: fullUnitMicro,
+        fullUnitCostClp: clpOf(fullUnitMicro),
+        sale,
         chargeableKg: Math.round(a.offer.chargeableKg * 1000) / 1000,
         breakdown: withCents(
           a.offer.landedUsdMicro,
@@ -564,12 +600,20 @@ export function buildAirTrial({
         offersByPart.get(o.partId).push(o)
       }
       const cases = {
-        // A: todos los repuestos. B: solo los que conviene volar. C: los de más demanda.
+        // A: todos los repuestos. B: solo los que se ofrecen (tramos A y B de precio). C: los de más demanda.
         A: parts,
         B: parts.filter((p) => {
           if (dgIds.has(p.id) || baselineOf(p) == null) return false
-          const best = Math.min(...(offersByPart.get(p.id) ?? []).map((o) => o.landedUsdMicro))
-          return Number.isFinite(best) && clpOf(best) < baselineOf(p)
+          const offers = offersByPart.get(p.id) ?? []
+          if (!offers.length) return false
+          const best = offers.reduce((a, b) => (b.landedUsdMicro < a.landedUsdMicro ? b : a))
+          const { tier } = salePrice({
+            costClp: clpOf(best.landedUsdMicro),
+            baselineClp: baselineOf(p),
+            quality: best.quality,
+            pricing,
+          })
+          return isOffered(tier)
         }),
         C: parts
           .filter((p) => baselineOf(p) != null)
@@ -581,7 +625,7 @@ export function buildAirTrial({
         const results = subsets(supplierIds)
           .map((set) => evaluateSet(set, offersByPart, list, scenario.qtyBp))
           .filter((r) => r.covered > 0)
-          .sort((a, b) => b.savingsClp[focusMarginBp] - a.savingsClp[focusMarginBp])
+          .sort((a, b) => b.surplusClp - a.surplusClp)
         // El detalle por repuesto solo se guarda para lo que se compra; en el resto pesa de más.
         if (!(caseKey === 'B' && scenario.key === 'base'))
           for (const r of results) {
@@ -655,8 +699,7 @@ export function buildAirTrial({
   const known = distances.map((d) => d.originDistanceKm).filter((k) => k != null)
   return {
     partCount: parts.length,
-    focusMarginBp,
-    marginsBp: margins,
+    pricing,
     suppliers: suppliers.map((s) => ({ id: s.id, name: nameOf.get(s.id), abbr: abbrOf.get(s.id) })),
     assumptions: {
       airUsdPerKgCents: rates.airUsdPerKgCents,

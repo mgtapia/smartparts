@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
+import { TIERS } from '@features/costing/pricingModel'
 import {
   OPTION_LABELS_ES,
   RED_REASON,
@@ -13,8 +14,6 @@ import {
   formatClpMillions,
   formatUsdMicro,
 } from '../constants'
-
-const priceWithMargin = (cost, bp) => Math.round((cost * (10000 + bp)) / 10000)
 
 const red = (children) => (
   <UncertainValue verified={false} reason={RED_REASON}>
@@ -26,21 +25,19 @@ const red = (children) => (
  * Plan de una opción del cliente: el proveedor recomendado y lo que cuesta, cuánto se le cobra y
  * cuánto ahorra frente a lo que paga hoy. Todo importe es estimado, por eso va en rojo.
  */
-export default function PlanCard({ option, data, marginBp }) {
+export default function PlanCard({ option, data }) {
   const plan = data.scenarios[0].results[option].B
   const best = plan.single[0]
   const supplier = data.suppliers.find((s) => s.id === best.supplierIds[0])
-  const price = priceWithMargin(best.costClp, marginBp)
-  const saving = best.baselineClp - price
-  const profit = price - best.costClp
+  const price = best.saleClp
+  const saving = best.savingClp
+  const profit = best.profitClp
   const abbrs = (ids) => ids.map((id) => data.suppliers.find((s) => s.id === id).abbr).join(' + ')
-  const gainPair = plan.pair
-    ? plan.pair.savingsClp[data.focusMarginBp] - best.savingsClp[data.focusMarginBp]
-    : 0
+  const gainPair = plan.pair ? plan.pair.surplusClp - best.surplusClp : 0
 
   const notes = [
     `Un solo proveedor por opción: cada proveedor extra agrega despacho, guía aérea y reparto, y otra guía que coordinar.${plan.pair ? ` La mejor pareja, ${abbrs(plan.pair.supplierIds)}, agregaría ${formatClpMillions(gainPair)}.` : ''}`,
-    `Se compran ${best.covered} de los ${plan.parts} repuestos que conviene volar.`,
+    `Se compran ${best.covered} de los ${plan.parts} repuestos que se ofrecen: los que compiten con el margen mínimo y el ahorro máximo de Ajustes.`,
     'Las ofertas con precio atípico no entran en la recomendación hasta que el proveedor las confirme.',
   ]
 
@@ -89,11 +86,16 @@ export default function PlanCard({ option, data, marginBp }) {
       </Box>
       <Box sx={{ mt: 2 }}>
         <InfoGrid columns={3}>
-          <InfoField label="Cliente hoy">{formatClp(best.baselineClp)}</InfoField>
-          <InfoField label="Precio al cliente" hint="Costo en Chile más el margen elegido.">
+          <InfoField label="Precio REF" hint="Lo que el cliente paga hoy por estos repuestos.">
+            {formatClp(best.baselineClp)}
+          </InfoField>
+          <InfoField
+            label="PVP neto"
+            hint="Suma del precio de venta de cada repuesto: el mayor entre el precio REF menos el ahorro máximo y el costo con el margen mínimo."
+          >
             {red(formatClp(price))}
           </InfoField>
-          <InfoField label="Ganancia nuestra" hint="Precio al cliente menos el costo en Chile.">
+          <InfoField label="Ganancia nuestra" hint="PVP neto menos el costo en Chile.">
             {red(formatClp(profit))}
           </InfoField>
         </InfoGrid>
@@ -102,7 +104,7 @@ export default function PlanCard({ option, data, marginBp }) {
         <InfoGrid columns={3}>
           <InfoField
             label="Ganancia sobre el precio"
-            hint="Ganancia nuestra dividida por el precio al cliente."
+            hint="Ganancia nuestra dividida por el PVP neto."
           >
             {red(
               `${((profit / price) * 100).toLocaleString('es-CL', { maximumFractionDigits: 1 })} %`,
@@ -111,6 +113,22 @@ export default function PlanCard({ option, data, marginBp }) {
           <InfoField label="Ahorro del cliente">{red(formatClp(saving))}</InfoField>
           <InfoField label="Ahorro sobre lo de hoy">
             {red(`${Math.round((saving / best.baselineClp) * 100)} %`)}
+          </InfoField>
+        </InfoGrid>
+      </Box>
+      <Box sx={{ mt: 2 }}>
+        <InfoGrid columns={3}>
+          <InfoField
+            label="Ahorro máximo"
+            hint="Líneas donde el cliente ahorra el máximo permitido y el margen queda sobre el mínimo."
+          >
+            {best.tiers[TIERS.MAX_SAVING]} líneas
+          </InfoField>
+          <InfoField
+            label="Ahorro parcial"
+            hint="Líneas donde rige el margen mínimo y el cliente aún ahorra lo mínimo."
+          >
+            {best.tiers[TIERS.MIN_MARGIN]} líneas
           </InfoField>
         </InfoGrid>
       </Box>

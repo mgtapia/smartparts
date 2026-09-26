@@ -7,7 +7,8 @@ import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { DEFAULT_FX } from '@mocks/costParams'
 import { CODE_STATUS } from '@constants/enums'
-import { SELECTIONS, bestOf, convenience } from '@features/costing/partCostsModel'
+import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
+import { isOffered, pricingFor, salePrice } from '@features/costing/pricingModel'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
 import { supplierAbbr } from '@features/trial/airTrialModel'
 import { supplierLabel } from '@features/quotes/constants'
@@ -15,21 +16,29 @@ import { supplierLabel } from '@features/quotes/constants'
 const PAGE_SIZE = 100
 
 /**
- * PVP en un modo de envío: mejor costo original puesto en Chile más el margen, el proveedor que lo
- * da y si conviene importar (el costo no supera lo que el cliente paga hoy por el repuesto).
+ * PVP en un modo de envío con la fórmula de precio de venta: el mayor entre el precio de hoy menos
+ * el ahorro máximo y el costo original puesto en Chile con el margen mínimo. Trae el proveedor que da
+ * el costo y si conviene (la línea entra en la oferta).
  */
-function pvpOf(costs, ctx, part, marginBp) {
+function pvpOf(costs, ctx, part, pricing) {
   const best = bestOf(costs, part.id, SELECTIONS.OEM)
-  if (!best) return { pvpClp: null, pvpUsd: null, supplier: null, worthIt: null }
+  if (!best) return { pvpClp: null, pvpUsd: null, supplier: null, worthIt: null, tier: null }
   const costClp = ctx.toClp(best.usdMicro)
-  const amount = Math.round((costClp * (10000 + marginBp)) / 10000)
-  const pvpClp = { amount, currency: 'CLP', scale: 0 }
+  const sale = salePrice({
+    costClp,
+    baselineClp: part.baselinePrice?.amount ?? null,
+    quality: best.quality,
+    pricing,
+  })
+  const pvpClp = { amount: sale.priceClp, currency: 'CLP', scale: 0 }
   const supplier = ctx.suppliers.find((x) => x.id === best.supplierId)
   return {
     pvpClp,
     pvpUsd: clpToUsd(pvpClp, DEFAULT_FX),
     supplier: supplier ? supplierAbbr(supplierLabel(supplier, supplier.id)) : null,
-    worthIt: convenience(costClp, part.baselinePrice?.amount ?? null),
+    // Conviene si la línea entra en la oferta: el cliente ahorra al menos lo mínimo con el margen mínimo.
+    worthIt: sale.tier == null ? null : isOffered(sale.tier),
+    tier: sale.tier,
   }
 }
 
@@ -128,8 +137,8 @@ export function useCatalog() {
         codeStatus: p.codeStatus,
         baselinePriceUsd,
         baselinePriceClp: p.baselinePrice,
-        pvpAir: pvpOf(costs?.air, ctx, p, rates.pvpMarginAirBp),
-        pvpSea: pvpOf(costs?.sea, ctx, p, rates.pvpMarginSeaBp),
+        pvpAir: pvpOf(costs?.air, ctx, p, pricingFor(rates, 'air')),
+        pvpSea: pvpOf(costs?.sea, ctx, p, pricingFor(rates, 'sea')),
       }
     })
   }, [partsData, costs, costSuppliers, toClp, rates])

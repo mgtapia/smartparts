@@ -6,7 +6,7 @@ import {
   DEFAULT_UNIT_COST_ASSUMPTIONS,
   SHIPMENT_CHARGES,
 } from '@mocks/costParams'
-import { FOCUS_MARGIN_BP, buildAirTrial, summarizeExcluded, supplierAbbr } from './airTrialModel'
+import { buildAirTrial, summarizeExcluded, supplierAbbr } from './airTrialModel'
 
 // Datos de prueba (mocks solo en tests): tres proveedores y tres repuestos en USD.
 const rates = { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES }
@@ -43,8 +43,17 @@ const part = (id, name, quotes, extra = {}) => ({
   ...extra,
 })
 
+const pricing = { minMarginBp: 3000, maxSavingOemBp: 5000, maxSavingAltBp: 7000, minSavingBp: 1000 }
 const run = (parts) =>
-  buildAirTrial({ parts, suppliers, settingsFor, rates, params: DEFAULT_PARAM_SET, fx: DEFAULT_FX })
+  buildAirTrial({
+    parts,
+    suppliers,
+    settingsFor,
+    rates,
+    params: DEFAULT_PARAM_SET,
+    fx: DEFAULT_FX,
+    pricing,
+  })
 const base = (result, option, caseKey = 'B') => result.scenarios[0].results[option][caseKey]
 
 describe('supplierAbbr', () => {
@@ -148,11 +157,33 @@ describe('buildAirTrial', () => {
     ).toBe(true)
   })
 
-  it('el ahorro con margen sale del costo en Chile, no del precio al cliente', () => {
-    const r = run([part('p1', 'Bandeja', [quote('s1', 3000)])])
+  it('el precio de venta sigue la fórmula: piso de margen sobre la venta y ahorro máximo del cliente', () => {
+    const r = run([
+      part('p1', 'Bandeja', [quote('s1', 3000)]),
+      part('p2', 'Óptico', [quote('s1', 500)]),
+    ])
     const x = base(r, 'original').single[0]
-    const expected = x.baselineClp - Math.round((x.costClp * (10_000 + FOCUS_MARGIN_BP)) / 10_000)
-    expect(x.savingsClp[FOCUS_MARGIN_BP]).toBe(expected)
+    expect(x.items.length).toBeGreaterThan(0)
+    for (const i of x.items) {
+      // Nunca bajo el piso ni con más ahorro que el máximo (salvo el redondeo a la centena).
+      expect(i.sale.priceClp).toBeGreaterThanOrEqual(i.sale.floorClp - 50)
+      expect(i.sale.priceClp).toBeGreaterThanOrEqual(i.unitBaselineClp / 2 - 50)
+    }
+    const sale = x.items.reduce((sum, i) => sum + i.sale.priceClp * i.qty, 0)
+    expect(x.saleClp).toBe(sale)
+    expect(x.profitClp).toBe(x.saleClp - x.costClp)
+    expect(x.savingClp).toBe(x.baselineClp - x.saleClp)
+  })
+
+  it('no ofrece los repuestos donde el cliente no ahorra lo mínimo', () => {
+    // Un repuesto carísimo de traer frente a lo que paga hoy el cliente queda fuera del pedido.
+    const r = run([
+      part('p1', 'Bandeja', [quote('s1', 3000)]),
+      part('p2', 'Caro', [quote('s1', 900_000)]),
+    ])
+    const names = base(r, 'original').single[0].items.map((i) => i.name)
+    expect(names).toContain('Bandeja')
+    expect(names).not.toContain('Caro')
   })
 
   it('entrega el mejor costo por repuesto y calidad con su proveedor, sin ofertas atípicas', () => {

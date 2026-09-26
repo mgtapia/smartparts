@@ -5,7 +5,6 @@ import SectionTitle from '@components/common/SectionTitle'
 import { GRID_GAP, px } from '@constants/layout'
 import { OPTIONS } from '@features/trial/airTrialModel'
 import { TRIAL_TABS } from '@features/trial/constants'
-import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useAirTrial } from '@features/trial/hooks/useAirTrial'
 import PlanCard from '@features/trial/components/PlanCard'
 import ExcludedParts from '@features/trial/components/ExcludedParts'
@@ -19,9 +18,6 @@ const EXCLUDED_SHOWN = 8
  */
 export default function TrialSummary() {
   const { data, loading, error } = useAirTrial()
-  // Margen de venta por avión definido en Ajustes: es el mismo que da el PVP aéreo del catálogo.
-  const { rates } = useCostAssumptions()
-  const marginBp = rates.pvpMarginAirBp
   if (loading || error || !data) return null
 
   return (
@@ -29,7 +25,7 @@ export default function TrialSummary() {
       <Box sx={{ mb: px(GRID_GAP) }}>
         <SectionTitle
           title="Compra de prueba por avión"
-          description={`Proveedor recomendado para cada opción del cliente, con el margen de PVP aéreo de Ajustes: ${marginBp / 100} % sobre el costo en Chile.`}
+          description={`Proveedor recomendado para cada opción del cliente, con la fórmula de precio de venta de Ajustes: margen mínimo aéreo y ahorro máximo del cliente.`}
           link={{ label: 'Ver el análisis', href: '/trial' }}
         />
         <Box
@@ -40,7 +36,7 @@ export default function TrialSummary() {
           }}
         >
           {OPTIONS.map((opt) => (
-            <PlanCard key={opt} option={opt} data={data} marginBp={marginBp} />
+            <PlanCard key={opt} option={opt} data={data} />
           ))}
         </Box>
       </Box>

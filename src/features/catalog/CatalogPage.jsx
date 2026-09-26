@@ -74,8 +74,8 @@ const CODE_STATUS_COLOR = {
 // Verde si conviene importar (el costo puesto en Chile no supera lo que el cliente paga hoy),
 // rojo si no conviene, gris si falta el costo o el precio de referencia.
 const PVP_NOTES = [
-  'PVP neto, sin IVA: el mejor costo de la pieza original puesta en Chile, por avión y por barco (marítimo LCL), más el margen de cada modo (se edita en Ajustes). El proveedor es el que da ese costo.',
-  'Verde: conviene importar, el costo no supera lo que el cliente paga hoy. Rojo: no conviene. Gris: falta el costo o el precio de referencia.',
+  'PVP neto, sin IVA: el mayor entre el precio de referencia menos el ahorro máximo del cliente y el mejor costo de la pieza original puesta en Chile con el margen mínimo, por avión y por barco (formato marítimo elegido). Se edita en Ajustes. El proveedor es el que da ese costo.',
+  'Verde: se ofrece, el cliente ahorra al menos lo mínimo con el margen mínimo. Rojo: no compite. Gris: falta el costo o el precio de referencia.',
   'Son estimaciones con tarifas de referencia y pesos sin confirmar, no cotizaciones de un forwarder.',
 ]
 

@@ -8,6 +8,7 @@ import SectionTitle from '@components/common/SectionTitle'
 import ListTable from '@components/common/ListTable'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import UncertainValue from '@components/common/UncertainValue'
+import { TIER_LABELS_ES } from '@features/costing/pricingModel'
 import { RED_REASON, formatClp, formatUsdCents } from '../constants'
 
 const red = (children) => (
@@ -15,8 +16,6 @@ const red = (children) => (
     {children}
   </UncertainValue>
 )
-
-const priceWithMargin = (cost, bp) => Math.round((cost * (10000 + bp)) / 10000)
 
 function Step({ number, title, note, children }) {
   return (
@@ -53,7 +52,7 @@ function Line({ label, value, strong = false }) {
  * costo de cada repuesto, costo del pedido con los gastos por embarque, y precio y ahorro con el
  * margen elegido. Todo sale del análisis: acá no se calcula nada.
  */
-export default function CalculationSteps({ option, data, marginBp }) {
+export default function CalculationSteps({ option, data }) {
   const plan = data.scenarios[0].results[option].B
   const best = plan.single[0]
   const supplier = data.suppliers.find((s) => s.id === best.supplierIds[0])
@@ -66,7 +65,9 @@ export default function CalculationSteps({ option, data, marginBp }) {
   const [partId, setPartId] = useState(items[0]?.partId)
   const item = items.find((i) => i.partId === partId) ?? items[0]
 
-  const price = priceWithMargin(best.costClp, marginBp)
+  const { pricing } = data
+  const pct = (bp) => `${bp / 100} %`
+  const capBp = item.quality === 'AFM' ? pricing.maxSavingAltBp : pricing.maxSavingOemBp
   const partOptions = items.map((i) => ({ value: i.partId, label: i.name }))
 
   const columns = [
@@ -149,17 +150,43 @@ export default function CalculationSteps({ option, data, marginBp }) {
 
       <Step
         number={3}
-        title="Precio al cliente y ahorro"
-        note={`El margen de ${marginBp / 100} % se aplica sobre el costo del pedido. El ahorro compara con lo que el cliente paga hoy por esos mismos ${best.covered} repuestos.`}
+        title="Precio de venta del repuesto"
+        note={`El precio es el mayor entre lo que paga hoy el cliente menos el ahorro máximo (${pct(capBp)} en ${item.quality === 'AFM' ? 'alternativo' : 'original'}) y el costo con su parte de los gastos por embarque dividido por (1 − ${pct(pricing.minMarginBp)}), el margen mínimo sobre la venta.`}
       >
-        <Line label="Costo del pedido en Chile" value={red(formatClp(best.costClp))} />
         <Line
-          label={`Margen de ${marginBp / 100} %`}
-          value={red(formatClp(price - best.costClp))}
+          label="Costo con su parte de los gastos por embarque"
+          value={red(formatClp(item.fullUnitCostClp))}
         />
-        <Line label="Precio al cliente" value={red(formatClp(price))} strong />
+        <Line
+          label="Piso: costo ÷ (1 − margen mínimo)"
+          value={red(formatClp(item.sale.floorClp))}
+        />
+        <Line
+          label="Precio REF, lo que paga hoy el cliente"
+          value={formatClp(item.unitBaselineClp)}
+        />
+        <Line
+          label={`Objetivo: precio REF menos ${pct(capBp)}`}
+          value={formatClp(Math.round((item.unitBaselineClp * (10000 - capBp)) / 10000))}
+        />
+        <Line
+          label="PVP neto, el mayor de los dos redondeado a la centena"
+          value={red(formatClp(item.sale.priceClp))}
+          strong
+        />
+        <Line label="Tramo" value={TIER_LABELS_ES[item.sale.tier]} />
+      </Step>
+
+      <Step
+        number={4}
+        title="Resultado del pedido"
+        note={`Suma del precio de venta de los ${best.covered} repuestos por su cantidad, frente a lo que el cliente paga hoy por esos mismos repuestos.`}
+      >
+        <Line label="PVP neto del pedido" value={red(formatClp(best.saleClp))} />
+        <Line label="Costo del pedido en Chile" value={red(formatClp(best.costClp))} />
+        <Line label="Ganancia nuestra" value={red(formatClp(best.profitClp))} strong />
         <Line label="Lo que el cliente paga hoy" value={formatClp(best.baselineClp)} />
-        <Line label="Ahorro del cliente" value={red(formatClp(best.baselineClp - price))} strong />
+        <Line label="Ahorro del cliente" value={red(formatClp(best.savingClp))} strong />
       </Step>
     </Box>
   )

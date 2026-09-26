@@ -47,7 +47,6 @@ export default function AppShell({ children }) {
             flex: 1,
             minWidth: 0,
             display: 'flex',
-            mt: px(CONTENT_GAP),
             mr: px(CONTENT_GAP),
             mb: px(CONTENT_GAP),
             borderRadius: px(CONTENT_RADIUS),

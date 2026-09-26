@@ -91,10 +91,6 @@ export default function OverviewPage() {
     <ContentWidth>
       <PageHeader title="Vista general" />
 
-      <TrialSummary />
-      <ClientOrderSavings />
-      <PendingSummary />
-
       <Card sx={{ p: 2, mb: `${GRID_GAP}px` }}>
         <InfoGrid columns={5}>
           <InfoField
@@ -133,6 +129,10 @@ export default function OverviewPage() {
           </InfoField>
         </InfoGrid>
       </Card>
+
+      <TrialSummary />
+      <ClientOrderSavings />
+      <PendingSummary />
 
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
         Mayores diferencias entre proveedores

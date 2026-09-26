@@ -91,7 +91,6 @@ export default function ExcludedParts({ logistics, limit }) {
           <InfoField
             label="Cuestan más que el cliente hoy"
             hint="Volarlos costaría más que lo que el cliente paga hoy por las mismas cantidades."
-            divided
           >
             {summary.price.count}
             {summary.price.count ? (

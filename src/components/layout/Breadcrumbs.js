@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { findNavTrail } from '@constants/routes'
 
-/** Migas de pan: Grupo / Módulo (/ Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
+/** Migas de pan: Grupo › Módulo (› Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
 export default function Breadcrumbs() {
   const trail = findNavTrail(usePathname())
   // Sin grupo ni ficha es un módulo de primer nivel (Vista general): no hay ruta que mostrar.
@@ -21,8 +21,12 @@ export default function Breadcrumbs() {
   return (
     <MuiBreadcrumbs
       aria-label="Ubicación"
-      separator={<ChevronRightIcon sx={{ fontSize: 16 }} />}
-      sx={{ mt: 0.5 }}
+      separator={<ChevronRightIcon sx={{ fontSize: 16, display: 'block' }} />}
+      sx={{
+        mt: 0.5,
+        '& .MuiBreadcrumbs-ol': { alignItems: 'center' },
+        '& .MuiBreadcrumbs-separator': { display: 'flex', alignItems: 'center' },
+      }}
     >
       {crumbs.map((c) =>
         c.href ? (
@@ -32,12 +36,16 @@ export default function Breadcrumbs() {
             component={Link}
             href={c.href}
             color="text.secondary"
-            sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+            sx={{
+              lineHeight: 1,
+              textDecoration: 'none',
+              '&:hover': { textDecoration: 'underline' },
+            }}
           >
             {c.label}
           </Typography>
         ) : (
-          <Typography key={c.label} variant="body2" color="text.secondary">
+          <Typography key={c.label} variant="body2" color="text.secondary" sx={{ lineHeight: 1 }}>
             {c.label}
           </Typography>
         ),

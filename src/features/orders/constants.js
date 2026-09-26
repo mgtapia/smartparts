@@ -13,8 +13,8 @@ export { formatIsoDate } from '@libs/dates'
 // Pestañas de /orders: la lista de OC de clientes y la de OC a proveedores.
 export const ORDER_VIEWS = { CLIENTS: 'clientes', SUPPLIERS: 'proveedores' }
 export const ORDER_VIEW_TABS = [
-  { value: ORDER_VIEWS.CLIENTS, label: 'Clientes' },
-  { value: ORDER_VIEWS.SUPPLIERS, label: 'Proveedores' },
+  { value: ORDER_VIEWS.CLIENTS, label: 'De clientes' },
+  { value: ORDER_VIEWS.SUPPLIERS, label: 'A proveedores' },
 ]
 
 export const CLIENT_ORDER_TABS = { LINES: 'lineas', PURCHASES: 'compras', DATA: 'datos' }

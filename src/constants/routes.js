@@ -159,7 +159,7 @@ export const NAV_ENTRIES = Object.freeze([
         labelEs: 'Ajustes',
         icon: 'Tune',
         permission: 'admin',
-        implemented: true,
+        implemented: false,
       },
     ],
   },

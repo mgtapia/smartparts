@@ -36,7 +36,7 @@ const normalize = (s) => (s ?? '').toString().toLowerCase()
 export default function QuotationsPage() {
   const { lines, quotations, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor } = assumptions
   const [view, setView] = useUrlTab(Object.values(VIEWS))
   const [metric, setMetric] = useState(METRICS.PRICE)
   const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
@@ -59,8 +59,10 @@ export default function QuotationsPage() {
 
   const matrix = useMemo(
     () =>
-      isMatrix ? buildMatrix(lines, metric, term, quality, { mode, rates, settingsFor }) : null,
-    [isMatrix, lines, metric, term, quality, mode, rates, settingsFor],
+      isMatrix
+        ? buildMatrix(lines, metric, term, quality, { mode, rates, params, settingsFor })
+        : null,
+    [isMatrix, lines, metric, term, quality, mode, rates, params, settingsFor],
   )
 
   if (loading) {

@@ -3,7 +3,7 @@ import { supplierLabel } from '@features/quotes/constants'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
-import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
+import { DEFAULT_FX } from '@mocks/costParams'
 import {
   DEFAULT_CUSTOM,
   cheapestScenario,
@@ -21,7 +21,7 @@ import {
 export function useOrderSimulation() {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { rates, settingsFor } = assumptions
+  const { rates, params, settingsFor } = assumptions
 
   const [quantitySource, setQuantitySource] = usePersistentState(
     'order.quantitySource.v1',
@@ -63,10 +63,19 @@ export function useOrderSimulation() {
       quantityOverrides: deferredOverrides,
       settingsFor,
       assumptions: rates,
-      params: DEFAULT_PARAM_SET,
+      params,
       fx: DEFAULT_FX,
     })
-  }, [lines, vehicleId, quantitySource, deferredOverrides, deferredCustom, settingsFor, rates])
+  }, [
+    lines,
+    vehicleId,
+    quantitySource,
+    deferredOverrides,
+    deferredCustom,
+    settingsFor,
+    rates,
+    params,
+  ])
 
   const quantityRows = useMemo(
     () => vehicleQuantityRows({ lines, vehicleId, quantitySource, quantityOverrides }),

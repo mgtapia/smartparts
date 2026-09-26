@@ -8,5 +8,5 @@ export const SETTINGS_TAB_LIST = [
 export const SETTINGS_HELP = [
   'Son los parámetros globales: los usan la Calculadora, el Catálogo, la ficha del repuesto y la Compra de prueba.',
   'Los márgenes se aplican sobre el costo puesto en Chile y pueden ser distintos para avión y barco.',
-  'Los cambios se guardan en este navegador al pulsar Aplicar. Todo valor sin verificar va en rojo, con su fuente.',
+  'Aplicar guarda los ajustes en la base y todas las pantallas los usan. Los cambios en los modales de parámetros son temporales: valen solo mientras la pantalla está abierta. Todo valor sin verificar va en rojo, con su fuente.',
 ]

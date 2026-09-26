@@ -24,7 +24,7 @@ export function usePartCosts() {
   const parts = useCachedQuery('parts', listParts)
   const suppliers = useCachedQuery('suppliers', listSuppliers)
   const { data: trial } = useAirTrial()
-  const { rates, settingsForAir, settingsForSea } = useCostAssumptions()
+  const { rates, params, settingsForAir, settingsForSea } = useCostAssumptions()
 
   const costs = useMemo(() => {
     if (!parts.data || !suppliers.data) return null
@@ -32,7 +32,7 @@ export function usePartCosts() {
       parts: parts.data,
       suppliers: suppliers.data,
       rates,
-      params: DEFAULT_PARAM_SET,
+      params,
       fx: DEFAULT_FX,
       skipKeys: trial?.suspectOfferKeys,
     }
@@ -40,7 +40,7 @@ export function usePartCosts() {
       air: buildPartCosts({ ...base, settingsFor: settingsForAir, mode: SHIPPING_MODES.AIR }),
       sea: buildPartCosts({ ...base, settingsFor: settingsForSea, mode: SHIPPING_MODES.SEA_LCL }),
     }
-  }, [parts.data, suppliers.data, trial, rates, settingsForAir, settingsForSea])
+  }, [parts.data, suppliers.data, trial, rates, params, settingsForAir, settingsForSea])
 
   return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates }
 }

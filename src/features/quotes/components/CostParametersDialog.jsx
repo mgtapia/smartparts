@@ -21,14 +21,9 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import ViewTabs from '@components/common/ViewTabs'
 import NumberField from '@components/common/NumberField'
 import { RADIUS } from '@constants/colors'
-import {
-  DEFAULT_PARAM_SET,
-  DEFAULT_UNIT_COST_ASSUMPTIONS,
-  FCL_SOURCES,
-  FREIGHT_SOURCES,
-  SHIPMENT_CHARGES,
-} from '@mocks/costParams'
+import { FCL_SOURCES, FREIGHT_SOURCES, SHIPMENT_CHARGES } from '@mocks/costParams'
 import { chargeModeKey } from '@core/costing/shipmentCharges'
+import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
 
 const fromCents = (c) => (c == null ? null : c / 100)
@@ -39,46 +34,45 @@ const fromMicro = (m) => (m == null ? null : m / 1e6)
 const toMicro = (n) => (n == null ? null : Math.round(n * 1e6))
 const pct = (bp) => `${(bp / 100).toLocaleString('es-CL')} %`
 
-export const { defaultOriginCostBp, ...DEFAULT_EDITABLE } = DEFAULT_UNIT_COST_ASSUMPTIONS
-
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 
-/** ¿Los parámetros editables difieren de los originales? Decide si "Restablecer" tiene algo que hacer. */
-export function differsFromDefaults(rates) {
-  const { chargeOverrides, ...values } = DEFAULT_EDITABLE
+/** ¿Los parámetros editables difieren de los ajustes globales? Decide si "Restablecer" tiene algo que hacer. */
+export function differsFromBase(rates, base) {
+  const { chargeOverrides, ...values } = base
   const changedValue = Object.keys(values).some((key) => !same(rates[key], values[key]))
   const changedCharge = SHIPMENT_CHARGES.some(
-    (c) => !same({ ...c, ...rates.chargeOverrides?.[c.code] }, c),
+    (c) =>
+      !same({ ...c, ...rates.chargeOverrides?.[c.code] }, { ...c, ...chargeOverrides?.[c.code] }),
   )
   return changedValue || changedCharge
 }
 
 export const TABS = { PARAMS: 'parametros', CONSTANTS: 'constantes' }
 
-// Valores que no se editan acá: los fija la ley, una convención del transporte o el set de
-// parámetros. `verified: false` los muestra en rojo con el motivo.
-const CONSTANTS = [
+// Valores que no se editan en este modal: son los ajustes globales (se cambian en Ajustes) o una
+// convención del transporte. `verified: false` los muestra en rojo con el motivo.
+const constantsOf = (g) => [
   {
     label: 'IVA (% CIF + arancel)',
-    value: pct(DEFAULT_PARAM_SET.vat.rateBp),
+    value: pct(g.vatBp),
     verified: false,
     note: 'Crédito fiscal recuperable: no se suma al costo final. Sin verificar con el SII',
   },
   {
     label: 'Seguro (% del valor asegurado)',
-    value: pct(DEFAULT_PARAM_SET.insurance.rateBp),
+    value: pct(g.insuranceRateBp),
     verified: false,
     note: 'Tasa referencial, sin cotización de seguro',
   },
   {
     label: 'Valor asegurado (% sobre FOB + flete)',
-    value: pct(DEFAULT_PARAM_SET.insurance.markupBp),
+    value: pct(g.insuranceMarkupBp),
     verified: false,
-    note: 'Referencial: se asegura un 10 % más que FOB + flete',
+    note: 'Referencial: se asegura un porcentaje más que FOB + flete',
   },
   {
     label: 'Peso por m³ marítimo (kg/m³)',
-    value: DEFAULT_PARAM_SET.freightDefaults.seaLclWmKgPerCbm.toLocaleString('es-CL'),
+    value: g.seaLclWmKgPerCbm.toLocaleString('es-CL'),
     verified: true,
     note: 'Convención del transporte marítimo: se cobra el mayor entre toneladas y m³',
   },
@@ -92,6 +86,17 @@ const DUTY_SOURCES = {
   fta: {
     labelEs: 'Solo con Formulario F y partida elegible',
     noteEs: 'Sin verificar por partida',
+  },
+}
+const PARAM_SOURCES = {
+  vat: {
+    labelEs: 'IVA de Chile',
+    noteEs: 'Crédito fiscal recuperable: no se suma al costo final. Sin verificar con el SII',
+  },
+  insurance: { labelEs: 'Referencial', noteEs: 'Sin cotización de seguro' },
+  seaWeight: {
+    labelEs: 'Convención del transporte marítimo',
+    noteEs: 'Se cobra el mayor entre toneladas y m³',
   },
 }
 const MARGIN_SOURCE = {
@@ -125,6 +130,7 @@ const UNIT_ES = { air: 'kg', sea: 'm³', fcl: 'contenedor' }
  * (distancia al puerto, Formulario F) se edita en su ficha.
  */
 export default function CostParametersDialog({ mode, setMode, rates, setRates }) {
+  const global = useGlobalSettings()
   const [draft, setDraft] = useState(null)
   const [tab, setTab] = useState(TABS.PARAMS)
   const openDialog = () => {
@@ -158,13 +164,19 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
             <InfoNote dense title="Sobre estos parámetros" paragraphs={PARAMETERS_HELP} />
           </DialogTitle>
           <DialogContent>
-            <CostParametersForm draft={draft} setDraft={setDraft} tab={tab} setTab={setTab} />
+            <CostParametersForm
+              draft={draft}
+              setDraft={setDraft}
+              tab={tab}
+              setTab={setTab}
+              globalParams={global.globalParams}
+            />
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
-            {tab === TABS.PARAMS && differsFromDefaults(draft.rates) ? (
+            {tab === TABS.PARAMS && differsFromBase(draft.rates, global.editableRates) ? (
               <ModalActionButton
                 label="Restablecer"
-                onClick={() => setDraft((d) => ({ ...d, rates: { ...DEFAULT_EDITABLE } }))}
+                onClick={() => setDraft((d) => ({ ...d, rates: { ...global.editableRates } }))}
               />
             ) : (
               <span />
@@ -181,7 +193,7 @@ export default function CostParametersDialog({ mode, setMode, rates, setRates })
 }
 
 /** Formulario de los parámetros de costo sobre un borrador `{ mode, rates }`; sirve al modal y a Ajustes. */
-export function CostParametersForm({ draft, setDraft, tab, setTab }) {
+export function CostParametersForm({ draft, setDraft, tab, setTab, globalParams }) {
   const modeKey = chargeModeKey(draft.mode)
   const isAir = modeKey === 'air'
   const isFcl = modeKey === 'fcl'
@@ -232,7 +244,7 @@ export function CostParametersForm({ draft, setDraft, tab, setTab }) {
       />
       {tab === TABS.CONSTANTS ? (
         <Grid>
-          {CONSTANTS.map((c) => (
+          {constantsOf(globalParams).map((c) => (
             <ConstantValue key={c.label} {...c} />
           ))}
         </Grid>
@@ -351,9 +363,45 @@ export function CostParametersForm({ draft, setDraft, tab, setTab }) {
 
 /** Aranceles y márgenes de venta: parámetros globales que no dependen del modo de transporte. */
 export function GlobalRatesFields({ draft, setDraft }) {
+  const setParam = (patch) => setDraft((d) => ({ ...d, params: { ...d.params, ...patch } }))
   const setRate = (patch) => setDraft((d) => ({ ...d, rates: { ...d.rates, ...patch } }))
   return (
     <>
+      <Section title="IVA y seguro">
+        <Field source={PARAM_SOURCES.vat}>
+          <NumberField
+            label="IVA (% CIF + arancel)"
+            adornment="%"
+            value={fromBp(draft.params.vatBp)}
+            onCommit={(n) => n != null && n >= 0 && setParam({ vatBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={PARAM_SOURCES.insurance}>
+          <NumberField
+            label="Seguro (% del valor asegurado)"
+            adornment="%"
+            value={fromBp(draft.params.insuranceRateBp)}
+            onCommit={(n) => n != null && n >= 0 && setParam({ insuranceRateBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={PARAM_SOURCES.insurance}>
+          <NumberField
+            label="Valor asegurado (% sobre FOB + flete)"
+            adornment="%"
+            value={fromBp(draft.params.insuranceMarkupBp)}
+            onCommit={(n) => n != null && n >= 0 && setParam({ insuranceMarkupBp: toBp(n) })}
+          />
+        </Field>
+        <Field source={PARAM_SOURCES.seaWeight}>
+          <NumberField
+            label="Peso por m³ marítimo (kg/m³)"
+            adornment="kg"
+            value={draft.params.seaLclWmKgPerCbm}
+            onCommit={(n) => n > 0 && setParam({ seaLclWmKgPerCbm: Math.round(n) })}
+          />
+        </Field>
+      </Section>
+
       <Section title="Aranceles">
         <Field source={DUTY_SOURCES.general}>
           <NumberField

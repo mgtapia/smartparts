@@ -1,13 +1,14 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { SHIPPING_MODES } from '@constants/enums'
-import { DEFAULT_UNIT_COST_ASSUMPTIONS, SHIPMENT_CHARGES } from '@mocks/costParams'
+import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
+import {
+  buildRates,
+  defaultOriginCostBp,
+  pickEditable,
+} from '@features/settings/globalSettingsModel'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
-
-const { defaultOriginCostBp, ...DEFAULT_RATES } = DEFAULT_UNIT_COST_ASSUMPTIONS
-// Lo que se edita en pantalla y se guarda por navegador: tarifas, tamaño del embarque y gastos.
-const EDITABLE_KEYS = Object.keys(DEFAULT_RATES)
 
 /**
  * Supuestos de cada proveedor para un modo: distancia al puerto o aeropuerto (`factKey`, de su
@@ -51,34 +52,19 @@ function buildSettingsFor(suppliers, factKey, supplierSettings) {
  */
 export function useCostAssumptions() {
   const [mode, setMode] = usePersistentState('quotes.mode', SHIPPING_MODES.SEA_LCL)
-  const [storedRates, setStoredRates] = usePersistentState('quotes.rates.v3', DEFAULT_RATES)
+  // Los ajustes globales viven en la base (vista Ajustes). Lo que se cambia en los modales de esta
+  // pantalla es temporal: pisa a los globales solo mientras la pantalla está abierta.
+  const global = useGlobalSettings()
+  const [tempRates, setTempRates] = useState(null)
   const [supplierSettings, setSupplierSettings] = usePersistentState(
     'quotes.supplierSettings.v3',
     {},
   )
 
-  // Un valor guardado de una versión anterior puede no tener claves nuevas. Los gastos por
-  // embarque son la lista de referencia con los valores editados en pantalla encima.
-  const rates = useMemo(() => {
-    const merged = { ...DEFAULT_RATES, ...storedRates }
-    const overrides = merged.chargeOverrides ?? {}
-    // Contenedores: los tipos que falten en lo guardado toman el valor de referencia.
-    const fclContainers = Object.fromEntries(
-      Object.entries(DEFAULT_RATES.fclContainers).map(([key, spec]) => [
-        key,
-        { ...spec, ...storedRates?.fclContainers?.[key] },
-      ]),
-    )
-    return {
-      ...merged,
-      fclContainers,
-      shipmentCharges: SHIPMENT_CHARGES.map((c) => ({ ...c, ...overrides[c.code] })),
-    }
-  }, [storedRates])
+  const rates = useMemo(() => buildRates(tempRates ?? global.editableRates), [tempRates, global])
 
-  // Solo se guardan los valores editables; la lista de gastos armada no.
-  const setRates = (next) =>
-    setStoredRates(Object.fromEntries(EDITABLE_KEYS.map((key) => [key, next[key]])))
+  // Un cambio temporal guarda solo los valores editables.
+  const setRates = (next) => setTempRates(pickEditable(next))
 
   // Distancia de cada proveedor al puerto (marítimo) o aeropuerto (aéreo) de embarque, en km.
   const { data: suppliers } = useCachedQuery('suppliers', listSuppliers)
@@ -99,13 +85,15 @@ export function useCostAssumptions() {
     setSupplierSettings((prev) => ({ ...prev, [supplierId]: { ...prev[supplierId], ...patch } }))
 
   // Solo los parámetros generales: lo de cada proveedor se edita en su cotización.
-  const reset = () => setStoredRates(DEFAULT_RATES)
+  const reset = () => setTempRates(null)
 
   return {
     mode,
     setMode,
     rates,
     setRates,
+    params: global.params,
+    hasTemporaryChanges: tempRates !== null,
     settingsFor,
     settingsForAir,
     settingsForSea,

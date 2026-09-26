@@ -56,7 +56,7 @@ export default function PartDetailPage() {
   const { part, loading, error, refetch } = usePartDetail(partId)
   const partCosts = usePartCosts()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor } = assumptions
   const [tab, setTab] = useUrlTab(Object.values(PART_TABS))
   const [editing, setEditing] = useState(null)
   const [image, setImage] = useState(null)
@@ -78,11 +78,11 @@ export default function PartDetailPage() {
     return part.quotes
       .map((quote) => ({
         quote,
-        cost: costLine({ part, quote }, { mode, rates, settingsFor }),
+        cost: costLine({ part, quote }, { mode, rates, params, settingsFor }),
         priceMicro: priceUsdMicro(quote),
       }))
       .sort((a, b) => (a.priceMicro ?? Infinity) - (b.priceMicro ?? Infinity))
-  }, [part, mode, rates, settingsFor])
+  }, [part, mode, rates, params, settingsFor])
 
   if (loading) {
     return (

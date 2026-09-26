@@ -300,7 +300,7 @@ export default function PartDetailPage() {
           )}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <InfoGrid columns={6}>
+          <InfoGrid columns={5}>
             <InfoField label="Código" divided onEdit={() => setEditing(EDIT.CODE)}>
               <UncertainValue
                 verified={part.codeStatus === 'confirmed'}
@@ -314,7 +314,6 @@ export default function PartDetailPage() {
             <InfoField label="Vehículo">
               {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
             </InfoField>
-            <InfoField label="Categoría">{part.category?.labelEs ?? part.categoryPath}</InfoField>
             <InfoField label="Precio referencia">
               <MoneyValue money={part.baselinePrice} />
             </InfoField>

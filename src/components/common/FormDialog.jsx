@@ -37,12 +37,13 @@ export function DialogGrid({ children }) {
  * Input de texto con el alto estándar de los controles (44 px). `type="date"`
  * da un selector de fecha con valor 'AAAA-MM-DD'.
  */
-export function DialogTextInput({ value, onChange, placeholder, type = 'text' }) {
+export function DialogTextInput({ value, onChange, placeholder, type = 'text', disabled = false }) {
   return (
     <TextField
       size="small"
       fullWidth
       type={type}
+      disabled={disabled}
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}

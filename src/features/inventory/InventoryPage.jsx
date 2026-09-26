@@ -1,0 +1,110 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import Box from '@mui/material/Box'
+import ContentWidth from '@components/common/ContentWidth'
+import PageHeader from '@components/common/PageHeader'
+import ListTable from '@components/common/ListTable'
+import ToolbarSearch from '@components/common/ToolbarSearch'
+import ToolbarButton from '@components/common/ToolbarButton'
+import { ErrorState } from '@components/common/AsyncState'
+import { ListPageSkeleton } from '@components/common/Skeletons'
+import { formatIsoDate } from '@libs/dates'
+import InventoryDialog from './components/InventoryDialog'
+import { useInventory } from './hooks/useInventory'
+
+const normalize = (s) => (s ?? '').toString().toLowerCase()
+
+const COLUMNS = [
+  { id: 'part', label: 'Repuesto', render: ({ entry, part }) => part?.nameEs ?? entry.partId },
+  {
+    id: 'code',
+    label: 'Código',
+    width: 140,
+    render: ({ part }) => (
+      <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
+        {part?.code ?? '—'}
+      </Box>
+    ),
+  },
+  { id: 'location', label: 'Ubicación', width: 180, render: ({ entry }) => entry.location ?? '—' },
+  {
+    id: 'quantity',
+    label: 'Cantidad',
+    width: 90,
+    align: 'right',
+    render: ({ entry }) => entry.quantity.toLocaleString('es-CL'),
+  },
+  {
+    id: 'updated',
+    label: 'Actualizado',
+    width: 110,
+    render: ({ entry }) => (entry.updatedAt ? formatIsoDate(entry.updatedAt) : '—'),
+  },
+]
+
+export default function InventoryPage() {
+  const { rows, parts, loading, error, reload } = useInventory()
+  const [search, setSearch] = useState('')
+  // `true` = agregar; una fila = editar ese stock.
+  const [dialog, setDialog] = useState(null)
+  const term = normalize(search.trim())
+
+  const usedPartIds = useMemo(() => new Set(rows.map(({ entry }) => entry.partId)), [rows])
+  const filtered = useMemo(
+    () =>
+      rows.filter(
+        ({ part, entry }) =>
+          !term ||
+          normalize(part?.nameEs ?? entry.partId).includes(term) ||
+          normalize(part?.code).includes(term) ||
+          normalize(entry.location).includes(term),
+      ),
+    [rows, term],
+  )
+
+  if (loading) {
+    return (
+      <ContentWidth>
+        <ListPageSkeleton />
+      </ContentWidth>
+    )
+  }
+  if (error) {
+    return (
+      <ContentWidth>
+        <ErrorState />
+      </ContentWidth>
+    )
+  }
+
+  return (
+    <ContentWidth>
+      <PageHeader title="Inventario" />
+      {dialog ? (
+        <InventoryDialog
+          row={dialog === true ? undefined : dialog}
+          parts={parts}
+          usedPartIds={usedPartIds}
+          onSaved={reload}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <ToolbarSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre, código o ubicación…"
+        />
+        <ToolbarButton label="Agregar stock" onClick={() => setDialog(true)} />
+      </Box>
+      <ListTable
+        columns={COLUMNS}
+        rows={filtered}
+        getRowKey={({ entry }) => entry.id}
+        onRowClick={(row) => setDialog(row)}
+        emptyText="Sin stock cargado todavía: agrega el primero con Agregar stock."
+      />
+    </ContentWidth>
+  )
+}

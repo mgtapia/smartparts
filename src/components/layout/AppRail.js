@@ -21,6 +21,7 @@ import FlightIcon from '@mui/icons-material/Flight'
 import ChecklistIcon from '@mui/icons-material/Checklist'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import WarehouseIcon from '@mui/icons-material/Warehouse'
 import { visibleNavEntries, isNavItemActive, entryPath } from '@constants/routes'
 import { RAIL_WIDTH, RAIL_WIDTH_EXPANDED } from '@constants/layout'
 
@@ -45,6 +46,7 @@ const ICONS = {
   Flight: FlightIcon,
   ReceiptLong: ReceiptLongIcon,
   ShoppingCart: ShoppingCartIcon,
+  Warehouse: WarehouseIcon,
 }
 
 const IDLE_COLOR = 'rgba(255,255,255,0.65)'

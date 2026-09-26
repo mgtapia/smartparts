@@ -38,6 +38,13 @@ export const NAV_ENTRIES = Object.freeze([
         icon: 'DirectionsCar',
         implemented: true,
       },
+      {
+        key: 'inventory',
+        path: '/inventory',
+        labelEs: 'Inventario',
+        icon: 'Warehouse',
+        implemented: true,
+      },
     ],
   },
   {

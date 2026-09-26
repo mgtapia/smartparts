@@ -26,6 +26,7 @@ costing_scenarios/   escenarios guardados
 cost_param_sets/     parámetros aduaneros versionados e inmutables
 fx_rates/            tipos de cambio por fecha
 clients/             clientes (razón social, RUT, contacto); los crea el usuario desde la UI
+inventory/           stock en Chile por repuesto (`part_id`, `quantity`, `location`); lo carga el usuario desde la UI, una entrada por repuesto
 client_orders/       OC del cliente a SmartDeal (client_id, número de OC, fecha, estado, moneda)
   /client_order_lines/  repuesto, cantidad, precio de venta, fulfillment
 purchase_orders/     OC de SmartDeal a un proveedor (supplier_id, quotation_id, Incoterm, moneda)

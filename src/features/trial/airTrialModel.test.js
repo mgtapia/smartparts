@@ -6,7 +6,7 @@ import {
   DEFAULT_UNIT_COST_ASSUMPTIONS,
   SHIPMENT_CHARGES,
 } from '@mocks/costParams'
-import { FOCUS_MARGIN_BP, buildAirTrial, supplierAbbr } from './airTrialModel'
+import { FOCUS_MARGIN_BP, buildAirTrial, summarizeExcluded, supplierAbbr } from './airTrialModel'
 
 // Datos de prueba (mocks solo en tests): tres proveedores y tres repuestos en USD.
 const rates = { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES }
@@ -143,5 +143,60 @@ describe('buildAirTrial', () => {
     // s2 tiene un precio atípico en p1: el mejor costo válido es de s1.
     expect(r.partCosts.p1.original.supplierId).toBe('s1')
     expect(r.partCosts.p2.alternative).toBeUndefined()
+  })
+})
+
+describe('summarizeExcluded', () => {
+  const logistics = [
+    {
+      partId: 'a',
+      name: 'Tapabarro',
+      reasons: ['Cuesta más que lo que paga hoy el cliente'],
+      kg: 71.5,
+      costClp: 300_000,
+      baselineClp: 200_000,
+      demandClp: 2_000_000, // 10 unidades
+    },
+    {
+      partId: 'b',
+      name: 'Capó',
+      reasons: ['Bulto de 200 × 12 × 25 cm: puede exigir avión de carga'],
+      kg: 40,
+      costClp: 100_000,
+      baselineClp: 200_000,
+      demandClp: 4_000_000,
+    },
+    {
+      partId: 'c',
+      name: 'Compresor',
+      reasons: ['Posible mercancía peligrosa'],
+      kg: null,
+      costClp: null,
+      baselineClp: null,
+      demandClp: 0,
+    },
+  ]
+  const s = summarizeExcluded(logistics)
+
+  it('calcula cuánto más caro sale cada repuesto y el sobrecosto total', () => {
+    const a = s.rows.find((r) => r.partId === 'a')
+    expect(a).toMatchObject({ qty: 10, diffClp: 100_000, diffBp: 5000, extraClp: 1_000_000 })
+    expect(s.price).toEqual({ count: 1, extraClp: 1_000_000, medianBp: 5000 })
+  })
+
+  it('un repuesto que sale más barato no suma sobrecosto', () => {
+    const b = s.rows.find((r) => r.partId === 'b')
+    expect(b).toMatchObject({ diffClp: -100_000, diffBp: -5000, extraClp: 0 })
+    expect(s.size).toEqual({ count: 1, kg: 40 })
+  })
+
+  it('sin costo o sin precio de referencia no calcula diferencia', () => {
+    const c = s.rows.find((r) => r.partId === 'c')
+    expect(c).toMatchObject({ diffClp: null, diffBp: null, extraClp: 0 })
+    expect(s.dg.count).toBe(1)
+  })
+
+  it('ordena por sobrecosto y luego por demanda', () => {
+    expect(s.rows.map((r) => r.partId)).toEqual(['a', 'b', 'c'])
   })
 })

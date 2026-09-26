@@ -19,6 +19,7 @@ import { QUALITY } from './analyticsModel'
 import { useAnalytics } from './hooks/useAnalytics'
 import PendingSummary from './components/PendingSummary'
 import ClientOrderSavings from './components/ClientOrderSavings'
+import TrialSummary from './components/TrialSummary'
 
 const PRICE_NOTE = [
   'Precio unitario del proveedor llevado a USD, sin flete, aranceles ni gastos de origen. Si un proveedor ofrece varias variantes o tramos, se usa la más barata.',
@@ -90,6 +91,7 @@ export default function OverviewPage() {
     <ContentWidth>
       <PageHeader title="Vista general" />
 
+      <TrialSummary />
       <ClientOrderSavings />
       <PendingSummary />
 

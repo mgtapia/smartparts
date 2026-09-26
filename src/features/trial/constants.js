@@ -44,6 +44,10 @@ export const formatClpMillions = (n) => {
   return `${m < 0 ? '−' : ''}CLP ${Math.abs(m).toLocaleString('es-CL', { maximumFractionDigits: 1 })} M`
 }
 
+/** Dólares enteros en texto, desde micros de USD. */
+export const formatUsdMicro = (micro) =>
+  `US$ ${Math.round(micro / 1_000_000).toLocaleString('es-CL')}`
+
 /** Dólares en texto desde centavos enteros. */
 export const formatUsdCents = (cents) =>
   `US$ ${(cents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

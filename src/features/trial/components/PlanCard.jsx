@@ -7,7 +7,13 @@ import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import { FOCUS_MARGIN_BP } from '../airTrialModel'
-import { OPTION_LABELS_ES, RED_REASON, formatClp, formatClpMillions } from '../constants'
+import {
+  OPTION_LABELS_ES,
+  RED_REASON,
+  formatClp,
+  formatClpMillions,
+  formatUsdMicro,
+} from '../constants'
 
 const priceWithMargin = (cost, bp) => Math.round((cost * (10000 + bp)) / 10000)
 
@@ -54,17 +60,37 @@ export default function PlanCard({ option, data, marginBp }) {
         <InfoField label="Repuestos">
           {best.covered} de {plan.parts}
         </InfoField>
-        <InfoField label="Cliente hoy">{formatClp(best.baselineClp)}</InfoField>
-        <InfoField label="Peso cobrable">{best.kg.toLocaleString('es-CL')} kg</InfoField>
+        <InfoField label="Unidades">{best.units.toLocaleString('es-CL')}</InfoField>
+        <InfoField
+          label="Peso cobrable"
+          hint="El mayor entre el peso real y el volumétrico. Entre paréntesis, el volumen de los bultos."
+        >
+          {best.kg.toLocaleString('es-CL')} kg (
+          {(best.volumeCm3 / 1e6).toLocaleString('es-CL', { maximumFractionDigits: 1 })} m³)
+        </InfoField>
       </InfoGrid>
       <Box sx={{ mt: 2 }}>
         <InfoGrid columns={3}>
+          <InfoField
+            label="Compra al proveedor"
+            hint="FOB: el precio del proveedor más el transporte en China y los gastos de exportación."
+          >
+            {red(formatUsdMicro(best.fobUsdMicro))}
+          </InfoField>
+          <InfoField label="Flete aéreo" hint="Kg cobrables por la tarifa, sin la guía aérea.">
+            {red(formatUsdMicro(best.freightUsdMicro))}
+          </InfoField>
           <InfoField
             label="Costo en Chile"
             hint="Con gastos por embarque, flete, arancel y agente."
           >
             {red(formatClp(best.costClp))}
           </InfoField>
+        </InfoGrid>
+      </Box>
+      <Box sx={{ mt: 2 }}>
+        <InfoGrid columns={3}>
+          <InfoField label="Cliente hoy">{formatClp(best.baselineClp)}</InfoField>
           <InfoField label="Precio al cliente" hint="Costo en Chile más el margen elegido.">
             {red(formatClp(price))}
           </InfoField>
@@ -75,6 +101,14 @@ export default function PlanCard({ option, data, marginBp }) {
       </Box>
       <Box sx={{ mt: 2 }}>
         <InfoGrid columns={3}>
+          <InfoField
+            label="Ganancia sobre el precio"
+            hint="Ganancia nuestra dividida por el precio al cliente."
+          >
+            {red(
+              `${((profit / price) * 100).toLocaleString('es-CL', { maximumFractionDigits: 1 })} %`,
+            )}
+          </InfoField>
           <InfoField label="Ahorro del cliente">{red(formatClp(saving))}</InfoField>
           <InfoField label="Ahorro sobre lo de hoy">
             {red(`${Math.round((saving / best.baselineClp) * 100)} %`)}

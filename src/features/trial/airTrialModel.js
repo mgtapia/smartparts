@@ -217,6 +217,9 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         priceUsdMicro: usdMicro,
         landedUsdMicro: unit.landedNetUsdMicro, // sin gastos por embarque
         components: unit.components,
+        freightMicro: comp('freight').usdMicro,
+        fobMicro: comp('price').usdMicro + comp('origin').usdMicro + comp('originCharges').usdMicro,
+        volumeCm3: bpOf(p.volumeCm3, volBp),
         agentMicro: item('localCosts', 'customs_agent'),
         inlandMicro: item('origin', 'inland_china'),
         insuranceMicro: comp('insurance').usdMicro,
@@ -304,9 +307,14 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
     }
     const cost = costAssignments(assigned)
     const costClp = clpOf(cost.totalUsdMicro)
+    const sumOver = (pick) => assigned.reduce((sum, a) => sum + pick(a.offer) * a.qty, 0)
     return {
       supplierIds: setIds,
       covered: assigned.length,
+      units: assigned.reduce((sum, a) => sum + a.qty, 0),
+      volumeCm3: sumOver((o) => o.volumeCm3),
+      freightUsdMicro: sumOver((o) => o.freightMicro),
+      fobUsdMicro: sumOver((o) => o.fobMicro),
       baselineClp: baseline,
       costClp,
       kg: Math.round(cost.perSupplier.reduce((s, x) => s + x.kg, 0) * 10) / 10,

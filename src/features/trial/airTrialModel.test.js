@@ -82,6 +82,11 @@ describe('buildAirTrial', () => {
       const total = i.breakdown.reduce((sum, l) => sum + l.cents, 0)
       expect(total).toBe(Math.round(i.unitCostUsdMicro / 10_000))
     }
+    // Unidades, compra al proveedor y flete del pedido, para comparar con otros cálculos.
+    expect(best.units).toBe(best.items.reduce((sum, i) => sum + i.qty, 0))
+    expect(best.fobUsdMicro).toBeGreaterThan(0)
+    expect(best.freightUsdMicro).toBeGreaterThan(0)
+    expect(best.volumeCm3).toBe(best.units * 6000)
     const calc = best.calc[0]
     expect(calc.lines.reduce((sum, l) => sum + l.cents, 0)).toBe(
       Math.round(calc.totalUsdMicro / 10_000),

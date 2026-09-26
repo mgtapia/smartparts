@@ -6,6 +6,9 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { RADIUS } from '@constants/colors'
 import { findNavTrail } from '@constants/routes'
 
+// Radio del contenedor menos su borde de 1 px.
+const INNER_RADIUS = `${RADIUS.input - 1}px`
+
 /**
  * Pestañas de los módulos de una sección del menú (Catálogo → Repuestos /
  * Vehículos). El menú lateral solo lleva a la sección; el cambio entre sus
@@ -48,6 +51,15 @@ export default function SectionTabs() {
             bgcolor: 'action.selected',
             fontWeight: 600,
             boxShadow: (t) => `inset 0 0 0 1px ${t.palette.text.disabled}`,
+            // Las esquinas externas siguen la curva del contenedor para que el borde no se corte.
+            '&:first-of-type': {
+              borderTopLeftRadius: INNER_RADIUS,
+              borderBottomLeftRadius: INNER_RADIUS,
+            },
+            '&:last-of-type': {
+              borderTopRightRadius: INNER_RADIUS,
+              borderBottomRightRadius: INNER_RADIUS,
+            },
           },
         },
       }}

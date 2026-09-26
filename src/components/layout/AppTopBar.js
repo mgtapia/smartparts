@@ -57,9 +57,9 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
               onClick={(e) => setAnchor(e.currentTarget)}
               aria-label="Cuenta"
               aria-haspopup="menu"
-              sx={{ p: 0.5 }}
+              sx={{ p: 0 }}
             >
-              <Avatar src={user.photoURL || undefined} alt={name} sx={{ width: 32, height: 32 }} />
+              <Avatar src={user.photoURL || undefined} alt={name} sx={{ width: 40, height: 40 }} />
             </IconButton>
             <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
               <Box sx={{ px: 2, py: 1 }}>

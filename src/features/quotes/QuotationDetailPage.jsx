@@ -41,7 +41,7 @@ import {
 } from './constants'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { useCostAssumptions } from './hooks/useCostAssumptions'
-import { useQuotationsData, costLine, unitPriceMoney } from './hooks/useQuotations'
+import { useQuotationsData, costLine, priceUsdMicro, unitPriceMoney } from './hooks/useQuotations'
 
 const FIELDS = {
   incoterm: {
@@ -139,6 +139,7 @@ export default function QuotationDetailPage() {
     {
       id: 'part',
       label: 'Pieza',
+      sortValue: ({ line }) => line.part.nameEs,
       render: ({ line }) => (
         <Link
           href={`/parts/${line.part.id}`}
@@ -152,13 +153,21 @@ export default function QuotationDetailPage() {
     {
       id: 'category',
       label: 'Categoría',
+      sortValue: ({ line }) => line.part.categoryLabel,
       width: 100,
       render: ({ line }) => line.part.categoryLabel,
     },
-    { id: 'position', label: 'Lugar', width: 80, render: ({ line }) => line.part.position ?? '—' },
+    {
+      id: 'position',
+      label: 'Lugar',
+      sortValue: ({ line }) => line.part.position,
+      width: 80,
+      render: ({ line }) => line.part.position ?? '—',
+    },
     {
       id: 'code',
       label: 'Código',
+      sortValue: ({ line }) => line.part.code,
       width: 100,
       render: ({ line }) => (
         <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
@@ -169,6 +178,7 @@ export default function QuotationDetailPage() {
     {
       id: 'quality',
       label: 'Calidad',
+      sortValue: ({ line }) => line.quote.partType,
       width: 90,
       render: ({ line }) => (
         <UncertainValue
@@ -185,12 +195,14 @@ export default function QuotationDetailPage() {
     {
       id: 'variant',
       label: 'Variante',
+      sortValue: ({ line }) => line.quote.variant,
       width: 110,
       render: ({ line }) => line.quote.variant ?? '—',
     },
     {
       id: 'price',
       label: 'Precio',
+      sortValue: ({ line }) => priceUsdMicro(line.quote, fx),
       width: 90,
       align: 'right',
       tooltip:
@@ -224,6 +236,7 @@ export default function QuotationDetailPage() {
     ...COST_COLUMNS.map((c) => ({
       id: c.code,
       label: c.label,
+      sortValue: ({ cost, byCode }) => (cost.blockers.length > 0 ? null : byCode[c.code]?.usdMicro),
       width: 90,
       align: 'right',
       render: ({ cost, byCode }) => {
@@ -347,7 +360,12 @@ export default function QuotationDetailPage() {
       </Box>
 
       <Box sx={{ mb: 2 }}>
-        <ListTable columns={columns} rows={rows} getRowKey={({ line }) => line.quote.id} />
+        <ListTable
+          sortKey="quotation-lines"
+          columns={columns}
+          rows={rows}
+          getRowKey={({ line }) => line.quote.id}
+        />
       </Box>
 
       {sample ? (

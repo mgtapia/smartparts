@@ -87,6 +87,7 @@ export default function ClientOrderDetailPage() {
     {
       id: 'part',
       label: 'Repuesto',
+      sortValue: (l) => partLabel(data.partsById.get(l.partId)),
       render: (l) => {
         const part = data.partsById.get(l.partId)
         return part ? (
@@ -98,10 +99,18 @@ export default function ClientOrderDetailPage() {
         )
       },
     },
-    { id: 'qty', label: 'Cantidad', width: 80, align: 'right', render: (l) => `${l.qty} u` },
+    {
+      id: 'qty',
+      label: 'Cantidad',
+      sortValue: (l) => l.qty,
+      width: 80,
+      align: 'right',
+      render: (l) => `${l.qty} u`,
+    },
     {
       id: 'price',
       label: 'Precio unitario',
+      sortValue: (l) => l.unitPrice?.amount,
       width: 120,
       align: 'right',
       render: (l) => (l.unitPrice ? <MoneyValue money={l.unitPrice} /> : MISSING_PRICE),
@@ -109,6 +118,7 @@ export default function ClientOrderDetailPage() {
     {
       id: 'total',
       label: 'Total',
+      sortValue: (l) => (l.unitPrice ? l.unitPrice.amount * l.qty : null),
       width: 120,
       align: 'right',
       render: (l) =>
@@ -117,6 +127,7 @@ export default function ClientOrderDetailPage() {
     {
       id: 'covered',
       label: 'Cubierto',
+      sortValue: (l) => coveredByLine.get(l.id)?.coveredQty ?? 0,
       width: 90,
       align: 'right',
       tooltip: 'Unidades con una compra a proveedor enlazada.',
@@ -168,7 +179,12 @@ export default function ClientOrderDetailPage() {
     })),
   )
   const purchaseColumns = [
-    { id: 'order', label: 'OC a proveedor', render: (r) => orderLabel(r.purchaseOrder) },
+    {
+      id: 'order',
+      label: 'OC a proveedor',
+      sortValue: (r) => orderLabel(r.purchaseOrder),
+      render: (r) => orderLabel(r.purchaseOrder),
+    },
     {
       id: 'supplier',
       label: 'Proveedor',
@@ -182,10 +198,18 @@ export default function ClientOrderDetailPage() {
     {
       id: 'part',
       label: 'Repuesto',
+      sortValue: (r) => partLabel(data.partsById.get(r.clientLine.partId)),
       width: 220,
       render: (r) => partLabel(data.partsById.get(r.clientLine.partId)),
     },
-    { id: 'qty', label: 'Cantidad', width: 80, align: 'right', render: (r) => `${r.qty} u` },
+    {
+      id: 'qty',
+      label: 'Cantidad',
+      sortValue: (r) => r.qty,
+      width: 80,
+      align: 'right',
+      render: (r) => `${r.qty} u`,
+    },
     {
       id: 'price',
       label: 'Precio proveedor',
@@ -209,6 +233,7 @@ export default function ClientOrderDetailPage() {
     {
       id: 'status',
       label: 'Estado',
+      sortValue: (r) => PURCHASE_ORDER_STATUS_LABELS_ES[r.purchaseOrder.status],
       width: 100,
       render: (r) => PURCHASE_ORDER_STATUS_LABELS_ES[r.purchaseOrder.status],
     },
@@ -311,6 +336,9 @@ export default function ClientOrderDetailPage() {
             <InfoNote title="Cómo se calcula" paragraphs={CLIENT_ORDER_HELP} />
           </Box>
           <ListTable
+            sortKey="client-order-lines"
+            searchFields={(l) => [partLabel(data.partsById.get(l.partId))]}
+            searchPlaceholder="Buscar por repuesto…"
             columns={lineColumns}
             rows={order.lines}
             getRowKey={(l) => l.id}
@@ -321,6 +349,7 @@ export default function ClientOrderDetailPage() {
 
       {!simulating && tab === CLIENT_ORDER_TABS.PURCHASES ? (
         <ListTable
+          sortKey="client-order-purchases"
           columns={purchaseColumns}
           rows={purchaseRows}
           getRowKey={(r) => r.key}

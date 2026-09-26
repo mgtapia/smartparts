@@ -55,15 +55,22 @@ export default function VehicleDetailPage() {
     {
       id: 'supplier',
       label: 'Proveedor',
+      sortValue: (q) => supplierLabel(q.supplier, q.supplierId),
       render: (q) => (
         <span title={q.supplier?.name}>{supplierLabel(q.supplier, q.supplierId)}</span>
       ),
     },
-    { id: 'file', label: 'Cotización', render: (q) => q.sourceFile ?? 'Sin archivo de origen' },
+    {
+      id: 'file',
+      label: 'Cotización',
+      sortValue: (q) => q.sourceFile,
+      render: (q) => q.sourceFile ?? 'Sin archivo de origen',
+    },
     { id: 'sells', label: 'Oferta', width: 130, render: (q) => <QualityChips quotation={q} /> },
     {
       id: 'incoterm',
       label: 'Incoterm',
+      sortValue: (q) => q.incoterms.join(', '),
       width: 90,
       render: (q) => (
         <UncertainValue verified={q.incotermConfirmed} reason="Incoterm sin confirmar">
@@ -74,19 +81,27 @@ export default function VehicleDetailPage() {
     {
       id: 'parts',
       label: 'Repuestos',
+      sortValue: (q) => q.partCount,
       width: 90,
       align: 'right',
       tooltip: 'Repuestos de este vehículo en la cotización.',
       render: (q) => q.partCount,
     },
-    { id: 'date', label: 'Fecha', width: 100, render: (q) => formatDate(q.capturedAt) },
+    {
+      id: 'date',
+      label: 'Fecha',
+      sortValue: (q) => q.capturedAt,
+      width: 100,
+      render: (q) => formatDate(q.capturedAt),
+    },
   ]
 
   const partColumns = [
-    { id: 'name', label: 'Repuesto', render: (p) => p.nameEs },
+    { id: 'name', label: 'Repuesto', sortValue: (p) => p.nameEs, render: (p) => p.nameEs },
     {
       id: 'code',
       label: 'Código',
+      sortValue: (p) => p.code,
       width: 130,
       render: (p) => (
         <UncertainValue
@@ -97,10 +112,17 @@ export default function VehicleDetailPage() {
         </UncertainValue>
       ),
     },
-    { id: 'category', label: 'Categoría', width: 160, render: (p) => p.category?.labelEs ?? '—' },
+    {
+      id: 'category',
+      label: 'Categoría',
+      sortValue: (p) => p.category?.labelEs,
+      width: 160,
+      render: (p) => p.category?.labelEs ?? '—',
+    },
     {
       id: 'quoted',
       label: 'Cotizado',
+      sortValue: (p) => (quotedIds.has(p.id) ? 1 : 0),
       width: 90,
       render: (p) => (
         <UncertainValue verified={quotedIds.has(p.id)} reason="Ningún proveedor lo cotizó">
@@ -159,6 +181,9 @@ export default function VehicleDetailPage() {
 
       {tab === VEHICLE_TABS.QUOTES ? (
         <ListTable
+          sortKey="vehicle-quotations"
+          searchFields={(q) => [q.supplier?.alias, q.supplier?.name, q.sourceFile]}
+          searchPlaceholder="Buscar por proveedor o cotización…"
           columns={quoteColumns}
           rows={quotations}
           getRowKey={(q) => q.id}
@@ -169,6 +194,9 @@ export default function VehicleDetailPage() {
 
       {tab === VEHICLE_TABS.PARTS ? (
         <ListTable
+          sortKey="vehicle-parts"
+          searchFields={(p) => [p.nameEs, p.nameEn, p.code, p.category?.labelEs]}
+          searchPlaceholder="Buscar por repuesto, código o categoría…"
           columns={partColumns}
           rows={parts}
           getRowKey={(p) => p.id}

@@ -150,6 +150,7 @@ export default function QuotationsPage() {
         </>
       ) : (
         <ListTable
+          sortKey="quotations"
           columns={LIST_COLUMNS}
           rows={filteredQuotations}
           getRowKey={(q) => q.id}
@@ -165,11 +166,13 @@ const LIST_COLUMNS = [
   {
     id: 'supplier',
     label: 'Proveedor',
+    sortValue: (q) => supplierLabel(q.supplier, q.supplierId),
     render: (q) => <span title={q.supplier?.name}>{supplierLabel(q.supplier, q.supplierId)}</span>,
   },
   {
     id: 'type',
     label: 'Tipo',
+    sortValue: (q) => q.supplier?.facts?.type?.value,
     width: 100,
     render: (q) => <FactCell supplier={q.supplier} factKey="type" />,
   },
@@ -183,6 +186,7 @@ const LIST_COLUMNS = [
   {
     id: 'incoterm',
     label: 'Incoterm',
+    sortValue: (q) => q.incoterms.join(', '),
     width: 90,
     render: (q) =>
       q.incoterms.length > 0 ? (
@@ -205,6 +209,7 @@ const LIST_COLUMNS = [
   {
     id: 'currency',
     label: 'Moneda',
+    sortValue: (q) => q.currencies.join(', '),
     width: 70,
     render: (q) => (
       <UncertainValue verified={q.currencyConfirmed} reason="Moneda sin confirmar por el proveedor">
@@ -215,12 +220,14 @@ const LIST_COLUMNS = [
   {
     id: 'vehicles',
     label: 'Vehículos',
+    sortValue: (q) => q.vehicles.map((v) => v.label).join(', '),
     width: 110,
     render: (q) => q.vehicles.map((v) => v.label).join(', ') || '—',
   },
   {
     id: 'parts',
     label: 'Repuestos',
+    sortValue: (q) => q.partCount,
     width: 90,
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',

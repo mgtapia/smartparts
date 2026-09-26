@@ -77,6 +77,7 @@ export default function PurchaseOrderDetailPage() {
     {
       id: 'part',
       label: 'Repuesto',
+      sortValue: (l) => partLabel(data.partsById.get(l.partId)),
       render: (l) => {
         const part = data.partsById.get(l.partId)
         return part ? (
@@ -88,10 +89,18 @@ export default function PurchaseOrderDetailPage() {
         )
       },
     },
-    { id: 'qty', label: 'Cantidad', width: 80, align: 'right', render: (l) => `${l.qty} u` },
+    {
+      id: 'qty',
+      label: 'Cantidad',
+      sortValue: (l) => l.qty,
+      width: 80,
+      align: 'right',
+      render: (l) => `${l.qty} u`,
+    },
     {
       id: 'price',
       label: 'Precio unitario',
+      sortValue: (l) => l.unitPrice?.amount,
       width: 120,
       align: 'right',
       tooltip: 'De la cotización o ingresado a mano.',
@@ -107,6 +116,7 @@ export default function PurchaseOrderDetailPage() {
     {
       id: 'total',
       label: 'Total',
+      sortValue: (l) => (l.unitPrice ? l.unitPrice.amount * l.qty : null),
       width: 120,
       align: 'right',
       render: (l) => (l.unitPrice ? <MoneyValue money={multiplyMoney(l.unitPrice, l.qty)} /> : '—'),
@@ -222,6 +232,9 @@ export default function PurchaseOrderDetailPage() {
             <InfoNote title="Cómo se enlaza" paragraphs={PURCHASE_ORDER_HELP} />
           </Box>
           <ListTable
+            sortKey="purchase-order-lines"
+            searchFields={(l) => [partLabel(data.partsById.get(l.partId))]}
+            searchPlaceholder="Buscar por repuesto…"
             columns={columns}
             rows={order.lines}
             getRowKey={(l) => l.id}

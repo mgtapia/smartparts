@@ -112,12 +112,14 @@ export default function SupplierDetailPage() {
     {
       id: 'file',
       label: 'Cotización',
+      sortValue: (q) => q.sourceFile,
       render: (q) => q.sourceFile ?? 'Sin archivo de origen',
     },
     { id: 'sells', label: 'Oferta', width: 130, render: (q) => <QualityChips quotation={q} /> },
     {
       id: 'incoterm',
       label: 'Incoterm',
+      sortValue: (q) => q.incoterms.join(', '),
       width: 90,
       render: (q) => (
         <UncertainValue verified={q.incotermConfirmed} reason="Incoterm sin confirmar">
@@ -128,6 +130,7 @@ export default function SupplierDetailPage() {
     {
       id: 'currency',
       label: 'Moneda',
+      sortValue: (q) => q.currencies.join(', '),
       width: 70,
       render: (q) => (
         <UncertainValue verified={q.currencyConfirmed} reason="Moneda sin confirmar">
@@ -135,8 +138,21 @@ export default function SupplierDetailPage() {
         </UncertainValue>
       ),
     },
-    { id: 'parts', label: 'Repuestos', width: 90, align: 'right', render: (q) => q.partCount },
-    { id: 'date', label: 'Fecha', width: 100, render: (q) => formatDate(q.capturedAt) },
+    {
+      id: 'parts',
+      label: 'Repuestos',
+      sortValue: (q) => q.partCount,
+      width: 90,
+      align: 'right',
+      render: (q) => q.partCount,
+    },
+    {
+      id: 'date',
+      label: 'Fecha',
+      sortValue: (q) => q.capturedAt,
+      width: 100,
+      render: (q) => formatDate(q.capturedAt),
+    },
   ]
 
   const declarations = supplier.declarations ?? []
@@ -190,6 +206,9 @@ export default function SupplierDetailPage() {
 
       {tab === SUPPLIER_TABS.QUOTES ? (
         <ListTable
+          sortKey="supplier-quotations"
+          searchFields={(q) => [q.sourceFile, ...q.incoterms, ...q.currencies]}
+          searchPlaceholder="Buscar por cotización, incoterm o moneda…"
           columns={quoteColumns}
           rows={quotations}
           getRowKey={(q) => q.id}

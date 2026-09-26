@@ -53,6 +53,7 @@ export default function OverviewPage() {
     {
       id: 'part',
       label: 'Repuesto',
+      sortValue: (g) => g.part.nameEs,
       render: (g) => (
         <Link href={`/parts/${g.part.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
           {g.part.nameEs}
@@ -62,6 +63,7 @@ export default function OverviewPage() {
     {
       id: 'cheapest',
       label: 'Más barato',
+      sortValue: (g) => g.cheapest.micro,
       width: 200,
       render: (g) => (
         <>
@@ -73,6 +75,7 @@ export default function OverviewPage() {
     {
       id: 'dearest',
       label: 'Más caro',
+      sortValue: (g) => g.dearest.micro,
       width: 200,
       render: (g) => (
         <>
@@ -83,6 +86,7 @@ export default function OverviewPage() {
     {
       id: 'spread',
       label: 'Diferencia',
+      sortValue: (g) => g.spreadBp,
       width: 90,
       align: 'right',
       render: (g) => formatBp(g.spreadBp),
@@ -128,6 +132,13 @@ export default function OverviewPage() {
         description="Repuestos con más distancia entre el precio más barato y el más caro."
       />
       <ListTable
+        sortKey="overview-gaps"
+        searchFields={(g) => [
+          g.part.nameEs,
+          nameOf(g.cheapest.supplierId),
+          nameOf(g.dearest.supplierId),
+        ]}
+        searchPlaceholder="Buscar por repuesto o proveedor…"
         columns={gapColumns}
         rows={topGaps}
         getRowKey={(g) => g.part.id}

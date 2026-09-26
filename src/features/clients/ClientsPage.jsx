@@ -16,12 +16,17 @@ import { formatIsoDate } from '@libs/dates'
 import ClientDialog from './components/ClientDialog'
 import { useClients } from './hooks/useClients'
 
-
 const COLUMNS = [
-  { id: 'name', label: 'Cliente', render: ({ client }) => client.name },
+  {
+    id: 'name',
+    label: 'Cliente',
+    sortValue: ({ client }) => client.name,
+    render: ({ client }) => client.name,
+  },
   {
     id: 'rut',
     label: 'RUT',
+    sortValue: ({ client }) => client.rut,
     width: 130,
     render: ({ client }) =>
       client.rut ?? (
@@ -33,12 +38,14 @@ const COLUMNS = [
   {
     id: 'contact',
     label: 'Contacto',
+    sortValue: ({ client }) => client.contact.person ?? client.contact.email,
     width: 180,
     render: ({ client }) => client.contact.person ?? client.contact.email ?? '—',
   },
   {
     id: 'orders',
     label: 'OC',
+    sortValue: ({ orders }) => orders.length,
     width: 70,
     align: 'right',
     tooltip: 'OC recibidas del cliente, incluidas las anuladas.',
@@ -47,6 +54,7 @@ const COLUMNS = [
   {
     id: 'open',
     label: 'Vigentes',
+    sortValue: ({ openCount }) => openCount,
     width: 80,
     align: 'right',
     tooltip: 'OC no anuladas.',
@@ -55,6 +63,7 @@ const COLUMNS = [
   {
     id: 'last',
     label: 'Última OC',
+    sortValue: ({ lastDate }) => lastDate,
     width: 110,
     render: ({ lastDate }) => (lastDate ? formatIsoDate(lastDate) : '—'),
   },
@@ -107,10 +116,15 @@ export default function ClientsPage() {
         />
       ) : null}
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por nombre, RUT o contacto…" />
+        <ToolbarSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre, RUT o contacto…"
+        />
         <ToolbarButton label="Nuevo cliente" onClick={() => setCreating(true)} />
       </Box>
       <ListTable
+        sortKey="clients"
         columns={COLUMNS}
         rows={filtered}
         getRowKey={({ client }) => client.id}

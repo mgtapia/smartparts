@@ -36,25 +36,38 @@ import {
   orderLabel,
 } from './constants'
 
-
 const CLIENT_COLUMNS = [
-  { id: 'number', label: 'OC', render: ({ order }) => orderLabel(order) },
-  { id: 'client', label: 'Cliente', width: 180, render: ({ client }) => client?.name ?? '—' },
+  {
+    id: 'number',
+    label: 'OC',
+    sortValue: ({ order }) => orderLabel(order),
+    render: ({ order }) => orderLabel(order),
+  },
+  {
+    id: 'client',
+    label: 'Cliente',
+    sortValue: ({ client }) => client?.name,
+    width: 180,
+    render: ({ client }) => client?.name ?? '—',
+  },
   {
     id: 'date',
     label: 'Fecha',
+    sortValue: ({ order }) => order.date,
     width: 100,
     render: ({ order }) => (order.date ? formatIsoDate(order.date) : '—'),
   },
   {
     id: 'status',
     label: 'Estado',
+    sortValue: ({ order }) => CLIENT_ORDER_STATUS_LABELS_ES[order.status],
     width: 100,
     render: ({ order }) => CLIENT_ORDER_STATUS_LABELS_ES[order.status] ?? order.status,
   },
   {
     id: 'lines',
     label: 'Líneas',
+    sortValue: ({ order }) => order.lines.length,
     width: 70,
     align: 'right',
     render: ({ order }) => order.lines.length,
@@ -62,6 +75,7 @@ const CLIENT_COLUMNS = [
   {
     id: 'total',
     label: 'Venta',
+    sortValue: ({ total }) => total.amount / 10 ** total.scale,
     width: 120,
     align: 'right',
     render: (row) => <TotalValue {...row} />,
@@ -69,6 +83,8 @@ const CLIENT_COLUMNS = [
   {
     id: 'coverage',
     label: 'Cubierto',
+    sortValue: ({ coverage }) =>
+      coverage.orderedQty > 0 ? coverage.coveredQty / coverage.orderedQty : null,
     width: 110,
     align: 'right',
     tooltip: 'Unidades pedidas que ya tienen una compra a proveedor enlazada.',
@@ -80,6 +96,7 @@ const CLIENT_COLUMNS = [
   {
     id: 'margin',
     label: 'Margen estimado',
+    sortValue: ({ coverage }) => coverage.margin?.marginBp,
     width: 150,
     align: 'right',
     render: ({ coverage }) => (
@@ -89,10 +106,16 @@ const CLIENT_COLUMNS = [
 ]
 
 const PURCHASE_COLUMNS = [
-  { id: 'number', label: 'OC', render: ({ order }) => orderLabel(order) },
+  {
+    id: 'number',
+    label: 'OC',
+    sortValue: ({ order }) => orderLabel(order),
+    render: ({ order }) => orderLabel(order),
+  },
   {
     id: 'supplier',
     label: 'Proveedor',
+    sortValue: ({ order, supplier }) => supplierLabel(supplier, order.supplierId),
     width: 150,
     render: ({ order, supplier }) => (
       <span title={supplier?.name}>{supplierLabel(supplier, order.supplierId)}</span>
@@ -101,18 +124,21 @@ const PURCHASE_COLUMNS = [
   {
     id: 'date',
     label: 'Fecha',
+    sortValue: ({ order }) => order.date,
     width: 100,
     render: ({ order }) => (order.date ? formatIsoDate(order.date) : '—'),
   },
   {
     id: 'status',
     label: 'Estado',
+    sortValue: ({ order }) => PURCHASE_ORDER_STATUS_LABELS_ES[order.status],
     width: 100,
     render: ({ order }) => PURCHASE_ORDER_STATUS_LABELS_ES[order.status] ?? order.status,
   },
   {
     id: 'incoterm',
     label: 'Incoterm',
+    sortValue: ({ order }) => order.incoterm,
     width: 120,
     render: ({ order }) =>
       order.incoterm ? (
@@ -126,6 +152,7 @@ const PURCHASE_COLUMNS = [
   {
     id: 'lines',
     label: 'Líneas',
+    sortValue: ({ order }) => order.lines.length,
     width: 70,
     align: 'right',
     render: ({ order }) => order.lines.length,
@@ -133,6 +160,7 @@ const PURCHASE_COLUMNS = [
   {
     id: 'total',
     label: 'Total',
+    sortValue: ({ total }) => total.amount / 10 ** total.scale,
     width: 120,
     align: 'right',
     render: (row) => <TotalValue {...row} />,
@@ -140,6 +168,7 @@ const PURCHASE_COLUMNS = [
   {
     id: 'clientOrders',
     label: 'Pedidos',
+    sortValue: ({ clientOrders }) => clientOrders.map(orderLabel).join(', '),
     width: 150,
     tooltip: 'OC de clientes que cubre esta compra.',
     render: ({ clientOrders }) => clientOrders.map(orderLabel).join(', ') || '—',
@@ -241,7 +270,11 @@ export default function OrdersPage() {
         <ToolbarSearch
           value={search}
           onChange={setSearch}
-          placeholder={isClients ? 'Buscar por OC, cliente, RUT o estado…' : 'Buscar por OC, proveedor, incoterm o estado…'}
+          placeholder={
+            isClients
+              ? 'Buscar por OC, cliente, RUT o estado…'
+              : 'Buscar por OC, proveedor, incoterm o estado…'
+          }
         />
         <ToolbarSelectBox
           label="Estado"
@@ -258,6 +291,7 @@ export default function OrdersPage() {
 
       {isClients ? (
         <ListTable
+          sortKey="client-orders"
           columns={CLIENT_COLUMNS}
           rows={clientRows}
           getRowKey={({ order }) => order.id}
@@ -266,6 +300,7 @@ export default function OrdersPage() {
         />
       ) : (
         <ListTable
+          sortKey="purchase-orders"
           columns={PURCHASE_COLUMNS}
           rows={purchaseRows}
           getRowKey={({ order }) => order.id}

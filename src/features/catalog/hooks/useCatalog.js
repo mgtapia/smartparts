@@ -6,7 +6,7 @@ import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { makeMatcher } from '@libs/textSearch'
-import { CODE_STATUS } from '@constants/enums'
+import { CODE_STATUS, CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
 import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
 import { isOffered, pricingFor, salePrice } from '@features/costing/pricingModel'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
@@ -49,6 +49,11 @@ export const SORT_FIELDS = Object.freeze({
   VEHICLE: 'vehicle',
   CATEGORY: 'category',
   BASELINE: 'baseline',
+  PVP_AIR: 'pvpAir',
+  PVP_SEA: 'pvpSea',
+  SUPPLIER: 'supplier',
+  CODE: 'code',
+  QUOTES: 'quotes',
 })
 
 export const SORT_FIELD_LABELS_ES = Object.freeze({
@@ -56,6 +61,11 @@ export const SORT_FIELD_LABELS_ES = Object.freeze({
   [SORT_FIELDS.VEHICLE]: 'Vehículo',
   [SORT_FIELDS.CATEGORY]: 'Categoría',
   [SORT_FIELDS.BASELINE]: 'Precio REF',
+  [SORT_FIELDS.PVP_AIR]: 'PVP aéreo',
+  [SORT_FIELDS.PVP_SEA]: 'PVP marítimo',
+  [SORT_FIELDS.SUPPLIER]: 'Proveedor',
+  [SORT_FIELDS.CODE]: 'Código',
+  [SORT_FIELDS.QUOTES]: 'Cotizaciones',
 })
 
 const SORT_VALUE_GETTERS = {
@@ -63,6 +73,36 @@ const SORT_VALUE_GETTERS = {
   [SORT_FIELDS.VEHICLE]: (r) => r.vehicleLabel,
   [SORT_FIELDS.CATEGORY]: (r) => r.categoryLabel,
   [SORT_FIELDS.BASELINE]: (r) => r.baselinePriceUsd.amount,
+  [SORT_FIELDS.PVP_AIR]: (r) => r.pvpAir.pvpClp?.amount ?? null,
+  [SORT_FIELDS.PVP_SEA]: (r) => r.pvpSea.pvpClp?.amount ?? null,
+  [SORT_FIELDS.SUPPLIER]: (r) => r.suppliers[0] ?? null,
+  [SORT_FIELDS.CODE]: (r) => r.code || null,
+  [SORT_FIELDS.QUOTES]: (r) => r.quoteCount,
+}
+
+/** Qué pasa con el repuesto según su PVP: dónde se ofrece, o por qué no. */
+export const OFFER = Object.freeze({
+  AIR: 'air',
+  SEA: 'sea',
+  NOT_COMPETITIVE: 'none',
+  NO_COST: 'nocost',
+})
+export const OFFER_LABELS_ES = Object.freeze({
+  [OFFER.AIR]: 'Se ofrece por avión',
+  [OFFER.SEA]: 'Se ofrece por barco',
+  [OFFER.NOT_COMPETITIVE]: 'No compite',
+  [OFFER.NO_COST]: 'Sin costo o sin precio REF',
+})
+
+function offerOf(pvpAir, pvpSea) {
+  const keys = []
+  if (pvpAir.worthIt) keys.push(OFFER.AIR)
+  if (pvpSea.worthIt) keys.push(OFFER.SEA)
+  if (keys.length === 0) {
+    const notCompetitive = pvpAir.worthIt === false || pvpSea.worthIt === false
+    keys.push(notCompetitive ? OFFER.NOT_COMPETITIVE : OFFER.NO_COST)
+  }
+  return keys
 }
 
 function compareRows(a, b, field, sortDir) {
@@ -86,6 +126,10 @@ export function useCatalog() {
   // búsqueda de texto no: es de una sola consulta, no una preferencia.
   const [categoryFilters, setCategoryFilters] = usePersistentState('catalog.categoryFilters', [])
   const [vehicleFilters, setVehicleFilters] = usePersistentState('catalog.vehicleFilters', [])
+  const [offerFilters, setOfferFilters] = usePersistentState('catalog.offerFilters', [])
+  const [supplierFilters, setSupplierFilters] = usePersistentState('catalog.supplierFilters', [])
+  const [quoteFilters, setQuoteFilters] = usePersistentState('catalog.quoteFilters', [])
+  const [logisticsFilters, setLogisticsFilters] = usePersistentState('catalog.logisticsFilters', [])
   const [codeStatusFilters, setCodeStatusFilters] = usePersistentState(
     'catalog.codeStatusFilters',
     [],
@@ -122,6 +166,8 @@ export function useCatalog() {
       // elige cuál pintar según el selector de moneda, el orden siempre
       // se calcula en USD (moneda común, la conversión no reordena).
       const baselinePriceUsd = clpToUsd(p.baselinePrice, fx)
+      const pvpAir = pvpOf(costs?.air, ctx, p, pricingFor(rates, 'air'))
+      const pvpSea = pvpOf(costs?.sea, ctx, p, pricingFor(rates, 'sea'))
       return {
         id: p.id,
         nameEs: p.nameEs,
@@ -140,8 +186,12 @@ export function useCatalog() {
         codeStatus: p.codeStatus,
         baselinePriceUsd,
         baselinePriceClp: p.baselinePrice,
-        pvpAir: pvpOf(costs?.air, ctx, p, pricingFor(rates, 'air')),
-        pvpSea: pvpOf(costs?.sea, ctx, p, pricingFor(rates, 'sea')),
+        pvpAir,
+        pvpSea,
+        offer: offerOf(pvpAir, pvpSea),
+        suppliers: [...new Set([pvpAir.supplier, pvpSea.supplier].filter(Boolean))],
+        quoteCount: p.quotes?.length ?? 0,
+        logisticsConfirmed: CONFIRMED_LOGISTICS_STATUSES.includes(p.logisticsStatus),
       }
     })
   }, [partsData, costs, costSuppliers, toClp, rates, fx])
@@ -156,6 +206,15 @@ export function useCatalog() {
 
   const effectivePriceRange = priceRange ?? priceBounds
 
+  // Proveedores que dan algún PVP: los únicos por los que tiene sentido filtrar.
+  const supplierOptions = useMemo(
+    () =>
+      [...new Set(allRows.flatMap((r) => r.suppliers))]
+        .sort((a, b) => a.localeCompare(b, 'es'))
+        .map((s) => ({ value: s, label: s })),
+    [allRows],
+  )
+
   const categories = getTopLevelCategories()
 
   const filteredRows = useMemo(() => {
@@ -165,6 +224,19 @@ export function useCatalog() {
       if (categoryFilters.length && !categoryFilters.includes(r.categoryTopPath)) return false
       if (vehicleFilters.length && !vehicleFilters.includes(r.vehicleId)) return false
       if (codeStatusFilters.length && !codeStatusFilters.includes(r.codeStatus)) return false
+      if (offerFilters.length && !r.offer.some((k) => offerFilters.includes(k))) return false
+      if (supplierFilters.length && !r.suppliers.some((s) => supplierFilters.includes(s))) {
+        return false
+      }
+      if (quoteFilters.length && !quoteFilters.includes(r.quoteCount > 0 ? 'quoted' : 'unquoted')) {
+        return false
+      }
+      if (
+        logisticsFilters.length &&
+        !logisticsFilters.includes(r.logisticsConfirmed ? 'confirmed' : 'unconfirmed')
+      ) {
+        return false
+      }
       const baselineUsd = r.baselinePriceUsd.amount / 100
       if (baselineUsd < minPrice || baselineUsd > maxPrice) return false
       return matches([
@@ -186,6 +258,10 @@ export function useCatalog() {
     categoryFilters,
     vehicleFilters,
     codeStatusFilters,
+    offerFilters,
+    supplierFilters,
+    quoteFilters,
+    logisticsFilters,
     effectivePriceRange,
     sortField,
     sortDir,
@@ -200,6 +276,10 @@ export function useCatalog() {
     categoryFilters,
     vehicleFilters,
     codeStatusFilters,
+    offerFilters,
+    supplierFilters,
+    quoteFilters,
+    logisticsFilters,
     effectivePriceRange,
     sortField,
     sortDir,
@@ -217,12 +297,20 @@ export function useCatalog() {
     categoryFilters.length > 0 ||
     vehicleFilters.length > 0 ||
     codeStatusFilters.length > 0 ||
+    offerFilters.length > 0 ||
+    supplierFilters.length > 0 ||
+    quoteFilters.length > 0 ||
+    logisticsFilters.length > 0 ||
     (priceRange !== null && (priceRange[0] !== priceBounds[0] || priceRange[1] !== priceBounds[1]))
 
   function clearAllFilters() {
     setCategoryFilters([])
     setVehicleFilters([])
     setCodeStatusFilters([])
+    setOfferFilters([])
+    setSupplierFilters([])
+    setQuoteFilters([])
+    setLogisticsFilters([])
     setPriceRange(null)
   }
 
@@ -244,6 +332,43 @@ export function useCatalog() {
     codeStatuses: Object.values(CODE_STATUS),
     codeStatusFilters,
     toggleCodeStatusFilter: (s) => setCodeStatusFilters((prev) => toggleInList(prev, s)),
+    // Filtros que dependen del costo y de las cotizaciones: cada uno con sus opciones y su conteo.
+    extraFilters: [
+      {
+        key: 'offer',
+        label: 'Se ofrece',
+        options: Object.values(OFFER).map((value) => ({ value, label: OFFER_LABELS_ES[value] })),
+        selected: offerFilters,
+        toggle: (v) => setOfferFilters((prev) => toggleInList(prev, v)),
+      },
+      {
+        key: 'supplier',
+        label: 'Proveedor',
+        options: supplierOptions,
+        selected: supplierFilters,
+        toggle: (v) => setSupplierFilters((prev) => toggleInList(prev, v)),
+      },
+      {
+        key: 'quote',
+        label: 'Cotización',
+        options: [
+          { value: 'quoted', label: 'Con cotización' },
+          { value: 'unquoted', label: 'Sin cotización' },
+        ],
+        selected: quoteFilters,
+        toggle: (v) => setQuoteFilters((prev) => toggleInList(prev, v)),
+      },
+      {
+        key: 'logistics',
+        label: 'Peso y volumen',
+        options: [
+          { value: 'confirmed', label: 'Confirmados' },
+          { value: 'unconfirmed', label: 'Sin confirmar' },
+        ],
+        selected: logisticsFilters,
+        toggle: (v) => setLogisticsFilters((prev) => toggleInList(prev, v)),
+      },
+    ],
     priceBounds,
     priceRange: effectivePriceRange,
     setPriceRange,

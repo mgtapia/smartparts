@@ -31,22 +31,30 @@ const missing = (reason) => (
 )
 
 const ORDER_COLUMNS = [
-  { id: 'number', label: 'OC', render: ({ order }) => orderLabel(order) },
+  {
+    id: 'number',
+    label: 'OC',
+    sortValue: ({ order }) => orderLabel(order),
+    render: ({ order }) => orderLabel(order),
+  },
   {
     id: 'date',
     label: 'Fecha',
+    sortValue: ({ order }) => order.date,
     width: 100,
     render: ({ order }) => (order.date ? formatIsoDate(order.date) : '—'),
   },
   {
     id: 'status',
     label: 'Estado',
+    sortValue: ({ order }) => CLIENT_ORDER_STATUS_LABELS_ES[order.status],
     width: 100,
     render: ({ order }) => CLIENT_ORDER_STATUS_LABELS_ES[order.status] ?? order.status,
   },
   {
     id: 'lines',
     label: 'Líneas',
+    sortValue: ({ order }) => order.lines.length,
     width: 70,
     align: 'right',
     render: ({ order }) => order.lines.length,
@@ -54,6 +62,7 @@ const ORDER_COLUMNS = [
   {
     id: 'total',
     label: 'Venta',
+    sortValue: ({ total }) => total.amount / 10 ** total.scale,
     width: 120,
     align: 'right',
     render: ({ total, missingPrice }) => <TotalValue total={total} missingPrice={missingPrice} />,
@@ -61,6 +70,8 @@ const ORDER_COLUMNS = [
   {
     id: 'coverage',
     label: 'Cubierto',
+    sortValue: ({ coverage }) =>
+      coverage.orderedQty > 0 ? coverage.coveredQty / coverage.orderedQty : null,
     width: 100,
     align: 'right',
     render: ({ coverage }) => `${coverage.coveredQty} de ${coverage.orderedQty} u`,
@@ -68,6 +79,7 @@ const ORDER_COLUMNS = [
   {
     id: 'margin',
     label: 'Margen estimado',
+    sortValue: ({ coverage }) => coverage.margin?.marginBp,
     width: 150,
     align: 'right',
     render: ({ coverage }) => (
@@ -157,6 +169,13 @@ export default function ClientDetailPage() {
             <ToolbarButton label="Nueva OC" onClick={() => setEditing('order')} />
           </Box>
           <ListTable
+            sortKey="client-detail-orders"
+            searchFields={({ order }) => [
+              order.number,
+              orderLabel(order),
+              CLIENT_ORDER_STATUS_LABELS_ES[order.status],
+            ]}
+            searchPlaceholder="Buscar por OC o estado…"
             columns={ORDER_COLUMNS}
             rows={orders}
             getRowKey={({ order }) => order.id}

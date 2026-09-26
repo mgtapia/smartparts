@@ -17,11 +17,11 @@ import { SUPPLIER_TYPE_LABELS_ES } from '@constants/enums'
 import FactCell from './components/FactCell'
 import { useSuppliers } from './hooks/useSuppliers'
 
-
 const COLUMNS = [
   {
     id: 'supplier',
     label: 'Proveedor',
+    sortValue: ({ supplier }) => supplierLabel(supplier, supplier.id),
     render: ({ supplier }) => (
       <span title={supplier.name}>{supplierLabel(supplier, supplier.id)}</span>
     ),
@@ -29,18 +29,21 @@ const COLUMNS = [
   {
     id: 'type',
     label: 'Tipo',
+    sortValue: ({ supplier }) => supplier.facts?.type?.value,
     width: 110,
     render: ({ supplier }) => <FactCell supplier={supplier} factKey="type" />,
   },
   {
     id: 'formF',
     label: 'Formulario F',
+    sortValue: ({ supplier }) => supplier.facts?.formF?.value,
     width: 110,
     render: ({ supplier }) => <FactCell supplier={supplier} factKey="formF" />,
   },
   {
     id: 'quotes',
     label: 'Cotizaciones',
+    sortValue: ({ quotations }) => quotations.length,
     width: 100,
     align: 'right',
     render: ({ quotations }) => quotations.length,
@@ -48,6 +51,7 @@ const COLUMNS = [
   {
     id: 'parts',
     label: 'Repuestos',
+    sortValue: ({ partCount }) => partCount,
     width: 90,
     align: 'right',
     tooltip: 'Repuestos distintos cotizados: una pieza con OEM y AFM cuenta una sola vez.',
@@ -56,6 +60,7 @@ const COLUMNS = [
   {
     id: 'cheapest',
     label: 'Más barato',
+    sortValue: ({ stats }) => stats?.cheapest,
     width: 100,
     align: 'right',
     tooltip:
@@ -65,6 +70,7 @@ const COLUMNS = [
   {
     id: 'over',
     label: 'Sobrecosto',
+    sortValue: ({ stats }) => stats?.overBp,
     width: 100,
     align: 'right',
     tooltip:
@@ -74,6 +80,7 @@ const COLUMNS = [
   {
     id: 'oem',
     label: 'OEM',
+    sortValue: ({ stats }) => stats?.oem,
     width: 70,
     align: 'right',
     tooltip: 'Repuestos del Dongfeng E70 que ofrece como OEM.',
@@ -82,6 +89,7 @@ const COLUMNS = [
   {
     id: 'afm',
     label: 'AFM',
+    sortValue: ({ stats }) => stats?.afm,
     width: 70,
     align: 'right',
     tooltip: 'Repuestos del Dongfeng E70 que ofrece como AFM.',
@@ -131,9 +139,14 @@ export default function SuppliersPage() {
     <ContentWidth>
       <PageHeader title="Proveedores" />
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch value={search} onChange={setSearch} placeholder="Buscar por proveedor, alias o tipo…" />
+        <ToolbarSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por proveedor, alias o tipo…"
+        />
       </Box>
       <ListTable
+        sortKey="suppliers"
         columns={COLUMNS}
         rows={filtered}
         getRowKey={({ supplier }) => supplier.id}

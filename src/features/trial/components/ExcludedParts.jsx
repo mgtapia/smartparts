@@ -21,6 +21,7 @@ const COLUMNS = [
   {
     id: 'name',
     label: 'Repuesto',
+    sortValue: (r) => r.name,
     render: (r) => (
       <>
         {r.name}
@@ -30,10 +31,17 @@ const COLUMNS = [
       </>
     ),
   },
-  { id: 'reasons', label: 'Motivo', width: 280, render: (r) => r.reasons.join('; ') },
+  {
+    id: 'reasons',
+    label: 'Motivo',
+    sortValue: (r) => r.reasons.join('; '),
+    width: 280,
+    render: (r) => r.reasons.join('; '),
+  },
   {
     id: 'kg',
     label: 'Kg cobrables',
+    sortValue: (r) => r.kg,
     width: 100,
     align: 'right',
     render: (r) => dash(r.kg, (v) => v.toLocaleString('es-CL')),
@@ -41,6 +49,7 @@ const COLUMNS = [
   {
     id: 'cost',
     label: 'Costo en Chile',
+    sortValue: (r) => r.costClp,
     width: 120,
     align: 'right',
     render: (r) => dash(r.costClp, (v) => red(formatClp(v))),
@@ -48,6 +57,7 @@ const COLUMNS = [
   {
     id: 'baseline',
     label: 'Cliente hoy',
+    sortValue: (r) => r.baselineClp,
     width: 120,
     align: 'right',
     render: (r) => dash(r.baselineClp, formatClp),
@@ -55,6 +65,7 @@ const COLUMNS = [
   {
     id: 'diff',
     label: 'Diferencia',
+    sortValue: (r) => r.diffBp,
     width: 110,
     align: 'right',
     render: (r) =>
@@ -65,6 +76,7 @@ const COLUMNS = [
   {
     id: 'extra',
     label: 'Sobrecosto total',
+    sortValue: (r) => r.extraClp,
     width: 130,
     align: 'right',
     render: (r) => (r.extraClp ? red(formatClpMillions(r.extraClp)) : '—'),
@@ -117,6 +129,9 @@ export default function ExcludedParts({ logistics, limit }) {
         </InfoGrid>
       </Card>
       <ListTable
+        sortKey="excluded-parts"
+        searchFields={(r) => [r.name, r.reasons.join(' ')]}
+        searchPlaceholder="Buscar por repuesto o motivo…"
         columns={COLUMNS}
         rows={rows}
         getRowKey={(r) => r.partId}

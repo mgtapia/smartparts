@@ -31,6 +31,7 @@ export default function FilterPanel({
   priceBounds,
   priceRange,
   setPriceRange,
+  extraFilters = [],
   hasActiveFilters,
   onClearAll,
 }) {
@@ -106,6 +107,21 @@ export default function FilterPanel({
           ))}
         </FormGroup>
       </FilterChip>
+
+      {extraFilters.map((f) => (
+        <FilterChip key={f.key} label={f.label} activeCount={f.selected.length}>
+          <FormGroup sx={{ gap: 0.5 }}>
+            {f.options.map((o) => (
+              <CheckboxRow
+                key={o.value}
+                checked={f.selected.includes(o.value)}
+                onChange={() => f.toggle(o.value)}
+                label={o.label}
+              />
+            ))}
+          </FormGroup>
+        </FilterChip>
+      ))}
 
       <FilterChip label="Precio" activeCount={priceActive ? 1 : 0} minWidth={260}>
         <Typography variant="caption" color="text.secondary">

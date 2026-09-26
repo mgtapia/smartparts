@@ -142,6 +142,7 @@ export default function PartDetailPage() {
     {
       id: 'supplier',
       label: 'Proveedor',
+      sortValue: ({ quote }) => supplierLabel(quote.supplier, quote.supplierId),
       render: ({ quote }) => supplierLabel(quote.supplier, quote.supplierId),
     },
     ...(hasVariants
@@ -149,6 +150,7 @@ export default function PartDetailPage() {
           {
             id: 'variant',
             label: 'Variante',
+            sortValue: ({ quote }) => quote.variant,
             width: 130,
             render: ({ quote }) => quote.variant ?? '—',
           },
@@ -157,6 +159,7 @@ export default function PartDetailPage() {
     {
       id: 'quality',
       label: 'Calidad',
+      sortValue: ({ quote }) => quote.partType,
       width: 90,
       render: ({ quote }) => (
         <UncertainValue
@@ -172,6 +175,7 @@ export default function PartDetailPage() {
     {
       id: 'incoterm',
       label: 'Incoterm',
+      sortValue: ({ quote }) => quote.incoterm,
       width: 100,
       render: ({ quote }) => (
         <UncertainValue
@@ -191,6 +195,7 @@ export default function PartDetailPage() {
     {
       id: 'price',
       label: 'Precio',
+      sortValue: ({ priceMicro }) => priceMicro,
       width: 100,
       align: 'right',
       tooltip:
@@ -211,6 +216,7 @@ export default function PartDetailPage() {
     {
       id: 'landed',
       label: 'Costo final',
+      sortValue: ({ cost }) => cost.landedNetUsdMicro,
       width: 100,
       align: 'right',
       tooltip:
@@ -326,6 +332,7 @@ export default function PartDetailPage() {
 
       {tab === PART_TABS.QUOTES ? (
         <ListTable
+          sortKey="part-quotes"
           columns={quoteColumns}
           rows={rows}
           getRowKey={({ quote }) => quote.id}

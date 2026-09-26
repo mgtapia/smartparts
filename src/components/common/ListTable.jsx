@@ -1,10 +1,17 @@
 'use client'
 
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ToolbarSearch from '@components/common/ToolbarSearch'
+import { usePersistentState } from '@hooks/usePersistentState'
+import { makeMatcher } from '@libs/textSearch'
+import { nextSort, sortRows } from '@libs/sortRows'
 import { RADIUS } from '@constants/colors'
 
 const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
@@ -16,7 +23,7 @@ const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
  * hace scroll horizontal ni pasa del ancho de la pantalla: si falta espacio,
  * las columnas se achican y el texto se corta con puntos suspensivos.
  *
- * Cada columna: `{ id, label, width?, align?, tooltip?, render(row) }`. La
+ * Cada columna: `{ id, label, width?, align?, tooltip?, sortValue?, render(row) }`. La
  * primera sin `width` es la principal y se estira con lo que sobra. Una fila
  * con `getRowHref` se vuelve un link.
  *
@@ -27,6 +34,18 @@ const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
  * @param {(row: any) => string} [props.getRowHref]
  * @param {(row: any) => void} [props.onRowClick]  La fila es clicable (ej. elegir un escenario).
  * @param {string} [props.selectedKey]  Clave de la fila elegida, resaltada.
+ * Orden: una columna con `sortValue(row)` se ordena con un clic en su encabezado (ascendente,
+ * descendente y sin orden). `defaultSort` es el orden inicial; con `sortKey` la elección se
+ * recuerda en el navegador.
+ *
+ * Búsqueda: con `searchFields(row)` (lista de textos de la fila) la tabla trae su propio buscador,
+ * con las mismas reglas que el resto de la app (sin tildes, todas las palabras, códigos sin guiones).
+ *
+ * @param {Object} props.columns  (ver arriba)
+ * @param {{ id: string, dir: 'asc'|'desc' }} [props.defaultSort]
+ * @param {string} [props.sortKey]
+ * @param {(row: any) => Array<string|null|undefined>} [props.searchFields]
+ * @param {string} [props.searchPlaceholder]
  * @param {string} [props.emptyText]
  */
 export default function ListTable({
@@ -36,8 +55,30 @@ export default function ListTable({
   getRowHref,
   onRowClick,
   selectedKey,
+  defaultSort,
+  sortKey,
+  searchFields,
+  searchPlaceholder = 'Buscar…',
   emptyText = 'Sin resultados.',
 }) {
+  const persistedSort = usePersistentState(`table.sort.${sortKey ?? 'off'}`, null)
+  const localSort = useState(null)
+  const [sort, setSort] = sortKey ? persistedSort : localSort
+  const [query, setQuery] = useState('')
+  const activeSort = sort ?? defaultSort ?? null
+
+  const visible = useMemo(() => {
+    let out = rows
+    if (searchFields && query.trim()) {
+      const matches = makeMatcher(query)
+      out = out.filter((row) => matches(searchFields(row)))
+    }
+    const column = columns.find((c) => c.id === activeSort?.id)
+    return column?.sortValue ? sortRows(out, column.sortValue, activeSort.dir) : out
+    // `searchFields` y `columns` se arman en cada render de la pantalla: dependen de las filas.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, query, activeSort?.id, activeSort?.dir])
+
   const cellSx = (c) => ({
     flex: c.width ? `0 1 ${c.width}px` : `1 1 ${MAIN_BASIS}px`,
     minWidth: 0,
@@ -47,7 +88,7 @@ export default function ListTable({
     textAlign: c.align === 'right' ? 'right' : 'left',
   })
 
-  return (
+  const table = (
     <Card sx={{ p: 0.75, overflow: 'hidden' }}>
       <Box>
         <Box>
@@ -64,14 +105,35 @@ export default function ListTable({
             }}
           >
             {columns.map((c) => {
+              const sortable = Boolean(c.sortValue)
+              const sorted = activeSort?.id === c.id ? activeSort.dir : null
+              const Arrow = sorted === 'desc' ? ArrowDownwardIcon : ArrowUpwardIcon
               const head = (
                 <Typography
                   key={c.id}
                   variant="overline"
-                  color="text.secondary"
-                  sx={{ ...cellSx(c), lineHeight: 1, cursor: c.tooltip ? 'help' : undefined }}
+                  color={sorted ? 'text.primary' : 'text.secondary'}
+                  {...(sortable
+                    ? {
+                        role: 'button',
+                        tabIndex: 0,
+                        'aria-sort': { asc: 'ascending', desc: 'descending' }[sorted] ?? 'none',
+                        onClick: () => setSort(nextSort(activeSort, c.id)),
+                        onKeyDown: (e) => e.key === 'Enter' && setSort(nextSort(activeSort, c.id)),
+                      }
+                    : {})}
+                  sx={{
+                    ...cellSx(c),
+                    lineHeight: 1,
+                    cursor: sortable ? 'pointer' : c.tooltip ? 'help' : undefined,
+                    userSelect: 'none',
+                    '&:hover': sortable ? { color: 'text.primary' } : undefined,
+                  }}
                 >
                   {c.label}
+                  {sorted ? (
+                    <Arrow sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'text-bottom' }} />
+                  ) : null}
                 </Typography>
               )
               return c.tooltip ? (
@@ -84,12 +146,12 @@ export default function ListTable({
             })}
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {rows.length === 0 ? (
+            {visible.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
                 {emptyText}
               </Typography>
             ) : (
-              rows.map((row) => {
+              visible.map((row) => {
                 const href = getRowHref?.(row)
                 return (
                   <Box
@@ -130,5 +192,15 @@ export default function ListTable({
         </Box>
       </Box>
     </Card>
+  )
+
+  if (!searchFields) return table
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box>
+        <ToolbarSearch value={query} onChange={setQuery} placeholder={searchPlaceholder} />
+      </Box>
+      {table}
+    </Box>
   )
 }

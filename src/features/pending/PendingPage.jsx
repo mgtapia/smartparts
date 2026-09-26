@@ -47,10 +47,11 @@ export default function PendingPage() {
   }
 
   const pendingColumns = [
-    { id: 'label', label: 'Pendiente', render: (p) => p.label },
+    { id: 'label', label: 'Pendiente', sortValue: (p) => p.label, render: (p) => p.label },
     {
       id: 'count',
       label: 'Cantidad',
+      sortValue: (p) => p.count,
       width: 90,
       align: 'right',
       render: (p) => (
@@ -67,11 +68,12 @@ export default function PendingPage() {
       : step.progress
 
   const milestoneColumns = [
-    { id: 'label', label: 'Paso', render: (s) => s.label },
+    { id: 'label', label: 'Paso', sortValue: (s) => s.label, render: (s) => s.label },
     { id: 'progress', label: 'Avance', width: 180, render: (s) => stepProgress(s) },
     {
       id: 'state',
       label: 'Estado',
+      sortValue: (s) => (s.done ? 1 : 0),
       width: 100,
       render: (s) => (
         <UncertainValue verified={s.done} reason="Falta cumplirlo o registrarlo">
@@ -139,6 +141,7 @@ export default function PendingPage() {
 
       {tab === PENDING_TABS.PENDING ? (
         <ListTable
+          sortKey="pending"
           columns={pendingColumns}
           rows={pending}
           getRowKey={(p) => p.id}
@@ -149,6 +152,7 @@ export default function PendingPage() {
 
       {tab === PENDING_TABS.MILESTONE ? (
         <ListTable
+          sortKey="milestones"
           columns={milestoneColumns}
           rows={steps}
           getRowKey={(s) => s.id}

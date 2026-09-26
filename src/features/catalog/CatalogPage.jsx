@@ -243,6 +243,7 @@ export default function CatalogPage() {
     currency,
     setCurrency,
     seaFormat,
+    extraFilters,
     loading,
     error,
   } = useCatalog()
@@ -394,6 +395,7 @@ export default function CatalogPage() {
             codeStatuses={codeStatuses}
             codeStatusFilters={codeStatusFilters}
             toggleCodeStatusFilter={toggleCodeStatusFilter}
+            extraFilters={extraFilters}
             priceBounds={priceBounds}
             priceRange={priceRange}
             setPriceRange={setPriceRange}

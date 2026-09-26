@@ -74,13 +74,33 @@ export default function AirTrialPage() {
   ]
 
   const purchaseColumns = [
-    { id: 'name', label: 'Repuesto', render: (i) => i.name },
-    { id: 'supplier', label: 'Proveedor', width: 90, render: (i) => abbr(i.supplierId) },
-    { id: 'quality', label: 'Calidad', width: 70, render: (i) => i.quality },
-    { id: 'qty', label: 'Cant.', width: 60, align: 'right', render: (i) => i.qty },
+    { id: 'name', label: 'Repuesto', sortValue: (i) => i.name, render: (i) => i.name },
+    {
+      id: 'supplier',
+      label: 'Proveedor',
+      sortValue: (i) => abbr(i.supplierId),
+      width: 90,
+      render: (i) => abbr(i.supplierId),
+    },
+    {
+      id: 'quality',
+      label: 'Calidad',
+      sortValue: (i) => i.quality,
+      width: 70,
+      render: (i) => i.quality,
+    },
+    {
+      id: 'qty',
+      label: 'Cant.',
+      sortValue: (i) => i.qty,
+      width: 60,
+      align: 'right',
+      render: (i) => i.qty,
+    },
     {
       id: 'cost',
       label: 'Costo aéreo',
+      sortValue: (i) => i.fullUnitCostClp,
       width: 125,
       align: 'right',
       render: (i) => red(formatClp(i.fullUnitCostClp)),
@@ -88,6 +108,7 @@ export default function AirTrialPage() {
     {
       id: 'price',
       label: 'PVP neto',
+      sortValue: (i) => i.sale.priceClp,
       width: 125,
       align: 'right',
       render: (i) => red(formatClp(i.sale.priceClp)),
@@ -95,6 +116,7 @@ export default function AirTrialPage() {
     {
       id: 'baseline',
       label: 'Precio REF',
+      sortValue: (i) => i.unitBaselineClp,
       width: 125,
       align: 'right',
       render: (i) => formatClp(i.unitBaselineClp),
@@ -102,6 +124,7 @@ export default function AirTrialPage() {
     {
       id: 'saving',
       label: 'Ahorro',
+      sortValue: (i) => i.unitBaselineClp - i.sale.priceClp,
       width: 125,
       align: 'right',
       render: (i) => red(formatClp(i.unitBaselineClp - i.sale.priceClp)),
@@ -212,6 +235,9 @@ export default function AirTrialPage() {
             />
           </Box>
           <ListTable
+            sortKey="trial-purchase"
+            searchFields={(i) => [i.name, abbr(i.supplierId), i.quality]}
+            searchPlaceholder="Buscar por repuesto, proveedor o calidad…"
             columns={purchaseColumns}
             rows={purchase}
             getRowKey={(i) => i.partId}

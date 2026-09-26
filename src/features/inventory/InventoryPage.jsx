@@ -14,12 +14,17 @@ import { formatIsoDate } from '@libs/dates'
 import InventoryDialog from './components/InventoryDialog'
 import { useInventory } from './hooks/useInventory'
 
-
 const COLUMNS = [
-  { id: 'part', label: 'Repuesto', render: ({ entry, part }) => part?.nameEs ?? entry.partId },
+  {
+    id: 'part',
+    label: 'Repuesto',
+    sortValue: ({ entry, part }) => part?.nameEs ?? entry.partId,
+    render: ({ entry, part }) => part?.nameEs ?? entry.partId,
+  },
   {
     id: 'code',
     label: 'Código',
+    sortValue: ({ part }) => part?.code,
     width: 140,
     render: ({ part }) => (
       <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
@@ -27,10 +32,17 @@ const COLUMNS = [
       </Box>
     ),
   },
-  { id: 'location', label: 'Ubicación', width: 180, render: ({ entry }) => entry.location ?? '—' },
+  {
+    id: 'location',
+    label: 'Ubicación',
+    sortValue: ({ entry }) => entry.location,
+    width: 180,
+    render: ({ entry }) => entry.location ?? '—',
+  },
   {
     id: 'quantity',
     label: 'Cantidad',
+    sortValue: ({ entry }) => entry.quantity,
     width: 90,
     align: 'right',
     render: ({ entry }) => entry.quantity.toLocaleString('es-CL'),
@@ -38,6 +50,7 @@ const COLUMNS = [
   {
     id: 'updated',
     label: 'Actualizado',
+    sortValue: ({ entry }) => entry.updatedAt,
     width: 110,
     render: ({ entry }) => (entry.updatedAt ? formatIsoDate(entry.updatedAt) : '—'),
   },
@@ -99,6 +112,7 @@ export default function InventoryPage() {
         <ToolbarButton label="Agregar stock" onClick={() => setDialog(true)} />
       </Box>
       <ListTable
+        sortKey="inventory"
         columns={COLUMNS}
         rows={filtered}
         getRowKey={({ entry }) => entry.id}

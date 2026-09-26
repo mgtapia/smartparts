@@ -24,8 +24,10 @@ connector_runs/      salud de los jobs de sourcing
 shipments/           embarques (+ /lines, /events, /documents)
 costing_scenarios/   escenarios guardados
 cost_param_sets/     parámetros aduaneros versionados e inmutables
+global_settings/     ajustes globales de costo y venta (vista Ajustes), una versión por guardado
 fx_rates/            tipos de cambio por fecha
 clients/             clientes (razón social, RUT, contacto); los crea el usuario desde la UI
+inventory/           stock en Chile por repuesto (`part_id`, `quantity`, `location`); lo carga el usuario desde la UI, una entrada por repuesto
 client_orders/       OC del cliente a SmartDeal (client_id, número de OC, fecha, estado, moneda)
   /client_order_lines/  repuesto, cantidad, precio de venta, fulfillment
 purchase_orders/     OC de SmartDeal a un proveedor (supplier_id, quotation_id, Incoterm, moneda)
@@ -119,6 +121,10 @@ Centinela de unicidad — detecta el caso real encontrado en la planilla: mismo 
 ```json
 { "code": "5705001", "part_ids": ["part_x", "part_y", "part_z"], "flagged_duplicate": true }
 ```
+
+### `global_settings/{id}`
+
+Cada "Aplicar" en la vista Ajustes crea una versión nueva; la vigente es la de `created_at` más reciente (nunca se edita una existente). Campos: `rates` (mapa con lo editable: tarifas de flete, tamaño del embarque, gastos por embarque, aranceles con y sin TLC, márgenes de PVP aéreo y marítimo; sus claves van como en `DEFAULT_UNIT_COST_ASSUMPTIONS`), `vat_bp`, `insurance_rate_bp`, `insurance_markup_bp`, `sea_lcl_wm_kg_per_cbm`, `created_by`, `created_at`. Sin ninguna versión rigen los valores de referencia de `src/mocks/costParams.js`. Los cambios de los modales de parámetros son temporales (estado de la pantalla) y no se guardan.
 
 ### `cost_param_sets/{id}` (resumen — contrato completo en `src/core/costing/types.js` → `CostParamSet`)
 

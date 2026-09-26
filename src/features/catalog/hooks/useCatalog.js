@@ -7,19 +7,30 @@ import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { DEFAULT_FX } from '@mocks/costParams'
 import { CODE_STATUS } from '@constants/enums'
-import { useAirTrial } from '@features/trial/hooks/useAirTrial'
-import { PVP_MARGIN_BP } from '../constants'
+import { SELECTIONS, bestOf, convenience } from '@features/costing/partCostsModel'
+import { usePartCosts } from '@features/costing/hooks/usePartCosts'
+import { supplierAbbr } from '@features/trial/airTrialModel'
+import { supplierLabel } from '@features/quotes/constants'
 
 const PAGE_SIZE = 100
 
-/** PVP: mejor costo original puesto en Chile más el margen, y el proveedor que lo da. */
-function pvpOf(trial, partId) {
-  const best = trial?.partCosts?.[partId]?.original
-  if (!best) return { pvpClp: null, pvpUsd: null, pvpSupplier: null }
-  const amount = Math.round((best.costClp * (10000 + PVP_MARGIN_BP)) / 10000)
+/**
+ * PVP en un modo de envío: mejor costo original puesto en Chile más el margen, el proveedor que lo
+ * da y si conviene importar (el costo no supera lo que el cliente paga hoy por el repuesto).
+ */
+function pvpOf(costs, ctx, part, marginBp) {
+  const best = bestOf(costs, part.id, SELECTIONS.OEM)
+  if (!best) return { pvpClp: null, pvpUsd: null, supplier: null, worthIt: null }
+  const costClp = ctx.toClp(best.usdMicro)
+  const amount = Math.round((costClp * (10000 + marginBp)) / 10000)
   const pvpClp = { amount, currency: 'CLP', scale: 0 }
-  const supplier = trial.suppliers.find((s) => s.id === best.supplierId)
-  return { pvpClp, pvpUsd: clpToUsd(pvpClp, DEFAULT_FX), pvpSupplier: supplier?.abbr ?? null }
+  const supplier = ctx.suppliers.find((x) => x.id === best.supplierId)
+  return {
+    pvpClp,
+    pvpUsd: clpToUsd(pvpClp, DEFAULT_FX),
+    supplier: supplier ? supplierAbbr(supplierLabel(supplier, supplier.id)) : null,
+    worthIt: convenience(costClp, part.baselinePrice?.amount ?? null),
+  }
 }
 
 export const CURRENCIES = Object.freeze({ USD: 'USD', CLP: 'CLP' })
@@ -89,12 +100,13 @@ export function useCatalog() {
   } = useCachedQuery('vehicles', listVehicles)
   const vehicles = useMemo(() => vehicleData ?? [], [vehicleData])
   // El PVP depende del costo en Chile, que solo existe con cotizaciones; no bloquea el catálogo.
-  const { data: trial } = useAirTrial()
+  const { costs, suppliers: costSuppliers, toClp, rates } = usePartCosts()
   const loading = partsLoading || vehiclesLoading
   const error = partsError || vehiclesError
 
   const allRows = useMemo(() => {
     if (!partsData) return []
+    const ctx = { suppliers: costSuppliers, toClp }
     return partsData.map((p) => {
       const categoryTopPath = p.categoryPath.split('__')[0]
       // Se guardan ambas monedas del precio de referencia — la tabla
@@ -116,10 +128,11 @@ export function useCatalog() {
         codeStatus: p.codeStatus,
         baselinePriceUsd,
         baselinePriceClp: p.baselinePrice,
-        ...pvpOf(trial, p.id),
+        pvpAir: pvpOf(costs?.air, ctx, p, rates.pvpMarginAirBp),
+        pvpSea: pvpOf(costs?.sea, ctx, p, rates.pvpMarginSeaBp),
       }
     })
-  }, [partsData, trial])
+  }, [partsData, costs, costSuppliers, toClp, rates])
 
   // Límites reales del baseline (USD) para el slider de precio — se recalculan
   // solo cuando llegan los datos, no en cada render.

@@ -18,9 +18,10 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import Tooltip from '@mui/material/Tooltip'
 import Divider from '@mui/material/Divider'
 import Link from 'next/link'
-import UncertainValue from '@components/common/UncertainValue'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import InfoNote from '@components/common/InfoNote'
+import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
@@ -54,10 +55,8 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 100, supplier: 80 }
+const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 110, supplier: 90 }
 const REPUESTO_MIN_WIDTH = 220
-const PVP_REASON =
-  'Costo original puesto en Chile por avión (tarifas de referencia, pesos sin confirmar) más 30 % de margen.'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -68,6 +67,35 @@ const CODE_STATUS_COLOR = {
   confirmed: 'success.main',
   provisional: 'warning.main',
   missing: 'error.main',
+}
+
+// Verde si conviene importar (el costo puesto en Chile no supera lo que el cliente paga hoy),
+// rojo si no conviene, gris si falta el costo o el precio de referencia.
+const PVP_NOTES = [
+  'PVP neto, sin IVA: el mejor costo de la pieza original puesta en Chile, por avión y por barco (marítimo LCL), más el margen de cada modo (se edita en Ajustes). El proveedor es el que da ese costo.',
+  'Verde: conviene importar, el costo no supera lo que el cliente paga hoy. Rojo: no conviene. Gris: falta el costo o el precio de referencia.',
+  'Son estimaciones con tarifas de referencia y pesos sin confirmar, no cotizaciones de un forwarder.',
+]
+
+const WORTH_COLOR = { true: 'success.main', false: 'error.main' }
+
+function PvpCell({ pvp, currency }) {
+  return (
+    <Box
+      sx={{
+        flex: `0 1 ${COL_WIDTH.pvp}px`,
+        textAlign: 'right',
+        fontSize: 13,
+        color: WORTH_COLOR[pvp.worthIt] ?? 'text.secondary',
+      }}
+    >
+      {pvp.pvpClp ? (
+        <MoneyValue money={currency === CURRENCIES.USD ? pvp.pvpUsd : pvp.pvpClp} />
+      ) : (
+        '—'
+      )}
+    </Box>
+  )
 }
 
 function CatalogRow({ r, isColumnVisible, currency }) {
@@ -166,25 +194,19 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           sx={{ flex: `0 1 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
         />
       ) : null}
-      {isColumnVisible('pvp') ? (
-        <Box sx={{ flex: `0 1 ${COL_WIDTH.pvp}px`, textAlign: 'right', fontSize: 13 }}>
-          {r.pvpClp ? (
-            <UncertainValue verified={false} reason={PVP_REASON}>
-              <MoneyValue money={currency === CURRENCIES.USD ? r.pvpUsd : r.pvpClp} />
-            </UncertainValue>
-          ) : (
-            '—'
-          )}
-        </Box>
-      ) : null}
+      {isColumnVisible('pvpAir') ? <PvpCell pvp={r.pvpAir} currency={currency} /> : null}
+      {isColumnVisible('pvpSea') ? <PvpCell pvp={r.pvpSea} currency={currency} /> : null}
       {isColumnVisible('supplier') ? (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ flex: `0 1 ${COL_WIDTH.supplier}px` }}
-        >
-          {r.pvpSupplier ?? '—'}
-        </Typography>
+        <Box sx={{ flex: `0 1 ${COL_WIDTH.supplier}px`, minWidth: 0, display: 'flex', gap: 0.5 }}>
+          {[...new Set([r.pvpAir.supplier, r.pvpSea.supplier].filter(Boolean))].map((abbr) => (
+            <Pill key={abbr} label={abbr} />
+          ))}
+          {!r.pvpAir.supplier && !r.pvpSea.supplier ? (
+            <Typography variant="caption" color="text.secondary">
+              —
+            </Typography>
+          ) : null}
+        </Box>
       ) : null}
     </Box>
   )
@@ -193,8 +215,6 @@ function CatalogRow({ r, isColumnVisible, currency }) {
 export default function CatalogPage() {
   const {
     rows,
-    filteredCount,
-    totalCount,
     page,
     setPage,
     pageCount,
@@ -268,7 +288,7 @@ export default function CatalogPage() {
 
   return (
     <ContentWidth full>
-      <PageHeader title="Catálogo" meta={`${filteredCount} de ${totalCount} repuestos.`} />
+      <PageHeader title="Repuestos" />
 
       {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
           columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).
@@ -354,6 +374,7 @@ export default function CatalogPage() {
             ) : null}
           </IconButton>
         </Tooltip>
+        <InfoNote paragraphs={PVP_NOTES} />
       </Box>
 
       {filtersOpen ? (
@@ -460,40 +481,55 @@ export default function CatalogPage() {
                 </Typography>
               ) : null}
               {isColumnVisible('baseline') ? (
-                <Tooltip title="Precio neto que paga hoy el cliente en Chile — no es un precio FOB ni CIF de sourcing.">
-                  <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    sx={{
-                      flex: `0 1 ${COL_WIDTH.baseline}px`,
-                      lineHeight: 1,
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      textAlign: 'right',
-                      cursor: 'help',
-                    }}
-                  >
-                    Precio REF
-                  </Typography>
-                </Tooltip>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.baseline}px`,
+                    lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right',
+                  }}
+                >
+                  Precio REF
+                </Typography>
               ) : null}
-              {isColumnVisible('pvp') ? (
-                <Tooltip title="Nuestro precio de venta: mejor costo original puesto en Chile más 30 % de margen.">
-                  <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    sx={{
-                      flex: `0 1 ${COL_WIDTH.pvp}px`,
-                      lineHeight: 1,
-                      textAlign: 'right',
-                      cursor: 'help',
-                    }}
-                  >
-                    PVP
-                  </Typography>
-                </Tooltip>
+              {isColumnVisible('pvpAir') ? (
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.pvp}px`,
+                    lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right',
+                  }}
+                >
+                  PVP aéreo
+                </Typography>
+              ) : null}
+              {isColumnVisible('pvpSea') ? (
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.pvp}px`,
+                    lineHeight: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right',
+                  }}
+                >
+                  PVP marítimo
+                </Typography>
               ) : null}
               {isColumnVisible('supplier') ? (
                 <Typography

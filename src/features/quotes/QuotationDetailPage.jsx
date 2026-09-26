@@ -68,7 +68,7 @@ export default function QuotationDetailPage() {
   const quotationId = useRouteId()
   const { quotations, loading, error, reload } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor } = assumptions
   const [search, setSearch] = useState('')
   const [hidden, setHidden] = usePersistentState(
     'quotes.detail.hiddenColumns',
@@ -96,11 +96,11 @@ export default function QuotationDetailPage() {
           !term || normalize(part.nameEs).includes(term) || normalize(part.code).includes(term),
       )
       .map((line) => {
-        const cost = costLine(line, { mode, rates, settingsFor })
+        const cost = costLine(line, { mode, rates, params, settingsFor })
         return { line, cost, byCode: Object.fromEntries(cost.components.map((c) => [c.code, c])) }
       })
       .sort((a, b) => a.line.part.nameEs.localeCompare(b.line.part.nameEs, 'es'))
-  }, [quotation, term, mode, rates, settingsFor])
+  }, [quotation, term, mode, rates, params, settingsFor])
 
   if (loading) {
     return (
@@ -249,7 +249,6 @@ export default function QuotationDetailPage() {
         back={{ href: '/quotes', label: 'Cotizaciones' }}
         title={supplierLabel(supplier, 'Proveedor')}
         description={quotation.sourceFile ?? 'Sin archivo de origen'}
-        meta={`${rows.length} de ${quotation.lineCount} SKU.`}
         actions={
           <ToolbarButton label="Ficha del proveedor" href={`/suppliers/${quotation.supplierId}`} />
         }

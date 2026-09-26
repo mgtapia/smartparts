@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
-import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
+import { DEFAULT_FX } from '@mocks/costParams'
 import { buildOrder } from '../orderModel'
 
 /** Margen por defecto sobre el costo, en basis points (20 %). Editable. */
@@ -17,7 +17,7 @@ export const DEFAULT_MARGIN_BP = 2000
 export function useCalculator(initialPartId) {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor } = assumptions
 
   const [chosenPartId, setPartId] = useState(initialPartId)
   const [chosenQuoteId, setQuoteId] = useState(null)
@@ -53,13 +53,13 @@ export function useCalculator(initialPartId) {
               settings: settingsFor(quote.supplierId),
               assumptions: rates,
               marginBp,
-              params: DEFAULT_PARAM_SET,
+              params,
               fx: DEFAULT_FX,
             }),
           }
         : { qty: null, order: null },
     )
-  }, [part, quote, quantities, mode, rates, settingsFor, marginBp])
+  }, [part, quote, quantities, mode, rates, params, settingsFor, marginBp])
 
   return {
     loading,

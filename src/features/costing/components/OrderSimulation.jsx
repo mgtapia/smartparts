@@ -47,18 +47,9 @@ export default function OrderSimulation({ tabs }) {
     )
   }
 
-  const totalParts = simulation?.parts.length ?? 0
-
   return (
     <ContentWidth>
-      <PageHeader
-        title="Calculadora"
-        meta={
-          simulation
-            ? `${totalParts} repuestos · ${simulation.units.toLocaleString('es-CL')} unidades.`
-            : undefined
-        }
-      />
+      <PageHeader title="Simulador" />
       {tabs}
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>

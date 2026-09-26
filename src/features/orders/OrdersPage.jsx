@@ -200,8 +200,6 @@ export default function OrdersPage() {
     )
   }
 
-  const shown = isClients ? clientRows.length : purchaseRows.length
-  const total = isClients ? data.clientOrderRows.length : data.purchaseOrderRows.length
   const statusOptions = [
     { value: ALL_STATUSES, label: 'Todos los estados' },
     ...(isClients ? CLIENT_STATUS_OPTIONS : PURCHASE_STATUS_OPTIONS),
@@ -209,7 +207,7 @@ export default function OrdersPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Órdenes de compra" meta={`${shown} de ${total} órdenes.`} />
+      <PageHeader title="Órdenes de compra" />
       <ViewTabs value={view} onChange={changeView} tabs={ORDER_VIEW_TABS} />
 
       {creating && isClients ? (

@@ -26,7 +26,7 @@ export default function PlanCard({ option, data, marginBp }) {
   const best = plan.single[0]
   const supplier = data.suppliers.find((s) => s.id === best.supplierIds[0])
   const price = priceWithMargin(best.costClp, marginBp)
-  const saving = best.savingsClp[marginBp]
+  const saving = best.baselineClp - price
   const profit = price - best.costClp
   const abbrs = (ids) => ids.map((id) => data.suppliers.find((s) => s.id === id).abbr).join(' + ')
   const gainPair = plan.pair

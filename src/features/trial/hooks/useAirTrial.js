@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { listParts } from '@libs/repos/partsRepo'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
-import { DEFAULT_FX, DEFAULT_PARAM_SET } from '@mocks/costParams'
+import { DEFAULT_FX } from '@mocks/costParams'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
 import { buildAirTrial } from '../airTrialModel'
@@ -16,7 +16,7 @@ export function useAirTrial() {
   const parts = useCachedQuery('parts', listParts)
   const suppliers = useCachedQuery('suppliers', listSuppliers)
   const sourcing = useSourcingVehicle()
-  const { rates, settingsFor } = useCostAssumptions()
+  const { rates, params, settingsFor } = useCostAssumptions()
 
   const loading = parts.loading || suppliers.loading || sourcing.loading
   const error = parts.error || suppliers.error || sourcing.error
@@ -28,10 +28,10 @@ export function useAirTrial() {
       suppliers: suppliers.data ?? [],
       settingsFor,
       rates,
-      params: DEFAULT_PARAM_SET,
+      params,
       fx: DEFAULT_FX,
     })
-  }, [loading, error, sourcing.vehicleId, parts.data, suppliers.data, settingsFor, rates])
+  }, [loading, error, sourcing.vehicleId, parts.data, suppliers.data, settingsFor, rates, params])
 
   return { data, loading, error }
 }

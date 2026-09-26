@@ -31,13 +31,12 @@ import {
 } from './partMatrix'
 
 const VIEWS = { LIST: 'proveedor', MATRIX: 'repuesto' }
-const countSuppliers = (list) => new Set(list.map((q) => q.supplierId)).size
 const normalize = (s) => (s ?? '').toString().toLowerCase()
 
 export default function QuotationsPage() {
   const { lines, quotations, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor } = assumptions
   const [view, setView] = useUrlTab(Object.values(VIEWS))
   const [metric, setMetric] = useState(METRICS.PRICE)
   const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
@@ -60,8 +59,10 @@ export default function QuotationsPage() {
 
   const matrix = useMemo(
     () =>
-      isMatrix ? buildMatrix(lines, metric, term, quality, { mode, rates, settingsFor }) : null,
-    [isMatrix, lines, metric, term, quality, mode, rates, settingsFor],
+      isMatrix
+        ? buildMatrix(lines, metric, term, quality, { mode, rates, params, settingsFor })
+        : null,
+    [isMatrix, lines, metric, term, quality, mode, rates, params, settingsFor],
   )
 
   if (loading) {
@@ -81,14 +82,7 @@ export default function QuotationsPage() {
 
   return (
     <ContentWidth>
-      <PageHeader
-        title="Cotizaciones"
-        meta={
-          isMatrix
-            ? `${matrix.rows.length} repuestos cotizados${quality === QUALITY_FILTERS.ANY ? '' : ` · ${matrix.rows.filter((r) => r.offers > 0).length} con oferta ${quality === QUALITY_FILTERS.OEM ? 'OEM' : 'AFM'}`}.`
-            : `${countSuppliers(filteredQuotations)} de ${countSuppliers(quotations)} proveedores.`
-        }
-      />
+      <PageHeader title="Cotizaciones" />
 
       <ViewTabs
         value={view}

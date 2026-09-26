@@ -1,10 +1,10 @@
-import Placeholder from '@components/common/Placeholder'
+import { Suspense } from 'react'
+import SettingsPage from '@features/settings/SettingsPage'
 
-export default function SettingsPage() {
+export default function Page() {
   return (
-    <Placeholder
-      title="Ajustes"
-      description="Parámetros aduaneros, tipos de cambio, usuarios y roles."
-    />
+    <Suspense>
+      <SettingsPage />
+    </Suspense>
   )
 }

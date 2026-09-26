@@ -7,7 +7,7 @@ export const POPOVER_TEXT_WIDTH = 360 // ancho máximo del texto en un popover i
 export const RAIL_WIDTH = 68
 export const RAIL_WIDTH_EXPANDED = 208
 export const IMAGE_PREVIEW_HEIGHT = 240 // alto máximo de la vista previa de una imagen en un modal
-export const PART_IMAGE_SIZE = 96 // lado de la miniatura del repuesto en su ficha
+export const PART_IMAGE_SIZE = 58.25 // lado de la miniatura del repuesto en su ficha
 
 export const GRID_GAP = 16
 export const SIDEBAR_GAP = 14
@@ -24,3 +24,7 @@ export function px(value) {
   return `${value}px`
 }
 export const VEHICLE_IMAGE_WIDTH = 120 // ancho de la imagen del vehículo en su ficha
+export const TOPBAR_HEIGHT = 56 // alto de la barra superior
+export const SEARCH_MAX_WIDTH = 640 // ancho máximo del buscador global de la barra superior
+export const CONTENT_GAP = 12 // separación entre la ventana de contenido y los bordes de la barra y el menú
+export const CONTENT_RADIUS = 16 // esquinas redondeadas de la ventana de contenido

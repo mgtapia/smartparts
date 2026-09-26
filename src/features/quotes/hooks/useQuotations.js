@@ -39,7 +39,7 @@ export function priceUsdMicro(quote) {
  * Costo unitario de una línea (una cotización de un proveedor para una pieza)
  * con los supuestos vigentes. Un precio sin moneda no se costea.
  */
-export function costLine(line, { mode, rates, settingsFor }) {
+export function costLine(line, { mode, rates, params = DEFAULT_PARAM_SET, settingsFor }) {
   const { quote, part } = line
   if (!quote.currency) {
     return { blockers: ['Moneda sin definir'], components: [], landedNetUsdMicro: null }
@@ -62,7 +62,7 @@ export function costLine(line, { mode, rates, settingsFor }) {
     logisticsConfirmed: CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus),
     mode,
     assumptions: rates,
-    params: DEFAULT_PARAM_SET,
+    params,
     fx: DEFAULT_FX,
   })
 }

@@ -93,7 +93,7 @@ export default function ClientsPage() {
 
   return (
     <ContentWidth>
-      <PageHeader title="Clientes" meta={`${filtered.length} de ${rows.length} clientes.`} />
+      <PageHeader title="Clientes" />
       {creating ? (
         <ClientDialog
           onClose={() => setCreating(false)}

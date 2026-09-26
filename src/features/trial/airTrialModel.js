@@ -12,7 +12,7 @@ import { toUsdMicro } from '@libs/fx'
 import { computeUnitCost } from '@core/costing/unitCost'
 
 /** Márgenes sobre el costo puesto en Chile, en basis points. */
-export const MARGINS_BP = Array.from({ length: 9 }, (_, i) => i * 500)
+export const MARGINS_BP = Array.from({ length: 5 }, (_, i) => i * 1000)
 export const FOCUS_MARGIN_BP = 2000
 export const TOP_DEMAND = 30
 /** Un precio es atípico si pasa de 3 veces la mediana entre proveedores o queda bajo un tercio. */
@@ -576,9 +576,67 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
     notWorthFlying,
     logistics,
     suspectOfferCount: suspectOffers.size,
+    suspectOfferKeys: [...suspectOffers],
     missingData,
     anomalies,
     scenarios,
     partCosts,
+  }
+}
+
+/** Por qué un repuesto queda fuera del pedido aéreo (según el texto del motivo). */
+export const EXCLUDED_KINDS = Object.freeze({ PRICE: 'price', SIZE: 'size', DG: 'dg' })
+const kindOfReason = (reason) =>
+  /Cuesta más/.test(reason)
+    ? EXCLUDED_KINDS.PRICE
+    : /Bulto/.test(reason)
+      ? EXCLUDED_KINDS.SIZE
+      : /peligrosa/.test(reason)
+        ? EXCLUDED_KINDS.DG
+        : null
+
+/**
+ * Qué tanto más caro sale volar cada repuesto que queda fuera del pedido aéreo, para justificar
+ * por qué se omite. Función pura sobre `logistics` del análisis. Por repuesto: unidades estimadas
+ * (demanda ÷ precio de hoy), diferencia con lo que paga hoy el cliente (pesos y basis points) y
+ * sobrecosto total si se volara (solo cuando cuesta más). Ordenado por sobrecosto y luego por
+ * demanda.
+ *
+ * @param {Array<{ partId: string, name: string, reasons: string[], kg: number|null, costClp: number|null, baselineClp: number|null, demandClp: number }>} logistics
+ */
+export function summarizeExcluded(logistics) {
+  const rows = logistics.map((l) => {
+    const hasBaseline = l.baselineClp != null && l.baselineClp > 0
+    const qty = hasBaseline ? Math.round(l.demandClp / l.baselineClp) : 1
+    const diffClp = hasBaseline && l.costClp != null ? l.costClp - l.baselineClp : null
+    return {
+      ...l,
+      qty,
+      kinds: [...new Set(l.reasons.map(kindOfReason).filter(Boolean))],
+      diffClp,
+      diffBp: diffClp == null ? null : Math.round((diffClp * 10000) / l.baselineClp),
+      extraClp: diffClp != null && diffClp > 0 ? diffClp * qty : 0,
+    }
+  })
+  rows.sort((a, b) => b.extraClp - a.extraClp || b.demandClp - a.demandClp)
+
+  const ofKind = (kind) => rows.filter((r) => r.kinds.includes(kind))
+  const price = ofKind(EXCLUDED_KINDS.PRICE)
+  const bps = price
+    .map((r) => r.diffBp)
+    .filter((v) => v != null)
+    .sort((a, b) => a - b)
+  return {
+    rows,
+    price: {
+      count: price.length,
+      extraClp: price.reduce((sum, r) => sum + r.extraClp, 0),
+      medianBp: bps.length ? bps[Math.floor(bps.length / 2)] : null,
+    },
+    size: {
+      count: ofKind(EXCLUDED_KINDS.SIZE).length,
+      kg: ofKind(EXCLUDED_KINDS.SIZE).reduce((sum, r) => sum + (r.kg ?? 0), 0),
+    },
+    dg: { count: ofKind(EXCLUDED_KINDS.DG).length },
   }
 }

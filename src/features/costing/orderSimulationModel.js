@@ -2,7 +2,7 @@
 // su cantidad) y las ofertas de cada proveedor desde las cotizaciones, y las pasa al plan de
 // compra (`planPurchase`). Función pura: sin React ni Firebase.
 import { planPurchase } from '@core/costing/purchasePlan'
-import { PART_TYPE } from '@constants/enums'
+import { PART_TYPE, SHIPPING_MODES, SHIPPING_MODE_LABELS_ES } from '@constants/enums'
 import { roundHalfUp, toMicros } from '@libs/money'
 import { unitPriceForQty } from './orderModel'
 
@@ -151,4 +151,90 @@ export function simulateOrder({ mode, assumptions, params, ...rest }) {
   })
   const units = inputs.parts.reduce((acc, p) => acc + p.qty, 0)
   return { ...plan, parts: inputs.parts, offers: inputs.offers, notes: inputs.notes, units }
+}
+
+// Escenarios por estrategia de ahorro. Lo que se decide es QUÉ se compra (solo originales o lo
+// más económico de cualquier calidad) y CÓMO se envía (marítimo o aéreo). Dentro de cada uno, el
+// plan elige solo la mejor combinación de proveedores; en marítimo, además, el formato más barato
+// entre LCL y contenedor completo.
+export const TRANSPORT = { SEA: 'sea', AIR: 'air' }
+const TRANSPORT_LABEL_ES = { [TRANSPORT.SEA]: 'Marítimo', [TRANSPORT.AIR]: 'Aéreo' }
+const TRANSPORT_MODES = {
+  [TRANSPORT.SEA]: [SHIPPING_MODES.SEA_LCL, SHIPPING_MODES.SEA_FCL_20, SHIPPING_MODES.SEA_FCL_40HQ],
+  [TRANSPORT.AIR]: [SHIPPING_MODES.AIR],
+}
+export const STRATEGIES = [
+  { id: 'oem', quality: QUALITY.OEM, labelEs: 'Originales' },
+  { id: 'cheapest', quality: QUALITY.ANY, labelEs: 'Más económico' },
+]
+
+/** Gana el que cubre más repuestos y, a igual cobertura, el de menor costo final. */
+export function isBetterPlan(a, b) {
+  if (!b) return true
+  if (a.coveredPartIds.length !== b.coveredPartIds.length) {
+    return a.coveredPartIds.length > b.coveredPartIds.length
+  }
+  return (a.cost.totals.landedNet ?? Infinity) < (b.cost.totals.landedNet ?? Infinity)
+}
+
+/**
+ * Escenario más barato entre los que cubren más repuestos (el que se propone por defecto).
+ * @param {Array<{ id: string, coveredPartIds: string[], cost: any }>} scenarios
+ */
+export function cheapestScenario(scenarios) {
+  return scenarios.reduce((best, s) => (isBetterPlan(s, best) ? s : best), null)
+}
+
+/**
+ * Los cuatro escenarios de ahorro (originales o más económico, por mar o por aire) de una
+ * canasta, cada uno con su mejor combinación de proveedores. Mismo contrato que `simulateOrder`
+ * para la pantalla: `{ blockers, scenarios, parts, offers, notes, units }`.
+ * @param {Object} input  Como `buildPlanInputs` (sin `quality`) más `assumptions` y `params`.
+ */
+export function simulateStrategies({ assumptions, params, ...rest }) {
+  const scenarios = []
+  const blockers = new Set()
+  let base = null
+  for (const strategy of STRATEGIES) {
+    const inputs = buildPlanInputs({ ...rest, quality: strategy.quality })
+    base ??= inputs
+    for (const transport of Object.values(TRANSPORT)) {
+      let chosen = null
+      for (const mode of TRANSPORT_MODES[transport]) {
+        const plan = planPurchase({
+          parts: inputs.parts,
+          offers: inputs.offers,
+          suppliers: inputs.suppliers,
+          mode,
+          assumptions,
+          params,
+          fx: rest.fx,
+          onlyBest: true,
+        })
+        plan.blockers.forEach((b) => blockers.add(b))
+        const best = plan.scenarios[0]
+        if (best && isBetterPlan(best, chosen?.plan)) chosen = { mode, plan: best }
+      }
+      if (!chosen) continue
+      scenarios.push({
+        ...chosen.plan,
+        id: `${strategy.id}-${transport}`,
+        kind: 'strategy',
+        strategyId: strategy.id,
+        transport,
+        mode: chosen.mode,
+        label: `${strategy.labelEs} · ${TRANSPORT_LABEL_ES[transport]}`,
+        modeLabel: SHIPPING_MODE_LABELS_ES[chosen.mode],
+      })
+    }
+  }
+  const units = base.parts.reduce((acc, p) => acc + p.qty, 0)
+  return {
+    blockers: scenarios.length === 0 ? [...blockers] : [],
+    scenarios,
+    parts: base.parts,
+    offers: base.offers,
+    notes: base.notes,
+    units,
+  }
 }

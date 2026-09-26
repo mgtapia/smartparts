@@ -87,6 +87,7 @@ export function shipmentShare(unitChargeable, shipmentChargeable) {
  * @param {number} input.shipmentChargeable      Del embarque típico, en la misma unidad.
  * @param {{ price?: number, cif?: number }} [input.baseMicro]  Bases de los porcentajes, micros de USD.
  * @param {number} [input.unitTons]              Toneladas cobrables por carretera (el mayor entre t y m³).
+ * @param {boolean} [input.withText]  Si es falso no arma los textos de las fórmulas (más rápido).
  * @param {number|null} [input.distanceKm]       Distancia del proveedor al puerto o aeropuerto.
  * @returns {UnitCharge[]}
  */
@@ -99,17 +100,21 @@ export function unitShipmentCharges({
   baseMicro = {},
   unitTons = 0,
   distanceKm = null,
+  withText = true,
 }) {
   const modeKey = givenModeKey ?? (isAir ? 'air' : 'sea')
   if (!charges.some((c) => c.modes.includes(modeKey))) return []
   const share = shipmentShare(unitChargeable, shipmentChargeable)
   const unitLabel = UNIT_LABEL[modeKey]
-  const shipmentLabel =
-    shipmentChargeable > 0
+  const shipmentLabel = !withText
+    ? ''
+    : shipmentChargeable > 0
       ? `${qty(shipmentChargeable)} ${SHIPMENT_UNIT[modeKey]}`
       : 'tamaño sin definir'
   const prorated = (cents) => roundHalfUp(cents * CENT_MICRO * share)
-  const shareEs = `la pieza ocupa ${qty(unitChargeable)} de un embarque de ${shipmentLabel}`
+  const shareEs = withText
+    ? `la pieza ocupa ${qty(unitChargeable)} de un embarque de ${shipmentLabel}`
+    : ''
 
   return charges
     .filter((c) => c.modes.includes(modeKey))
@@ -122,7 +127,9 @@ export function unitShipmentCharges({
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: roundHalfUp(c.amountCents * CENT_MICRO * unitChargeable),
-            formulaEs: `${usd(c.amountCents)} por ${unitLabel} × ${qty(unitChargeable)}`,
+            formulaEs: withText
+              ? `${usd(c.amountCents)} por ${unitLabel} × ${qty(unitChargeable)}`
+              : '',
           }
         case 'percent_min': {
           const byRate = roundHalfUp((base * c.rateBp) / 10000)
@@ -130,7 +137,9 @@ export function unitShipmentCharges({
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: Math.max(byRate, prorated(c.minCents)),
-            formulaEs: `${pct(c.rateBp)} del ${baseEs}, con mínimo de ${usd(c.minCents)} por embarque prorrateado (${shareEs}); se usa el mayor`,
+            formulaEs: withText
+              ? `${pct(c.rateBp)} del ${baseEs}, con mínimo de ${usd(c.minCents)} por embarque prorrateado (${shareEs}); se usa el mayor`
+              : '',
           }
         }
         case 'percent_plus_fixed':
@@ -138,34 +147,41 @@ export function unitShipmentCharges({
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: roundHalfUp((base * c.rateBp) / 10000) + prorated(c.amountCents),
-            formulaEs: `${pct(c.rateBp)} del ${baseEs} + ${usd(c.amountCents)} por embarque prorrateado (${shareEs})`,
+            formulaEs: withText
+              ? `${pct(c.rateBp)} del ${baseEs} + ${usd(c.amountCents)} por embarque prorrateado (${shareEs})`
+              : '',
           }
         case 'distance_min': {
           const km = distanceKm ?? 0
           const byDistance = roundHalfUp(c.rateMicroPerTonKm * unitTons * km)
-          const rateEs = (c.rateMicroPerTonKm / 1e6).toLocaleString('es-CL', {
-            maximumFractionDigits: 3,
-          })
+          const rateEs = withText
+            ? (c.rateMicroPerTonKm / 1e6).toLocaleString('es-CL', { maximumFractionDigits: 3 })
+            : ''
           return {
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: Math.max(byDistance, prorated(c.minCents)),
-            formulaEs: `US$ ${rateEs} por t·km × ${qty(unitTons)} t cobrables × ${qty(km)} km, con mínimo de ${usd(c.minCents)} por embarque prorrateado (${shareEs}); se usa el mayor`,
+            formulaEs: withText
+              ? `US$ ${rateEs} por t·km × ${qty(unitTons)} t cobrables × ${qty(km)} km, con mínimo de ${usd(c.minCents)} por embarque prorrateado (${shareEs}); se usa el mayor`
+              : '',
           }
         }
         case 'container_km': {
           const km = distanceKm ?? 0
           const minMicro = (c.minCents ?? 0) * CENT_MICRO
           const perContainer = Math.max(roundHalfUp(c.rateMicroPerKm * km), minMicro)
-          const rateEs = (c.rateMicroPerKm / 1e6).toLocaleString('es-CL', {
-            maximumFractionDigits: 3,
-          })
-          const minEs = minMicro > 0 ? `, con mínimo de ${usd(c.minCents)} por contenedor` : ''
+          const rateEs = withText
+            ? (c.rateMicroPerKm / 1e6).toLocaleString('es-CL', { maximumFractionDigits: 3 })
+            : ''
+          const minEs =
+            withText && minMicro > 0 ? `, con mínimo de ${usd(c.minCents)} por contenedor` : ''
           return {
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: roundHalfUp(perContainer * unitChargeable),
-            formulaEs: `US$ ${rateEs} por km × ${qty(km)} km por contenedor${minEs}, × ${qty(unitChargeable)} contenedores`,
+            formulaEs: withText
+              ? `US$ ${rateEs} por km × ${qty(km)} km por contenedor${minEs}, × ${qty(unitChargeable)} contenedores`
+              : '',
           }
         }
         default:
@@ -173,7 +189,9 @@ export function unitShipmentCharges({
             code: c.code,
             labelEs: c.labelEs,
             usdMicro: prorated(c.amountCents),
-            formulaEs: `${usd(c.amountCents)} por embarque prorrateado (${shareEs})`,
+            formulaEs: withText
+              ? `${usd(c.amountCents)} por embarque prorrateado (${shareEs})`
+              : '',
           }
       }
     })

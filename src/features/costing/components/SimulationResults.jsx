@@ -14,6 +14,8 @@ import { RADIUS } from '@constants/colors'
 import { PART_TYPE } from '@constants/enums'
 import { formatBp } from '@libs/percent'
 import { supplierLabel } from '@features/quotes/constants'
+import { isFclMode } from '@core/costing/containers'
+import { cheapestScenario } from '../orderSimulationModel'
 
 const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM' }
 
@@ -34,6 +36,7 @@ const pct = (num, den) =>
   den > 0 ? `${(Math.round((num * 1000) / den) / 10).toLocaleString('es-CL')} %` : '—'
 
 export function scenarioLabel(scenario, supplierName) {
+  if (scenario.label) return scenario.label
   if (scenario.kind === 'best') return 'Mejor combinación'
   if (scenario.kind === 'bestOfSize') return `Mejor con ${scenario.supplierIds.length} proveedores`
   return `Solo ${supplierName(scenario.supplierIds[0])}`
@@ -74,6 +77,8 @@ export default function SimulationResults({
   // Colapsado muestra solo el escenario elegido; abierto, todos para cambiar de escenario.
   const [open, setOpen] = useState(false)
   const totalParts = simulation?.parts.length ?? 0
+  // El formato de envío lo elige cada escenario; `isFcl` solo aplica si el escenario no lo trae.
+  const isFclFor = (s) => (s.mode ? isFclMode(s.mode) : Boolean(isFcl))
   const inferredReason = simulation?.notes.inferredOffers
     ? `${ESTIMATE_REASON}. Incluye cotizaciones inferidas del lado opuesto`
     : ESTIMATE_REASON
@@ -143,6 +148,7 @@ export default function SimulationResults({
         },
       ]
 
+  const cheapest = cheapestScenario(simulation.scenarios)
   const scenarioColumns = [
     {
       id: 'scenario',
@@ -154,6 +160,17 @@ export default function SimulationResults({
       label: 'Proveedores',
       render: (s) => s.supplierIds.map(supplierName).join(', '),
     },
+    ...(simulation.scenarios.some((s) => s.modeLabel)
+      ? [
+          {
+            id: 'mode',
+            label: 'Envío',
+            width: 140,
+            tooltip: 'Formato de envío más barato para este escenario.',
+            render: (s) => s.modeLabel ?? '—',
+          },
+        ]
+      : []),
     {
       id: 'coverage',
       label: 'Repuestos',
@@ -168,7 +185,7 @@ export default function SimulationResults({
             )
           : `${s.coveredPartIds.length} de ${totalParts}`,
     },
-    ...(isFcl
+    ...(simulation.scenarios.some(isFclFor)
       ? [
           {
             id: 'containers',
@@ -176,7 +193,7 @@ export default function SimulationResults({
             width: 110,
             align: 'right',
             tooltip: 'Contenedores que alcanzan para el volumen y el peso del escenario.',
-            render: (s) => red(s.cost.containers ?? '—', CONTAINERS_REASON),
+            render: (s) => (isFclFor(s) ? red(s.cost.containers ?? '—', CONTAINERS_REASON) : '—'),
           },
         ]
       : []),
@@ -189,19 +206,26 @@ export default function SimulationResults({
       render: (s) => money(s.cost.totals.goods),
     },
     {
-      id: 'extra',
-      label: 'Gastos',
-      width: 110,
-      align: 'right',
-      tooltip: 'Todo lo que se suma a la mercadería hasta la bodega en Chile, sin IVA.',
-      render: (s) => red(money(s.cost.totals.landedNet - s.cost.totals.goods), inferredReason),
-    },
-    {
       id: 'landed',
       label: 'Costo final',
       width: 120,
       align: 'right',
       render: (s) => red(money(s.cost.totals.landedNet), inferredReason),
+    },
+    {
+      id: 'versus',
+      label: 'Sobre el más barato',
+      width: 130,
+      align: 'right',
+      tooltip:
+        'Cuánto más cuesta este escenario que el más barato entre los que cubren más repuestos.',
+      render: (s) => {
+        if (!cheapest) return '—'
+        if (s.id === cheapest.id) return 'Más barato'
+        if (s.coveredPartIds.length !== cheapest.coveredPartIds.length) return '—'
+        const base = cheapest.cost.totals.landedNet
+        return red(`+${pct(s.cost.totals.landedNet - base, base)}`, inferredReason)
+      },
     },
     ...saleColumns,
   ]
@@ -247,7 +271,7 @@ export default function SimulationResults({
       {scenario ? (
         <ScenarioDetail
           scenario={scenario}
-          isFcl={isFcl}
+          isFcl={isFclFor(scenario)}
           lookup={lookup}
           supplierName={supplierName}
           reason={inferredReason}

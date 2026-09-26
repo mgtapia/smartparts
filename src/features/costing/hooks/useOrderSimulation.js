@@ -4,9 +4,9 @@ import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
 import {
-  QUALITY,
+  cheapestScenario,
   QUANTITY_SOURCE,
-  simulateOrder,
+  simulateStrategies,
   vehicleQuantityRows,
 } from '../orderSimulationModel'
 
@@ -19,9 +19,8 @@ import {
 export function useOrderSimulation() {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
+  const { rates, settingsFor } = assumptions
 
-  const [quality, setQuality] = usePersistentState('order.quality.v1', QUALITY.ANY)
   const [quantitySource, setQuantitySource] = usePersistentState(
     'order.quantitySource.v1',
     QUANTITY_SOURCE.CLIENT_ESTIMATE,
@@ -32,7 +31,7 @@ export function useOrderSimulation() {
   // diferidas para que escribir en el editor no se trabe.
   const deferredOverrides = useDeferredValue(quantityOverrides)
   const [chosenVehicleId, setVehicleId] = useState(null)
-  const [scenarioId, setScenarioId] = useState('best')
+  const [scenarioId, setScenarioId] = useState(null)
 
   // Vehículos con cotizaciones, del que tiene más repuestos cotizados al que menos.
   const vehicles = useMemo(() => {
@@ -51,19 +50,17 @@ export function useOrderSimulation() {
 
   const simulation = useMemo(() => {
     if (!vehicleId) return null
-    return simulateOrder({
+    return simulateStrategies({
       lines,
       vehicleId,
-      quality,
       quantitySource,
       quantityOverrides: deferredOverrides,
       settingsFor,
-      mode,
       assumptions: rates,
       params: DEFAULT_PARAM_SET,
       fx: DEFAULT_FX,
     })
-  }, [lines, vehicleId, quality, quantitySource, deferredOverrides, settingsFor, mode, rates])
+  }, [lines, vehicleId, quantitySource, deferredOverrides, settingsFor, rates])
 
   const quantityRows = useMemo(
     () => vehicleQuantityRows({ lines, vehicleId, quantitySource, quantityOverrides }),
@@ -79,8 +76,10 @@ export function useOrderSimulation() {
     })
   const resetQuantities = () => setQuantityOverrides({})
 
+  // Sin elección, el escenario más barato entre los que cubren más repuestos.
   const scenario =
-    simulation?.scenarios.find((s) => s.id === scenarioId) ?? simulation?.scenarios[0] ?? null
+    simulation?.scenarios.find((s) => s.id === scenarioId) ??
+    (simulation ? cheapestScenario(simulation.scenarios) : null)
 
   // Repuesto y cotización por id, para mostrar el detalle del reparto.
   const lookup = useMemo(() => {
@@ -100,8 +99,6 @@ export function useOrderSimulation() {
     vehicles,
     vehicleId,
     setVehicleId,
-    quality,
-    setQuality,
     quantitySource,
     setQuantitySource,
     simulation,

@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
-import { usePersistentState } from '@hooks/usePersistentState'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
-import { QUALITY, simulateOrder } from '@features/costing/orderSimulationModel'
+import { cheapestScenario, simulateStrategies } from '@features/costing/orderSimulationModel'
 import { basketFromClientOrder, scenarioMargin } from '../purchaseFromOrderModel'
 
 /**
@@ -17,9 +16,8 @@ import { basketFromClientOrder, scenarioMargin } from '../purchaseFromOrderModel
 export function useClientOrderSimulation(order, purchaseOrders) {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, settingsFor } = assumptions
-  const [quality, setQuality] = usePersistentState('clientOrder.quality.v1', QUALITY.ANY)
-  const [scenarioId, setScenarioId] = useState('best')
+  const { rates, settingsFor } = assumptions
+  const [scenarioId, setScenarioId] = useState(null)
 
   const basket = useMemo(
     () => basketFromClientOrder(order, purchaseOrders, DEFAULT_FX),
@@ -28,20 +26,20 @@ export function useClientOrderSimulation(order, purchaseOrders) {
 
   const simulation = useMemo(() => {
     if (basket.basket.length === 0) return null
-    return simulateOrder({
+    return simulateStrategies({
       lines,
       basket: basket.basket,
-      quality,
       settingsFor,
-      mode,
       assumptions: rates,
       params: DEFAULT_PARAM_SET,
       fx: DEFAULT_FX,
     })
-  }, [lines, basket, quality, settingsFor, mode, rates])
+  }, [lines, basket, settingsFor, rates])
 
+  // Sin elección, el escenario más barato entre los que cubren más repuestos.
   const scenario =
-    simulation?.scenarios.find((s) => s.id === scenarioId) ?? simulation?.scenarios[0] ?? null
+    simulation?.scenarios.find((s) => s.id === scenarioId) ??
+    (simulation ? cheapestScenario(simulation.scenarios) : null)
 
   // Venta y margen de cada escenario contra el precio acordado en la OC.
   const saleByScenario = useMemo(
@@ -64,8 +62,6 @@ export function useClientOrderSimulation(order, purchaseOrders) {
     loading,
     error,
     assumptions,
-    quality,
-    setQuality,
     basket,
     simulation,
     scenario,

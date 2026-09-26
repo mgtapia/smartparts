@@ -383,9 +383,19 @@ export function costShipment({ assignments, suppliers, mode, assumptions, params
  * @param {import('./unitCost').UnitCostAssumptions} input.assumptions
  * @param {import('./types').CostParamSet} input.params
  * @param {import('./types').FxSnapshot} input.fx
+ * @param {boolean} [input.onlyBest]  Solo la mejor combinación (más rápido: sin los escenarios por proveedor).
  * @returns {{ blockers: string[], scenarios: PlanScenario[] }}
  */
-export function planPurchase({ parts, offers, suppliers, mode, assumptions, params, fx }) {
+export function planPurchase({
+  parts,
+  offers,
+  suppliers,
+  mode,
+  assumptions,
+  params,
+  fx,
+  onlyBest = false,
+}) {
   const supplierById = new Map(suppliers.map((s) => [s.id, s]))
   const partById = new Map(parts.map((p) => [p.partId, p]))
 
@@ -405,6 +415,7 @@ export function planPurchase({ parts, offers, suppliers, mode, assumptions, para
       dgProfile: part.dgProfile,
       volumeCm3: part.volumeCm3,
       logisticsConfirmed: false,
+      summaryOnly: true,
       mode,
       assumptions,
       params,
@@ -479,6 +490,7 @@ export function planPurchase({ parts, offers, suppliers, mode, assumptions, para
 
   const scenarios = []
   if (best) scenarios.push({ id: 'best', kind: 'best', ...best })
+  if (onlyBest) return { blockers: [], scenarios }
   for (const [size, result] of [...bestBySize.entries()].sort((a, b) => a[0] - b[0])) {
     if (size === 1 || result === best) continue
     scenarios.push({ id: `best-${size}`, kind: 'bestOfSize', ...result })

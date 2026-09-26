@@ -83,7 +83,7 @@ export const NAV_ENTRIES = Object.freeze([
       {
         key: 'costing',
         path: '/costing',
-        labelEs: 'Simulador',
+        labelEs: 'Pedido',
         icon: 'Calculate',
         implemented: true,
       },

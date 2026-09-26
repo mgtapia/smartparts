@@ -26,6 +26,7 @@ const EXCLUDED = new Set([
   'out',
   'backups',
   'coverage',
+  '.claude',
 ])
 
 function prepareCopy() {

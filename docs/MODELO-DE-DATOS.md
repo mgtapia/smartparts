@@ -157,7 +157,7 @@ Campos que se agregaron al cargar cotizaciones reales: `currency_status` (`confi
 
 **`parts/{id}`**: un solo código, el mismo en Chile y en China. `oem_codes[0]` es el código, `code_status` (`missing`|`provisional`|`confirmed`) y `code_source` su evidencia; confirmar exige fuente citable. Además `hs_code` y `hs_code_source` (partida arancelaria), y la imagen en la subcolección `parts/{id}/media/main` como `data_url` reducido (para no engordar la lectura del catálogo).
 
-**`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`.
+**`parts/{id}`** agrega `logistics_status` (`estimated`|`suspect`|`seller_listing`|`supplier_confirmed`|`measured`), `logistics_source` y `logistics_note`: procedencia del `weight_g`/`volume_cm3`. `package_cm` (`[largo, ancho, alto]` en cm) son las medidas del bulto cuando la ficha las trae; sirven para saber si la pieza cabe en un avión de pasajeros.
 
 Regla: **la calidad no se confirma por inferencia.** La calidad que el proveedor indica en su propia cotización (Original/Alternative, OEM/AFM, original/copy) queda confirmada en `confirmations.part_type` con la cotización como fuente (`scripts/confirm-part-types.mjs`, decisión del usuario del 2026-09-25); las cotizaciones inferidas del lado opuesto no. Que un vendedor escriba 原厂 en un listado público no basta — pasar a verificado requiere la cotización del proveedor o una acción humana con foto o muestra (ver [[INTEGRACIONES-CHINA]] §Chino y matching).
 

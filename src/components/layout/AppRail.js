@@ -18,6 +18,7 @@ import GroupIcon from '@mui/icons-material/Group'
 import SellIcon from '@mui/icons-material/Sell'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import TuneIcon from '@mui/icons-material/Tune'
+import FlightIcon from '@mui/icons-material/Flight'
 import ChecklistIcon from '@mui/icons-material/Checklist'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import { RAIL_ITEMS } from '@constants/routes'
@@ -41,6 +42,7 @@ const ICONS = {
   UploadFile: UploadFileIcon,
   Tune: TuneIcon,
   Checklist: ChecklistIcon,
+  Flight: FlightIcon,
   ReceiptLong: ReceiptLongIcon,
 }
 

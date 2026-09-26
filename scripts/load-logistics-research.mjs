@@ -59,6 +59,8 @@ for (const e of entries) {
     await doc.ref.update({
       weight_g: e.weight_g,
       volume_cm3: e.volume_cm3,
+      // Medidas del bulto (cm): sirven para saber si la pieza cabe en un avión de pasajeros.
+      package_cm: e.package_cm ?? null,
       logistics_status: e.status,
       logistics_source: e.source,
       logistics_note: e.note,

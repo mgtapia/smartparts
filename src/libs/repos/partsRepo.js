@@ -61,6 +61,8 @@ function shapePart(id, raw, { vehicle = null, quotes = [], position = null } = {
     dgProfile: raw.dg_profile ?? null,
     weightG: raw.weight_g,
     volumeCm3: raw.volume_cm3,
+    // Medidas del bulto [largo, ancho, alto] en cm, cuando hay ficha con medidas.
+    packageCm: raw.package_cm ?? null,
     // Procedencia del peso/volumen; sin dato → estimado (heurística original).
     logisticsStatus: raw.logistics_status ?? 'estimated',
     logisticsSource: raw.logistics_source ?? null,

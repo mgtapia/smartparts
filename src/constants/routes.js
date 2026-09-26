@@ -51,6 +51,13 @@ export const RAIL_ITEMS = Object.freeze([
     icon: 'Checklist',
     implemented: true,
   },
+  {
+    key: 'trial',
+    path: '/trial',
+    labelEs: 'Compra de prueba',
+    icon: 'Flight',
+    implemented: true,
+  },
   { key: 'sourcing', path: '/sourcing', labelEs: 'Sourcing', icon: 'Search', implemented: false },
   {
     key: 'costing',

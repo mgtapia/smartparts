@@ -1,0 +1,136 @@
+import { describe, it, expect } from 'vitest'
+import { money } from '@libs/money'
+import {
+  DEFAULT_FX,
+  DEFAULT_PARAM_SET,
+  DEFAULT_UNIT_COST_ASSUMPTIONS,
+  SHIPMENT_CHARGES,
+} from '@mocks/costParams'
+import { FOCUS_MARGIN_BP, buildAirTrial, supplierAbbr } from './airTrialModel'
+
+// Datos de prueba (mocks solo en tests): tres proveedores y tres repuestos en USD.
+const rates = { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES }
+const suppliers = [
+  { id: 's1', alias: 'Henan Ronglai', facts: {} },
+  { id: 's2', alias: 'XM Industrial', facts: {} },
+  { id: 's3', alias: 'Anhui Zuoheng', facts: {} },
+]
+const settingsFor = (id) => ({
+  originDistanceKm: id === 's3' ? null : 40,
+  originDistanceConfirmed: false,
+  originFallback: { bp: 300, averageKm: 40 },
+})
+const quote = (supplierId, cents, partType = 'original') => ({
+  supplierId,
+  partType,
+  partTypeConfirmed: true,
+  inferred: false,
+  currency: 'USD',
+  price: money(cents, 'USD'),
+  incoterm: 'EXW',
+})
+const part = (id, name, quotes, extra = {}) => ({
+  id,
+  nameEs: name,
+  code: `C-${id}`,
+  weightG: 1000,
+  volumeCm3: 6000,
+  baselinePrice: { amount: 100_000, currency: 'CLP', scale: 0 },
+  quantityEstimated: 10,
+  logisticsStatus: 'seller_listing',
+  packageCm: null,
+  quotes,
+  ...extra,
+})
+
+const run = (parts) =>
+  buildAirTrial({ parts, suppliers, settingsFor, rates, params: DEFAULT_PARAM_SET, fx: DEFAULT_FX })
+const base = (result, option, caseKey = 'B') => result.scenarios[0].results[option][caseKey]
+
+describe('supplierAbbr', () => {
+  it('usa las iniciales, o la sigla que el nombre ya trae', () => {
+    expect(supplierAbbr('Henan Ronglai')).toBe('HR')
+    expect(supplierAbbr('XM Industrial')).toBe('XM')
+  })
+})
+
+describe('buildAirTrial', () => {
+  it('asigna cada repuesto al proveedor de menor costo y cobra los gastos por embarque una vez por proveedor', () => {
+    const parts = [
+      part('p1', 'Óptico DEL DER', [quote('s1', 3000), quote('s2', 2000)]),
+      part('p2', 'Bandeja DEL DER', [quote('s1', 3000), quote('s2', 2500)]),
+    ]
+    const r = run(parts)
+    const solo = base(r, 'original').single.find((x) => x.supplierIds[0] === 's2')
+    expect(solo.covered).toBe(2)
+    const variable = solo.items.reduce((s, i) => s + i.unitCostClp * i.qty, 0)
+    // Despacho, guía aérea y reparto: US$ 495 por proveedor, una sola vez, no por repuesto.
+    const fixed = solo.costClp - variable
+    expect(fixed).toBeGreaterThanOrEqual(470_000)
+    expect(fixed).toBeLessThan(2 * 470_000)
+    // s2 es más barato en ambos repuestos: el mejor solo es s2.
+    expect(base(r, 'original').single[0].supplierIds).toEqual(['s2'])
+  })
+
+  it('saca de la recomendación un precio atípico y lo informa como anomalía', () => {
+    const parts = [
+      part('p1', 'Caja Reductora', [quote('s1', 100_000), quote('s2', 4100), quote('s3', 110_000)]),
+    ]
+    const r = run(parts)
+    expect(r.anomalies.some((a) => a.code === 'price_low' && a.supplierId === 's2')).toBe(true)
+    expect(r.suspectOfferCount).toBe(1)
+    const single = base(r, 'original', 'A').single
+    expect(single.find((x) => x.supplierIds[0] === 's2')).toBeUndefined()
+  })
+
+  it('con dos líneas del mismo proveedor y calidad usa la de menor precio', () => {
+    const both = run([part('p1', 'Bandeja', [quote('s1', 5000), quote('s1', 2000)])])
+    const cheap = run([part('p1', 'Bandeja', [quote('s1', 2000)])])
+    expect(base(both, 'original').single[0].costClp).toBe(base(cheap, 'original').single[0].costClp)
+  })
+
+  it('en Más barato toma la calidad más barata de cada repuesto', () => {
+    const parts = [
+      part('p1', 'Óptico', [quote('s1', 5000, 'original'), quote('s1', 2000, 'alternative')]),
+    ]
+    const r = run(parts)
+    const item = base(r, 'cheapest', 'A').single[0].items
+    // El detalle por repuesto solo se guarda para el caso B de la base: se mira en él.
+    const b = base(r, 'cheapest', 'B').single[0]
+    expect(b.items[0].quality).toBe('AFM')
+    expect(item).toBeUndefined()
+  })
+
+  it('deja fuera del pedido, con su motivo, lo que cuesta más que el cliente o no cabe en avión', () => {
+    const parts = [
+      part('p1', 'Puerta DEL DER', [quote('s1', 3000)], { weightG: 30_000, volumeCm3: 600_000 }),
+      part('p2', 'Zócalo', [quote('s1', 3000)], { packageCm: [200, 20, 15] }),
+      part('p3', 'Bandeja', [quote('s1', 3000)]),
+    ]
+    const r = run(parts)
+    const reasons = Object.fromEntries(r.logistics.map((l) => [l.name, l.reasons.join(' | ')]))
+    expect(reasons['Puerta DEL DER']).toMatch(/Cuesta más/)
+    expect(reasons['Zócalo']).toMatch(/200 × 20 × 15 cm/)
+    expect(reasons.Bandeja).toBeUndefined()
+    // Ninguna de las dos entra en el pedido de "solo lo que conviene volar".
+    const inB = base(r, 'original').single[0].items.map((i) => i.name)
+    expect(inB).toEqual(['Bandeja'])
+  })
+
+  it('no trata como anomalía lo que solo es un dato que falta', () => {
+    const r = run([part('p1', 'Bandeja', [quote('s1', 3000)])])
+    expect(r.missingData.some((m) => /s3|AZ/.test(m.titleEs) && /aeropuerto/.test(m.titleEs))).toBe(
+      true,
+    )
+    expect(
+      r.anomalies.every((a) => !/Formulario|aeropuerto|Used|sin código/i.test(a.titleEs)),
+    ).toBe(true)
+  })
+
+  it('el ahorro con margen sale del costo en Chile, no del precio al cliente', () => {
+    const r = run([part('p1', 'Bandeja', [quote('s1', 3000)])])
+    const x = base(r, 'original').single[0]
+    const expected = x.baselineClp - Math.round((x.costClp * (10_000 + FOCUS_MARGIN_BP)) / 10_000)
+    expect(x.savingsClp[FOCUS_MARGIN_BP]).toBe(expected)
+  })
+})

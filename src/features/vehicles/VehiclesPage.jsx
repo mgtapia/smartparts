@@ -2,40 +2,13 @@
 
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
-import ListTable from '@components/common/ListTable'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
-import { vehicleLabel } from './constants'
+import { GRID_GAP, px } from '@constants/layout'
+import VehicleCard from './components/VehicleCard'
 import { useVehicles } from './hooks/useVehicles'
-
-const COLUMNS = [
-  { id: 'vehicle', label: 'Vehículo', render: ({ vehicle }) => vehicleLabel(vehicle) },
-  { id: 'origin', label: 'Origen', width: 90, render: ({ vehicle }) => vehicle.origin ?? '—' },
-  { id: 'year', label: 'Año', width: 70, render: ({ vehicle }) => vehicle.year ?? '—' },
-  { id: 'parts', label: 'Repuestos', width: 90, align: 'right', render: (r) => r.parts.length },
-  {
-    id: 'quoted',
-    label: 'Cotizados',
-    width: 90,
-    align: 'right',
-    tooltip: 'Repuestos con al menos una cotización.',
-    render: (r) => r.quotedIds.size,
-  },
-  {
-    id: 'quotes',
-    label: 'Cotizaciones',
-    width: 100,
-    align: 'right',
-    render: (r) => r.quotations.length,
-  },
-  {
-    id: 'suppliers',
-    label: 'Proveedores',
-    width: 100,
-    align: 'right',
-    render: (r) => r.supplierCount,
-  },
-]
 
 export default function VehiclesPage() {
   const { rows, loading, error } = useVehicles()
@@ -58,13 +31,21 @@ export default function VehiclesPage() {
   return (
     <ContentWidth>
       <PageHeader title="Vehículos" />
-      <ListTable
-        columns={COLUMNS}
-        rows={rows}
-        getRowKey={({ vehicle }) => vehicle.id}
-        getRowHref={({ vehicle }) => `/vehicles/${vehicle.id}`}
-        emptyText="Sin vehículos cargados todavía."
-      />
+      {rows.length === 0 ? (
+        <Typography color="text.secondary">Sin vehículos cargados todavía.</Typography>
+      ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: px(GRID_GAP),
+          }}
+        >
+          {rows.map((row) => (
+            <VehicleCard key={row.vehicle.id} row={row} />
+          ))}
+        </Box>
+      )}
     </ContentWidth>
   )
 }

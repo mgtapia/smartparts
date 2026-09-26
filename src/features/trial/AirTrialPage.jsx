@@ -70,23 +70,38 @@ export default function AirTrialPage() {
     'Los márgenes son sobre el costo puesto en Chile. Las piezas peligrosas o fuera de medida no entran en el pedido.',
   ]
 
+  const withMargin = (cost) => Math.round((cost * (10000 + marginBp)) / 10000)
   const purchaseColumns = [
     { id: 'name', label: 'Repuesto', render: (i) => i.name },
-    { id: 'quality', label: 'Calidad', width: 80, render: (i) => i.quality },
-    { id: 'qty', label: 'Cant.', width: 70, align: 'right', render: (i) => i.qty },
+    { id: 'quality', label: 'Calidad', width: 70, render: (i) => i.quality },
+    { id: 'qty', label: 'Cant.', width: 60, align: 'right', render: (i) => i.qty },
     {
       id: 'cost',
       label: 'Costo en Chile',
-      width: 130,
+      width: 125,
       align: 'right',
       render: (i) => red(formatClp(i.unitCostClp)),
     },
     {
+      id: 'price',
+      label: 'Precio cliente',
+      width: 125,
+      align: 'right',
+      render: (i) => red(formatClp(withMargin(i.unitCostClp))),
+    },
+    {
       id: 'baseline',
       label: 'Cliente hoy',
-      width: 130,
+      width: 125,
       align: 'right',
       render: (i) => formatClp(i.unitBaselineClp),
+    },
+    {
+      id: 'saving',
+      label: 'Ahorro',
+      width: 125,
+      align: 'right',
+      render: (i) => red(formatClp(i.unitBaselineClp - withMargin(i.unitCostClp))),
     },
   ]
   const purchase = [...planOf(option).items].sort(
@@ -98,10 +113,9 @@ export default function AirTrialPage() {
     ...OPTIONS.flatMap((opt) => [
       {
         id: `${opt}-n`,
-        label: `${OPTION_LABELS_ES[opt]}: repuestos`,
+        label: OPTION_LABELS_ES[opt],
         width: 130,
-        align: 'right',
-        render: (c) => base[opt][c].parts,
+        render: (c) => `${base[opt][c].parts} repuestos`,
       },
       {
         id: `${opt}-s`,
@@ -217,12 +231,18 @@ export default function AirTrialPage() {
 
       {tab === TRIAL_TABS.PURCHASE ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <ToolbarSelectBox
               label="Opción"
               value={option}
               onChange={setOption}
               options={OPTION_OPTIONS}
+            />
+            <ToolbarSelectBox
+              label="Margen sobre el costo en Chile"
+              value={marginBp}
+              onChange={setMarginBp}
+              options={MARGIN_OPTIONS}
             />
           </Box>
           <ListTable

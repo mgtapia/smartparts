@@ -10,7 +10,7 @@ Detalle en `.agent/` ([[ARCHITECTURE]], [[DESIGN]], [[WORKFLOW]], [[MEMORY]]) y 
 - i18n propio: claves en inglés, valores en español, en `src/i18n/messages/es/`.
 - Componentes y funciones en **inglés**; el copy de UI va en **español**.
 - JavaScript + JSDoc, **sin TypeScript**. `checkJs: true` en `jsconfig.json` es el chequeo de tipos.
-- Commits Conventional en español; `feature/*` → `dev` con `--no-ff`.
+- Git: ramas cortas (`feature/*`, `fix/*`, `docs/*`, `chore/*`) fusionadas a `main` con `--no-ff`; **nunca commits directos en `main`**, archivos agregados por nombre, commits atómicos Conventional en español. Reglas completas en [[WORKFLOW]] §Git; las críticas las bloquea `.claude/hooks/check-git.mjs`.
 
 ## Propias de este dominio
 

@@ -12,13 +12,6 @@ const COLUMNS = [
   { id: 'vehicle', label: 'Vehículo', render: ({ vehicle }) => vehicleLabel(vehicle) },
   { id: 'origin', label: 'Origen', width: 90, render: ({ vehicle }) => vehicle.origin ?? '—' },
   { id: 'year', label: 'Año', width: 70, render: ({ vehicle }) => vehicle.year ?? '—' },
-  {
-    id: 'fleet',
-    label: 'Flota',
-    width: 80,
-    align: 'right',
-    render: ({ vehicle }) => vehicle.fleetSize ?? '—',
-  },
   { id: 'parts', label: 'Repuestos', width: 90, align: 'right', render: (r) => r.parts.length },
   {
     id: 'quoted',

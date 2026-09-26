@@ -5,6 +5,7 @@ export const MAX_WIDTH = 1180
 export const TOOLTIP_MAX_WIDTH = 260 // ancho máximo de un tooltip: por sobre esto el texto pasa a otra línea
 export const POPOVER_TEXT_WIDTH = 360 // ancho máximo del texto en un popover informativo
 export const RAIL_WIDTH = 68
+export const RAIL_WIDTH_EXPANDED = 208
 export const IMAGE_PREVIEW_HEIGHT = 240 // alto máximo de la vista previa de una imagen en un modal
 export const PART_IMAGE_SIZE = 96 // lado de la miniatura del repuesto en su ficha
 

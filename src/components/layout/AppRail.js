@@ -5,7 +5,11 @@ import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Typography from '@mui/material/Typography'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useAuth } from '@contexts/AuthContext'
+import { usePersistentState } from '@hooks/usePersistentState'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
@@ -22,7 +26,7 @@ import FlightIcon from '@mui/icons-material/Flight'
 import ChecklistIcon from '@mui/icons-material/Checklist'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import { RAIL_ITEMS } from '@constants/routes'
-import { RAIL_WIDTH } from '@constants/layout'
+import { RAIL_WIDTH, RAIL_WIDTH_EXPANDED } from '@constants/layout'
 
 // Imports puntuales por ícono (nunca `import * as Icons`): un barrel import de
 // @mui/icons-material obliga a webpack a procesar ~2500 módulos y dispara el
@@ -56,17 +60,21 @@ const ICONS = {
 export default function AppRail() {
   const pathname = usePathname()
   const { user, signOutUser } = useAuth()
+  const [expanded, setExpanded] = usePersistentState('rail.expanded', false)
 
   return (
     <Box
       component="nav"
       sx={{
-        width: RAIL_WIDTH,
+        width: expanded ? RAIL_WIDTH_EXPANDED : RAIL_WIDTH,
         flexShrink: 0,
+        transition: 'width 150ms ease',
+        overflow: 'hidden',
         bgcolor: 'brand.railBg',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: expanded ? 'stretch' : 'center',
+        px: expanded ? 1.5 : 0,
         py: 2,
         gap: 0.5,
         height: '100vh',
@@ -80,16 +88,19 @@ export default function AppRail() {
           pathname?.startsWith(p),
         )
         return (
-          <Tooltip key={item.key} title={item.labelEs} placement="right">
+          <Tooltip key={item.key} title={expanded ? '' : item.labelEs} placement="right">
             <Box
               component={Link}
               href={item.path}
               sx={{
-                width: 44,
+                width: expanded ? 'auto' : 44,
                 height: 44,
+                flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: expanded ? 'flex-start' : 'center',
+                gap: 1.5,
+                px: expanded ? 1.5 : 0,
                 borderRadius: 2,
                 color: active ? 'secondary.main' : 'rgba(255,255,255,0.65)',
                 bgcolor: active ? 'rgba(197,255,62,0.12)' : 'transparent',
@@ -98,10 +109,42 @@ export default function AppRail() {
               }}
             >
               <Icon fontSize="small" />
+              {expanded ? (
+                <Typography variant="body2" noWrap sx={{ color: 'inherit' }}>
+                  {item.labelEs}
+                </Typography>
+              ) : null}
             </Box>
           </Tooltip>
         )
       })}
+
+      <Tooltip title={expanded ? '' : 'Expandir menú'} placement="right">
+        <Box
+          component="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-label={expanded ? 'Contraer menú' : 'Expandir menú'}
+          sx={{
+            mt: 'auto',
+            width: expanded ? 'auto' : 44,
+            height: 36,
+            flexShrink: 0,
+            alignSelf: expanded ? 'stretch' : 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: expanded ? 'flex-end' : 'center',
+            px: expanded ? 1.5 : 0,
+            border: 'none',
+            borderRadius: 2,
+            cursor: 'pointer',
+            bgcolor: 'transparent',
+            color: 'rgba(255,255,255,0.65)',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
+          }}
+        >
+          {expanded ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+        </Box>
+      </Tooltip>
 
       {user ? (
         <Tooltip title={`${user.displayName || user.email} — cerrar sesión`} placement="right">
@@ -109,7 +152,8 @@ export default function AppRail() {
             component="button"
             onClick={() => signOutUser()}
             sx={{
-              mt: 'auto',
+              mt: 0.5,
+              alignSelf: expanded ? 'flex-start' : 'center',
               width: 36,
               height: 36,
               p: 0,

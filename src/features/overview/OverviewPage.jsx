@@ -6,6 +6,7 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionTitle from '@components/common/SectionTitle'
 import ListTable from '@components/common/ListTable'
 import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
@@ -20,6 +21,7 @@ import { useAnalytics } from './hooks/useAnalytics'
 import PendingSummary from './components/PendingSummary'
 import ClientOrderSavings from './components/ClientOrderSavings'
 import TrialSummary from './components/TrialSummary'
+import ImportabilityFields from './components/ImportabilityFields'
 
 const PRICE_NOTE = [
   'Precio unitario del proveedor llevado a USD, sin flete, aranceles ni gastos de origen. Si un proveedor ofrece varias variantes o tramos, se usa la más barata.',
@@ -99,14 +101,11 @@ export default function OverviewPage() {
           >
             {summary.quotedParts} de {summary.totalParts}
           </InfoField>
-          <InfoField label="Comparables" hint="Repuestos con precio de dos o más proveedores.">
-            {summary.comparableParts}
-          </InfoField>
           <InfoField
-            label="Diferencia típica"
-            hint="Mediana de cuánto más caro es el precio más alto que el más bajo, en los repuestos comparables."
+            label="Sin comparar"
+            hint="Repuestos con precio de un solo proveedor: falta una segunda cotización para comparar."
           >
-            {summary.medianSpreadBp === null ? 'Sin datos' : formatBp(summary.medianSpreadBp)}
+            {summary.quotedParts - summary.comparableParts}
           </InfoField>
           <InfoField
             label="AFM vs OEM"
@@ -116,17 +115,7 @@ export default function OverviewPage() {
               ? 'Sin datos'
               : `${afmVsOem.medianBp <= 0 ? '−' : '+'}${formatBp(Math.abs(afmVsOem.medianBp))}`}
           </InfoField>
-          <InfoField
-            label="Moneda"
-            hint="Precios cuya moneda confirmó el proveedor. El resto se lleva a USD con el tipo de cambio de referencia."
-          >
-            <UncertainValue
-              verified={summary.pricesUnconfirmedCurrency === 0}
-              reason="Moneda sin confirmar por el proveedor"
-            >
-              {summary.pricesTotal - summary.pricesUnconfirmedCurrency} de {summary.pricesTotal}
-            </UncertainValue>
-          </InfoField>
+          <ImportabilityFields />
         </InfoGrid>
       </Card>
 
@@ -134,9 +123,10 @@ export default function OverviewPage() {
       <ClientOrderSavings />
       <PendingSummary />
 
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-        Mayores diferencias entre proveedores
-      </Typography>
+      <SectionTitle
+        title="Mayores diferencias entre proveedores"
+        description="Repuestos con más distancia entre el precio más barato y el más caro."
+      />
       <ListTable
         columns={gapColumns}
         rows={topGaps}

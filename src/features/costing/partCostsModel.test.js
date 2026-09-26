@@ -13,6 +13,7 @@ import {
   buildPartCosts,
   buildRecommendations,
   convenience,
+  worthImportingCounts,
 } from './partCostsModel'
 
 // Datos de prueba (mocks solo en tests).
@@ -138,5 +139,36 @@ describe('buildRecommendations', () => {
     expect(options.every((o) => o.best === null && o.worthIt === null)).toBe(true)
     expect(pick).toBeNull()
     expect(buildRecommendations(costs, 'p1', null, toClp).pick).toBeNull()
+  })
+})
+
+describe('worthImportingCounts', () => {
+  const toClp = (usdMicro) => Math.round(usdMicro / 1_000_000) * 1000
+  const best = (usd) => ({
+    cheapest: { usdMicro: usd * 1_000_000, supplierId: 's1', quality: 'original' },
+  })
+  const costs = {
+    air: { a: best(30), b: best(10) }, // 30.000 y 10.000 CLP
+    sea: { a: best(8), b: best(9) },
+  }
+  const parts = [
+    { id: 'a', baselinePrice: { amount: 20_000 } },
+    { id: 'b', baselinePrice: { amount: 20_000 } },
+    { id: 'c', baselinePrice: { amount: 20_000 } }, // sin costo: no cuenta
+    { id: 'd' }, // sin precio de referencia: no cuenta
+  ]
+
+  it('cuenta por cada vía los que conviene importar sobre los que se pueden evaluar', () => {
+    expect(worthImportingCounts(costs, parts, toClp)).toEqual({
+      air: { worth: 1, total: 2 },
+      sea: { worth: 2, total: 2 },
+    })
+  })
+
+  it('sin costos calculados no cuenta ninguno', () => {
+    expect(worthImportingCounts(null, parts, toClp)).toEqual({
+      air: { worth: 0, total: 0 },
+      sea: { worth: 0, total: 0 },
+    })
   })
 })

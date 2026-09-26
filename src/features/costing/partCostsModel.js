@@ -147,3 +147,31 @@ export function buildRecommendations(costs, partId, baselineClp, toClp) {
   const pick = viable.length ? viable.reduce((a, b) => (b.costClp < a.costClp ? b : a)) : null
   return { options, pick }
 }
+
+/**
+ * Cuántos repuestos conviene importar por cada modo: su mejor costo puesto en Chile no supera lo
+ * que el cliente paga hoy. Solo cuentan los que tienen costo y precio de referencia.
+ *
+ * @param {{ air: any, sea: any }} costs  Salida de `buildPartCosts` por modo.
+ * @param {Array<{ id: string, baselinePrice?: { amount: number } }>} parts
+ * @param {(usdMicro: number) => number} toClp
+ * @param {string} [selection]
+ * @returns {{ air: { worth: number, total: number }, sea: { worth: number, total: number } }}
+ */
+export function worthImportingCounts(costs, parts, toClp, selection = SELECTIONS.CHEAPEST) {
+  const count = (mode) => {
+    let worth = 0
+    let total = 0
+    for (const part of parts) {
+      const best = bestOf(costs?.[mode], part.id, selection)
+      const verdict = best
+        ? convenience(toClp(best.usdMicro), part.baselinePrice?.amount ?? null)
+        : null
+      if (verdict === null) continue
+      total += 1
+      if (verdict) worth += 1
+    }
+    return { worth, total }
+  }
+  return { air: count(COST_MODES.AIR), sea: count(COST_MODES.SEA) }
+}

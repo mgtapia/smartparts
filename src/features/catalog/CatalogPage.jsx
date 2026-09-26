@@ -58,7 +58,7 @@ const GROUP_KEY_GETTERS = {
 const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 100, supplier: 80 }
 const REPUESTO_MIN_WIDTH = 220
 const PVP_REASON =
-  'Costo original puesto en Chile por avión (tarifas de referencia, pesos sin confirmar) más 30 % de margen.'
+  'Costo original puesto en Chile por avión (tarifas de referencia, pesos sin confirmar) más 30 % de margen, sin IVA.'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -492,7 +492,7 @@ export default function CatalogPage() {
                       cursor: 'help',
                     }}
                   >
-                    PVP
+                    PVP neto
                   </Typography>
                 </Tooltip>
               ) : null}

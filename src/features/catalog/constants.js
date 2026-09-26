@@ -7,7 +7,7 @@ export const CATALOG_COLUMNS = [
   { id: 'category', label: 'Categoría' },
   { id: 'code', label: 'Código' },
   { id: 'baseline', label: 'Precio REF' },
-  { id: 'pvp', label: 'PVP' },
+  { id: 'pvp', label: 'PVP neto' },
   { id: 'supplier', label: 'Proveedor' },
 ]
 

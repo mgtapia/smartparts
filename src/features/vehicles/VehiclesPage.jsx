@@ -37,7 +37,7 @@ export default function VehiclesPage() {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
             gap: px(GRID_GAP),
           }}
         >

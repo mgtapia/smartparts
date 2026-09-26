@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography'
 import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
-import { FOCUS_MARGIN_BP } from '../airTrialModel'
 import {
   OPTION_LABELS_ES,
   RED_REASON,
@@ -36,7 +35,7 @@ export default function PlanCard({ option, data, marginBp }) {
   const profit = price - best.costClp
   const abbrs = (ids) => ids.map((id) => data.suppliers.find((s) => s.id === id).abbr).join(' + ')
   const gainPair = plan.pair
-    ? plan.pair.savingsClp[FOCUS_MARGIN_BP] - best.savingsClp[FOCUS_MARGIN_BP]
+    ? plan.pair.savingsClp[data.focusMarginBp] - best.savingsClp[data.focusMarginBp]
     : 0
 
   const notes = [

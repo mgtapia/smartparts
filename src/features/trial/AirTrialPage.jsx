@@ -15,10 +15,9 @@ import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
-import { FOCUS_MARGIN_BP, OPTIONS } from './airTrialModel'
+import { OPTIONS } from './airTrialModel'
 import {
   CASE_LABELS_ES,
-  MARGIN_OPTIONS,
   OPTION_LABELS_ES,
   RED_REASON,
   TAB_LIST,
@@ -44,7 +43,9 @@ const CASES = ['A', 'B', 'C']
 export default function AirTrialPage() {
   const { data, loading, error } = useAirTrial()
   const [tab, setTab] = useUrlTab(Object.values(TRIAL_TABS))
-  const [marginBp, setMarginBp] = useState(FOCUS_MARGIN_BP)
+  // Sin elegir otro, rige el margen aéreo global de Ajustes.
+  const [chosenMarginBp, setMarginBp] = useState(null)
+  const marginBp = chosenMarginBp ?? data?.focusMarginBp
   const [option, setOption] = useState(OPTIONS[0])
 
   if (loading) {
@@ -73,6 +74,7 @@ export default function AirTrialPage() {
     'Los márgenes son sobre el costo puesto en Chile. Las piezas peligrosas o fuera de medida no entran en el pedido.',
   ]
 
+  const marginOptions = data.marginsBp.map((bp) => ({ value: bp, label: `Margen ${bp / 100} %` }))
   const withMargin = (cost) => Math.round((cost * (10000 + marginBp)) / 10000)
   const purchaseColumns = [
     { id: 'name', label: 'Repuesto', render: (i) => i.name },
@@ -130,7 +132,7 @@ export default function AirTrialPage() {
           const same = base[opt][c].single.find(
             (x) => x.supplierIds[0] === planOf(opt).supplierIds[0],
           )
-          return same ? red(formatClpMillions(same.savingsClp[FOCUS_MARGIN_BP])) : '—'
+          return same ? red(formatClpMillions(same.savingsClp[data.focusMarginBp])) : '—'
         },
       },
     ]),
@@ -162,7 +164,7 @@ export default function AirTrialPage() {
         width: 130,
         align: 'right',
         render: (sc) =>
-          red(formatClpMillions(scenarioCell(sc, opt).top.savingsClp[FOCUS_MARGIN_BP])),
+          red(formatClpMillions(scenarioCell(sc, opt).top.savingsClp[data.focusMarginBp])),
       },
     ]),
   ]
@@ -188,7 +190,7 @@ export default function AirTrialPage() {
               label="Margen sobre el costo en Chile"
               value={marginBp}
               onChange={setMarginBp}
-              options={MARGIN_OPTIONS}
+              options={marginOptions}
             />
           </Box>
           <Box
@@ -218,7 +220,7 @@ export default function AirTrialPage() {
               label="Margen sobre el costo en Chile"
               value={marginBp}
               onChange={setMarginBp}
-              options={MARGIN_OPTIONS}
+              options={marginOptions}
             />
           </Box>
           <ListTable
@@ -243,7 +245,7 @@ export default function AirTrialPage() {
               label="Margen sobre el costo en Chile"
               value={marginBp}
               onChange={setMarginBp}
-              options={MARGIN_OPTIONS}
+              options={marginOptions}
             />
           </Box>
           <CalculationSteps key={option} option={option} data={data} marginBp={marginBp} />

@@ -26,13 +26,6 @@ export const CASE_LABELS_ES = {
   C: 'Volar solo el top de demanda',
 }
 
-import { MARGINS_BP } from './airTrialModel'
-
-export const MARGIN_OPTIONS = MARGINS_BP.map((bp) => ({
-  value: bp,
-  label: `Margen ${bp / 100} %`,
-}))
-
 export const RED_REASON = 'Estimación con tarifas de referencia, sin cotización real de forwarder'
 
 /** Pesos chilenos en texto, con separador de miles. */

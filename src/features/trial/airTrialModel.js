@@ -134,8 +134,18 @@ export function supplierAbbr(name) {
  * @param {any} input.rates         Supuestos de costo unitario (tarifa aérea, gastos por embarque).
  * @param {any} input.params        Set de parámetros fiscales.
  * @param {any} input.fx
+ * @param {number} [input.focusMarginBp]  Margen con el que se ordena y se resume el ahorro; el aéreo global.
  */
-export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx }) {
+export function buildAirTrial({
+  parts,
+  suppliers,
+  settingsFor,
+  rates,
+  params,
+  fx,
+  focusMarginBp = FOCUS_MARGIN_BP,
+}) {
+  const margins = [...new Set([...MARGINS_BP, focusMarginBp])].sort((a, b) => a - b)
   const partById = new Map(parts.map((p) => [p.id, p]))
   const nameOf = new Map(suppliers.map((s) => [s.id, s.alias || s.name]))
   const abbrOf = new Map([...nameOf].map(([id, name]) => [id, supplierAbbr(name)]))
@@ -318,9 +328,7 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
       baselineClp: baseline,
       costClp,
       kg: Math.round(cost.perSupplier.reduce((s, x) => s + x.kg, 0) * 10) / 10,
-      savingsClp: Object.fromEntries(
-        MARGINS_BP.map((m) => [m, baseline - bpOf(costClp, 10000 + m)]),
-      ),
+      savingsClp: Object.fromEntries(margins.map((m) => [m, baseline - bpOf(costClp, 10000 + m)])),
       estimatedQualityLines: assigned.filter((a) => !a.offer.qualityConfirmed).length,
       calc: cost.perSupplier.map((x) => ({
         supplierId: x.supplierId,
@@ -566,7 +574,7 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
         const results = subsets(supplierIds)
           .map((set) => evaluateSet(set, offersByPart, list, scenario.qtyBp))
           .filter((r) => r.covered > 0)
-          .sort((a, b) => b.savingsClp[FOCUS_MARGIN_BP] - a.savingsClp[FOCUS_MARGIN_BP])
+          .sort((a, b) => b.savingsClp[focusMarginBp] - a.savingsClp[focusMarginBp])
         // El detalle por repuesto solo se guarda para lo que se compra; en el resto pesa de más.
         if (!(caseKey === 'B' && scenario.key === 'base'))
           for (const r of results) {
@@ -640,6 +648,8 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
   const known = distances.map((d) => d.originDistanceKm).filter((k) => k != null)
   return {
     partCount: parts.length,
+    focusMarginBp,
+    marginsBp: margins,
     suppliers: suppliers.map((s) => ({ id: s.id, name: nameOf.get(s.id), abbr: abbrOf.get(s.id) })),
     assumptions: {
       airUsdPerKgCents: rates.airUsdPerKgCents,

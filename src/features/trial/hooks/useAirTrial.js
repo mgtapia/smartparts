@@ -30,6 +30,7 @@ export function useAirTrial() {
       rates,
       params,
       fx: DEFAULT_FX,
+      focusMarginBp: rates.pvpMarginAirBp,
     })
   }, [loading, error, sourcing.vehicleId, parts.data, suppliers.data, settingsFor, rates, params])
 

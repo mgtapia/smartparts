@@ -185,36 +185,79 @@ export function cheapestScenario(scenarios) {
   return scenarios.reduce((best, s) => (isBetterPlan(s, best) ? s : best), null)
 }
 
+export const QUALITY_LABEL_ES = {
+  [QUALITY.OEM]: 'Originales',
+  [QUALITY.ANY]: 'Más económico',
+  [QUALITY.AFM]: 'Solo alternativos',
+}
+
+/** Formatos de envío que puede fijar el escenario personalizado ('sea' = el marítimo más barato). */
+export const CUSTOM_SHIPPING = {
+  SEA: 'sea',
+  LCL: SHIPPING_MODES.SEA_LCL,
+  FCL_20: SHIPPING_MODES.SEA_FCL_20,
+  FCL_40: SHIPPING_MODES.SEA_FCL_40HQ,
+  AIR: SHIPPING_MODES.AIR,
+}
+
+/** Configuración inicial del escenario personalizado: como "Más económico · Marítimo". */
+export const DEFAULT_CUSTOM = {
+  quality: QUALITY.ANY,
+  shipping: CUSTOM_SHIPPING.SEA,
+  supplierIds: null,
+}
+
+/** Mejor plan (cobertura y luego costo) entre los modos dados, o null si ninguno se puede costear. */
+function bestForModes(inputs, modes, { assumptions, params, fx }, blockers) {
+  let chosen = null
+  for (const mode of modes) {
+    const plan = planPurchase({
+      parts: inputs.parts,
+      offers: inputs.offers,
+      suppliers: inputs.suppliers,
+      mode,
+      assumptions,
+      params,
+      fx,
+      onlyBest: true,
+    })
+    plan.blockers.forEach((b) => blockers.add(b))
+    const best = plan.scenarios[0]
+    if (best && isBetterPlan(best, chosen?.plan)) chosen = { mode, plan: best }
+  }
+  return chosen
+}
+
+/** Deja solo las ofertas y proveedores elegidos; `null` o vacío = todos. */
+function onlySuppliers(inputs, supplierIds) {
+  if (!supplierIds?.length) return inputs
+  const keep = new Set(supplierIds)
+  return {
+    ...inputs,
+    offers: inputs.offers.filter((o) => keep.has(o.supplierId)),
+    suppliers: inputs.suppliers.filter((s) => keep.has(s.id)),
+  }
+}
+
 /**
- * Los cuatro escenarios de ahorro (originales o más económico, por mar o por aire) de una
- * canasta, cada uno con su mejor combinación de proveedores. Mismo contrato que `simulateOrder`
- * para la pantalla: `{ blockers, scenarios, parts, offers, notes, units }`.
+ * Los escenarios de ahorro (originales o más económico, por mar o por aire) de una canasta,
+ * cada uno con su mejor combinación de proveedores, más el escenario personalizado si se pide.
+ * Mismo contrato que `simulateOrder` para la pantalla: `{ blockers, scenarios, parts, offers,
+ * notes, units }`.
  * @param {Object} input  Como `buildPlanInputs` (sin `quality`) más `assumptions` y `params`.
+ * @param {{ quality: string, shipping: string, supplierIds: string[]|null }} [input.custom]
+ *   Escenario personalizado: calidad, formato de envío (ver CUSTOM_SHIPPING) y proveedores.
  */
-export function simulateStrategies({ assumptions, params, ...rest }) {
+export function simulateStrategies({ assumptions, params, custom, ...rest }) {
   const scenarios = []
   const blockers = new Set()
+  const costing = { assumptions, params, fx: rest.fx }
   let base = null
   for (const strategy of STRATEGIES) {
     const inputs = buildPlanInputs({ ...rest, quality: strategy.quality })
     base ??= inputs
     for (const transport of Object.values(TRANSPORT)) {
-      let chosen = null
-      for (const mode of TRANSPORT_MODES[transport]) {
-        const plan = planPurchase({
-          parts: inputs.parts,
-          offers: inputs.offers,
-          suppliers: inputs.suppliers,
-          mode,
-          assumptions,
-          params,
-          fx: rest.fx,
-          onlyBest: true,
-        })
-        plan.blockers.forEach((b) => blockers.add(b))
-        const best = plan.scenarios[0]
-        if (best && isBetterPlan(best, chosen?.plan)) chosen = { mode, plan: best }
-      }
+      const chosen = bestForModes(inputs, TRANSPORT_MODES[transport], costing, blockers)
       if (!chosen) continue
       scenarios.push({
         ...chosen.plan,
@@ -224,6 +267,24 @@ export function simulateStrategies({ assumptions, params, ...rest }) {
         transport,
         mode: chosen.mode,
         label: `${strategy.labelEs} · ${TRANSPORT_LABEL_ES[transport]}`,
+        modeLabel: SHIPPING_MODE_LABELS_ES[chosen.mode],
+      })
+    }
+  }
+  if (custom) {
+    const inputs = onlySuppliers(
+      buildPlanInputs({ ...rest, quality: custom.quality }),
+      custom.supplierIds,
+    )
+    const modes = TRANSPORT_MODES[custom.shipping] ?? [custom.shipping]
+    const chosen = bestForModes(inputs, modes, costing, blockers)
+    if (chosen) {
+      scenarios.push({
+        ...chosen.plan,
+        id: 'custom',
+        kind: 'custom',
+        mode: chosen.mode,
+        label: `Personalizado · ${QUALITY_LABEL_ES[custom.quality]}`,
         modeLabel: SHIPPING_MODE_LABELS_ES[chosen.mode],
       })
     }

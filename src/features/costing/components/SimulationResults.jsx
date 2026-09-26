@@ -440,6 +440,11 @@ function ScenarioDetail({ scenario, isFcl, lookup, supplierName, reason, label, 
         {actions}
       </Box>
       <InfoGrid columns={5}>
+        {breakdown.map(([name, micro, hint]) => (
+          <InfoField key={name} label={name} hint={hint ?? undefined}>
+            {name === 'Mercadería' ? money(micro) : red(money(micro), reason)}
+          </InfoField>
+        ))}
         {isFcl ? (
           <InfoField
             label="Contenedores"
@@ -448,11 +453,6 @@ function ScenarioDetail({ scenario, isFcl, lookup, supplierName, reason, label, 
             {red(containers ?? '—', CONTAINERS_REASON)}
           </InfoField>
         ) : null}
-        {breakdown.map(([name, micro, hint]) => (
-          <InfoField key={name} label={name} hint={hint ?? undefined}>
-            {name === 'Mercadería' ? money(micro) : red(money(micro), reason)}
-          </InfoField>
-        ))}
       </InfoGrid>
       <Typography
         variant="caption"

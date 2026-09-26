@@ -36,7 +36,7 @@ const VIEWS = { LIST: 'proveedor', MATRIX: 'repuesto' }
 export default function QuotationsPage() {
   const { lines, quotations, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, params, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor, fx } = assumptions
   const [view, setView] = useUrlTab(Object.values(VIEWS))
   const [metric, setMetric] = useState(METRICS.PRICE)
   const [quality, setQuality] = useState(QUALITY_FILTERS.ANY)
@@ -61,9 +61,9 @@ export default function QuotationsPage() {
   const matrix = useMemo(
     () =>
       isMatrix
-        ? buildMatrix(lines, metric, term, quality, { mode, rates, params, settingsFor })
+        ? buildMatrix(lines, metric, term, quality, { mode, rates, params, settingsFor, fx })
         : null,
-    [isMatrix, lines, metric, term, quality, mode, rates, params, settingsFor],
+    [isMatrix, lines, metric, term, quality, mode, rates, params, settingsFor, fx],
   )
 
   if (loading) {
@@ -98,7 +98,11 @@ export default function QuotationsPage() {
         <ToolbarSearch
           value={search}
           onChange={setSearch}
-          placeholder={isMatrix ? 'Buscar por repuesto, código o categoría…' : 'Buscar por proveedor, archivo o incoterm…'}
+          placeholder={
+            isMatrix
+              ? 'Buscar por repuesto, código o categoría…'
+              : 'Buscar por proveedor, archivo o incoterm…'
+          }
         />
         {isMatrix ? (
           <>

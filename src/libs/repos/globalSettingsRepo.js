@@ -27,6 +27,8 @@ export async function getGlobalSettings() {
       insuranceRateBp: raw.insurance_rate_bp,
       insuranceMarkupBp: raw.insurance_markup_bp,
       seaLclWmKgPerCbm: raw.sea_lcl_wm_kg_per_cbm,
+      usdClp: raw.usd_clp,
+      fxAsOf: raw.fx_as_of,
     },
     createdBy: raw.created_by ?? null,
   }
@@ -41,6 +43,8 @@ export async function saveGlobalSettings({ rates, params, createdBy }) {
     insurance_rate_bp: params.insuranceRateBp,
     insurance_markup_bp: params.insuranceMarkupBp,
     sea_lcl_wm_kg_per_cbm: params.seaLclWmKgPerCbm,
+    usd_clp: params.usdClp,
+    fx_as_of: params.fxAsOf,
     created_by: createdBy ?? null,
     created_at: serverTimestamp(),
   })

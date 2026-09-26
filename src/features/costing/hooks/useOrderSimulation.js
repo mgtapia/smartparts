@@ -3,7 +3,6 @@ import { supplierLabel } from '@features/quotes/constants'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
-import { DEFAULT_FX } from '@mocks/costParams'
 import {
   DEFAULT_CUSTOM,
   cheapestScenario,
@@ -21,7 +20,7 @@ import {
 export function useOrderSimulation() {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { rates, params, settingsFor } = assumptions
+  const { rates, params, settingsFor, fx } = assumptions
 
   const [quantitySource, setQuantitySource] = usePersistentState(
     'order.quantitySource.v1',
@@ -64,9 +63,10 @@ export function useOrderSimulation() {
       settingsFor,
       assumptions: rates,
       params,
-      fx: DEFAULT_FX,
+      fx,
     })
   }, [
+    fx,
     lines,
     vehicleId,
     quantitySource,

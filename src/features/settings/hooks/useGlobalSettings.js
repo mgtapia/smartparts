@@ -1,7 +1,13 @@
 import { useMemo } from 'react'
 import { useCachedQuery } from '@hooks/useCachedQuery'
 import { getGlobalSettings } from '@libs/repos/globalSettingsRepo'
-import { buildGlobalParams, buildRates, buildParams, pickEditable } from '../globalSettingsModel'
+import {
+  buildFx,
+  buildGlobalParams,
+  buildRates,
+  buildParams,
+  pickEditable,
+} from '../globalSettingsModel'
 
 /**
  * Ajustes globales vigentes, guardados en la base. Mientras cargan (o si nunca se guardaron) rigen
@@ -18,6 +24,7 @@ export function useGlobalSettings() {
       editableRates: pickEditable(buildRates(data?.rates)),
       globalParams: buildGlobalParams(data?.params),
       params: buildParams(data?.params),
+      fx: buildFx(data?.params),
     }),
     [data, loading, error],
   )

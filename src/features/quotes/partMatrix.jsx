@@ -43,7 +43,7 @@ const QUALITY_TAG = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'AFM
  */
 function valueOf(line, metric, costCtx) {
   if (metric === METRICS.PRICE) {
-    const micro = priceUsdMicro(line.quote)
+    const micro = priceUsdMicro(line.quote, costCtx.fx)
     if (micro === null) return { micro: null, verified: false, reason: 'Moneda sin definir' }
     return {
       micro,

@@ -63,12 +63,11 @@ const FIELDS = {
   },
 }
 
-
 export default function QuotationDetailPage() {
   const quotationId = useRouteId()
   const { quotations, loading, error, reload } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { mode, rates, params, settingsFor } = assumptions
+  const { mode, rates, params, settingsFor, fx } = assumptions
   const [search, setSearch] = useState('')
   const [hidden, setHidden] = usePersistentState(
     'quotes.detail.hiddenColumns',
@@ -102,11 +101,11 @@ export default function QuotationDetailPage() {
         ]),
       )
       .map((line) => {
-        const cost = costLine(line, { mode, rates, params, settingsFor })
+        const cost = costLine(line, { mode, rates, params, settingsFor, fx })
         return { line, cost, byCode: Object.fromEntries(cost.components.map((c) => [c.code, c])) }
       })
       .sort((a, b) => a.line.part.nameEs.localeCompare(b.line.part.nameEs, 'es'))
-  }, [quotation, search, mode, rates, params, settingsFor])
+  }, [quotation, search, mode, rates, params, settingsFor, fx])
 
   if (loading) {
     return (

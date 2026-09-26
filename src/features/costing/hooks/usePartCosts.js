@@ -5,14 +5,11 @@ import { SHIPPING_MODES } from '@constants/enums'
 import { listParts } from '@libs/repos/partsRepo'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { usdMicroToClp } from '@libs/fx'
-import { DEFAULT_FX, DEFAULT_PARAM_SET } from '@mocks/costParams'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useAirTrial } from '@features/trial/hooks/useAirTrial'
 import { buildPartCosts } from '../partCostsModel'
 
 const NO_SUPPLIERS = []
-// Función estable (no se recrea en cada render): las pantallas la usan como dependencia.
-const toClp = (usdMicro) => usdMicroToClp(usdMicro, DEFAULT_FX).amount
 
 /**
  * Mejor costo unitario en Chile de cada repuesto, en avión y en barco (LCL o contenedor completo, según el formato elegido) a la vez, con
@@ -25,8 +22,10 @@ export function usePartCosts() {
   const parts = useCachedQuery('parts', listParts)
   const suppliers = useCachedQuery('suppliers', listSuppliers)
   const { data: trial } = useAirTrial()
-  const { rates, params, settingsForAir, settingsForSea } = useCostAssumptions()
-  const [seaFormat] = useSeaFormat()
+  const { rates, params, settingsForAir, settingsForSea, fx } = useCostAssumptions()
+  // Estable mientras no cambie el tipo de cambio: las pantallas la usan como dependencia.
+  const toClp = useMemo(() => (usdMicro) => usdMicroToClp(usdMicro, fx).amount, [fx])
+  const { format: seaFormat } = useSeaFormat()
 
   const costs = useMemo(() => {
     if (!parts.data || !suppliers.data) return null
@@ -35,14 +34,24 @@ export function usePartCosts() {
       suppliers: suppliers.data,
       rates,
       params,
-      fx: DEFAULT_FX,
+      fx,
       skipKeys: trial?.suspectOfferKeys,
     }
     return {
       air: buildPartCosts({ ...base, settingsFor: settingsForAir, mode: SHIPPING_MODES.AIR }),
       sea: buildPartCosts({ ...base, settingsFor: settingsForSea, mode: seaFormat }),
     }
-  }, [parts.data, suppliers.data, trial, rates, params, settingsForAir, settingsForSea, seaFormat])
+  }, [
+    parts.data,
+    suppliers.data,
+    trial,
+    rates,
+    params,
+    settingsForAir,
+    settingsForSea,
+    seaFormat,
+    fx,
+  ])
 
-  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates, seaFormat }
+  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates, seaFormat, fx }
 }

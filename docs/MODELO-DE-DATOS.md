@@ -124,7 +124,7 @@ Centinela de unicidad — detecta el caso real encontrado en la planilla: mismo 
 
 ### `global_settings/{id}`
 
-Cada "Aplicar" en la vista Ajustes crea una versión nueva; la vigente es la de `created_at` más reciente (nunca se edita una existente). Campos: `rates` (mapa con lo editable: tarifas de flete, tamaño del embarque, gastos por embarque, aranceles con y sin TLC, márgenes de PVP aéreo y marítimo; sus claves van como en `DEFAULT_UNIT_COST_ASSUMPTIONS`), `vat_bp`, `insurance_rate_bp`, `insurance_markup_bp`, `sea_lcl_wm_kg_per_cbm`, `created_by`, `created_at`. Sin ninguna versión rigen los valores de referencia de `src/mocks/costParams.js`. Los cambios de los modales de parámetros son temporales (estado de la pantalla) y no se guardan.
+Cada "Aplicar" en la vista Ajustes crea una versión nueva; la vigente es la de `created_at` más reciente (nunca se edita una existente). Campos: `rates` (mapa con lo editable: tarifas de flete, tamaño del embarque, gastos por embarque, aranceles con y sin TLC, margen mínimo de PVP aéreo y marítimo sobre la venta, ahorro máximo del cliente en original y alternativo, ahorro mínimo para ofrecer, formato marítimo del PVP; sus claves van como en `DEFAULT_UNIT_COST_ASSUMPTIONS`), `vat_bp`, `insurance_rate_bp`, `insurance_markup_bp`, `sea_lcl_wm_kg_per_cbm`, `usd_clp` (pesos por dólar) y `fx_as_of` (desde cuándo rige), `created_by`, `created_at`. Sin ninguna versión rigen los valores de referencia de `src/mocks/costParams.js`. Los cambios de los modales de parámetros son temporales (estado de la pantalla) y no se guardan.
 
 ### `cost_param_sets/{id}` (resumen — contrato completo en `src/core/costing/types.js` → `CostParamSet`)
 

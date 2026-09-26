@@ -93,6 +93,7 @@ export function useCostAssumptions() {
     rates,
     setRates,
     params: global.params,
+    fx: global.fx,
     hasTemporaryChanges: tempRates !== null,
     settingsFor,
     settingsForAir,

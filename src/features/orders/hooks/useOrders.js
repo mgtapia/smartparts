@@ -5,7 +5,7 @@ import { listClientOrders } from '@libs/repos/clientOrdersRepo'
 import { listPurchaseOrders } from '@libs/repos/purchaseOrdersRepo'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { listParts } from '@libs/repos/partsRepo'
-import { DEFAULT_FX } from '@mocks/costParams'
+import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { clientOrderCoverage, isActiveClientOrder, ordersTotal } from '../ordersModel'
 
@@ -25,6 +25,7 @@ export function useOrders() {
   // Misma clave y lectura que Catálogo y Cotizaciones: se comparte la caché.
   const partsQuery = useCachedQuery('parts', listParts)
   const { quotations } = useQuotationsData()
+  const { fx } = useGlobalSettings()
 
   const queries = [clientsQuery, clientOrdersQuery, purchaseOrdersQuery, suppliersQuery, partsQuery]
   const loading = queries.some((q) => q.loading)
@@ -47,7 +48,7 @@ export function useOrders() {
         order,
         client: clientsById.get(order.clientId) ?? null,
         ...ordersTotal(order.lines, order.currency),
-        coverage: clientOrderCoverage(order, purchaseOrders, DEFAULT_FX),
+        coverage: clientOrderCoverage(order, purchaseOrders, fx),
       }))
       .sort(byDateDesc)
 
@@ -89,6 +90,7 @@ export function useOrders() {
     suppliersQuery.data,
     partsQuery.data,
     quotations,
+    fx,
   ])
 
   const { reload: reloadClients } = clientsQuery
@@ -99,5 +101,5 @@ export function useOrders() {
     [reloadClients, reloadClientOrders, reloadPurchaseOrders],
   )
 
-  return { ...data, fx: DEFAULT_FX, loading, error, reload }
+  return { ...data, fx, loading, error, reload }
 }

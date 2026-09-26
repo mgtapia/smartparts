@@ -24,6 +24,7 @@ import { RADIUS } from '@constants/colors'
 import { FCL_SOURCES, FREIGHT_SOURCES, SHIPMENT_CHARGES } from '@mocks/costParams'
 import { chargeModeKey } from '@core/costing/shipmentCharges'
 import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
+import { SEA_FORMATS } from '@features/costing/partCostsModel'
 import { MODE_OPTIONS, PARAMETERS_HELP } from '../constants'
 
 const fromCents = (c) => (c == null ? null : c / 100)
@@ -99,6 +100,12 @@ const PARAM_SOURCES = {
     noteEs: 'Se cobra el mayor entre toneladas y m³',
   },
 }
+const FX_SOURCE = {
+  labelEs: 'Referencia del equipo, sin verificar',
+  noteEs:
+    'Pesos por dólar para pasar los precios de los proveedores y los costos a pesos. Diego usa el mismo valor para pagar al proveedor y para la aduana',
+}
+const SEA_FORMAT_OPTIONS = SEA_FORMATS.map((f) => ({ value: f.value, label: f.labelEs }))
 const MARGIN_SOURCE = {
   labelEs: 'Decisión del equipo, sin fuente',
   noteEs:
@@ -368,6 +375,20 @@ export function GlobalRatesFields({ draft, setDraft }) {
   const setRate = (patch) => setDraft((d) => ({ ...d, rates: { ...d.rates, ...patch } }))
   return (
     <>
+      <Section title="Tipo de cambio">
+        <Field source={FX_SOURCE}>
+          <NumberField
+            label="Dólar (CLP por US$)"
+            adornment="$"
+            value={draft.params.usdClp}
+            onCommit={(n) =>
+              n > 0 &&
+              setParam({ usdClp: Math.round(n), fxAsOf: new Date().toISOString().slice(0, 10) })
+            }
+          />
+        </Field>
+      </Section>
+
       <Section title="IVA y seguro">
         <Field source={PARAM_SOURCES.vat}>
           <NumberField
@@ -463,6 +484,18 @@ export function GlobalRatesFields({ draft, setDraft }) {
             onCommit={(n) => n != null && n >= 0 && setRate({ pvpMinSavingBp: toBp(n) })}
           />
         </Field>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            Formato marítimo del PVP
+          </Typography>
+          <ToolbarSelectBox
+            fullWidth
+            label="Formato marítimo"
+            value={draft.rates.pvpSeaFormat}
+            onChange={(pvpSeaFormat) => setRate({ pvpSeaFormat })}
+            options={SEA_FORMAT_OPTIONS}
+          />
+        </Box>
       </Section>
     </>
   )

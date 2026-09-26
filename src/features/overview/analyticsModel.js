@@ -27,12 +27,13 @@ function median(values) {
  * @param {any[]} input.lines     Líneas `{ part, quote }` con `part.categoryLabel`.
  * @param {string} input.quality  Una de QUALITY.
  * @param {(supplierId: string) => string} input.supplierName
+ * @param {any} [input.fx]  Tipo de cambio; por defecto el de referencia.
  */
-export function buildAnalytics({ vehicleId, parts, lines, quality, supplierName }) {
+export function buildAnalytics({ vehicleId, parts, lines, quality, supplierName, fx }) {
   const scopeParts = parts.filter((p) => p.vehicleId === vehicleId)
   const real = lines
     .filter((l) => l.part.vehicleId === vehicleId && !l.quote.inferred)
-    .map((l) => ({ ...l, micro: priceUsdMicro(l.quote) }))
+    .map((l) => ({ ...l, micro: priceUsdMicro(l.quote, fx) }))
     .filter((l) => l.micro !== null)
 
   // Más barato por repuesto y proveedor dentro de la calidad elegida.

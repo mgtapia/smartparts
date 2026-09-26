@@ -4,6 +4,7 @@ import { listParts } from '@libs/repos/partsRepo'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { supplierLabel } from '@features/quotes/constants'
 import { useSuppliers } from '@features/suppliers/hooks/useSuppliers'
+import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
 import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
 import { buildAnalytics } from '../analyticsModel'
 
@@ -18,6 +19,7 @@ export function useAnalytics(quality) {
   const { rows, loading: suppliersLoading, error: suppliersError } = useSuppliers()
 
   const sourcing = useSourcingVehicle()
+  const { fx } = useGlobalSettings()
 
   const loading = parts.loading || sourcing.loading || quotesLoading || suppliersLoading
   const error = parts.error || sourcing.error || quotesError || suppliersError
@@ -30,9 +32,10 @@ export function useAnalytics(quality) {
       parts: parts.data ?? [],
       lines,
       quality,
+      fx,
       supplierName: (id) => supplierLabel(suppliers.get(id), id),
     })
-  }, [loading, error, sourcing.vehicleId, parts.data, lines, rows, quality])
+  }, [loading, error, sourcing.vehicleId, parts.data, lines, rows, quality, fx])
 
   return { data, loading, error }
 }

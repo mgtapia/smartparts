@@ -1,6 +1,7 @@
 // Parámetros globales de costo y venta: lo que se guarda en la base (versión vigente de
 // `global_settings`) y cómo se arma con lo que falte. Puro: sin React ni Firebase.
 import {
+  DEFAULT_FX,
   DEFAULT_PARAM_SET,
   DEFAULT_UNIT_COST_ASSUMPTIONS,
   SHIPMENT_CHARGES,
@@ -17,6 +18,9 @@ export const DEFAULT_GLOBAL_PARAMS = Object.freeze({
   insuranceRateBp: DEFAULT_PARAM_SET.insurance.rateBp,
   insuranceMarkupBp: DEFAULT_PARAM_SET.insurance.markupBp,
   seaLclWmKgPerCbm: DEFAULT_PARAM_SET.freightDefaults.seaLclWmKgPerCbm,
+  // Tipo de cambio de referencia: pesos por dólar y desde cuándo rige.
+  usdClp: Math.round(DEFAULT_FX.usdClp / 1e6),
+  fxAsOf: DEFAULT_FX.asOf,
 })
 
 /**
@@ -49,6 +53,12 @@ export function pickEditable(rates) {
 export function buildGlobalParams(stored) {
   const defined = Object.entries(stored ?? {}).filter(([, v]) => v != null)
   return { ...DEFAULT_GLOBAL_PARAMS, ...Object.fromEntries(defined) }
+}
+
+/** Tipo de cambio para el motor y las pantallas, desde el ajuste global (pesos por dólar en micros). */
+export function buildFx(globalParams) {
+  const g = buildGlobalParams(globalParams)
+  return { ...DEFAULT_FX, usdClp: g.usdClp * 1_000_000, asOf: g.fxAsOf }
 }
 
 /** Set de parámetros del motor con IVA, seguro y peso por m³ del ajuste global. */

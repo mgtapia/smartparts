@@ -6,7 +6,6 @@ import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { makeMatcher } from '@libs/textSearch'
-import { DEFAULT_FX } from '@mocks/costParams'
 import { CODE_STATUS } from '@constants/enums'
 import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
 import { isOffered, pricingFor, salePrice } from '@features/costing/pricingModel'
@@ -35,7 +34,7 @@ function pvpOf(costs, ctx, part, pricing) {
   const supplier = ctx.suppliers.find((x) => x.id === best.supplierId)
   return {
     pvpClp,
-    pvpUsd: clpToUsd(pvpClp, DEFAULT_FX),
+    pvpUsd: clpToUsd(pvpClp, ctx.fx),
     supplier: supplier ? supplierAbbr(supplierLabel(supplier, supplier.id)) : null,
     // Conviene si la línea entra en la oferta: el cliente ahorra al menos lo mínimo con el margen mínimo.
     worthIt: sale.tier == null ? null : isOffered(sale.tier),
@@ -110,19 +109,19 @@ export function useCatalog() {
   } = useCachedQuery('vehicles', listVehicles)
   const vehicles = useMemo(() => vehicleData ?? [], [vehicleData])
   // El PVP depende del costo en Chile, que solo existe con cotizaciones; no bloquea el catálogo.
-  const { costs, suppliers: costSuppliers, toClp, rates, seaFormat } = usePartCosts()
+  const { costs, suppliers: costSuppliers, toClp, rates, seaFormat, fx } = usePartCosts()
   const loading = partsLoading || vehiclesLoading
   const error = partsError || vehiclesError
 
   const allRows = useMemo(() => {
     if (!partsData) return []
-    const ctx = { suppliers: costSuppliers, toClp }
+    const ctx = { suppliers: costSuppliers, toClp, fx }
     return partsData.map((p) => {
       const categoryTopPath = p.categoryPath.split('__')[0]
       // Se guardan ambas monedas del precio de referencia — la tabla
       // elige cuál pintar según el selector de moneda, el orden siempre
       // se calcula en USD (moneda común, la conversión no reordena).
-      const baselinePriceUsd = clpToUsd(p.baselinePrice, DEFAULT_FX)
+      const baselinePriceUsd = clpToUsd(p.baselinePrice, fx)
       return {
         id: p.id,
         nameEs: p.nameEs,
@@ -145,7 +144,7 @@ export function useCatalog() {
         pvpSea: pvpOf(costs?.sea, ctx, p, pricingFor(rates, 'sea')),
       }
     })
-  }, [partsData, costs, costSuppliers, toClp, rates])
+  }, [partsData, costs, costSuppliers, toClp, rates, fx])
 
   // Límites reales del baseline (USD) para el slider de precio — se recalculan
   // solo cuando llegan los datos, no en cada render.

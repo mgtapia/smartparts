@@ -3,6 +3,7 @@ import { DEFAULT_PARAM_SET } from '@mocks/costParams'
 import {
   DEFAULT_GLOBAL_PARAMS,
   DEFAULT_RATES,
+  buildFx,
   buildGlobalParams,
   buildParams,
   buildRates,
@@ -32,6 +33,30 @@ describe('globalSettingsModel', () => {
     expect(params.freightDefaults.seaLclWmKgPerCbm).toBe(900)
     // Lo que no se edita queda como estaba.
     expect(params.duty).toEqual(DEFAULT_PARAM_SET.duty)
+  })
+
+  it('el dólar del ajuste llega al tipo de cambio en micros', () => {
+    expect(buildFx(undefined).usdClp).toBe(DEFAULT_GLOBAL_PARAMS.usdClp * 1_000_000)
+    const fx = buildFx({ usdClp: 980, fxAsOf: '2026-10-01' })
+    expect(fx.usdClp).toBe(980_000_000)
+    expect(fx.asOf).toBe('2026-10-01')
+  })
+
+  it('los parámetros del precio de venta y el formato marítimo son editables y tienen valor de referencia', () => {
+    const rates = buildRates(undefined)
+    expect(rates.pvpMaxSavingOemBp).toBe(5000)
+    expect(rates.pvpMaxSavingAltBp).toBe(7000)
+    expect(rates.pvpMinSavingBp).toBe(1000)
+    expect(rates.pvpSeaFormat).toBe('sea_lcl')
+    const picked = pickEditable(rates)
+    for (const key of [
+      'pvpMaxSavingOemBp',
+      'pvpMaxSavingAltBp',
+      'pvpMinSavingBp',
+      'pvpSeaFormat',
+    ]) {
+      expect(picked[key]).toBeDefined()
+    }
   })
 
   it('un valor guardado vacío no borra la referencia', () => {

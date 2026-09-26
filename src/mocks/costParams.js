@@ -66,6 +66,7 @@ export const DEFAULT_UNIT_COST_ASSUMPTIONS = {
   ftaDutyBp: 0, // arancel con TLC Chile-China (solo con Formulario F): 0 % estimado, depende de la partida — sin verificar.
   pvpMarginAirBp: 3000, // Margen mínimo por avión, 30 % sobre el precio de venta: el piso del PVP aéreo (costo ÷ (1 − margen)). Fórmula de Diego, editable.
   pvpMarginSeaBp: 3000, // Margen mínimo por barco, sobre el precio de venta. Puede ser distinto del aéreo.
+  pvpSeaFormat: 'sea_lcl', // Formato marítimo con el que se calcula el PVP por barco: 'sea_lcl', 'sea_fcl_20' o 'sea_fcl_40hq'. Se puede cambiar por pantalla.
   pvpMaxSavingOemBp: 5000, // Ahorro máximo del cliente en una pieza original, 50 % bajo lo que paga hoy: el precio nunca baja de ahí. Fórmula de Diego.
   pvpMaxSavingAltBp: 7000, // Ahorro máximo del cliente en una pieza alternativa, 70 %.
   pvpMinSavingBp: 1000, // Ahorro mínimo para ofrecer una línea, 10 %: si ni con el margen mínimo el cliente ahorra esto, no compite.

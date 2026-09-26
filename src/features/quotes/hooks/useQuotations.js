@@ -30,16 +30,19 @@ export function unitPriceMoney(quote) {
 }
 
 /** Precio unitario del proveedor llevado a USD (micros), sin costos adicionales. Null si no hay moneda. */
-export function priceUsdMicro(quote) {
+export function priceUsdMicro(quote, fx = DEFAULT_FX) {
   const unit = unitPriceMoney(quote)
-  return unit === null ? null : toUsdMicro(unit, DEFAULT_FX)
+  return unit === null ? null : toUsdMicro(unit, fx)
 }
 
 /**
  * Costo unitario de una línea (una cotización de un proveedor para una pieza)
  * con los supuestos vigentes. Un precio sin moneda no se costea.
  */
-export function costLine(line, { mode, rates, params = DEFAULT_PARAM_SET, settingsFor }) {
+export function costLine(
+  line,
+  { mode, rates, params = DEFAULT_PARAM_SET, settingsFor, fx = DEFAULT_FX },
+) {
   const { quote, part } = line
   if (!quote.currency) {
     return { blockers: ['Moneda sin definir'], components: [], landedNetUsdMicro: null }
@@ -63,7 +66,7 @@ export function costLine(line, { mode, rates, params = DEFAULT_PARAM_SET, settin
     mode,
     assumptions: rates,
     params,
-    fx: DEFAULT_FX,
+    fx,
   })
 }
 

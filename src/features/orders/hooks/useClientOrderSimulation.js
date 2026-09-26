@@ -3,7 +3,6 @@ import { usePersistentState } from '@hooks/usePersistentState'
 import { supplierLabel } from '@features/quotes/constants'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
-import { DEFAULT_FX } from '@mocks/costParams'
 import {
   DEFAULT_CUSTOM,
   cheapestScenario,
@@ -22,15 +21,15 @@ import { basketFromClientOrder, scenarioMargin } from '../purchaseFromOrderModel
 export function useClientOrderSimulation(order, purchaseOrders) {
   const { lines, loading, error } = useQuotationsData()
   const assumptions = useCostAssumptions()
-  const { rates, params, settingsFor } = assumptions
+  const { rates, params, settingsFor, fx } = assumptions
   const [scenarioId, setScenarioId] = useState(null)
   // Escenario personalizado (calidad, envío y proveedores), guardado en el navegador.
   const [custom, setCustom] = usePersistentState('clientOrder.custom.v1', DEFAULT_CUSTOM)
   const deferredCustom = useDeferredValue(custom)
 
   const basket = useMemo(
-    () => basketFromClientOrder(order, purchaseOrders, DEFAULT_FX),
-    [order, purchaseOrders],
+    () => basketFromClientOrder(order, purchaseOrders, fx),
+    [order, purchaseOrders, fx],
   )
 
   const simulation = useMemo(() => {
@@ -42,9 +41,9 @@ export function useClientOrderSimulation(order, purchaseOrders) {
       settingsFor,
       assumptions: rates,
       params,
-      fx: DEFAULT_FX,
+      fx,
     })
-  }, [lines, basket, deferredCustom, settingsFor, rates, params])
+  }, [lines, basket, deferredCustom, settingsFor, rates, params, fx])
 
   // Sin elección, el escenario más barato entre los que cubren más repuestos.
   // Proveedores con cotizaciones, para elegir cuáles incluir en el escenario personalizado.

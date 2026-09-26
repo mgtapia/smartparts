@@ -2,12 +2,16 @@
 
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { SEA_FORMATS } from '../partCostsModel'
-import { useSeaFormat } from '../hooks/useSeaFormat'
+import { SEA_FORMAT_FROM_SETTINGS, useSeaFormat } from '../hooks/useSeaFormat'
 
-const OPTIONS = SEA_FORMATS.map((f) => ({ value: f.value, label: f.labelEs }))
+const labelOf = (format) => SEA_FORMATS.find((f) => f.value === format)?.labelEs
 
 /** Selector del formato marítimo (LCL o contenedor completo) con el que se calcula el costo por barco. */
 export default function SeaFormatSelect() {
-  const [format, setFormat] = useSeaFormat()
-  return <ToolbarSelectBox label="Marítimo" value={format} onChange={setFormat} options={OPTIONS} />
+  const { choice, setChoice, settingsFormat } = useSeaFormat()
+  const options = [
+    { value: SEA_FORMAT_FROM_SETTINGS, label: `Ajustes: ${labelOf(settingsFormat)}` },
+    ...SEA_FORMATS.map((f) => ({ value: f.value, label: f.labelEs })),
+  ]
+  return <ToolbarSelectBox label="Marítimo" value={choice} onChange={setChoice} options={options} />
 }

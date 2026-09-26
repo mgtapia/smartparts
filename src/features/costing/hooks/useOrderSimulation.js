@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import { useQuotationsData } from '@features/quotes/hooks/useQuotations'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { DEFAULT_PARAM_SET, DEFAULT_FX } from '@mocks/costParams'
-import { QUALITY, QUANTITY_SOURCE, simulateOrder } from '../orderSimulationModel'
+import {
+  QUALITY,
+  QUANTITY_SOURCE,
+  simulateOrder,
+  vehicleQuantityRows,
+} from '../orderSimulationModel'
 
 /**
  * Simulación de un pedido completo del cliente: por defecto, todos los repuestos cotizados del
@@ -21,6 +26,11 @@ export function useOrderSimulation() {
     'order.quantitySource.v1',
     QUANTITY_SOURCE.CLIENT_ESTIMATE,
   )
+  // Cantidades editadas por repuesto (las que no se tocan siguen la fuente elegida).
+  const [quantityOverrides, setQuantityOverrides] = usePersistentState('order.quantities.v1', {})
+  // El plan prueba todas las combinaciones de proveedores: se recalcula con las cantidades
+  // diferidas para que escribir en el editor no se trabe.
+  const deferredOverrides = useDeferredValue(quantityOverrides)
   const [chosenVehicleId, setVehicleId] = useState(null)
   const [scenarioId, setScenarioId] = useState('best')
 
@@ -46,13 +56,28 @@ export function useOrderSimulation() {
       vehicleId,
       quality,
       quantitySource,
+      quantityOverrides: deferredOverrides,
       settingsFor,
       mode,
       assumptions: rates,
       params: DEFAULT_PARAM_SET,
       fx: DEFAULT_FX,
     })
-  }, [lines, vehicleId, quality, quantitySource, settingsFor, mode, rates])
+  }, [lines, vehicleId, quality, quantitySource, deferredOverrides, settingsFor, mode, rates])
+
+  const quantityRows = useMemo(
+    () => vehicleQuantityRows({ lines, vehicleId, quantitySource, quantityOverrides }),
+    [lines, vehicleId, quantitySource, quantityOverrides],
+  )
+  /** Fija la cantidad de un repuesto; `null` vuelve a la cantidad por defecto. */
+  const setQuantity = (partId, qty) =>
+    setQuantityOverrides((prev) => {
+      const next = { ...prev }
+      if (qty === null) delete next[partId]
+      else next[partId] = qty
+      return next
+    })
+  const resetQuantities = () => setQuantityOverrides({})
 
   const scenario =
     simulation?.scenarios.find((s) => s.id === scenarioId) ?? simulation?.scenarios[0] ?? null
@@ -80,6 +105,9 @@ export function useOrderSimulation() {
     quantitySource,
     setQuantitySource,
     simulation,
+    quantityRows,
+    setQuantity,
+    resetQuantities,
     scenario,
     setScenarioId,
     lookup,

@@ -11,6 +11,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/Menu'
+import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { useAuth } from '@contexts/AuthContext'
 import GlobalSearch from '@features/search/GlobalSearch'
 import { TOPBAR_HEIGHT } from '@constants/layout'
@@ -32,7 +33,7 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
           aria-label={expanded ? 'Contraer menú' : 'Expandir menú'}
           sx={{ color: 'common.white' }}
         >
-          <MenuIcon />
+          {expanded ? <MenuOpenIcon /> : <MenuIcon />}
         </IconButton>
         <Box
           component={Link}
@@ -44,7 +45,7 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
             component="img"
             src="/assets/brand/logo-smartdeal-white.svg"
             alt="SmartDeal"
-            sx={{ height: 18, width: 'auto', display: 'block' }}
+            sx={{ height: 16, width: 'auto', display: 'block' }}
           />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>

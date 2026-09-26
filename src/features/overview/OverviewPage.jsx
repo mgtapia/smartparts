@@ -17,6 +17,8 @@ import { GRID_GAP } from '@constants/layout'
 import { formatBp } from '@libs/percent'
 import { QUALITY } from './analyticsModel'
 import { useAnalytics } from './hooks/useAnalytics'
+import PendingSummary from './components/PendingSummary'
+import ClientOrderSavings from './components/ClientOrderSavings'
 
 const PRICE_NOTE = [
   'Precio unitario del proveedor llevado a USD, sin flete, aranceles ni gastos de origen. Si un proveedor ofrece varias variantes o tramos, se usa la más barata.',
@@ -87,6 +89,9 @@ export default function OverviewPage() {
   return (
     <ContentWidth>
       <PageHeader title="Vista general" />
+
+      <ClientOrderSavings />
+      <PendingSummary />
 
       <Card sx={{ p: 2, mb: `${GRID_GAP}px` }}>
         <InfoGrid columns={5}>

@@ -52,7 +52,7 @@ export default function OrderSimulation({ tabs }) {
   return (
     <ContentWidth>
       <PageHeader
-        title="Calculadora"
+        title="Simulador"
         meta={
           simulation
             ? `${totalParts} repuestos · ${simulation.units.toLocaleString('es-CL')} unidades.`

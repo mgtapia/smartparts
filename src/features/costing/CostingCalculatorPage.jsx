@@ -76,7 +76,7 @@ function PartCalculator({ tabs }) {
   if (!part || !quote) {
     return (
       <ContentWidth>
-        <PageHeader title="Calculadora" />
+        <PageHeader title="Simulador" />
         {tabs}
         <Card sx={{ p: 2, fontSize: 13, color: 'text.secondary' }}>
           Sin cotizaciones cargadas para calcular todavía.
@@ -176,7 +176,7 @@ function PartCalculator({ tabs }) {
 
   return (
     <ContentWidth>
-      <PageHeader title="Calculadora" />
+      <PageHeader title="Simulador" />
       {tabs}
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>

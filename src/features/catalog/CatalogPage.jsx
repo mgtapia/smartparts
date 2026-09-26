@@ -472,7 +472,6 @@ export default function CatalogPage() {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     textAlign: 'right',
-                    cursor: 'help',
                   }}
                 >
                   Precio REF

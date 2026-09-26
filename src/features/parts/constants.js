@@ -2,6 +2,7 @@ import { LOGISTICS_STATUS_LABELS_ES } from '@constants/enums'
 
 export const PART_TABS = {
   QUOTES: 'cotizaciones',
+  RECOMMENDATIONS: 'recomendaciones',
   IDENTITY: 'identificacion',
   LOGISTICS: 'logistica',
   CUSTOMS: 'aduana',
@@ -9,6 +10,7 @@ export const PART_TABS = {
 
 export const TAB_LIST = [
   { value: PART_TABS.QUOTES, label: 'Cotizaciones' },
+  { value: PART_TABS.RECOMMENDATIONS, label: 'Recomendaciones' },
   { value: PART_TABS.IDENTITY, label: 'Identificación' },
   { value: PART_TABS.LOGISTICS, label: 'Logística' },
   { value: PART_TABS.CUSTOMS, label: 'Aduana' },

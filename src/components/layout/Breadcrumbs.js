@@ -10,8 +10,8 @@ import { findNavTrail } from '@constants/routes'
 /** Migas de pan: Grupo › Módulo (› Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
 export default function Breadcrumbs() {
   const trail = findNavTrail(usePathname())
-  // Sin grupo ni ficha es un módulo de primer nivel (Vista general): no hay ruta que mostrar.
-  if (!trail || (!trail.group && !trail.detail)) return null
+  // Sin grupo (o con el mismo nombre que su único módulo) y sin ficha, las migas repetirían el título.
+  if (!trail || (!trail.detail && (!trail.group || trail.group === trail.item.labelEs))) return null
   const crumbs = [
     trail.group ? { label: trail.group } : null,
     { label: trail.item.labelEs, href: trail.detail ? trail.item.path : null },

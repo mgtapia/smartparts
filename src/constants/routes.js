@@ -42,7 +42,7 @@ export const NAV_ENTRIES = Object.freeze([
   },
   {
     key: 'sourcing-group',
-    labelEs: 'Abastecimiento',
+    labelEs: 'Logística',
     icon: 'Factory',
     children: [
       {
@@ -67,13 +67,6 @@ export const NAV_ENTRIES = Object.freeze([
         implemented: true,
       },
       {
-        key: 'trial',
-        path: '/trial',
-        labelEs: 'Compra de prueba',
-        icon: 'Flight',
-        implemented: true,
-      },
-      {
         key: 'sourcing',
         path: '/sourcing',
         labelEs: 'Sourcing',
@@ -83,9 +76,9 @@ export const NAV_ENTRIES = Object.freeze([
     ],
   },
   {
-    key: 'purchasing-group',
-    labelEs: 'Compras',
-    icon: 'ShoppingCart',
+    key: 'simulator-group',
+    labelEs: 'Simulador',
+    icon: 'Calculate',
     children: [
       {
         key: 'costing',
@@ -94,6 +87,20 @@ export const NAV_ENTRIES = Object.freeze([
         icon: 'Calculate',
         implemented: true,
       },
+      {
+        key: 'trial',
+        path: '/trial',
+        labelEs: 'Compra de prueba',
+        icon: 'Flight',
+        implemented: true,
+      },
+    ],
+  },
+  {
+    key: 'purchasing-group',
+    labelEs: 'Compras',
+    icon: 'ShoppingCart',
+    children: [
       {
         key: 'orders',
         path: '/orders',

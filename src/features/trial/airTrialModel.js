@@ -576,6 +576,7 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
     notWorthFlying,
     logistics,
     suspectOfferCount: suspectOffers.size,
+    suspectOfferKeys: [...suspectOffers],
     missingData,
     anomalies,
     scenarios,

@@ -35,6 +35,9 @@ import ImageDialog from './components/ImageDialog'
 import LogisticsDialog from './components/LogisticsDialog'
 import NamesDialog from './components/NamesDialog'
 import { PART_TABS, TAB_LIST } from './constants'
+import PartRecommendations from './components/PartRecommendations'
+import { usePartCosts } from '@features/costing/hooks/usePartCosts'
+import { COST_MODES, SELECTIONS, bestOf, convenience } from '@features/costing/partCostsModel'
 
 const EDIT = {
   CODE: 'code',
@@ -51,6 +54,7 @@ const formatVolume = (cm3) => `${cm3.toLocaleString('es-CL')} cm³`
 export default function PartDetailPage() {
   const partId = useRouteId()
   const { part, loading, error, refetch } = usePartDetail(partId)
+  const partCosts = usePartCosts()
   const assumptions = useCostAssumptions()
   const { mode, rates, settingsFor } = assumptions
   const [tab, setTab] = useUrlTab(Object.values(PART_TABS))
@@ -107,30 +111,21 @@ export default function PartDetailPage() {
   const logisticsConfirmed = CONFIRMED_LOGISTICS_STATUSES.includes(part.logisticsStatus)
   const logisticsReason = `${LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}: falta confirmarlo con el proveedor o medirlo`
 
-  const bestCost = (type) => {
-    const ofType = rows.filter((r) => r.quote.partType === type)
-    if (ofType.length === 0)
-      return { text: 'Sin cotización', reason: 'Ningún proveedor cotizó esta calidad' }
-    const priced = ofType.filter((r) => r.cost.landedNetUsdMicro !== null)
-    if (priced.length === 0) {
-      return { text: 'Falta dato', reason: ofType[0].cost.blockers.join('; ') }
-    }
-    const best = priced.reduce((a, b) =>
-      b.cost.landedNetUsdMicro < a.cost.landedNetUsdMicro ? b : a,
-    )
-    return {
-      micro: best.cost.landedNetUsdMicro,
-      reason: `${supplierLabel(best.quote.supplier, best.quote.supplierId)}. Costo estimado, sin verificar`,
-    }
-  }
-
-  const bestCostField = (type, label) => {
-    const b = bestCost(type)
+  // Mejor costo puesto en Chile (lo más barato, sea cual sea su calidad) por avión y por barco.
+  // Verde si conviene importar, rojo si no; gris si falta el costo o el precio de referencia.
+  const costField = (mode, label) => {
+    const best = bestOf(partCosts.costs?.[mode], part.id, SELECTIONS.CHEAPEST)
+    const worthIt = best
+      ? convenience(partCosts.toClp(best.usdMicro), part.baselinePrice?.amount ?? null)
+      : null
     return (
       <InfoField label={label}>
-        <UncertainValue verified={false} reason={b.reason}>
-          {b.micro === undefined ? b.text : <MoneyFromMicros micros={b.micro} currency="USD" />}
-        </UncertainValue>
+        <Box
+          component="span"
+          sx={{ color: { true: 'success.main', false: 'error.main' }[worthIt] ?? 'text.secondary' }}
+        >
+          {best ? <MoneyFromMicros micros={best.usdMicro} currency="USD" /> : '—'}
+        </Box>
       </InfoField>
     )
   }
@@ -315,8 +310,8 @@ export default function PartDetailPage() {
             <InfoField label="Precio referencia">
               <MoneyValue money={part.baselinePrice} />
             </InfoField>
-            {bestCostField(PART_TYPE.ORIGINAL, 'Mejor costo OEM')}
-            {bestCostField(PART_TYPE.ALTERNATIVE, 'Mejor costo AFM')}
+            {costField(COST_MODES.AIR, 'Costo aéreo')}
+            {costField(COST_MODES.SEA, 'Costo marítimo')}
           </InfoGrid>
         </Box>
       </Card>
@@ -332,6 +327,8 @@ export default function PartDetailPage() {
           emptyText="Sin cotizaciones todavía."
         />
       ) : null}
+
+      {tab === PART_TABS.RECOMMENDATIONS ? <PartRecommendations part={part} /> : null}
 
       {tab === PART_TABS.IDENTITY ? (
         <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>

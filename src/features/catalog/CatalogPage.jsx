@@ -18,7 +18,6 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import Tooltip from '@mui/material/Tooltip'
 import Divider from '@mui/material/Divider'
 import Link from 'next/link'
-import UncertainValue from '@components/common/UncertainValue'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import Pill from '@components/common/Pill'
@@ -57,8 +56,6 @@ const GROUP_KEY_GETTERS = {
 // sobra, como columna principal.
 const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 100, supplier: 80 }
 const REPUESTO_MIN_WIDTH = 220
-const PVP_REASON =
-  'Costo original puesto en Chile por avión (tarifas de referencia, pesos sin confirmar) más 30 % de margen, sin IVA.'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -170,9 +167,9 @@ function CatalogRow({ r, isColumnVisible, currency }) {
       {isColumnVisible('pvp') ? (
         <Box sx={{ flex: `0 1 ${COL_WIDTH.pvp}px`, textAlign: 'right', fontSize: 13 }}>
           {r.pvpClp ? (
-            <UncertainValue verified={false} reason={PVP_REASON}>
+            <Box component="span" sx={{ color: 'error.main' }}>
               <MoneyValue money={currency === CURRENCIES.USD ? r.pvpUsd : r.pvpClp} />
-            </UncertainValue>
+            </Box>
           ) : (
             '—'
           )}
@@ -478,20 +475,17 @@ export default function CatalogPage() {
                 </Typography>
               ) : null}
               {isColumnVisible('pvp') ? (
-                <Tooltip title="Nuestro precio de venta: mejor costo original puesto en Chile más 30 % de margen.">
-                  <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    sx={{
-                      flex: `0 1 ${COL_WIDTH.pvp}px`,
-                      lineHeight: 1,
-                      textAlign: 'right',
-                      cursor: 'help',
-                    }}
-                  >
-                    PVP neto
-                  </Typography>
-                </Tooltip>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{
+                    flex: `0 1 ${COL_WIDTH.pvp}px`,
+                    lineHeight: 1,
+                    textAlign: 'right',
+                  }}
+                >
+                  PVP neto
+                </Typography>
               ) : null}
               {isColumnVisible('supplier') ? (
                 <Typography

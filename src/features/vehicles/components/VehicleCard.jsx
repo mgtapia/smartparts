@@ -30,7 +30,7 @@ export default function VehicleCard({ row }) {
     >
       <Box
         sx={{
-          aspectRatio: '4 / 5',
+          aspectRatio: '5 / 4',
           p: 2,
           display: 'flex',
           alignItems: 'center',

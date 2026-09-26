@@ -1,14 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
-import Avatar from '@mui/material/Avatar'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import ListItemIcon from '@mui/material/ListItemIcon'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Typography from '@mui/material/Typography'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { useAuth } from '@contexts/AuthContext'
 import { usePersistentState } from '@hooks/usePersistentState'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
@@ -25,13 +27,14 @@ import TuneIcon from '@mui/icons-material/Tune'
 import FlightIcon from '@mui/icons-material/Flight'
 import ChecklistIcon from '@mui/icons-material/Checklist'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
-import { RAIL_ITEMS } from '@constants/routes'
-import { RAIL_WIDTH, RAIL_WIDTH_EXPANDED } from '@constants/layout'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import { visibleNavEntries, isNavItemActive } from '@constants/routes'
+import { RAIL_WIDTH, RAIL_WIDTH_EXPANDED, TOPBAR_HEIGHT } from '@constants/layout'
 
 // Imports puntuales por ícono (nunca `import * as Icons`): un barrel import de
 // @mui/icons-material obliga a webpack a procesar ~2500 módulos y dispara el
 // build a varios minutos. Este mapa es lo único que hay que tocar al sumar un
-// ítem al rail.
+// ítem al menú.
 const ICONS = {
   Dashboard: DashboardIcon,
   DirectionsCar: DirectionsCarIcon,
@@ -48,19 +51,151 @@ const ICONS = {
   Checklist: ChecklistIcon,
   Flight: FlightIcon,
   ReceiptLong: ReceiptLongIcon,
+  ShoppingCart: ShoppingCartIcon,
+}
+
+const IDLE_COLOR = 'rgba(255,255,255,0.65)'
+const HOVER_BG = 'rgba(255,255,255,0.08)'
+const ACTIVE_BG = 'rgba(197,255,62,0.12)'
+
+/** Fila del rail (ítem directo, hijo de un grupo o encabezado de grupo). */
+function rowSx({ expanded, active, indent = false }) {
+  return {
+    width: expanded ? 'auto' : 44,
+    height: 44,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: expanded ? 'flex-start' : 'center',
+    gap: 1.5,
+    pl: expanded ? (indent ? 4.5 : 1.5) : 0,
+    pr: expanded ? 1.5 : 0,
+    border: 'none',
+    borderRadius: 2,
+    cursor: 'pointer',
+    font: 'inherit',
+    textAlign: 'left',
+    color: active ? 'secondary.main' : IDLE_COLOR,
+    bgcolor: active ? ACTIVE_BG : 'transparent',
+    textDecoration: 'none',
+    '&:hover': { bgcolor: HOVER_BG },
+  }
+}
+
+function RailLink({ item, pathname, expanded, indent = false }) {
+  const Icon = ICONS[item.icon]
+  const active = isNavItemActive(item, pathname)
+  return (
+    <Tooltip title={expanded ? '' : item.labelEs} placement="right">
+      <Box
+        component={Link}
+        href={item.path}
+        sx={rowSx({ expanded, active, indent })}
+        aria-current={active ? 'page' : undefined}
+      >
+        <Icon fontSize="small" />
+        {expanded ? (
+          <Typography variant="body2" noWrap sx={{ color: 'inherit' }}>
+            {item.labelEs}
+          </Typography>
+        ) : null}
+      </Box>
+    </Tooltip>
+  )
 }
 
 /**
- * Rail vertical de módulos — ver .agent/DESIGN.md §Navegación.
- * Solo se muestran los `implemented: true` en @constants/routes (el resto son
- * placeholders sin feature real, no forman parte de la navegación todavía).
- * `permission` filtra ítems según el rol del usuario (Fase 2, ver docs/SEGURIDAD-Y-ROLES.md);
- * hasta que Auth con custom claims esté conectado, se muestran todos los implementados.
+ * Grupo del menú. Contraído: el ícono abre un flyout a la derecha con los ítems.
+ * Expandido: se despliega en línea; el grupo con la ruta activa se ve abierto.
  */
-export default function AppRail() {
+function RailGroup({ entry, pathname, expanded, open, onToggle }) {
+  const [anchor, setAnchor] = useState(null)
+  const Icon = ICONS[entry.icon]
+  const active = entry.children.some((c) => isNavItemActive(c, pathname))
+
+  if (!expanded) {
+    return (
+      <>
+        <Tooltip title={anchor ? '' : entry.labelEs} placement="right">
+          <Box
+            component="button"
+            onClick={(e) => setAnchor(e.currentTarget)}
+            aria-haspopup="menu"
+            aria-label={entry.labelEs}
+            sx={rowSx({ expanded, active })}
+          >
+            <Icon fontSize="small" />
+          </Box>
+        </Tooltip>
+        <Menu
+          anchorEl={anchor}
+          open={Boolean(anchor)}
+          onClose={() => setAnchor(null)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          slotProps={{ paper: { sx: { ml: 1, minWidth: 200 } } }}
+        >
+          <Typography variant="overline" color="text.secondary" sx={{ px: 2, display: 'block' }}>
+            {entry.labelEs}
+          </Typography>
+          {entry.children.map((item) => {
+            const ItemIcon = ICONS[item.icon]
+            return (
+              <MenuItem
+                key={item.key}
+                component={Link}
+                href={item.path}
+                selected={isNavItemActive(item, pathname)}
+                onClick={() => setAnchor(null)}
+              >
+                <ListItemIcon>
+                  <ItemIcon fontSize="small" />
+                </ListItemIcon>
+                {item.labelEs}
+              </MenuItem>
+            )
+          })}
+        </Menu>
+      </>
+    )
+  }
+
+  const showChildren = open || active
+  return (
+    <>
+      <Box
+        component="button"
+        onClick={onToggle}
+        aria-expanded={showChildren}
+        sx={{
+          ...rowSx({ expanded, active: false }),
+          color: active ? 'secondary.main' : IDLE_COLOR,
+        }}
+      >
+        <Icon fontSize="small" />
+        <Typography variant="body2" noWrap sx={{ color: 'inherit', flex: 1 }}>
+          {entry.labelEs}
+        </Typography>
+        {showChildren ? <ExpandMoreIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+      </Box>
+      {showChildren
+        ? entry.children.map((item) => (
+            <RailLink key={item.key} item={item} pathname={pathname} expanded indent />
+          ))
+        : null}
+    </>
+  )
+}
+
+/**
+ * Menú lateral — ver .agent/DESIGN.md §Navegación. `expanded` lo controla la
+ * hamburguesa de la barra superior. Solo se muestran los `implemented: true`
+ * de @constants/routes; `permission` filtra por rol cuando Auth con custom
+ * claims esté conectado (Fase 2, ver docs/SEGURIDAD-Y-ROLES.md).
+ */
+export default function AppRail({ expanded }) {
   const pathname = usePathname()
-  const { user, signOutUser } = useAuth()
-  const [expanded, setExpanded] = usePersistentState('rail.expanded', false)
+  const [openGroups, setOpenGroups] = usePersistentState('rail.groups', {})
 
   return (
     <Box
@@ -69,7 +204,8 @@ export default function AppRail() {
         width: expanded ? RAIL_WIDTH_EXPANDED : RAIL_WIDTH,
         flexShrink: 0,
         transition: 'width 150ms ease',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         bgcolor: 'brand.railBg',
         display: 'flex',
         flexDirection: 'column',
@@ -77,100 +213,25 @@ export default function AppRail() {
         px: expanded ? 1.5 : 0,
         py: 2,
         gap: 0.5,
-        height: '100vh',
+        height: `calc(100vh - ${TOPBAR_HEIGHT}px)`,
         position: 'sticky',
-        top: 0,
+        top: TOPBAR_HEIGHT,
       }}
     >
-      {RAIL_ITEMS.filter((item) => item.implemented).map((item) => {
-        const Icon = ICONS[item.icon]
-        const active = [item.path, ...(item.alsoActiveOn ?? [])].some((p) =>
-          pathname?.startsWith(p),
-        )
-        return (
-          <Tooltip key={item.key} title={expanded ? '' : item.labelEs} placement="right">
-            <Box
-              component={Link}
-              href={item.path}
-              sx={{
-                width: expanded ? 'auto' : 44,
-                height: 44,
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: expanded ? 'flex-start' : 'center',
-                gap: 1.5,
-                px: expanded ? 1.5 : 0,
-                borderRadius: 2,
-                color: active ? 'secondary.main' : 'rgba(255,255,255,0.65)',
-                bgcolor: active ? 'rgba(197,255,62,0.12)' : 'transparent',
-                textDecoration: 'none',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
-              }}
-            >
-              <Icon fontSize="small" />
-              {expanded ? (
-                <Typography variant="body2" noWrap sx={{ color: 'inherit' }}>
-                  {item.labelEs}
-                </Typography>
-              ) : null}
-            </Box>
-          </Tooltip>
-        )
-      })}
-
-      <Tooltip title={expanded ? '' : 'Expandir menú'} placement="right">
-        <Box
-          component="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-label={expanded ? 'Contraer menú' : 'Expandir menú'}
-          sx={{
-            mt: 'auto',
-            width: expanded ? 'auto' : 44,
-            height: 36,
-            flexShrink: 0,
-            alignSelf: expanded ? 'stretch' : 'center',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: expanded ? 'flex-end' : 'center',
-            px: expanded ? 1.5 : 0,
-            border: 'none',
-            borderRadius: 2,
-            cursor: 'pointer',
-            bgcolor: 'transparent',
-            color: 'rgba(255,255,255,0.65)',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
-          }}
-        >
-          {expanded ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
-        </Box>
-      </Tooltip>
-
-      {user ? (
-        <Tooltip title={`${user.displayName || user.email} — cerrar sesión`} placement="right">
-          <Box
-            component="button"
-            onClick={() => signOutUser()}
-            sx={{
-              mt: 0.5,
-              alignSelf: expanded ? 'flex-start' : 'center',
-              width: 36,
-              height: 36,
-              p: 0,
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              bgcolor: 'transparent',
-            }}
-          >
-            <Avatar
-              src={user.photoURL || undefined}
-              alt={user.displayName || user.email || ''}
-              sx={{ width: 36, height: 36 }}
-            />
-          </Box>
-        </Tooltip>
-      ) : null}
+      {visibleNavEntries().map((entry) =>
+        entry.children ? (
+          <RailGroup
+            key={entry.key}
+            entry={entry}
+            pathname={pathname}
+            expanded={expanded}
+            open={Boolean(openGroups[entry.key])}
+            onToggle={() => setOpenGroups((prev) => ({ ...prev, [entry.key]: !prev[entry.key] }))}
+          />
+        ) : (
+          <RailLink key={entry.key} item={entry} pathname={pathname} expanded={expanded} />
+        ),
+      )}
     </Box>
   )
 }

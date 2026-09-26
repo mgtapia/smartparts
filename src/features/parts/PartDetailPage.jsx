@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import { vehicleLabel } from '@features/vehicles/constants'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import MoneyValue, { MoneyFromMicros } from '@components/common/MoneyValue'
@@ -311,9 +312,7 @@ export default function PartDetailPage() {
                 </Box>
               </UncertainValue>
             </InfoField>
-            <InfoField label="Vehículo">
-              {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
-            </InfoField>
+            <InfoField label="Vehículo">{vehicleLabel(part.vehicle) || '—'}</InfoField>
             <InfoField label="Precio referencia">
               <MoneyValue money={part.baselinePrice} />
             </InfoField>

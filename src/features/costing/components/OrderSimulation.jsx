@@ -5,6 +5,7 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import QuantitiesEditor from './QuantitiesEditor'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { isFclMode } from '@core/costing/containers'
@@ -99,6 +100,12 @@ export default function OrderSimulation({ tabs }) {
         />
         <InfoNote paragraphs={ORDER_HELP} />
       </Box>
+
+      <QuantitiesEditor
+        rows={sim.quantityRows}
+        onChange={sim.setQuantity}
+        onReset={sim.resetQuantities}
+      />
 
       <SimulationResults
         simulation={simulation}

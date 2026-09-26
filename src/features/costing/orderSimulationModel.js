@@ -11,6 +11,28 @@ export const QUALITY = { ANY: 'any', OEM: PART_TYPE.ORIGINAL, AFM: PART_TYPE.ALT
 /** De dónde salen las cantidades del pedido. */
 export const QUANTITY_SOURCE = { CLIENT_ESTIMATE: 'client_estimate', ONE_EACH: 'one_each' }
 
+/** Cantidad de un repuesto según la fuente elegida, sin las ediciones del usuario. */
+export function defaultQuantity(part, quantitySource) {
+  return quantitySource === QUANTITY_SOURCE.ONE_EACH ? 1 : Number(part.quantityEstimated) || 0
+}
+
+/**
+ * Repuestos cotizados de un vehículo con su cantidad por defecto y la vigente (la editada si
+ * hay), para el editor de cantidades. Orden alfabético.
+ * @returns {Array<{ part: any, defaultQty: number, qty: number, edited: boolean }>}
+ */
+export function vehicleQuantityRows({ lines, vehicleId, quantitySource, quantityOverrides }) {
+  const parts = new Map()
+  for (const { part } of lines) if (part.vehicleId === vehicleId) parts.set(part.id, part)
+  return [...parts.values()]
+    .sort((a, b) => a.nameEs.localeCompare(b.nameEs, 'es'))
+    .map((part) => {
+      const defaultQty = defaultQuantity(part, quantitySource)
+      const edited = quantityOverrides?.[part.id] !== undefined
+      return { part, defaultQty, qty: edited ? quantityOverrides[part.id] : defaultQty, edited }
+    })
+}
+
 /** Precio que paga hoy el cliente (neto, CLP) llevado a micros de USD. */
 function baselineUsdMicro(part, fx) {
   const baseline = part.baselinePrice
@@ -28,6 +50,8 @@ function baselineUsdMicro(part, fx) {
  *   `baselineUsdMicro`, ese es el precio de venta unitario en vez del precio base del repuesto.
  * @param {string} input.quality          Ver QUALITY.
  * @param {string} [input.quantitySource]   Ver QUANTITY_SOURCE.
+ * @param {Record<string, number>} [input.quantityOverrides]  Cantidades editadas por repuesto en la
+ *   canasta por vehículo: mandan sobre la fuente de cantidades; 0 saca el repuesto del pedido.
  * @param {(supplierId: string) => any} input.settingsFor  Supuestos por proveedor (distancia, Incoterm supuesto).
  * @param {any} input.fx
  */
@@ -37,6 +61,7 @@ export function buildPlanInputs({
   basket,
   quality,
   quantitySource,
+  quantityOverrides,
   settingsFor,
   fx,
 }) {
@@ -53,9 +78,7 @@ export function buildPlanInputs({
     if (!partsById.has(part.id)) {
       const qty = inBasket
         ? inBasket.qty
-        : quantitySource === QUANTITY_SOURCE.ONE_EACH
-          ? 1
-          : Number(part.quantityEstimated) || 0
+        : (quantityOverrides?.[part.id] ?? defaultQuantity(part, quantitySource))
       if (qty <= 0) {
         partsWithoutQty += 1
         partsById.set(part.id, null)

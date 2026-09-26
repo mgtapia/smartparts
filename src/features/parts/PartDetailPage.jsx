@@ -267,7 +267,7 @@ export default function PartDetailPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
         <Box
           role="button"
           tabIndex={0}

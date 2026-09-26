@@ -172,3 +172,17 @@ describe('worthImportingCounts', () => {
     })
   })
 })
+
+describe('formatos marítimos', () => {
+  it('cada formato da un costo distinto para la misma pieza', () => {
+    const parts = [part([quote('s1', 3000)])]
+    const at = (mode) => bestOf(costs(mode, parts), 'p1', SELECTIONS.OEM)?.usdMicro
+    const lcl = at(SHIPPING_MODES.SEA_LCL)
+    const fcl20 = at(SHIPPING_MODES.SEA_FCL_20)
+    const fcl40 = at(SHIPPING_MODES.SEA_FCL_40HQ)
+    expect(lcl).toBeGreaterThan(0)
+    expect(fcl20).toBeGreaterThan(0)
+    expect(fcl40).toBeGreaterThan(0)
+    expect(new Set([lcl, fcl20, fcl40]).size).toBeGreaterThan(1)
+  })
+})

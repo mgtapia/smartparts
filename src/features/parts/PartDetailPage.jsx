@@ -37,7 +37,13 @@ import NamesDialog from './components/NamesDialog'
 import { PART_TABS, TAB_LIST } from './constants'
 import PartRecommendations from './components/PartRecommendations'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
-import { COST_MODES, SELECTIONS, bestOf, convenience } from '@features/costing/partCostsModel'
+import {
+  COST_MODES,
+  SELECTIONS,
+  bestOf,
+  convenience,
+  seaFormatSuffix,
+} from '@features/costing/partCostsModel'
 
 const EDIT = {
   CODE: 'code',
@@ -311,7 +317,7 @@ export default function PartDetailPage() {
               <MoneyValue money={part.baselinePrice} />
             </InfoField>
             {costField(COST_MODES.AIR, 'Costo aéreo')}
-            {costField(COST_MODES.SEA, 'Costo marítimo')}
+            {costField(COST_MODES.SEA, `Costo marítimo${seaFormatSuffix(partCosts.seaFormat)}`)}
           </InfoGrid>
         </Box>
       </Card>

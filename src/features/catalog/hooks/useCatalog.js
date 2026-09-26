@@ -100,7 +100,7 @@ export function useCatalog() {
   } = useCachedQuery('vehicles', listVehicles)
   const vehicles = useMemo(() => vehicleData ?? [], [vehicleData])
   // El PVP depende del costo en Chile, que solo existe con cotizaciones; no bloquea el catálogo.
-  const { costs, suppliers: costSuppliers, toClp, rates } = usePartCosts()
+  const { costs, suppliers: costSuppliers, toClp, rates, seaFormat } = usePartCosts()
   const loading = partsLoading || vehiclesLoading
   const error = partsError || vehiclesError
 
@@ -240,6 +240,7 @@ export function useCatalog() {
     setSortDir,
     currency,
     setCurrency,
+    seaFormat,
     loading,
     error,
   }

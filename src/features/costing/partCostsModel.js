@@ -113,6 +113,20 @@ export function convenience(costClp, baselineClp) {
   return costClp <= baselineClp
 }
 
+/** Formatos del envío marítimo: carga consolidada o contenedor completo. */
+export const SEA_FORMATS = Object.freeze([
+  { value: 'sea_lcl', labelEs: 'LCL', shortEs: 'LCL' },
+  { value: 'sea_fcl_20', labelEs: "FCL 20'", shortEs: "FCL 20'" },
+  { value: 'sea_fcl_40hq', labelEs: "FCL 40' HC", shortEs: "FCL 40' HC" },
+])
+export const DEFAULT_SEA_FORMAT = 'sea_lcl'
+
+/** Sufijo para rotular una columna marítima con su formato: vacío en LCL, el de siempre. */
+export const seaFormatSuffix = (format) =>
+  format === DEFAULT_SEA_FORMAT
+    ? ''
+    : ` ${SEA_FORMATS.find((f) => f.value === format)?.shortEs ?? ''}`
+
 /** Modos que se comparan lado a lado. */
 export const COST_MODES = Object.freeze({ AIR: 'air', SEA: 'sea' })
 

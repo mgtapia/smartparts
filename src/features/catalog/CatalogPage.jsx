@@ -24,6 +24,8 @@ import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import SeaFormatSelect from '@features/costing/components/SeaFormatSelect'
+import { seaFormatSuffix } from '@features/costing/partCostsModel'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
@@ -240,6 +242,7 @@ export default function CatalogPage() {
     setSortDir,
     currency,
     setCurrency,
+    seaFormat,
     loading,
     error,
   } = useCatalog()
@@ -341,6 +344,8 @@ export default function CatalogPage() {
           onChange={setGroupBy}
           options={GROUP_OPTIONS}
         />
+
+        <SeaFormatSelect />
 
         <ToolbarSelectBox
           label="Moneda"
@@ -528,7 +533,7 @@ export default function CatalogPage() {
                     textAlign: 'right',
                   }}
                 >
-                  PVP marítimo
+                  {`PVP marítimo${seaFormatSuffix(seaFormat)}`}
                 </Typography>
               ) : null}
               {isColumnVisible('supplier') ? (

@@ -9,6 +9,7 @@ import MoneyValue from '@components/common/MoneyValue'
 import { PART_TYPE } from '@constants/enums'
 import { formatBp } from '@libs/percent'
 import { supplierLabel } from '@features/quotes/constants'
+import SeaFormatSelect from '@features/costing/components/SeaFormatSelect'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
 import { COST_MODES, SELECTIONS, buildRecommendations } from '@features/costing/partCostsModel'
 
@@ -18,7 +19,7 @@ const QUALITY_LABEL = { [PART_TYPE.ORIGINAL]: 'OEM', [PART_TYPE.ALTERNATIVE]: 'A
 const WORTH_COLOR = { true: 'success.main', false: 'error.main' }
 
 const NOTES = [
-  'Costo puesto en Chile de la mejor oferta, sin IVA y sin los gastos que se cobran por embarque completo, que dependen de qué más se compre en el mismo envío. Barco es marítimo LCL.',
+  'Costo puesto en Chile de la mejor oferta, sin IVA y sin los gastos que se cobran por embarque completo, que dependen de qué más se compre en el mismo envío. Barco usa el formato marítimo elegido: carga consolidada (LCL) o contenedor completo (FCL).',
   'Solo OEM considera únicamente la pieza original; Mejor costo, la oferta más barata sea cual sea su calidad.',
   'Conviene si el costo no supera el precio de referencia, lo que el cliente paga hoy por el repuesto.',
   'Son estimaciones con tarifas de referencia y pesos sin confirmar, no cotizaciones de un forwarder.',
@@ -122,6 +123,7 @@ export default function PartRecommendations({ part }) {
         <Typography variant="body1" sx={{ flex: 1, color: verdict.color }}>
           {verdict.text}
         </Typography>
+        <SeaFormatSelect />
         <InfoNote title="Cómo se calcula" paragraphs={NOTES} />
       </Card>
       <ListTable

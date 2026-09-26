@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useCachedQuery } from '@hooks/useCachedQuery'
+import { useSeaFormat } from './useSeaFormat'
 import { SHIPPING_MODES } from '@constants/enums'
 import { listParts } from '@libs/repos/partsRepo'
 import { listSuppliers } from '@libs/repos/suppliersRepo'
@@ -14,7 +15,7 @@ const NO_SUPPLIERS = []
 const toClp = (usdMicro) => usdMicroToClp(usdMicro, DEFAULT_FX).amount
 
 /**
- * Mejor costo unitario en Chile de cada repuesto, en avión y en barco (marítimo LCL) a la vez, con
+ * Mejor costo unitario en Chile de cada repuesto, en avión y en barco (LCL o contenedor completo, según el formato elegido) a la vez, con
  * los supuestos de costo vigentes. No bloquea la pantalla: mientras se calcula, `costs` es null.
  * Las ofertas que la compra de prueba marca como atípicas no cuentan.
  *
@@ -25,6 +26,7 @@ export function usePartCosts() {
   const suppliers = useCachedQuery('suppliers', listSuppliers)
   const { data: trial } = useAirTrial()
   const { rates, params, settingsForAir, settingsForSea } = useCostAssumptions()
+  const [seaFormat] = useSeaFormat()
 
   const costs = useMemo(() => {
     if (!parts.data || !suppliers.data) return null
@@ -38,9 +40,9 @@ export function usePartCosts() {
     }
     return {
       air: buildPartCosts({ ...base, settingsFor: settingsForAir, mode: SHIPPING_MODES.AIR }),
-      sea: buildPartCosts({ ...base, settingsFor: settingsForSea, mode: SHIPPING_MODES.SEA_LCL }),
+      sea: buildPartCosts({ ...base, settingsFor: settingsForSea, mode: seaFormat }),
     }
-  }, [parts.data, suppliers.data, trial, rates, params, settingsForAir, settingsForSea])
+  }, [parts.data, suppliers.data, trial, rates, params, settingsForAir, settingsForSea, seaFormat])
 
-  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates }
+  return { costs, suppliers: suppliers.data ?? NO_SUPPLIERS, toClp, rates, seaFormat }
 }

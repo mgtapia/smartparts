@@ -1,0 +1,2274 @@
+[
+  {
+    "name": "Absorbedor Frontal plastico",
+    "codes": [
+      "B004163"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 33750,
+    "package_cm": [
+      150,
+      15,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Absorbedor TRAS DER",
+    "codes": [
+      "B020712"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Absorbedor TRAS IZQ",
+    "codes": [
+      "B020711"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Amortiguador DEL DER",
+    "codes": [
+      "4141013"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 24000,
+    "package_cm": [
+      60,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Amortiguador DEL IZQ",
+    "codes": [
+      "4142013"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 24000,
+    "package_cm": [
+      60,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Amortiguador TRAS DER",
+    "codes": [
+      "4201009"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 6000,
+    "package_cm": [
+      60,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Amortiguador TRAS IZQ",
+    "codes": [
+      "4201009"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 6000,
+    "package_cm": [
+      60,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bandeja DEL DER",
+    "codes": [
+      "B003427"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bandeja DEL IZQ",
+    "codes": [
+      "B003426"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Barra estabilizadora DEL",
+    "codes": [
+      "4151005"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 135000,
+    "package_cm": [
+      150,
+      60,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bieleta DEL DER",
+    "codes": [
+      "B003233"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2560,
+    "package_cm": [
+      40,
+      8,
+      8
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bieleta DEL IZQ",
+    "codes": [
+      "B003233"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2560,
+    "package_cm": [
+      40,
+      8,
+      8
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra superior puerta DEL DER",
+    "codes": [
+      "5705001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra inferior puerta DEL DER",
+    "codes": [
+      "5706001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra superior puerta DEL IZQ",
+    "codes": [
+      "5705001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra inferior puerta DEL IZQ",
+    "codes": [
+      "5705001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra superior puerta TRAS DER",
+    "codes": [
+      "5990001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra inferior puerta TRAS DER",
+    "codes": [
+      "5706001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra superior puerta TRAS IZQ",
+    "codes": [
+      "5990001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bisagra inferior puerta TRAS IZQ",
+    "codes": [
+      "5706001"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bocina alerta movimiento",
+    "codes": [
+      "B016025"
+    ],
+    "weight_g": 400,
+    "volume_cm3": 1050,
+    "package_cm": [
+      15,
+      10,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Bocina vehículo",
+    "codes": [
+      "B012697"
+    ],
+    "weight_g": 400,
+    "volume_cm3": 1152,
+    "package_cm": [
+      12,
+      12,
+      8
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Caliper DEL DER",
+    "codes": [
+      "4544005"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 4500,
+    "package_cm": [
+      20,
+      15,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Caliper DEL IZQ",
+    "codes": [
+      "4544004"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 4500,
+    "package_cm": [
+      20,
+      15,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Capó",
+    "codes": [
+      "B022354"
+    ],
+    "weight_g": 40000,
+    "volume_cm3": 60000,
+    "package_cm": [
+      200,
+      12,
+      25
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Capó bisagra DER",
+    "codes": [
+      "5286602"
+    ],
+    "weight_g": 1200,
+    "volume_cm3": 3000,
+    "package_cm": [
+      30,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Capó bisagra IZQ",
+    "codes": [
+      "5286501"
+    ],
+    "weight_g": 1200,
+    "volume_cm3": 3000,
+    "package_cm": [
+      30,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Careta Frontal puerto de carga",
+    "codes": [
+      "B020626"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 18000,
+    "package_cm": [
+      60,
+      30,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Cazoleta DER",
+    "codes": [
+      "4143511"
+    ],
+    "weight_g": 800,
+    "volume_cm3": 1350,
+    "package_cm": [
+      15,
+      15,
+      6
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Cazoleta IZQ",
+    "codes": [
+      "4143510"
+    ],
+    "weight_g": 800,
+    "volume_cm3": 1350,
+    "package_cm": [
+      15,
+      15,
+      6
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Chapa Cerradura Capo",
+    "codes": [
+      "B004280"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 2000,
+    "package_cm": [
+      20,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Chapa maleta (conjunto completo)",
+    "codes": [
+      "5545001"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Compresor",
+    "codes": [
+      "B023705"
+    ],
+    "weight_g": 7500,
+    "volume_cm3": 18000,
+    "package_cm": [
+      30,
+      20,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Condensador",
+    "codes": [
+      "8101013"
+    ],
+    "weight_g": 6000,
+    "volume_cm3": 81000,
+    "package_cm": [
+      90,
+      60,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Deflector plastico A ACOND DEL DER",
+    "codes": [
+      "2844206"
+    ],
+    "weight_g": 300,
+    "volume_cm3": 27000,
+    "package_cm": [
+      60,
+      30,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Deflector plastico A ACOND DEL IZQ",
+    "codes": [
+      "2844105"
+    ],
+    "weight_g": 300,
+    "volume_cm3": 27000,
+    "package_cm": [
+      60,
+      30,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Depósito plastico limpia parabrisas",
+    "codes": [
+      "6271008"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 36000,
+    "package_cm": [
+      40,
+      30,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Disco freno DEL DER",
+    "codes": [
+      "4541007"
+    ],
+    "weight_g": 8000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Disco freno DEL IZQ",
+    "codes": [
+      "4541007"
+    ],
+    "weight_g": 8000,
+    "volume_cm3": 16000,
+    "package_cm": [
+      40,
+      40,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Disco freno TRAS DER",
+    "codes": [
+      "4551007"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 12250,
+    "package_cm": [
+      35,
+      35,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Disco freno TRAS IZQ",
+    "codes": [
+      "4551007"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 12250,
+    "package_cm": [
+      35,
+      35,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Eje Palier DEL DER",
+    "codes": [
+      "B018339"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 22500,
+    "package_cm": [
+      15,
+      15,
+      100
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Eje Palier DEL IZQ",
+    "codes": [
+      "B018338"
+    ],
+    "weight_g": 8000,
+    "volume_cm3": 18000,
+    "package_cm": [
+      15,
+      15,
+      80
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Eje Trasero",
+    "codes": [
+      "4958006"
+    ],
+    "weight_g": 60000,
+    "volume_cm3": 760000,
+    "package_cm": [
+      190,
+      80,
+      50
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Electroventilador",
+    "codes": [
+      "B020156"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 108000,
+    "package_cm": [
+      90,
+      60,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Estructura interior plastica parrilla puerto carga",
+    "codes": [
+      "B004642"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 42000,
+    "package_cm": [
+      60,
+      35,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Foco TRAS DER externo",
+    "codes": [
+      "B018559"
+    ],
+    "weight_g": 2500,
+    "volume_cm3": 30000,
+    "package_cm": [
+      50,
+      30,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Foco TRAS IZQ externo",
+    "codes": [
+      "B018558"
+    ],
+    "weight_g": 2500,
+    "volume_cm3": 30000,
+    "package_cm": [
+      50,
+      30,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Fuelle Axial DER",
+    "codes": [
+      "4424006"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Fuelle Axial IZQ",
+    "codes": [
+      "4424006"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1500,
+    "package_cm": [
+      15,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Guardafango DEL DER",
+    "codes": [
+      "5324202"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 84000,
+    "package_cm": [
+      60,
+      40,
+      35
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Guardafango DEL IZQ",
+    "codes": [
+      "5324102"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 84000,
+    "package_cm": [
+      60,
+      40,
+      35
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Guardafango TRAS DER",
+    "codes": [
+      "5452404"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 27000,
+    "package_cm": [
+      60,
+      30,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Guardafango TRAS IZQ",
+    "codes": [
+      "5452304"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 27000,
+    "package_cm": [
+      60,
+      30,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Inferior metálico tapa de carga",
+    "codes": [
+      "B004156"
+    ],
+    "weight_g": 1500,
+    "volume_cm3": 6750,
+    "package_cm": [
+      30,
+      15,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Luneta espejo DER",
+    "codes": [
+      "B004180"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1125,
+    "package_cm": [
+      25,
+      15,
+      3
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Luneta espejo IZQ",
+    "codes": [
+      "B004177"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1125,
+    "package_cm": [
+      25,
+      15,
+      3
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Luneta TRAS central",
+    "codes": [
+      "5521002"
+    ],
+    "weight_g": 40000,
+    "volume_cm3": 418000,
+    "package_cm": [
+      190,
+      110,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Luneta TRAS DER",
+    "codes": [
+      "5422003"
+    ],
+    "weight_g": 7000,
+    "volume_cm3": 37500,
+    "package_cm": [
+      50,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Luneta TRAS IZQ",
+    "codes": [
+      "5421003"
+    ],
+    "weight_g": 7000,
+    "volume_cm3": 37500,
+    "package_cm": [
+      50,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Manilla DEL DER",
+    "codes": [
+      "B018512"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 2500,
+    "package_cm": [
+      25,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Manilla DEL IZQ",
+    "codes": [
+      "B018513"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 2500,
+    "package_cm": [
+      25,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Manilla TRAS DER",
+    "codes": [
+      "B018512"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 2500,
+    "package_cm": [
+      25,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Manilla TRAS IZQ",
+    "codes": [
+      "B018513"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 2500,
+    "package_cm": [
+      25,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Máscara o embellecedor frontal",
+    "codes": [
+      "B020151"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 130000,
+    "package_cm": [
+      130,
+      50,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Ménsula DEL DER",
+    "codes": [
+      "6102105"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1225,
+    "package_cm": [
+      25,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Ménsula DEL IZQ",
+    "codes": [
+      "6102205"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1225,
+    "package_cm": [
+      25,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Ménsula TRAS DER",
+    "codes": [
+      "6442204"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1225,
+    "package_cm": [
+      25,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Ménsula TRAS IZQ",
+    "codes": [
+      "6442104"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 1225,
+    "package_cm": [
+      25,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Moldura puerta DEL DER",
+    "codes": [
+      "B020885"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 10000,
+    "package_cm": [
+      100,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Moldura puerta DEL IZQ",
+    "codes": [
+      "B020884"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 10000,
+    "package_cm": [
+      100,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Moldura puerta TRAS DER",
+    "codes": [
+      "B020886"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      80,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Moldura puerta TRAS IZQ",
+    "codes": [
+      "B020887"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      80,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Óptico DEL DER",
+    "codes": [
+      "B018789"
+    ],
+    "weight_g": 6500,
+    "volume_cm3": 84000,
+    "package_cm": [
+      70,
+      30,
+      40
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Óptico DEL IZQ",
+    "codes": [
+      "B018788"
+    ],
+    "weight_g": 6500,
+    "volume_cm3": 84000,
+    "package_cm": [
+      70,
+      30,
+      40
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parabrisas DEL",
+    "codes": [
+      "B004134"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 520000,
+    "package_cm": [
+      200,
+      130,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoque DEL rejilla Central",
+    "codes": [
+      "B018579"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 20000,
+    "package_cm": [
+      100,
+      20,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoque DEL rejilla lateral DER",
+    "codes": [
+      "B018576"
+    ],
+    "weight_g": 1500,
+    "volume_cm3": 12500,
+    "package_cm": [
+      50,
+      25,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoque DEL rejilla lateral IZQ",
+    "codes": [
+      "B018575"
+    ],
+    "weight_g": 1500,
+    "volume_cm3": 12500,
+    "package_cm": [
+      50,
+      25,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoque TRAS reflector DER",
+    "codes": [
+      "7508002"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 3000,
+    "package_cm": [
+      30,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoque TRAS reflector IZQ",
+    "codes": [
+      "7507000"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 3000,
+    "package_cm": [
+      30,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoques DEL parte superior",
+    "codes": [
+      "61010099Z"
+    ],
+    "weight_g": 20000,
+    "volume_cm3": 866125,
+    "package_cm": [
+      205,
+      65,
+      65
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Parachoques TRAS parte superior",
+    "codes": [
+      "B020713"
+    ],
+    "weight_g": 20000,
+    "volume_cm3": 866125,
+    "package_cm": [
+      205,
+      65,
+      65
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Platina superior puerta DEL DER",
+    "codes": [
+      "B002842"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2500,
+    "package_cm": [
+      100,
+      5,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Platina superior puerta DEL IZQ",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2500,
+    "package_cm": [
+      100,
+      5,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Platina superior puerta TRAS DER",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2500,
+    "package_cm": [
+      100,
+      5,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Platina superior puerta TRAS IZQ",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 2500,
+    "package_cm": [
+      100,
+      5,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Reflector Portalón Central",
+    "codes": [
+      "B020860"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 14400,
+    "package_cm": [
+      100,
+      12,
+      12
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Reflector Portalón DER interno",
+    "codes": [
+      "B018561"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 9000,
+    "package_cm": [
+      30,
+      20,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Reflector Portalón IZQ interno",
+    "codes": [
+      "B018560"
+    ],
+    "weight_g": 500,
+    "volume_cm3": 9000,
+    "package_cm": [
+      30,
+      20,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Portalón y/o maleta",
+    "codes": [
+      "B004640"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 960000,
+    "package_cm": [
+      200,
+      80,
+      60
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Puerta DEL DER",
+    "codes": [
+      "B004285"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 390000,
+    "package_cm": [
+      100,
+      130,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Puerta DEL IZQ",
+    "codes": [
+      "B004284"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 390000,
+    "package_cm": [
+      100,
+      130,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Puerta TRAS DER",
+    "codes": [
+      "B003699"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 390000,
+    "package_cm": [
+      100,
+      130,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Puerta TRAS IZQ",
+    "codes": [
+      "B003698"
+    ],
+    "weight_g": 50000,
+    "volume_cm3": 390000,
+    "package_cm": [
+      100,
+      130,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Radiador principal",
+    "codes": [
+      "2801006"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 108000,
+    "package_cm": [
+      90,
+      20,
+      60
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Frontal metalico superior radiador",
+    "codes": [
+      "B004281"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 187500,
+    "package_cm": [
+      150,
+      50,
+      25
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Frontal metalico inferior radiador",
+    "codes": [
+      "5226403"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 56250,
+    "package_cm": [
+      150,
+      25,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Soporte metalico superior Optico DER",
+    "codes": [
+      "5227402"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 10000,
+    "package_cm": [
+      50,
+      20,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Soporte metalico superior Optico IZQ",
+    "codes": [
+      "5227305"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 10000,
+    "package_cm": [
+      50,
+      20,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Refuerzo metalico Parachoque Del",
+    "codes": [
+      "B004155"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 60000,
+    "package_cm": [
+      150,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapa cubremotor inferior",
+    "codes": [
+      "B015946"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 143000,
+    "package_cm": [
+      130,
+      110,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapa cubre radiador inferior",
+    "codes": [
+      "6101501"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 43200,
+    "package_cm": [
+      180,
+      30,
+      8
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Refuerzo metalico interno Tapabarro DEL DER",
+    "codes": [
+      "5322303"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 7000,
+    "package_cm": [
+      35,
+      20,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Refuerzo metalico interno Tapabarro DEL IZQ",
+    "codes": [
+      "5322303"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 7000,
+    "package_cm": [
+      35,
+      20,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Retrovisor DER completo",
+    "codes": [
+      "B004176"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 30000,
+    "package_cm": [
+      40,
+      30,
+      25
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Retrovisor IZQ completo",
+    "codes": [
+      "B004175"
+    ],
+    "weight_g": 3000,
+    "volume_cm3": 30000,
+    "package_cm": [
+      40,
+      30,
+      25
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Rodamiento de maza DEL DER",
+    "codes": [
+      "B013621"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      20,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Rodamiento de maza DEL IZQ",
+    "codes": [
+      "B013621"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      20,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Rodamiento de maza TRAS DER",
+    "codes": [
+      "B013546"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      20,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Rodamiento de maza TRAS IZQ",
+    "codes": [
+      "B013546"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 8000,
+    "package_cm": [
+      20,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Sensores de acercamiento TRAS",
+    "codes": [
+      "B016341"
+    ],
+    "weight_g": 20,
+    "volume_cm3": 45,
+    "package_cm": [
+      5,
+      3,
+      3
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Sistema Sensor de freno DEL DER",
+    "codes": [
+      "4663002"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 500,
+    "package_cm": [
+      10,
+      10,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Sistema Sensor de freno DEL IZQ",
+    "codes": [
+      "4663002"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 500,
+    "package_cm": [
+      10,
+      10,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Sistema Sensor de freno TRAS DER",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 500,
+    "package_cm": [
+      10,
+      10,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Sistema Sensor de freno TRAS IZQ",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 200,
+    "volume_cm3": 500,
+    "package_cm": [
+      10,
+      10,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Soporte caja reductora",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 1200,
+    "volume_cm3": 2000,
+    "package_cm": [
+      20,
+      10,
+      10
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapa DEL Gancho de remolque",
+    "codes": [
+      "61051079Z"
+    ],
+    "weight_g": 50,
+    "volume_cm3": 500,
+    "package_cm": [
+      10,
+      10,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapabarro DER DEL",
+    "codes": [
+      "5322006"
+    ],
+    "weight_g": 6000,
+    "volume_cm3": 429000,
+    "package_cm": [
+      130,
+      110,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapabarro IZQ DEL",
+    "codes": [
+      "5321006"
+    ],
+    "weight_g": 6000,
+    "volume_cm3": 429000,
+    "package_cm": [
+      130,
+      110,
+      30
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapiz Interior portalón y/o maleta",
+    "codes": [
+      "6491001"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 960000,
+    "package_cm": [
+      200,
+      80,
+      60
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapiz interior puerta DEL DER",
+    "codes": [
+      "B019653"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 150000,
+    "package_cm": [
+      100,
+      75,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapiz interior puerta DEL IZQ",
+    "codes": [
+      "B019652"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 150000,
+    "package_cm": [
+      100,
+      75,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapiz interior puerta TRAS DER",
+    "codes": [
+      "B019656"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 150000,
+    "package_cm": [
+      100,
+      75,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Tapiz interior puerta TRAS IZQ",
+    "codes": [
+      "B019655"
+    ],
+    "weight_g": 10000,
+    "volume_cm3": 150000,
+    "package_cm": [
+      100,
+      75,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Terminal Exterior DEL DER",
+    "codes": [
+      "B013771"
+    ],
+    "weight_g": 1200,
+    "volume_cm3": 1715,
+    "package_cm": [
+      35,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Terminal Exterior DEL IZQ",
+    "codes": [
+      "B013771"
+    ],
+    "weight_g": 1200,
+    "volume_cm3": 1715,
+    "package_cm": [
+      35,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Terminal Interior DEL DER (Axial)",
+    "codes": [
+      "B003197"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 1470,
+    "package_cm": [
+      30,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Terminal Interior DEL IZQ (Axial)",
+    "codes": [
+      "B003196"
+    ],
+    "weight_g": 1000,
+    "volume_cm3": 1470,
+    "package_cm": [
+      30,
+      7,
+      7
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Terminales enchufes puerto carga, incl. cableado",
+    "codes": [
+      "B018324"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 24000,
+    "package_cm": [
+      40,
+      40,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Varilla Capo",
+    "codes": [
+      "5287201"
+    ],
+    "weight_g": 2000,
+    "volume_cm3": 1600,
+    "package_cm": [
+      100,
+      4,
+      4
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Vidrio puerta DEL DER",
+    "codes": [
+      "5742003"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 75000,
+    "package_cm": [
+      100,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Vidrio puerta DEL IZQ",
+    "codes": [
+      "5741003"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 75000,
+    "package_cm": [
+      100,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Vidrio puerta TRAS DER",
+    "codes": [
+      "5842003"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 75000,
+    "package_cm": [
+      100,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Vidrio puerta TRAS IZQ",
+    "codes": [
+      "5841003"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 75000,
+    "package_cm": [
+      100,
+      50,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Zocalo plastico costado DER",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 80000,
+    "package_cm": [
+      200,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Zocalo plastico costado IZQ",
+    "codes": [
+      "B021074"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 80000,
+    "package_cm": [
+      200,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Cerradura Electronica",
+    "codes": [
+      "B018325"
+    ],
+    "weight_g": 5000,
+    "volume_cm3": 24000,
+    "package_cm": [
+      40,
+      40,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Pedal de Acelerador",
+    "codes": [
+      "2307001"
+    ],
+    "weight_g": 1500,
+    "volume_cm3": 6750,
+    "package_cm": [
+      30,
+      15,
+      15
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Refuerzo metálico DEL IZQ",
+    "codes": [
+      "SIN CODIGO"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 20000,
+    "package_cm": [
+      50,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Refuerzo metálico DEL DER",
+    "codes": [
+      "B015942"
+    ],
+    "weight_g": 4000,
+    "volume_cm3": 20000,
+    "package_cm": [
+      50,
+      20,
+      20
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  },
+  {
+    "name": "Frontal plastico superior radiador",
+    "codes": [
+      "B019672"
+    ],
+    "weight_g": 1500,
+    "volume_cm3": 30000,
+    "package_cm": [
+      150,
+      40,
+      5
+    ],
+    "status": "supplier_confirmed",
+    "source": "Henan Ronglai (archivo volumenes.xlsx, recibido 2026-09-26)",
+    "note": "Dimensiones del bulto (cm) y peso (kg) informados por el proveedor; el volumen es largo × ancho × alto."
+  }
+]

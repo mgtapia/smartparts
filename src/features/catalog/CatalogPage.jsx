@@ -18,6 +18,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import Tooltip from '@mui/material/Tooltip'
 import Divider from '@mui/material/Divider'
 import Link from 'next/link'
+import UncertainValue from '@components/common/UncertainValue'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import MoneyValue from '@components/common/MoneyValue'
@@ -53,8 +54,10 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90 }
+const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 100, supplier: 80 }
 const REPUESTO_MIN_WIDTH = 220
+const PVP_REASON =
+  'Costo original puesto en Chile por avión (tarifas de referencia, pesos sin confirmar) más 30 % de margen.'
 
 const CODE_STATUS_ICON = {
   confirmed: CheckCircleIcon,
@@ -162,6 +165,26 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           money={currency === CURRENCIES.USD ? r.baselinePriceUsd : r.baselinePriceClp}
           sx={{ flex: `0 1 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
         />
+      ) : null}
+      {isColumnVisible('pvp') ? (
+        <Box sx={{ flex: `0 1 ${COL_WIDTH.pvp}px`, textAlign: 'right', fontSize: 13 }}>
+          {r.pvpClp ? (
+            <UncertainValue verified={false} reason={PVP_REASON}>
+              <MoneyValue money={currency === CURRENCIES.USD ? r.pvpUsd : r.pvpClp} />
+            </UncertainValue>
+          ) : (
+            '—'
+          )}
+        </Box>
+      ) : null}
+      {isColumnVisible('supplier') ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ flex: `0 1 ${COL_WIDTH.supplier}px` }}
+        >
+          {r.pvpSupplier ?? '—'}
+        </Typography>
       ) : null}
     </Box>
   )
@@ -455,6 +478,31 @@ export default function CatalogPage() {
                     Precio REF
                   </Typography>
                 </Tooltip>
+              ) : null}
+              {isColumnVisible('pvp') ? (
+                <Tooltip title="Nuestro precio de venta: mejor costo original puesto en Chile más 30 % de margen.">
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.pvp}px`,
+                      lineHeight: 1,
+                      textAlign: 'right',
+                      cursor: 'help',
+                    }}
+                  >
+                    PVP
+                  </Typography>
+                </Tooltip>
+              ) : null}
+              {isColumnVisible('supplier') ? (
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ flex: `0 1 ${COL_WIDTH.supplier}px`, lineHeight: 1 }}
+                >
+                  Proveedor
+                </Typography>
               ) : null}
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

@@ -133,4 +133,15 @@ describe('buildAirTrial', () => {
     const expected = x.baselineClp - Math.round((x.costClp * (10_000 + FOCUS_MARGIN_BP)) / 10_000)
     expect(x.savingsClp[FOCUS_MARGIN_BP]).toBe(expected)
   })
+
+  it('entrega el mejor costo por repuesto y calidad con su proveedor, sin ofertas atípicas', () => {
+    const r = run([
+      part('p1', 'Caja Reductora', [quote('s1', 100_000), quote('s2', 4100), quote('s3', 110_000)]),
+      part('p2', 'Bandeja', [quote('s1', 3000), quote('s2', 2000)]),
+    ])
+    expect(r.partCosts.p2.original.supplierId).toBe('s2')
+    // s2 tiene un precio atípico en p1: el mejor costo válido es de s1.
+    expect(r.partCosts.p1.original.supplierId).toBe('s1')
+    expect(r.partCosts.p2.alternative).toBeUndefined()
+  })
 })

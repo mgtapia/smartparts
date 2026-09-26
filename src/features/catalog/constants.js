@@ -7,4 +7,9 @@ export const CATALOG_COLUMNS = [
   { id: 'category', label: 'Categoría' },
   { id: 'code', label: 'Código' },
   { id: 'baseline', label: 'Precio REF' },
+  { id: 'pvp', label: 'PVP' },
+  { id: 'supplier', label: 'Proveedor' },
 ]
+
+/** Margen sobre el costo puesto en Chile con el que se calcula el PVP (basis points). */
+export const PVP_MARGIN_BP = 3000

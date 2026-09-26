@@ -543,6 +543,23 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
   }
   logistics.sort((a, b) => b.demandClp - a.demandClp)
 
+  // Mejor costo unitario en Chile por repuesto y calidad, sin gastos por embarque y sin ofertas
+  // atípicas: sirve para calcular un precio de venta por repuesto.
+  const partCosts = {}
+  for (const o of baseOffers) {
+    if (suspectOffers.has(`${o.partId}|${o.supplierId}|${o.quality}`)) continue
+    const byQuality = (partCosts[o.partId] ??= {})
+    const prev = byQuality[o.quality]
+    if (!prev || o.landedUsdMicro < prev.usdMicro) {
+      byQuality[o.quality] = { usdMicro: o.landedUsdMicro, supplierId: o.supplierId }
+    }
+  }
+  for (const byQuality of Object.values(partCosts)) {
+    for (const q of Object.keys(byQuality)) {
+      byQuality[q] = { costClp: clpOf(byQuality[q].usdMicro), supplierId: byQuality[q].supplierId }
+    }
+  }
+
   const known = distances.map((d) => d.originDistanceKm).filter((k) => k != null)
   return {
     partCount: parts.length,
@@ -562,5 +579,6 @@ export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx
     missingData,
     anomalies,
     scenarios,
+    partCosts,
   }
 }

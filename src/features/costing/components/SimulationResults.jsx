@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import ListTable from '@components/common/ListTable'
 import UncertainValue from '@components/common/UncertainValue'
 import { MoneyFromMicros } from '@components/common/MoneyValue'
@@ -69,6 +71,8 @@ export default function SimulationResults({
   detailActions,
 }) {
   const supplierName = supplierNameFrom(lookup)
+  // Colapsado muestra solo el escenario elegido; abierto, todos para cambiar de escenario.
+  const [open, setOpen] = useState(false)
   const totalParts = simulation?.parts.length ?? 0
   const inferredReason = simulation?.notes.inferredOffers
     ? `${ESTIMATE_REASON}. Incluye cotizaciones inferidas del lado opuesto`
@@ -143,22 +147,7 @@ export default function SimulationResults({
     {
       id: 'scenario',
       label: 'Escenario',
-      render: (s) => (
-        <Box
-          component="button"
-          type="button"
-          onClick={() => onSelectScenario(s.id)}
-          sx={{
-            all: 'unset',
-            cursor: 'pointer',
-            px: 1,
-            borderRadius: `${RADIUS.inputSmall}px`,
-            bgcolor: scenario?.id === s.id ? 'action.selected' : undefined,
-          }}
-        >
-          {scenarioLabel(s, supplierName)}
-        </Box>
-      ),
+      render: (s) => scenarioLabel(s, supplierName),
     },
     {
       id: 'suppliers',
@@ -220,7 +209,40 @@ export default function SimulationResults({
   return (
     <>
       <Box sx={{ mb: 2 }}>
-        <ListTable columns={scenarioColumns} rows={simulation.scenarios} getRowKey={(s) => s.id} />
+        <Box
+          role="button"
+          tabIndex={0}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          onKeyDown={(e) => e.key === 'Enter' && setOpen((v) => !v)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            px: 0.5,
+            mb: 0.5,
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            {open ? 'Elige un escenario' : 'Escenario elegido'} · {simulation.scenarios.length}{' '}
+            escenarios
+          </Typography>
+          <KeyboardArrowDownIcon
+            fontSize="small"
+            sx={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none' }}
+          />
+        </Box>
+        <ListTable
+          columns={scenarioColumns}
+          rows={open ? simulation.scenarios : [scenario ?? simulation.scenarios[0]]}
+          getRowKey={(s) => s.id}
+          selectedKey={open ? scenario?.id : undefined}
+          onRowClick={(s) => {
+            if (open) onSelectScenario(s.id)
+            setOpen((v) => !v)
+          }}
+        />
       </Box>
       {scenario ? (
         <ScenarioDetail

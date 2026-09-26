@@ -25,6 +25,8 @@ const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
  * @param {any[]} props.rows
  * @param {(row: any) => string} props.getRowKey
  * @param {(row: any) => string} [props.getRowHref]
+ * @param {(row: any) => void} [props.onRowClick]  La fila es clicable (ej. elegir un escenario).
+ * @param {string} [props.selectedKey]  Clave de la fila elegida, resaltada.
  * @param {string} [props.emptyText]
  */
 export default function ListTable({
@@ -32,6 +34,8 @@ export default function ListTable({
   rows,
   getRowKey,
   getRowHref,
+  onRowClick,
+  selectedKey,
   emptyText = 'Sin resultados.',
 }) {
   const cellSx = (c) => ({
@@ -91,6 +95,14 @@ export default function ListTable({
                   <Box
                     key={getRowKey(row)}
                     {...(href ? { component: Link, href } : {})}
+                    {...(onRowClick
+                      ? {
+                          role: 'button',
+                          tabIndex: 0,
+                          onClick: () => onRowClick(row),
+                          onKeyDown: (e) => e.key === 'Enter' && onRowClick(row),
+                        }
+                      : {})}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -100,7 +112,8 @@ export default function ListTable({
                       borderRadius: `${RADIUS.inputSmall}px`,
                       textDecoration: 'none',
                       color: 'inherit',
-                      bgcolor: 'brand.bodyBg',
+                      bgcolor: getRowKey(row) === selectedKey ? 'action.selected' : 'brand.bodyBg',
+                      cursor: onRowClick ? 'pointer' : undefined,
                       '&:hover': { bgcolor: 'action.hover' },
                     }}
                   >

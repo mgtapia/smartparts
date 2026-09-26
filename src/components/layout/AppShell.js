@@ -5,7 +5,6 @@ import { usePersistentState } from '@hooks/usePersistentState'
 import { CONTENT_GAP, CONTENT_RADIUS, px } from '@constants/layout'
 import AppRail from './AppRail'
 import AppTopBar from './AppTopBar'
-import SectionTabs from './SectionTabs'
 
 // Barra de desplazamiento fina y sin flechas (estándar: Chrome ≥ 121 ignora los
 // pseudo-elementos ::-webkit-scrollbar cuando estas propiedades están definidas).
@@ -46,7 +45,6 @@ export default function AppShell({ children }) {
           <Box
             sx={{ flex: 1, minWidth: 0, overflowY: 'auto', p: { xs: 2, md: 4 }, ...scrollbarSx }}
           >
-            <SectionTabs />
             {children}
           </Box>
         </Box>

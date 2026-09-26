@@ -5,12 +5,13 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Breadcrumbs from '@components/layout/Breadcrumbs'
+import SectionTabs from '@components/layout/SectionTabs'
 
 /**
  * Encabezado de página. `back` ({ href, label }) pone una flecha de volver a la
  * izquierda del título, en la misma fila. A la derecha van las `actions` y, al
  * final, `meta`: el dato corto de estado (ej. "592 de 592 repuestos."), siempre
- * el último. Bajo el título van las migas de pan (omitidas en la página principal). `description` es texto explicativo y va debajo del título.
+ * el último. Junto al título van las pestañas de la sección y, debajo, las migas de pan (omitidas en la página principal). `description` es texto explicativo y va debajo del título.
  */
 export default function PageHeader({ title, description, meta, actions, back }) {
   return (
@@ -24,7 +25,7 @@ export default function PageHeader({ title, description, meta, actions, back }) 
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, minWidth: 0 }}>
           {back ? (
             <Tooltip title={back.label}>
               <IconButton
@@ -41,6 +42,9 @@ export default function PageHeader({ title, description, meta, actions, back }) 
           <Typography variant="h5" component="h1">
             {title}
           </Typography>
+          <Box sx={{ ml: 2 }}>
+            <SectionTabs />
+          </Box>
         </Box>
         <Breadcrumbs />
         {description ? (

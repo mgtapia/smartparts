@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import { IMAGE_PREVIEW_HEIGHT } from '@constants/layout'
 import { vehicleLabel } from '../constants'
 
 const STATS = [
@@ -31,7 +30,7 @@ export default function VehicleCard({ row }) {
     >
       <Box
         sx={{
-          height: IMAGE_PREVIEW_HEIGHT,
+          aspectRatio: '4 / 5',
           p: 2,
           display: 'flex',
           alignItems: 'center',

@@ -3,6 +3,17 @@
     "ask": ["Bash(firebase deploy*)", "Bash(npx firebase deploy*)", "Bash(*firebase deploy*)"]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-git.mjs"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",

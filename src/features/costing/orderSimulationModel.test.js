@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { money } from '@libs/money'
+import { computeUnitCost } from '@core/costing/unitCost'
 import {
   DEFAULT_PARAM_SET,
   DEFAULT_FX,
@@ -7,10 +9,12 @@ import {
 } from '@mocks/costParams'
 import {
   buildPlanInputs,
+  cheapestScenario,
   defaultQuantity,
   QUALITY,
   QUANTITY_SOURCE,
   simulateOrder,
+  simulateStrategies,
   vehicleQuantityRows,
 } from './orderSimulationModel'
 
@@ -115,5 +119,90 @@ describe('vehicleQuantityRows', () => {
       ['a', 12, 40, true],
       ['b', 5, 5, false],
     ])
+  })
+})
+
+describe('escenarios por estrategia', () => {
+  // Cada repuesto tiene una oferta original cara y una alternativa barata.
+  const afm = (id, partId, amount) => ({
+    ...quote(id, partId),
+    partType: 'alternative',
+    price: { amount, currency: 'USD', scale: 2 },
+  })
+  const strategyLines = [
+    { part: pA, quote: quote('qa', 'a') },
+    { part: pA, quote: afm('qa2', 'a', 300) },
+    { part: pB, quote: quote('qb', 'b') },
+    { part: pB, quote: afm('qb2', 'b', 200) },
+  ]
+  const run = () =>
+    simulateStrategies({
+      ...base,
+      lines: strategyLines,
+      assumptions: { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES },
+      params: DEFAULT_PARAM_SET,
+    })
+  const landed = (r, id) => r.scenarios.find((s) => s.id === id).cost.totals.landedNet
+
+  it('son cuatro: originales o más económico, por mar o por aire', () => {
+    expect(run().scenarios.map((s) => s.id)).toEqual([
+      'oem-sea',
+      'oem-air',
+      'cheapest-sea',
+      'cheapest-air',
+    ])
+  })
+
+  it('originales usa solo ofertas originales y más económico puede usar alternativas', () => {
+    const r = run()
+    const qualityOf = (id) =>
+      new Set(
+        r.scenarios
+          .find((s) => s.id === id)
+          .cost.lines.map((l) => (l.offerId.endsWith('2') ? 'alternative' : 'original')),
+      )
+    expect(qualityOf('oem-sea')).toEqual(new Set(['original']))
+    expect(qualityOf('cheapest-sea')).toEqual(new Set(['alternative']))
+  })
+
+  it('lo más económico nunca cuesta más que solo originales con el mismo envío', () => {
+    const r = run()
+    expect(landed(r, 'cheapest-sea')).toBeLessThanOrEqual(landed(r, 'oem-sea'))
+    expect(landed(r, 'cheapest-air')).toBeLessThanOrEqual(landed(r, 'oem-air'))
+  })
+
+  it('en marítimo elige el formato más barato y en aéreo, aéreo', () => {
+    const r = run()
+    expect(['sea_lcl', 'sea_fcl_20', 'sea_fcl_40hq']).toContain(
+      r.scenarios.find((s) => s.id === 'oem-sea').mode,
+    )
+    expect(r.scenarios.find((s) => s.id === 'oem-air').mode).toBe('air')
+  })
+
+  it('cheapestScenario propone el más barato entre los que cubren más repuestos', () => {
+    const r = run()
+    const pick = cheapestScenario(r.scenarios)
+    const min = Math.min(...r.scenarios.map((s) => s.cost.totals.landedNet))
+    expect(pick.cost.totals.landedNet).toBe(min)
+  })
+
+  it('el cálculo rápido de ofertas da el mismo costo final que el completo', () => {
+    const args = {
+      unitPrice: money(1000, 'USD'),
+      incoterm: 'EXW',
+      originDistanceKm: 500,
+      formF: 'unknown',
+      weightG: 2000,
+      volumeCm3: 8000,
+      logisticsConfirmed: false,
+      mode: 'sea_lcl',
+      assumptions: { ...DEFAULT_UNIT_COST_ASSUMPTIONS, shipmentCharges: SHIPMENT_CHARGES },
+      params: DEFAULT_PARAM_SET,
+      fx: DEFAULT_FX,
+    }
+    const full = computeUnitCost(args)
+    const fast = computeUnitCost({ ...args, summaryOnly: true })
+    expect(fast.landedNetUsdMicro).toBe(full.landedNetUsdMicro)
+    expect(fast.components).toEqual([])
   })
 })

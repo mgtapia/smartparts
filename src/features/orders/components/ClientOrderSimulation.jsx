@@ -11,11 +11,8 @@ import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
-import { isFclMode } from '@core/costing/containers'
 import CostParametersDialog from '@features/quotes/components/CostParametersDialog'
-import { MODE_OPTIONS } from '@features/quotes/constants'
 import SimulationResults, { supplierNameFrom } from '@features/costing/components/SimulationResults'
-import { QUALITY_OPTIONS } from '@features/costing/components/OrderSimulation'
 import { useClientOrderSimulation } from '../hooks/useClientOrderSimulation'
 import { partLabel } from '../constants'
 import CreatePurchaseOrdersDialog from './CreatePurchaseOrdersDialog'
@@ -23,6 +20,7 @@ import CreatePurchaseOrdersDialog from './CreatePurchaseOrdersDialog'
 const HELP = [
   'Simula la compra de lo que falta de esta OC: las unidades de cada línea que ninguna compra vigente cubre todavía. La cantidad decide el tramo de precio del proveedor.',
   'Venta: el precio acordado en la OC del cliente, llevado a USD con el tipo de cambio de referencia. Margen: esa venta menos el costo final puesto en Chile, sin IVA. Ambos van en rojo mientras no estén confirmados.',
+  'Cada escenario combina qué se compra (solo originales o lo más económico) y cómo se envía (marítimo o aéreo); dentro de cada uno se busca sola la mejor combinación de proveedores.',
   'Lo ya cubierto por compras creadas no se vuelve a comprar: se muestra aparte.',
   'Las líneas que se despachan desde inventario propio no entran a la simulación.',
 ]
@@ -66,18 +64,6 @@ export default function ClientOrderSimulation({ order, purchaseOrders, partsById
   return (
     <>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
-        <ToolbarSelectBox
-          label="Calidad"
-          value={sim.quality}
-          onChange={sim.setQuality}
-          options={QUALITY_OPTIONS}
-        />
-        <ToolbarSelectBox
-          label="Modo de transporte"
-          value={assumptions.mode}
-          onChange={assumptions.setMode}
-          options={MODE_OPTIONS}
-        />
         <CostParametersDialog
           mode={assumptions.mode}
           setMode={assumptions.setMode}
@@ -110,7 +96,6 @@ export default function ClientOrderSimulation({ order, purchaseOrders, partsById
           scenario={scenario}
           onSelectScenario={sim.setScenarioId}
           lookup={lookup}
-          isFcl={isFclMode(assumptions.mode)}
           sale={sim.saleFor}
           detailActions={
             <ToolbarButton

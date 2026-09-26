@@ -116,6 +116,7 @@ function inlandFallback(inlandAt, priceUsdMicro, fallback) {
  *   proveedor: se cobra el mayor entre `bp` del precio y el transporte con `averageKm` (promedio
  *   de los proveedores con dato). Sin esto, falta de distancia es un bloqueo.
  * @param {'yes'|'no'|'unknown'} input.formF   ¿El proveedor emite Form F?
+ * @param {boolean} [input.summaryOnly]  Devuelve solo el costo final, sin componentes ni textos.
  * @param {import('./types').DgProfile} [input.dgProfile]  Mercancía peligrosa: si no puede ir en el modo elegido, no se costea.
  * @param {number} input.weightG          Peso bruto por unidad (g).
  * @param {number} input.volumeCm3        Volumen por unidad (cm³).
@@ -200,6 +201,7 @@ export function computeUnitCost(input) {
       modeKey,
       unitChargeable: chargeableUnits,
       shipmentChargeable,
+      withText: !input.summaryOnly,
       ...extra,
     })
   const sumOf = (list) => list.reduce((acc, c) => acc + c.usdMicro, 0)
@@ -303,6 +305,8 @@ export function computeUnitCost(input) {
   const localMicro = sumOf(localCharges)
   const bankMicro = sumOf(paymentCharges)
   const landedNetMicro = line.landedNet.amount + localMicro + bankMicro
+  // Solo el costo final (ej. para ordenar ofertas): sin componentes ni textos.
+  if (input.summaryOnly) return { blockers: [], components: [], landedNetUsdMicro: landedNetMicro }
   const itemsEs = (list) => list.map((c) => `${c.labelEs}: ${c.formulaEs}`).join('. ')
   const chargesReason =
     'referencias públicas, sin cotización real de forwarder ni agente de aduanas'

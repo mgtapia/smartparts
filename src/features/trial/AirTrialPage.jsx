@@ -151,7 +151,7 @@ export default function AirTrialPage() {
       },
       {
         id: `${opt}-s`,
-        label: 'Ganancia',
+        label: 'Utilidad',
         width: 130,
         align: 'right',
         render: (c) => {
@@ -186,7 +186,7 @@ export default function AirTrialPage() {
       },
       {
         id: `${opt}-s`,
-        label: 'Ganancia',
+        label: 'Utilidad',
         width: 130,
         align: 'right',
         render: (sc) => red(formatClpMillions(scenarioCell(sc, opt).top.profitClp)),

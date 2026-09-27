@@ -74,7 +74,7 @@ const COLUMNS = [
   },
   {
     id: 'cost',
-    label: 'Costo en Chile',
+    label: 'Costo aéreo',
     sortValue: (r) => r.costClp,
     width: 120,
     align: 'right',
@@ -82,7 +82,7 @@ const COLUMNS = [
   },
   {
     id: 'baseline',
-    label: 'Cliente hoy',
+    label: 'Precio REF',
     sortValue: (r) => r.baselineClp,
     width: 120,
     align: 'right',

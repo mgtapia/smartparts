@@ -76,10 +76,7 @@ export default function PlanCard({ option, data }) {
           <InfoField label="Flete aéreo" hint="Kg cobrables por la tarifa, sin la guía aérea.">
             {red(formatUsdMicro(best.freightUsdMicro))}
           </InfoField>
-          <InfoField
-            label="Costo en Chile"
-            hint="Con gastos por embarque, flete, arancel y agente."
-          >
+          <InfoField label="Costo aéreo" hint="Con gastos por embarque, flete, arancel y agente.">
             {red(formatClp(best.costClp))}
           </InfoField>
         </InfoGrid>

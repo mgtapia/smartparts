@@ -61,7 +61,7 @@ export function supplierNameFrom(lookup) {
  * @param {{ parts: Map<string, any>, quotes: Map<string, any> }} props.lookup
  * @param {boolean} props.isFcl
  * @param {(scenario: any) => { saleMicro: number, costMicro: number, margin: any, unpricedPartIds: string[] }} [props.sale]
- *   Con esto, en vez de "Cliente hoy" y "Ahorro" se muestran la venta acordada y el margen.
+ *   Con esto, en vez de "Precio REF" y "Ahorro" se muestran la venta acordada y el margen.
  * @param {import('react').ReactNode} [props.detailActions]  Acciones sobre el escenario elegido.
  */
 export default function SimulationResults({
@@ -109,7 +109,7 @@ export default function SimulationResults({
           label: 'Margen',
           width: 150,
           align: 'right',
-          tooltip: 'Venta menos costo final, y su porcentaje sobre la venta.',
+          tooltip: 'Venta menos costo en Chile, y su porcentaje sobre la venta.',
           render: (s) => {
             const { margin } = sale(s)
             return margin
@@ -127,7 +127,7 @@ export default function SimulationResults({
     : [
         {
           id: 'baseline',
-          label: 'Cliente hoy',
+          label: 'Precio REF',
           width: 120,
           align: 'right',
           tooltip: 'Lo que paga hoy el cliente por los mismos repuestos.',
@@ -142,7 +142,7 @@ export default function SimulationResults({
           label: 'Ahorro',
           width: 90,
           align: 'right',
-          tooltip: 'Cliente hoy menos costo final, antes del margen.',
+          tooltip: 'Precio REF menos costo en Chile, antes del margen.',
           render: (s) =>
             red(pct(s.baselineMicro - s.cost.totals.landedNet, s.baselineMicro), inferredReason),
         },
@@ -207,9 +207,10 @@ export default function SimulationResults({
     },
     {
       id: 'landed',
-      label: 'Costo final',
+      label: 'Costo en Chile',
       width: 120,
       align: 'right',
+      tooltip: 'El envío puede variar entre escenarios: se ve en la columna Envío.',
       render: (s) => red(money(s.cost.totals.landedNet), inferredReason),
     },
     {

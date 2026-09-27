@@ -7,6 +7,7 @@ import {
   SHIPMENT_CHARGES,
 } from '@mocks/costParams'
 import { SHIPPING_MODES } from '@constants/enums'
+import { isOffered, salePrice } from './pricingModel'
 import {
   SELECTIONS,
   bestOf,
@@ -84,22 +85,43 @@ describe('buildPartCosts', () => {
   })
 })
 
+// Márgenes y ahorros de prueba para `convenience`/`buildRecommendations`/`worthImportingCounts`:
+// margen mínimo 20 % sobre la venta, ahorro máximo 30 % (original) / 50 % (alternativo), mínimo 5 %.
+const pricing = { minMarginBp: 2000, maxSavingOemBp: 3000, maxSavingAltBp: 5000, minSavingBp: 500 }
+
 describe('convenience', () => {
-  it('conviene si el costo no supera lo que paga hoy el cliente', () => {
-    expect(convenience(9000, 10_000)).toBe(true)
-    expect(convenience(10_000, 10_000)).toBe(true)
-    expect(convenience(10_001, 10_000)).toBe(false)
+  it('se ofrece si el cliente ahorra al menos el mínimo con el margen mínimo cubierto', () => {
+    // Costo 7.500 → piso 9.375 (÷ 0,8); con 10.000 de referencia el piso ya ahorra 6,25 % ≥ 5 %.
+    expect(convenience(7500, 10_000, 'original', pricing)).toBe(true)
+    // Costo 9.600 → piso 12.000, sobre el precio de referencia: no ofrece ni el ahorro mínimo.
+    expect(convenience(9600, 10_000, 'original', pricing)).toBe(false)
+  })
+
+  it('delega en la fórmula de precio de venta (mismo criterio que el Catálogo)', () => {
+    // "Se ofrece" depende del margen mínimo, no de la calidad: la calidad solo cambia el precio.
+    expect(convenience(9600, 10_000, 'original', pricing)).toBe(
+      isOffered(
+        salePrice({ costClp: 9600, baselineClp: 10_000, quality: 'original', pricing }).tier,
+      ),
+    )
   })
 
   it('sin costo o sin referencia no se puede decir', () => {
-    expect(convenience(null, 10_000)).toBeNull()
-    expect(convenience(9000, null)).toBeNull()
-    expect(convenience(9000, 0)).toBeNull()
+    expect(convenience(null, 10_000, 'original', pricing)).toBeNull()
+    expect(convenience(9000, null, 'original', pricing)).toBeNull()
+    expect(convenience(9000, 0, 'original', pricing)).toBeNull()
   })
 })
 
 describe('buildRecommendations', () => {
   const toClp = (usdMicro) => Math.round(usdMicro / 1_000_000) * 1000
+  const rates = {
+    pvpMarginAirBp: pricing.minMarginBp,
+    pvpMarginSeaBp: pricing.minMarginBp,
+    pvpMaxSavingOemBp: pricing.maxSavingOemBp,
+    pvpMaxSavingAltBp: pricing.maxSavingAltBp,
+    pvpMinSavingBp: pricing.minSavingBp,
+  }
   const costs = {
     air: {
       p1: {
@@ -115,14 +137,14 @@ describe('buildRecommendations', () => {
     },
   }
 
-  it('elige la opción más barata que conviene', () => {
-    const { options, pick } = buildRecommendations(costs, 'p1', 25_000, toClp)
+  it('elige la opción más barata que se ofrece', () => {
+    const { options, pick } = buildRecommendations(costs, 'p1', 25_000, toClp, rates)
     expect(options).toHaveLength(4)
     expect(pick).toMatchObject({ selection: 'cheapest', mode: 'sea', costClp: 8000, worthIt: true })
   })
 
-  it('marca las que no convienen y calcula la diferencia con la referencia', () => {
-    const { options } = buildRecommendations(costs, 'p1', 25_000, toClp)
+  it('marca las que no se ofrecen y calcula la diferencia con la referencia', () => {
+    const { options } = buildRecommendations(costs, 'p1', 25_000, toClp, rates)
     const oemAir = options.find((o) => o.selection === 'original' && o.mode === 'air')
     expect(oemAir.worthIt).toBe(false)
     expect(oemAir.diffBp).toBe(2000) // 30.000 sobre 25.000 = +20 %
@@ -130,20 +152,27 @@ describe('buildRecommendations', () => {
     expect(cheapSea.diffBp).toBe(-6800)
   })
 
-  it('sin ninguna opción conveniente no hay recomendación', () => {
-    expect(buildRecommendations(costs, 'p1', 5_000, toClp).pick).toBeNull()
+  it('sin ninguna opción que se ofrezca no hay recomendación', () => {
+    expect(buildRecommendations(costs, 'p1', 5_000, toClp, rates).pick).toBeNull()
   })
 
   it('sin costo o sin referencia no se decide', () => {
-    const { options, pick } = buildRecommendations({ air: {}, sea: {} }, 'p1', 25_000, toClp)
+    const { options, pick } = buildRecommendations({ air: {}, sea: {} }, 'p1', 25_000, toClp, rates)
     expect(options.every((o) => o.best === null && o.worthIt === null)).toBe(true)
     expect(pick).toBeNull()
-    expect(buildRecommendations(costs, 'p1', null, toClp).pick).toBeNull()
+    expect(buildRecommendations(costs, 'p1', null, toClp, rates).pick).toBeNull()
   })
 })
 
 describe('worthImportingCounts', () => {
   const toClp = (usdMicro) => Math.round(usdMicro / 1_000_000) * 1000
+  const rates = {
+    pvpMarginAirBp: pricing.minMarginBp,
+    pvpMarginSeaBp: pricing.minMarginBp,
+    pvpMaxSavingOemBp: pricing.maxSavingOemBp,
+    pvpMaxSavingAltBp: pricing.maxSavingAltBp,
+    pvpMinSavingBp: pricing.minSavingBp,
+  }
   const best = (usd) => ({
     cheapest: { usdMicro: usd * 1_000_000, supplierId: 's1', quality: 'original' },
   })
@@ -158,15 +187,15 @@ describe('worthImportingCounts', () => {
     { id: 'd' }, // sin precio de referencia: no cuenta
   ]
 
-  it('cuenta por cada vía los que conviene importar sobre los que se pueden evaluar', () => {
-    expect(worthImportingCounts(costs, parts, toClp)).toEqual({
+  it('cuenta por cada vía los que se ofrecen sobre los que se pueden evaluar', () => {
+    expect(worthImportingCounts(costs, parts, toClp, rates)).toEqual({
       air: { worth: 1, total: 2 },
       sea: { worth: 2, total: 2 },
     })
   })
 
   it('sin costos calculados no cuenta ninguno', () => {
-    expect(worthImportingCounts(null, parts, toClp)).toEqual({
+    expect(worthImportingCounts(null, parts, toClp, rates)).toEqual({
       air: { worth: 0, total: 0 },
       sea: { worth: 0, total: 0 },
     })

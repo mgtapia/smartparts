@@ -24,10 +24,11 @@ import {
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import { PART_IMAGE_SIZE } from '@constants/layout'
 import { getPartImage, updatePartCustoms } from '@libs/repos/partsRepo'
+import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { costLine, priceUsdMicro, unitPriceMoney } from '@features/quotes/hooks/useQuotations'
 import { shortReason } from '@features/quotes/partMatrix'
-import { supplierLabel } from '@features/quotes/constants'
+import { MODE_OPTIONS, supplierLabel } from '@features/quotes/constants'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { usePartDetail } from './hooks/usePartDetail'
 import CodeDialog from './components/CodeDialog'
@@ -44,6 +45,7 @@ import {
   convenience,
   seaFormatSuffix,
 } from '@features/costing/partCostsModel'
+import { pricingFor } from '@features/costing/pricingModel'
 
 const EDIT = {
   CODE: 'code',
@@ -118,11 +120,17 @@ export default function PartDetailPage() {
   const logisticsReason = `${LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}: falta confirmarlo con el proveedor o medirlo`
 
   // Mejor costo puesto en Chile (lo más barato, sea cual sea su calidad) por avión y por barco.
-  // Verde si conviene importar, rojo si no; gris si falta el costo o el precio de referencia.
+  // Verde si se ofrece (mismo criterio que el Catálogo), rojo si no; gris si falta el costo o el
+  // precio de referencia.
   const costField = (mode, label) => {
     const best = bestOf(partCosts.costs?.[mode], part.id, SELECTIONS.CHEAPEST)
     const worthIt = best
-      ? convenience(partCosts.toClp(best.usdMicro), part.baselinePrice?.amount ?? null)
+      ? convenience(
+          partCosts.toClp(best.usdMicro),
+          part.baselinePrice?.amount ?? null,
+          best.quality,
+          pricingFor(partCosts.rates, mode),
+        )
       : null
     return (
       <InfoField label={label}>
@@ -331,14 +339,24 @@ export default function PartDetailPage() {
       <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
       {tab === PART_TABS.QUOTES ? (
-        <ListTable
-          sortKey="part-quotes"
-          columns={quoteColumns}
-          rows={rows}
-          getRowKey={({ quote }) => quote.id}
-          getRowHref={({ quote }) => `/quotes/${quote.quotationId}`}
-          emptyText="Sin cotizaciones todavía."
-        />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box>
+            <ToolbarSelectBox
+              label="Modo de transporte"
+              value={mode}
+              onChange={assumptions.setMode}
+              options={MODE_OPTIONS}
+            />
+          </Box>
+          <ListTable
+            sortKey="part-quotes"
+            columns={quoteColumns}
+            rows={rows}
+            getRowKey={({ quote }) => quote.id}
+            getRowHref={({ quote }) => `/quotes/${quote.quotationId}`}
+            emptyText="Sin cotizaciones todavía."
+          />
+        </Box>
       ) : null}
 
       {tab === PART_TABS.RECOMMENDATIONS ? <PartRecommendations part={part} /> : null}

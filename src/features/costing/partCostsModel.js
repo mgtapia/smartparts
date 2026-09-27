@@ -6,6 +6,7 @@
 import { money } from '@libs/money'
 import { toUsdMicro } from '@libs/fx'
 import { computeUnitCost } from '@core/costing/unitCost'
+import { isOffered, pricingFor, salePrice } from './pricingModel'
 
 /** Quién pide qué: solo pieza original, o lo más barato sea cual sea su calidad. */
 export const SELECTIONS = Object.freeze({ OEM: 'original', CHEAPEST: 'cheapest' })
@@ -102,15 +103,19 @@ export function buildPartCosts({
 export const bestOf = (costs, partId, selection) => costs?.[partId]?.[selection] ?? null
 
 /**
- * ¿Conviene importar? Compara el costo puesto en Chile con lo que el cliente paga hoy por el
- * repuesto (mismo criterio que la compra de prueba). Sin costo o sin precio de referencia no se
- * puede decir: devuelve null.
+ * ¿Se ofrece? Mismo criterio en toda la app (Catálogo, esta ficha, Vista general y Compra de
+ * prueba): aplica la fórmula de precio de venta (`pricingModel.salePrice`) y exige que la línea
+ * quede en un tramo ofertable (el cliente ahorra al menos el mínimo, con el margen mínimo sobre
+ * la venta cubierto). No basta con que el costo sea menor al precio de referencia. Sin costo o
+ * sin precio de referencia no se puede decir: devuelve null.
  * @param {number|null} costClp
  * @param {number|null} baselineClp
+ * @param {'original'|'alternative'} quality
+ * @param {{ minMarginBp: number, maxSavingOemBp: number, maxSavingAltBp: number, minSavingBp: number }} pricing
  */
-export function convenience(costClp, baselineClp) {
+export function convenience(costClp, baselineClp, quality, pricing) {
   if (costClp == null || baselineClp == null || baselineClp <= 0) return null
-  return costClp <= baselineClp
+  return isOffered(salePrice({ costClp, baselineClp, quality, pricing }).tier)
 }
 
 /** Formatos del envío marítimo: carga consolidada o contenedor completo. */
@@ -132,24 +137,26 @@ export const COST_MODES = Object.freeze({ AIR: 'air', SEA: 'sea' })
 
 /**
  * Recomendación de un repuesto: para cada selección (solo original, o lo más barato) y cada modo,
- * el mejor costo puesto en Chile, cuánto se aleja del precio de referencia y si conviene. Además
- * elige la opción más barata que conviene, o dice que ninguna conviene.
+ * el mejor costo puesto en Chile, cuánto se aleja del precio de referencia y si se ofrece (mismo
+ * criterio que el Catálogo: fórmula de precio de venta, no solo costo bajo referencia). Además
+ * elige la opción más barata entre las que se ofrecen, o dice que ninguna se ofrece.
  *
  * @param {{ air: any, sea: any }} costs  Salida de `buildPartCosts` por modo.
  * @param {string} partId
  * @param {number|null} baselineClp  Precio de referencia (lo que paga hoy el cliente).
  * @param {(usdMicro: number) => number} toClp
+ * @param {any} rates  Supuestos de costo y venta vigentes (`pvpMargin*Bp`, `pvpMaxSaving*Bp`, `pvpMinSavingBp`).
  * @returns {{ options: Option[], pick: Option|null }}
  *   `Option` = `{ selection, mode, best, costClp, diffBp, worthIt }`; `diffBp` es (costo − referencia)
  *   sobre la referencia, en basis points (negativo = ahorro).
  */
-export function buildRecommendations(costs, partId, baselineClp, toClp) {
+export function buildRecommendations(costs, partId, baselineClp, toClp, rates) {
   const options = []
   for (const selection of [SELECTIONS.OEM, SELECTIONS.CHEAPEST]) {
     for (const mode of [COST_MODES.AIR, COST_MODES.SEA]) {
       const best = bestOf(costs?.[mode], partId, selection)
       const costClp = best ? toClp(best.usdMicro) : null
-      const worthIt = convenience(costClp, baselineClp)
+      const worthIt = convenience(costClp, baselineClp, best?.quality, pricingFor(rates, mode))
       const diffBp =
         costClp != null && baselineClp > 0
           ? Math.round(((costClp - baselineClp) * 10000) / baselineClp)
@@ -163,23 +170,30 @@ export function buildRecommendations(costs, partId, baselineClp, toClp) {
 }
 
 /**
- * Cuántos repuestos conviene importar por cada modo: su mejor costo puesto en Chile no supera lo
- * que el cliente paga hoy. Solo cuentan los que tienen costo y precio de referencia.
+ * Cuántos repuestos se ofrecen por cada modo (mismo criterio que el Catálogo: fórmula de precio de
+ * venta). Solo cuentan los que tienen costo y precio de referencia.
  *
  * @param {{ air: any, sea: any }} costs  Salida de `buildPartCosts` por modo.
  * @param {Array<{ id: string, baselinePrice?: { amount: number } }>} parts
  * @param {(usdMicro: number) => number} toClp
+ * @param {any} rates  Supuestos de costo y venta vigentes.
  * @param {string} [selection]
  * @returns {{ air: { worth: number, total: number }, sea: { worth: number, total: number } }}
  */
-export function worthImportingCounts(costs, parts, toClp, selection = SELECTIONS.CHEAPEST) {
+export function worthImportingCounts(costs, parts, toClp, rates, selection = SELECTIONS.CHEAPEST) {
   const count = (mode) => {
+    const pricing = pricingFor(rates, mode)
     let worth = 0
     let total = 0
     for (const part of parts) {
       const best = bestOf(costs?.[mode], part.id, selection)
       const verdict = best
-        ? convenience(toClp(best.usdMicro), part.baselinePrice?.amount ?? null)
+        ? convenience(
+            toClp(best.usdMicro),
+            part.baselinePrice?.amount ?? null,
+            best.quality,
+            pricing,
+          )
         : null
       if (verdict === null) continue
       total += 1

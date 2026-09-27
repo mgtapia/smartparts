@@ -21,7 +21,7 @@ const WORTH_COLOR = { true: 'success.main', false: 'error.main' }
 const NOTES = [
   'Costo puesto en Chile de la mejor oferta, sin IVA y sin los gastos que se cobran por embarque completo, que dependen de qué más se compre en el mismo envío. Barco usa el formato marítimo elegido: carga consolidada (LCL) o contenedor completo (FCL).',
   'Solo OEM considera únicamente la pieza original; Mejor costo, la oferta más barata sea cual sea su calidad.',
-  'Conviene si el costo no supera el precio de referencia, lo que el cliente paga hoy por el repuesto.',
+  'Se ofrece con el mismo criterio que el Catálogo: el cliente debe ahorrar al menos el mínimo frente al Precio REF, con el margen mínimo sobre la venta cubierto (Ajustes → Precio de venta).',
   'Son estimaciones con tarifas de referencia y pesos sin confirmar, no cotizaciones de un forwarder.',
 ]
 
@@ -29,7 +29,7 @@ const clp = (amount) => ({ amount, currency: 'CLP', scale: 0 })
 
 /** Pestaña Recomendaciones de la ficha: qué conviene comprar y por qué vía, con solo OEM o con lo más barato. */
 export default function PartRecommendations({ part }) {
-  const { costs, suppliers, toClp } = usePartCosts()
+  const { costs, suppliers, toClp, rates } = usePartCosts()
 
   if (!costs) {
     return (
@@ -40,7 +40,7 @@ export default function PartRecommendations({ part }) {
   }
 
   const baselineClp = part.baselinePrice?.amount ?? null
-  const { options, pick } = buildRecommendations(costs, part.id, baselineClp, toClp)
+  const { options, pick } = buildRecommendations(costs, part.id, baselineClp, toClp, rates)
   const withCost = options.filter((o) => o.costClp != null)
   const supplierOf = (o) => {
     const s = suppliers.find((x) => x.id === o.best.supplierId)
@@ -51,13 +51,13 @@ export default function PartRecommendations({ part }) {
   if (pick) {
     verdict = {
       color: 'success.main',
-      text: `Conviene importar: ${SELECTION_LABEL[pick.selection].toLowerCase()} por ${MODE_LABEL[pick.mode].toLowerCase()} con ${supplierOf(pick)}, a ${formatBp(Math.abs(pick.diffBp))} bajo el precio de referencia.`,
+      text: `Se ofrece: ${SELECTION_LABEL[pick.selection].toLowerCase()} por ${MODE_LABEL[pick.mode].toLowerCase()} con ${supplierOf(pick)}, a ${formatBp(Math.abs(pick.diffBp))} bajo el Precio REF.`,
     }
   } else if (withCost.length > 0) {
     const cheapest = withCost.reduce((a, b) => (b.costClp < a.costClp ? b : a))
     verdict = {
       color: 'error.main',
-      text: `No conviene importar: el menor costo puesto en Chile (${MODE_LABEL[cheapest.mode].toLowerCase()}, ${SELECTION_LABEL[cheapest.selection].toLowerCase()}) supera en ${formatBp(cheapest.diffBp)} el precio de referencia.`,
+      text: `No se ofrece: el menor costo puesto en Chile (${MODE_LABEL[cheapest.mode].toLowerCase()}, ${SELECTION_LABEL[cheapest.selection].toLowerCase()}) no cubre el margen mínimo o el ahorro mínimo frente al Precio REF.`,
     }
   } else {
     verdict = {
@@ -83,7 +83,8 @@ export default function PartRecommendations({ part }) {
     },
     {
       id: 'cost',
-      label: 'Costo final',
+      label: 'Costo en Chile',
+      tooltip: 'El envío va en su propia columna: puede ser aéreo o marítimo según la fila.',
       width: 130,
       align: 'right',
       render: (o) => (o.costClp == null ? '—' : <MoneyValue money={clp(o.costClp)} />),
@@ -105,7 +106,7 @@ export default function PartRecommendations({ part }) {
     },
     {
       id: 'worth',
-      label: 'Conviene',
+      label: 'Se ofrece',
       width: 90,
       render: (o) =>
         o.worthIt == null ? (

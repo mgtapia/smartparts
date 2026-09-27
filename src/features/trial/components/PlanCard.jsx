@@ -120,15 +120,15 @@ export default function PlanCard({ option, data }) {
         <InfoGrid columns={3}>
           <InfoField
             label="Ahorro máximo"
-            hint="Líneas donde el cliente ahorra el máximo permitido y el margen queda sobre el mínimo."
+            hint="Repuestos donde el cliente ahorra el máximo permitido y el margen queda sobre el mínimo."
           >
-            {best.tiers[TIERS.MAX_SAVING]} líneas
+            {best.tiers[TIERS.MAX_SAVING]} repuestos
           </InfoField>
           <InfoField
             label="Ahorro parcial"
-            hint="Líneas donde rige el margen mínimo y el cliente aún ahorra lo mínimo."
+            hint="Repuestos donde rige el margen mínimo y el cliente aún ahorra lo mínimo."
           >
-            {best.tiers[TIERS.MIN_MARGIN]} líneas
+            {best.tiers[TIERS.MIN_MARGIN]} repuestos
           </InfoField>
         </InfoGrid>
       </Box>

@@ -69,7 +69,7 @@ export default function AirTrialPage() {
   const headerNotes = [
     `Primera compra por avión, pagada por nosotros. El cliente elige entre Original y Más barato; para cada una hay un proveedor recomendado. Proveedores: ${data.suppliers.map((s) => `${s.abbr} ${s.name}`).join(', ')}.`,
     `Flete aéreo US$ ${(a.airUsdPerKgCents / 100).toLocaleString('es-CL', { minimumFractionDigits: 2 })} por kg cobrable, el mayor entre kg y cm³ ÷ ${a.airDivisor.toLocaleString('es-CL')}. Arancel general ${a.generalDutyBp / 100} %. Despacho, guía aérea y reparto: US$ ${Math.round(a.perShipmentUsdCents / 100)} por proveedor. Tipo de cambio CLP ${a.usdClp} por US$ (${a.fxAsOf}). Se editan en Ajustes.`,
-    `Precio de venta de cada repuesto: el mayor entre lo que paga hoy el cliente menos el ahorro máximo (${data.pricing.maxSavingOemBp / 100} % en original, ${data.pricing.maxSavingAltBp / 100} % en alternativo) y el costo puesto en Chile dividido por (1 − ${data.pricing.minMarginBp / 100} %), el margen mínimo sobre la venta. Solo se ofrecen las líneas donde el cliente ahorra al menos ${data.pricing.minSavingBp / 100} %. Los parámetros se editan en Ajustes.`,
+    `Precio de venta de cada repuesto: el mayor entre lo que paga hoy el cliente menos el ahorro máximo (${data.pricing.maxSavingOemBp / 100} % en original, ${data.pricing.maxSavingAltBp / 100} % en alternativo) y el costo puesto en Chile dividido por (1 − ${data.pricing.minMarginBp / 100} %), el margen mínimo sobre la venta. Solo se ofrecen los repuestos donde el cliente ahorra al menos ${data.pricing.minSavingBp / 100} %. Los parámetros se editan en Ajustes.`,
     'El costo incluye la parte de cada repuesto en los gastos por embarque. Las piezas peligrosas o fuera de medida no entran en el pedido.',
   ]
 

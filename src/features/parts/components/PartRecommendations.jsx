@@ -83,14 +83,15 @@ export default function PartRecommendations({ part }) {
     },
     {
       id: 'cost',
-      label: 'Costo en Chile',
+      label: 'Costo final',
       width: 130,
       align: 'right',
       render: (o) => (o.costClp == null ? '—' : <MoneyValue money={clp(o.costClp)} />),
     },
     {
       id: 'diff',
-      label: 'Sobre referencia',
+      label: 'Diferencia',
+      tooltip: 'Sobre el Precio REF: lo que paga hoy el cliente.',
       width: 130,
       align: 'right',
       render: (o) =>

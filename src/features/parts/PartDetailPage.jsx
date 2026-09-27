@@ -319,7 +319,7 @@ export default function PartDetailPage() {
               </UncertainValue>
             </InfoField>
             <InfoField label="Vehículo">{vehicleLabel(part.vehicle) || '—'}</InfoField>
-            <InfoField label="Precio referencia">
+            <InfoField label="Precio REF" hint="Lo que el cliente paga hoy por este repuesto.">
               <MoneyValue money={part.baselinePrice} />
             </InfoField>
             {costField(COST_MODES.AIR, 'Costo aéreo')}

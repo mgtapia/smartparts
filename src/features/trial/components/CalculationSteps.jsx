@@ -161,10 +161,7 @@ export default function CalculationSteps({ option, data }) {
           label="Piso: costo ÷ (1 − margen mínimo)"
           value={red(formatClp(item.sale.floorClp))}
         />
-        <Line
-          label="Precio REF, lo que paga hoy el cliente"
-          value={formatClp(item.unitBaselineClp)}
-        />
+        <Line label="Precio REF" value={formatClp(item.unitBaselineClp)} />
         <Line
           label={`Objetivo: precio REF menos ${pct(capBp)}`}
           value={formatClp(Math.round((item.unitBaselineClp * (10000 - capBp)) / 10000))}
@@ -183,9 +180,9 @@ export default function CalculationSteps({ option, data }) {
         note={`Suma del precio de venta de los ${best.covered} repuestos por su cantidad, frente a lo que el cliente paga hoy por esos mismos repuestos.`}
       >
         <Line label="PVP neto del pedido" value={red(formatClp(best.saleClp))} />
-        <Line label="Costo del pedido en Chile" value={red(formatClp(best.costClp))} />
-        <Line label="Ganancia nuestra" value={red(formatClp(best.profitClp))} strong />
-        <Line label="Lo que el cliente paga hoy" value={formatClp(best.baselineClp)} />
+        <Line label="Costo aéreo del pedido" value={red(formatClp(best.costClp))} />
+        <Line label="Utilidad" value={red(formatClp(best.profitClp))} strong />
+        <Line label="Precio REF" value={formatClp(best.baselineClp)} />
         <Line label="Ahorro del cliente" value={red(formatClp(best.savingClp))} strong />
       </Step>
     </Box>

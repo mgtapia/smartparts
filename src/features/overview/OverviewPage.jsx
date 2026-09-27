@@ -7,15 +7,18 @@ import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionTitle from '@components/common/SectionTitle'
+import Tooltip from '@mui/material/Tooltip'
 import ListTable from '@components/common/ListTable'
 import InfoNote from '@components/common/InfoNote'
 import UncertainValue from '@components/common/UncertainValue'
+import Pill from '@components/common/Pill'
 import { MoneyFromMicros } from '@components/common/MoneyValue'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { GRID_GAP } from '@constants/layout'
 import { formatBp } from '@libs/percent'
+import { supplierAbbr } from '@features/trial/airTrialModel'
 import { QUALITY } from './analyticsModel'
 import { useAnalytics } from './hooks/useAnalytics'
 import PendingSummary from './components/PendingSummary'
@@ -48,6 +51,18 @@ export default function OverviewPage() {
 
   const { summary, suppliers, afmVsOem, topGaps } = data
   const nameOf = (id) => suppliers.find((s) => s.id === id)?.name ?? id
+  const abbrOf = (id) => supplierAbbr(nameOf(id))
+
+  const supplierCell = (offer) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+      <Tooltip title={nameOf(offer.supplierId)}>
+        <span>
+          <Pill label={abbrOf(offer.supplierId)} />
+        </span>
+      </Tooltip>
+      <MoneyFromMicros micros={offer.micro} currency="USD" />
+    </Box>
+  )
 
   const gapColumns = [
     {
@@ -64,24 +79,15 @@ export default function OverviewPage() {
       id: 'cheapest',
       label: 'Más barato',
       sortValue: (g) => g.cheapest.micro,
-      width: 200,
-      render: (g) => (
-        <>
-          {nameOf(g.cheapest.supplierId)}{' '}
-          <MoneyFromMicros micros={g.cheapest.micro} currency="USD" />
-        </>
-      ),
+      width: 150,
+      render: (g) => supplierCell(g.cheapest),
     },
     {
       id: 'dearest',
       label: 'Más caro',
       sortValue: (g) => g.dearest.micro,
-      width: 200,
-      render: (g) => (
-        <>
-          {nameOf(g.dearest.supplierId)} <MoneyFromMicros micros={g.dearest.micro} currency="USD" />
-        </>
-      ),
+      width: 150,
+      render: (g) => supplierCell(g.dearest),
     },
     {
       id: 'spread',
@@ -133,12 +139,6 @@ export default function OverviewPage() {
       />
       <ListTable
         sortKey="overview-gaps"
-        searchFields={(g) => [
-          g.part.nameEs,
-          nameOf(g.cheapest.supplierId),
-          nameOf(g.dearest.supplierId),
-        ]}
-        searchPlaceholder="Buscar por repuesto o proveedor…"
         columns={gapColumns}
         rows={topGaps}
         getRowKey={(g) => g.part.id}

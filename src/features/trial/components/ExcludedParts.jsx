@@ -2,12 +2,14 @@
 
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import ListTable from '@components/common/ListTable'
 import UncertainValue from '@components/common/UncertainValue'
+import Pill from '@components/common/Pill'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import { formatBp } from '@libs/percent'
-import { summarizeExcluded } from '../airTrialModel'
+import { EXCLUDED_KINDS, summarizeExcluded } from '../airTrialModel'
 import { RED_REASON, formatClp, formatClpMillions } from '../constants'
 
 const red = (children) => (
@@ -16,6 +18,19 @@ const red = (children) => (
   </UncertainValue>
 )
 const dash = (value, format) => (value == null ? '—' : format(value))
+
+// Mismo motivo corto que ya usan las tres tarjetas de resumen de arriba: un Pill, no la frase
+// completa repetida en cada fila (la mayoría queda fuera solo por precio).
+const KIND_LABELS_ES = {
+  [EXCLUDED_KINDS.PRICE]: 'Precio',
+  [EXCLUDED_KINDS.SIZE]: 'Bulto',
+  [EXCLUDED_KINDS.DG]: 'Peligrosa',
+}
+const KIND_TONES = {
+  [EXCLUDED_KINDS.PRICE]: 'neutral',
+  [EXCLUDED_KINDS.SIZE]: 'warning',
+  [EXCLUDED_KINDS.DG]: 'error',
+}
 
 const COLUMNS = [
   {
@@ -34,9 +49,20 @@ const COLUMNS = [
   {
     id: 'reasons',
     label: 'Motivo',
-    sortValue: (r) => r.reasons.join('; '),
-    width: 280,
-    render: (r) => r.reasons.join('; '),
+    sortValue: (r) => r.kinds[0],
+    width: 130,
+    tooltip: 'Por qué no entra en el pedido aéreo; el detalle completo va en cada etiqueta.',
+    render: (r) => (
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
+        {r.kinds.map((k) => (
+          <Tooltip key={k} title={r.reasons.join('; ')}>
+            <span>
+              <Pill label={KIND_LABELS_ES[k]} tone={KIND_TONES[k]} />
+            </span>
+          </Tooltip>
+        ))}
+      </Box>
+    ),
   },
   {
     id: 'kg',
@@ -104,15 +130,19 @@ export default function ExcludedParts({ logistics, limit }) {
             label="Cuestan más que el cliente hoy"
             hint="Volarlos costaría más que lo que el cliente paga hoy por las mismas cantidades."
           >
-            {summary.price.count}
-            {summary.price.count ? (
-              <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                {red(formatClpMillions(summary.price.extraClp))} de sobrecosto
-                {summary.price.medianBp != null
-                  ? `, típico +${formatBp(summary.price.medianBp)}`
-                  : ''}
+            <Box>
+              <Typography component="div" sx={{ fontSize: 13 }}>
+                {summary.price.count} repuestos
               </Typography>
-            ) : null}
+              {summary.price.count ? (
+                <Typography component="div" variant="caption" color="text.secondary">
+                  {red(formatClpMillions(summary.price.extraClp))} de sobrecosto
+                  {summary.price.medianBp != null
+                    ? ` (típico +${formatBp(summary.price.medianBp)})`
+                    : ''}
+                </Typography>
+              ) : null}
+            </Box>
           </InfoField>
           <InfoField
             label="Bulto grande"

@@ -95,17 +95,14 @@ export default function PlanCard({ option, data }) {
           >
             {red(formatClp(price))}
           </InfoField>
-          <InfoField label="Ganancia nuestra" hint="PVP neto menos el costo en Chile.">
+          <InfoField label="Utilidad" hint="PVP neto menos el costo en Chile.">
             {red(formatClp(profit))}
           </InfoField>
         </InfoGrid>
       </Box>
       <Box sx={{ mt: 2 }}>
         <InfoGrid columns={3}>
-          <InfoField
-            label="Ganancia sobre el precio"
-            hint="Ganancia nuestra dividida por el PVP neto."
-          >
+          <InfoField label="Margen" hint="Utilidad dividida por el PVP neto.">
             {red(
               `${((profit / price) * 100).toLocaleString('es-CL', { maximumFractionDigits: 1 })} %`,
             )}

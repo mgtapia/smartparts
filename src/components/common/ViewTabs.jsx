@@ -29,7 +29,7 @@ export default function ViewTabs({ value, onChange, tabs }) {
             variant="outlined"
             onClick={() => onChange(t.value)}
             sx={{
-              borderRadius: `${RADIUS.pill}px`,
+              borderRadius: `${RADIUS.input}px`,
               borderColor: active ? 'primary.main' : 'divider',
               bgcolor: active ? 'action.hover' : 'transparent',
               color: 'text.primary',

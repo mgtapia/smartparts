@@ -19,7 +19,7 @@ export default function ToolbarIconButton({ label, onClick, children }) {
           height: 44,
           border: 1,
           borderColor: 'divider',
-          borderRadius: `${RADIUS.pill}px`,
+          borderRadius: `${RADIUS.input}px`,
           color: 'text.primary',
           '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
         }}

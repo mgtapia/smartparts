@@ -128,7 +128,17 @@ const theme = createTheme({
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { borderRadius: RADIUS.input, paddingTop: 8, paddingBottom: 8 },
+        root: { borderRadius: RADIUS.input, paddingTop: 8, paddingBottom: 8, fontWeight: 400 },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: { borderRadius: RADIUS.input },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: { paddingLeft: 24, paddingRight: 24, paddingBottom: 16 },
       },
     },
     MuiCard: {

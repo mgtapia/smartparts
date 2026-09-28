@@ -4,11 +4,8 @@ import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import SectionPanel from '@components/layout/SectionPanel'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
 import Pagination from '@mui/material/Pagination'
 import IconButton from '@mui/material/IconButton'
-import SearchIcon from '@mui/icons-material/Search'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
@@ -23,6 +20,7 @@ import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
+import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { ErrorState } from '@components/common/AsyncState'
@@ -292,21 +290,10 @@ export default function CatalogPage() {
             Dos filas separadas a propósito — la de arriba cambia cómo se ve
             la lista, la de abajo cambia qué incluye. */}
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-          <TextField
-            size="small"
-            placeholder="Buscar por nombre, código, categoría, vehículo o proveedor…"
+          <ToolbarSearch
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              },
-            }}
+            onChange={setSearch}
+            placeholder="Buscar por nombre, código, categoría, vehículo o proveedor…"
           />
 
           <ToolbarSelectBox

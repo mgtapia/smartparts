@@ -24,6 +24,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import WarehouseIcon from '@mui/icons-material/Warehouse'
 import { visibleNavEntries, isNavItemActive, entryPath } from '@constants/routes'
 import { RAIL_WIDTH, RAIL_WIDTH_EXPANDED } from '@constants/layout'
+import { RADIUS } from '@constants/colors'
 
 // Imports puntuales por ícono (nunca `import * as Icons`): un barrel import de
 // @mui/icons-material obliga a webpack a procesar ~2500 módulos y dispara el
@@ -65,7 +66,7 @@ function rowSx({ expanded, active }) {
     gap: 1.5,
     px: expanded ? 1.5 : 0,
     border: 'none',
-    borderRadius: 2,
+    borderRadius: `${RADIUS.input}px`,
     cursor: 'pointer',
     font: 'inherit',
     textAlign: 'left',

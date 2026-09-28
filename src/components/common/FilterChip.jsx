@@ -29,7 +29,7 @@ export default function FilterChip({ label, activeCount = 0, children, minWidth 
         }
         variant="outlined"
         sx={{
-          borderRadius: `${RADIUS.pill}px`,
+          borderRadius: `${RADIUS.input}px`,
           borderStyle: open ? 'dashed' : 'solid',
           borderWidth: 1,
           borderColor: open || activeCount > 0 ? 'primary.main' : 'divider',

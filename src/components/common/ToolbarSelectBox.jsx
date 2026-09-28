@@ -32,7 +32,7 @@ export default function ToolbarSelectBox({ label, value, onChange, options, full
           border: '1px solid',
           borderStyle: open ? 'dashed' : 'solid',
           borderColor: open ? 'primary.main' : 'divider',
-          borderRadius: `${RADIUS.pill}px`,
+          borderRadius: `${RADIUS.input}px`,
           px: 1.5,
           height: 44,
           width: fullWidth ? '100%' : undefined,

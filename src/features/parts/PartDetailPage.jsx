@@ -47,6 +47,7 @@ import {
   seaFormatSuffix,
 } from '@features/costing/partCostsModel'
 import { pricingFor } from '@features/costing/pricingModel'
+import { RADIUS } from '@constants/colors'
 
 const EDIT = {
   CODE: 'code',
@@ -305,7 +306,7 @@ export default function PartDetailPage() {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              borderRadius: 1,
+              borderRadius: `${RADIUS.input}px`,
               overflow: 'hidden',
               bgcolor: 'brand.bodyBg',
             }}

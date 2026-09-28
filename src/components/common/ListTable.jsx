@@ -200,7 +200,7 @@ export default function ListTable({
   if (!searchFields) return table
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <Box>
+      <Box sx={{ display: 'flex' }}>
         <ToolbarSearch value={query} onChange={setQuery} placeholder={searchPlaceholder} />
       </Box>
       {table}

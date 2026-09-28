@@ -294,189 +294,144 @@ export default function CatalogPage() {
     <ContentWidth full>
       <PageHeader title="Repuestos" />
 
-      {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
-          columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).
-          Dos filas separadas a propósito — la de arriba cambia cómo se ve
-          la lista, la de abajo cambia qué incluye. */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <TextField
-          size="small"
-          placeholder="Buscar por nombre, código, categoría, vehículo o proveedor…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        <ToolbarSelectBox
-          label="Orden"
-          value={sortField}
-          onChange={setSortField}
-          options={SORT_OPTIONS}
-        />
-
-        <Tooltip title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}>
-          <IconButton
+      <SectionPanel>
+        {/* Fila 1: buscador + controles de vista (orden, agrupar, moneda,
+            columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).
+            Dos filas separadas a propósito — la de arriba cambia cómo se ve
+            la lista, la de abajo cambia qué incluye. */}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <TextField
             size="small"
-            onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            {sortDir === 'asc' ? (
-              <ArrowUpwardIcon fontSize="small" />
-            ) : (
-              <ArrowDownwardIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
-
-        <Divider orientation="vertical" flexItem sx={{ my: 1 }} />
-
-        <ToolbarSelectBox
-          label="Agrupar"
-          value={groupBy}
-          onChange={setGroupBy}
-          options={GROUP_OPTIONS}
-        />
-
-        <SeaFormatSelect />
-
-        <ToolbarSelectBox
-          label="Moneda"
-          value={currency}
-          onChange={setCurrency}
-          options={CURRENCY_OPTIONS}
-        />
-
-        <ColumnsMenu hiddenColumns={hiddenColumns} onToggle={toggleColumn} />
-
-        <Tooltip title={filtersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}>
-          <IconButton
-            size="small"
-            onClick={() => setFiltersOpen((v) => !v)}
-            sx={{ position: 'relative', flexShrink: 0 }}
-          >
-            <FilterListIcon fontSize="small" color={filtersOpen ? 'primary' : 'inherit'} />
-            {hasActiveFilters ? (
-              <Box
-                component="span"
-                sx={{
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  bgcolor: 'primary.main',
-                }}
-              />
-            ) : null}
-          </IconButton>
-        </Tooltip>
-        <InfoNote paragraphs={PVP_NOTES} />
-      </Box>
-
-      {filtersOpen ? (
-        <Box sx={{ mb: 1.5 }}>
-          <FilterPanel
-            categories={categories}
-            categoryFilters={categoryFilters}
-            toggleCategoryFilter={toggleCategoryFilter}
-            vehicles={vehicles}
-            vehicleFilters={vehicleFilters}
-            toggleVehicleFilter={toggleVehicleFilter}
-            codeStatuses={codeStatuses}
-            codeStatusFilters={codeStatusFilters}
-            toggleCodeStatusFilter={toggleCodeStatusFilter}
-            extraFilters={extraFilters}
-            priceBounds={priceBounds}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            hasActiveFilters={hasActiveFilters}
-            onClearAll={clearAllFilters}
+            placeholder="Buscar por nombre, código, categoría, vehículo o proveedor…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ minWidth: 260, flex: 1, '& .MuiInputBase-root': { height: 44 } }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
-        </Box>
-      ) : null}
 
-      <SectionPanel sx={{ p: 0.75, overflow: 'hidden' }}>
-        {/* Header y filas comparten este mismo contenedor con scroll — así
-            scrollean horizontal juntos como una sola tabla si hay muchas
-            columnas visibles, en vez de desbordar el ancho de la página. */}
-        <Box>
-          <Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                height: 36,
-                px: 1.5,
-                mb: 0.5,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-              }}
+          <ToolbarSelectBox
+            label="Orden"
+            value={sortField}
+            onChange={setSortField}
+            options={SORT_OPTIONS}
+          />
+
+          <Tooltip title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}>
+            <IconButton
+              size="small"
+              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Typography
-                variant="overline"
-                color="text.secondary"
+              {sortDir === 'asc' ? (
+                <ArrowUpwardIcon fontSize="small" />
+              ) : (
+                <ArrowDownwardIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+
+          <Divider orientation="vertical" flexItem sx={{ my: 1 }} />
+
+          <ToolbarSelectBox
+            label="Agrupar"
+            value={groupBy}
+            onChange={setGroupBy}
+            options={GROUP_OPTIONS}
+          />
+
+          <SeaFormatSelect />
+
+          <ToolbarSelectBox
+            label="Moneda"
+            value={currency}
+            onChange={setCurrency}
+            options={CURRENCY_OPTIONS}
+          />
+
+          <ColumnsMenu hiddenColumns={hiddenColumns} onToggle={toggleColumn} />
+
+          <Tooltip title={filtersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}>
+            <IconButton
+              size="small"
+              onClick={() => setFiltersOpen((v) => !v)}
+              sx={{ position: 'relative', flexShrink: 0 }}
+            >
+              <FilterListIcon fontSize="small" color={filtersOpen ? 'primary' : 'inherit'} />
+              {hasActiveFilters ? (
+                <Box
+                  component="span"
+                  sx={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'primary.main',
+                  }}
+                />
+              ) : null}
+            </IconButton>
+          </Tooltip>
+          <InfoNote paragraphs={PVP_NOTES} />
+        </Box>
+
+        {filtersOpen ? (
+          <Box sx={{ mb: 1.5 }}>
+            <FilterPanel
+              categories={categories}
+              categoryFilters={categoryFilters}
+              toggleCategoryFilter={toggleCategoryFilter}
+              vehicles={vehicles}
+              vehicleFilters={vehicleFilters}
+              toggleVehicleFilter={toggleVehicleFilter}
+              codeStatuses={codeStatuses}
+              codeStatusFilters={codeStatusFilters}
+              toggleCodeStatusFilter={toggleCodeStatusFilter}
+              extraFilters={extraFilters}
+              priceBounds={priceBounds}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              hasActiveFilters={hasActiveFilters}
+              onClearAll={clearAllFilters}
+            />
+          </Box>
+        ) : null}
+
+        {/* Se sale del padding del panel (mx/mb negativos) para que la tabla
+            llegue a los bordes; el borde superior la separa de los controles
+            de arriba, todo dentro del mismo panel blanco. */}
+        <Box sx={{ mx: -2, mb: -2, borderTop: 1, borderColor: 'divider', overflow: 'hidden' }}>
+          {/* Header y filas comparten este mismo contenedor con scroll — así
+              scrollean horizontal juntos como una sola tabla si hay muchas
+              columnas visibles, en vez de desbordar el ancho de la página. */}
+          <Box>
+            <Box>
+              <Box
                 sx={{
-                  flex: `1 1 ${REPUESTO_MIN_WIDTH}px`,
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  height: 36,
+                  px: 1.5,
+                  mb: 0.5,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
                 }}
               >
-                Repuesto
-              </Typography>
-              {isColumnVisible('vehicle') ? (
                 <Typography
                   variant="overline"
                   color="text.secondary"
                   sx={{
-                    flex: `0 1 ${COL_WIDTH.vehicle}px`,
-                    lineHeight: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: { xs: 'none', sm: 'block' },
-                  }}
-                >
-                  Vehículo
-                </Typography>
-              ) : null}
-              {isColumnVisible('category') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{
-                    flex: `0 1 ${COL_WIDTH.category}px`,
-                    lineHeight: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: { xs: 'none', md: 'block' },
-                  }}
-                >
-                  Categoría
-                </Typography>
-              ) : null}
-              {isColumnVisible('code') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{
-                    flex: `0 1 ${COL_WIDTH.code}px`,
+                    flex: `1 1 ${REPUESTO_MIN_WIDTH}px`,
                     minWidth: 0,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -484,115 +439,165 @@ export default function CatalogPage() {
                     lineHeight: 1,
                   }}
                 >
-                  Código
+                  Repuesto
                 </Typography>
-              ) : null}
-              {isColumnVisible('baseline') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{
-                    flex: `0 1 ${COL_WIDTH.baseline}px`,
-                    lineHeight: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    textAlign: 'right',
-                  }}
-                >
-                  Precio REF
-                </Typography>
-              ) : null}
-              {isColumnVisible('pvpAir') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{
-                    flex: `0 1 ${COL_WIDTH.pvp}px`,
-                    lineHeight: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    textAlign: 'right',
-                  }}
-                >
-                  PVP aéreo
-                </Typography>
-              ) : null}
-              {isColumnVisible('pvpSea') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{
-                    flex: `0 1 ${COL_WIDTH.pvp}px`,
-                    lineHeight: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    textAlign: 'right',
-                  }}
-                >
-                  {`PVP marítimo${seaFormatSuffix(seaFormat)}`}
-                </Typography>
-              ) : null}
-              {isColumnVisible('supplier') ? (
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ flex: `0 1 ${COL_WIDTH.supplier}px`, lineHeight: 1 }}
-                >
-                  Proveedor
-                </Typography>
-              ) : null}
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              {rows.length === 0 ? (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ p: 3, textAlign: 'center' }}
-                >
-                  Sin resultados.
-                </Typography>
-              ) : (
-                groupedSections.map((section) => (
-                  <Box key={section.key ?? 'all'}>
-                    {section.key !== null ? (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          height: 44,
-                          px: 1.5,
-                          mb: '2px',
-                          borderRadius: `${RADIUS.inputSmall}px`,
-                          bgcolor: 'action.selected',
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600 }}>
-                          {section.key}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.75 }}>
-                          · {section.rows.length}
-                        </Typography>
+                {isColumnVisible('vehicle') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.vehicle}px`,
+                      lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: { xs: 'none', sm: 'block' },
+                    }}
+                  >
+                    Vehículo
+                  </Typography>
+                ) : null}
+                {isColumnVisible('category') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.category}px`,
+                      lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: { xs: 'none', md: 'block' },
+                    }}
+                  >
+                    Categoría
+                  </Typography>
+                ) : null}
+                {isColumnVisible('code') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.code}px`,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      lineHeight: 1,
+                    }}
+                  >
+                    Código
+                  </Typography>
+                ) : null}
+                {isColumnVisible('baseline') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.baseline}px`,
+                      lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'right',
+                    }}
+                  >
+                    Precio REF
+                  </Typography>
+                ) : null}
+                {isColumnVisible('pvpAir') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.pvp}px`,
+                      lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'right',
+                    }}
+                  >
+                    PVP aéreo
+                  </Typography>
+                ) : null}
+                {isColumnVisible('pvpSea') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{
+                      flex: `0 1 ${COL_WIDTH.pvp}px`,
+                      lineHeight: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'right',
+                    }}
+                  >
+                    {`PVP marítimo${seaFormatSuffix(seaFormat)}`}
+                  </Typography>
+                ) : null}
+                {isColumnVisible('supplier') ? (
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{ flex: `0 1 ${COL_WIDTH.supplier}px`, lineHeight: 1 }}
+                  >
+                    Proveedor
+                  </Typography>
+                ) : null}
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                {rows.length === 0 ? (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ p: 3, textAlign: 'center' }}
+                  >
+                    Sin resultados.
+                  </Typography>
+                ) : (
+                  groupedSections.map((section) => (
+                    <Box key={section.key ?? 'all'}>
+                      {section.key !== null ? (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            height: 44,
+                            px: 1.5,
+                            mb: '2px',
+                            borderRadius: `${RADIUS.inputSmall}px`,
+                            bgcolor: 'action.selected',
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontSize: 13, fontWeight: 600 }}>
+                            {section.key}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.75 }}>
+                            · {section.rows.length}
+                          </Typography>
+                        </Box>
+                      ) : null}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {section.rows.map((r) => (
+                          <CatalogRow
+                            key={r.id}
+                            r={r}
+                            isColumnVisible={isColumnVisible}
+                            currency={currency}
+                          />
+                        ))}
                       </Box>
-                    ) : null}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      {section.rows.map((r) => (
-                        <CatalogRow
-                          key={r.id}
-                          r={r}
-                          isColumnVisible={isColumnVisible}
-                          currency={currency}
-                        />
-                      ))}
                     </Box>
-                  </Box>
-                ))
-              )}
+                  ))
+                )}
+              </Box>
             </Box>
           </Box>
         </Box>

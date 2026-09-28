@@ -58,7 +58,13 @@ export default function PageHeader({ title, description, actions, back }) {
         ) : null}
       </Box>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', alignSelf: 'flex-end', gap: 2, flexShrink: 0 }}
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          alignSelf: 'flex-end',
+          gap: 2,
+          flexShrink: 0,
+        }}
       >
         {actions ? <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box> : null}
         <SectionTabs />

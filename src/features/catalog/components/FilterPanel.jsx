@@ -10,6 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import FilterChip from '@components/common/FilterChip'
 import CheckboxRow from '@components/common/CheckboxRow'
+import SeaFormatSelect from '@features/costing/components/SeaFormatSelect'
 
 /**
  * Barra horizontal de filtros — un `FilterChip` por dimensión (referencia:
@@ -105,6 +106,8 @@ export default function FilterPanel({
           </FormGroup>
         </FilterChip>
       ))}
+
+      <SeaFormatSelect />
 
       <FilterChip label="Precio" activeCount={priceActive ? 1 : 0} minWidth={260}>
         <Typography variant="caption" color="text.secondary">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import { makeMatcher } from '@libs/textSearch'
@@ -115,22 +116,24 @@ export default function ClientsPage() {
           }}
         />
       ) : null}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre, RUT o contacto…"
+      <SectionPanel>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nombre, RUT o contacto…"
+          />
+          <ToolbarButton label="Nuevo cliente" onClick={() => setCreating(true)} />
+        </Box>
+        <ListTable
+          sortKey="clients"
+          columns={COLUMNS}
+          rows={filtered}
+          getRowKey={({ client }) => client.id}
+          getRowHref={({ client }) => `/clients/${client.id}`}
+          emptyText="Sin clientes todavía: crea el primero con Nuevo cliente."
         />
-        <ToolbarButton label="Nuevo cliente" onClick={() => setCreating(true)} />
-      </Box>
-      <ListTable
-        sortKey="clients"
-        columns={COLUMNS}
-        rows={filtered}
-        getRowKey={({ client }) => client.id}
-        getRowHref={({ client }) => `/clients/${client.id}`}
-        emptyText="Sin clientes todavía: crea el primero con Nuevo cliente."
-      />
+      </SectionPanel>
     </ContentWidth>
   )
 }

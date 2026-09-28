@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import FactCell from '@features/suppliers/components/FactCell'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
@@ -85,79 +86,79 @@ export default function QuotationsPage() {
     <ContentWidth>
       <PageHeader title="Cotizaciones" />
 
-      <ViewTabs
-        value={view}
-        onChange={setView}
-        tabs={[
-          { value: VIEWS.LIST, label: 'Por proveedor' },
-          { value: VIEWS.MATRIX, label: 'Por repuesto' },
-        ]}
-      />
-
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder={
-            isMatrix
-              ? 'Buscar por repuesto, código o categoría…'
-              : 'Buscar por proveedor, archivo o incoterm…'
-          }
+      <SectionPanel>
+        <ViewTabs
+          value={view}
+          onChange={setView}
+          tabs={[
+            { value: VIEWS.LIST, label: 'Por proveedor' },
+            { value: VIEWS.MATRIX, label: 'Por repuesto' },
+          ]}
         />
-        {isMatrix ? (
-          <>
-            <ToolbarSelectBox
-              label="Calidad"
-              value={quality}
-              onChange={setQuality}
-              options={QUALITY_OPTIONS}
-            />
-            <ToolbarSelectBox
-              label="Valor"
-              value={metric}
-              onChange={setMetric}
-              options={METRIC_OPTIONS}
-            />
-            {metric === METRICS.LANDED ? (
-              <>
-                <ToolbarSelectBox
-                  label="Modo de transporte"
-                  value={assumptions.mode}
-                  onChange={assumptions.setMode}
-                  options={MODE_OPTIONS}
-                />
-                <CostParametersDialog
-                  mode={assumptions.mode}
-                  setMode={assumptions.setMode}
-                  rates={assumptions.rates}
-                  setRates={assumptions.setRates}
-                />
-              </>
-            ) : null}
-            <InfoNote paragraphs={MATRIX_HELP} />
-          </>
-        ) : null}
-      </Box>
 
-      {isMatrix ? (
-        <>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder={
+              isMatrix
+                ? 'Buscar por repuesto, código o categoría…'
+                : 'Buscar por proveedor, archivo o incoterm…'
+            }
+          />
+          {isMatrix ? (
+            <>
+              <ToolbarSelectBox
+                label="Calidad"
+                value={quality}
+                onChange={setQuality}
+                options={QUALITY_OPTIONS}
+              />
+              <ToolbarSelectBox
+                label="Valor"
+                value={metric}
+                onChange={setMetric}
+                options={METRIC_OPTIONS}
+              />
+              {metric === METRICS.LANDED ? (
+                <>
+                  <ToolbarSelectBox
+                    label="Modo de transporte"
+                    value={assumptions.mode}
+                    onChange={assumptions.setMode}
+                    options={MODE_OPTIONS}
+                  />
+                  <CostParametersDialog
+                    mode={assumptions.mode}
+                    setMode={assumptions.setMode}
+                    rates={assumptions.rates}
+                    setRates={assumptions.setRates}
+                  />
+                </>
+              ) : null}
+              <InfoNote paragraphs={MATRIX_HELP} />
+            </>
+          ) : null}
+        </Box>
+
+        {isMatrix ? (
           <ListTable
             columns={matrix.columns}
             rows={matrix.rows}
             getRowKey={(r) => r.part.id}
             emptyText="Sin resultados."
           />
-        </>
-      ) : (
-        <ListTable
-          sortKey="quotations"
-          columns={LIST_COLUMNS}
-          rows={filteredQuotations}
-          getRowKey={(q) => q.id}
-          getRowHref={(q) => `/quotes/${q.id}`}
-          emptyText="Sin cotizaciones cargadas todavía."
-        />
-      )}
+        ) : (
+          <ListTable
+            sortKey="quotations"
+            columns={LIST_COLUMNS}
+            rows={filteredQuotations}
+            getRowKey={(q) => q.id}
+            getRowHref={(q) => `/quotes/${q.id}`}
+            emptyText="Sin cotizaciones cargadas todavía."
+          />
+        )}
+      </SectionPanel>
     </ContentWidth>
   )
 }

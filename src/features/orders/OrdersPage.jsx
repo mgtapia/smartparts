@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
@@ -242,7 +243,6 @@ export default function OrdersPage() {
   return (
     <ContentWidth>
       <PageHeader title="Órdenes de compra" />
-      <ViewTabs value={view} onChange={changeView} tabs={ORDER_VIEW_TABS} />
 
       {creating && isClients ? (
         <ClientOrderDialog
@@ -266,48 +266,52 @@ export default function OrdersPage() {
         />
       ) : null}
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder={
-            isClients
-              ? 'Buscar por OC, cliente, RUT o estado…'
-              : 'Buscar por OC, proveedor, incoterm o estado…'
-          }
-        />
-        <ToolbarSelectBox
-          label="Estado"
-          value={status}
-          onChange={setStatus}
-          options={statusOptions}
-        />
-        <ToolbarButton label="Nueva OC" onClick={() => setCreating(true)} />
-        <InfoNote
-          title="Cómo leer esta lista"
-          paragraphs={isClients ? CLIENT_ORDER_HELP : PURCHASE_ORDER_HELP}
-        />
-      </Box>
+      <SectionPanel>
+        <ViewTabs value={view} onChange={changeView} tabs={ORDER_VIEW_TABS} />
 
-      {isClients ? (
-        <ListTable
-          sortKey="client-orders"
-          columns={CLIENT_COLUMNS}
-          rows={clientRows}
-          getRowKey={({ order }) => order.id}
-          getRowHref={({ order }) => `/client-orders/${order.id}`}
-          emptyText="Sin OC de clientes todavía."
-        />
-      ) : (
-        <ListTable
-          sortKey="purchase-orders"
-          columns={PURCHASE_COLUMNS}
-          rows={purchaseRows}
-          getRowKey={({ order }) => order.id}
-          getRowHref={({ order }) => `/purchase-orders/${order.id}`}
-          emptyText="Sin OC a proveedores todavía."
-        />
-      )}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder={
+              isClients
+                ? 'Buscar por OC, cliente, RUT o estado…'
+                : 'Buscar por OC, proveedor, incoterm o estado…'
+            }
+          />
+          <ToolbarSelectBox
+            label="Estado"
+            value={status}
+            onChange={setStatus}
+            options={statusOptions}
+          />
+          <ToolbarButton label="Nueva OC" onClick={() => setCreating(true)} />
+          <InfoNote
+            title="Cómo leer esta lista"
+            paragraphs={isClients ? CLIENT_ORDER_HELP : PURCHASE_ORDER_HELP}
+          />
+        </Box>
+
+        {isClients ? (
+          <ListTable
+            sortKey="client-orders"
+            columns={CLIENT_COLUMNS}
+            rows={clientRows}
+            getRowKey={({ order }) => order.id}
+            getRowHref={({ order }) => `/client-orders/${order.id}`}
+            emptyText="Sin OC de clientes todavía."
+          />
+        ) : (
+          <ListTable
+            sortKey="purchase-orders"
+            columns={PURCHASE_COLUMNS}
+            rows={purchaseRows}
+            getRowKey={({ order }) => order.id}
+            getRowHref={({ order }) => `/purchase-orders/${order.id}`}
+            emptyText="Sin OC a proveedores todavía."
+          />
+        )}
+      </SectionPanel>
     </ContentWidth>
   )
 }

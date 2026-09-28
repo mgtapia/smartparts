@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import { ErrorState } from '@components/common/AsyncState'
@@ -138,21 +139,23 @@ export default function SuppliersPage() {
   return (
     <ContentWidth>
       <PageHeader title="Proveedores" />
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por proveedor, alias o tipo…"
+      <SectionPanel>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por proveedor, alias o tipo…"
+          />
+        </Box>
+        <ListTable
+          sortKey="suppliers"
+          columns={COLUMNS}
+          rows={filtered}
+          getRowKey={({ supplier }) => supplier.id}
+          getRowHref={({ supplier }) => `/suppliers/${supplier.id}`}
+          emptyText="Sin proveedores cargados todavía."
         />
-      </Box>
-      <ListTable
-        sortKey="suppliers"
-        columns={COLUMNS}
-        rows={filtered}
-        getRowKey={({ supplier }) => supplier.id}
-        getRowHref={({ supplier }) => `/suppliers/${supplier.id}`}
-        emptyText="Sin proveedores cargados todavía."
-      />
+      </SectionPanel>
     </ContentWidth>
   )
 }

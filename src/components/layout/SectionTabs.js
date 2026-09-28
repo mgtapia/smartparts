@@ -3,17 +3,15 @@
 import { usePathname, useRouter } from 'next/navigation'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import { RADIUS } from '@constants/colors'
+import { COLORS, RADIUS } from '@constants/colors'
 import { findNavTrail } from '@constants/routes'
-
-// Radio del contenedor menos su borde de 1 px.
-const INNER_RADIUS = `${RADIUS.input - 1}px`
 
 /**
  * Pestañas de los módulos de una sección del menú (Catálogo → Repuestos /
  * Vehículos). El menú lateral solo lleva a la sección; el cambio entre sus
- * módulos se hace acá. Van agrupadas en un solo control de esquinas
- * redondeadas (no pastillas) para distinguirse de los botones y de `ViewTabs`.
+ * módulos se hace acá. La activa se solapa 1 px con el `SectionPanel` de
+ * abajo y comparte su fondo, para leerse como una solapa que sale del panel
+ * (estilo pestaña de navegador); las inactivas quedan apagadas y separadas.
  * Sin sección o con un solo módulo no muestra nada.
  */
 export default function SectionTabs() {
@@ -32,34 +30,28 @@ export default function SectionTabs() {
         if (key) router.push(trail.siblings.find((s) => s.key === key).path)
       }}
       sx={{
-        borderRadius: `${RADIUS.input}px`,
-        border: 1,
-        borderColor: 'divider',
-        overflow: 'hidden',
+        mb: '-1px',
+        position: 'relative',
+        zIndex: 1,
+        gap: 0.5,
         '& .MuiToggleButtonGroup-grouped': {
-          border: 0,
-          borderRadius: 0,
+          border: 1,
+          borderColor: 'divider',
+          marginLeft: '0 !important',
+          borderRadius: `${RADIUS.input}px ${RADIUS.input}px 0 0 !important`,
           height: 36,
           px: 2.5,
           fontSize: 13,
           fontWeight: 400,
           textTransform: 'none',
-          color: 'text.primary',
+          color: 'text.secondary',
+          bgcolor: COLORS.bgAlt,
           whiteSpace: 'nowrap',
-          '&:not(:first-of-type)': { borderLeft: 1, borderLeftColor: 'divider' },
           '&.Mui-selected': {
-            bgcolor: 'action.selected',
+            bgcolor: COLORS.bg,
+            color: 'text.primary',
             fontWeight: 600,
-            boxShadow: (t) => `inset 0 0 0 1px ${t.palette.text.disabled}`,
-            // Las esquinas externas siguen la curva del contenedor para que el borde no se corte.
-            '&:first-of-type': {
-              borderTopLeftRadius: INNER_RADIUS,
-              borderBottomLeftRadius: INNER_RADIUS,
-            },
-            '&:last-of-type': {
-              borderTopRightRadius: INNER_RADIUS,
-              borderBottomRightRadius: INNER_RADIUS,
-            },
+            borderBottomColor: COLORS.bg,
           },
         },
       }}

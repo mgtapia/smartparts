@@ -3,7 +3,7 @@ import { useGlobalSettings } from '@features/settings/hooks/useGlobalSettings'
 import { SEA_FORMATS, DEFAULT_SEA_FORMAT } from '../partCostsModel'
 
 /** Elección "según Ajustes": no hay formato propio de esta pantalla. */
-export const SEA_FORMAT_FROM_SETTINGS = ''
+export const SEA_FORMAT_FROM_SETTINGS = 'settings'
 
 /**
  * Formato marítimo con el que se calcula el costo "marítimo" del catálogo y de la ficha: carga

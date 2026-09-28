@@ -44,6 +44,10 @@ export default function ToolbarSelectBox({ label, value, onChange, options, full
           disableUnderline
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          renderValue={(v) => {
+            const opt = options.find((o) => o.value === v)
+            return opt?.shortLabel ?? opt?.label
+          }}
           open={open}
           onOpen={() => setOpen(true)}
           onClose={() => setOpen(false)}

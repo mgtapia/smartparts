@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Card from '@mui/material/Card'
+import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
@@ -125,20 +125,20 @@ export default function PendingPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={2}>
-          <InfoField label="Pendientes">
-            <UncertainValue verified={summary.pendingCount === 0} reason="Datos sin confirmar">
-              {summary.pendingCount}
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Avance del hito">
-            {summary.stepsDone} de {summary.stepsTotal}
-          </InfoField>
-        </InfoGrid>
-      </Card>
-
       <SectionPanel>
+        <Box sx={{ mb: 2 }}>
+          <InfoGrid columns={2}>
+            <InfoField label="Pendientes">
+              <UncertainValue verified={summary.pendingCount === 0} reason="Datos sin confirmar">
+                {summary.pendingCount}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Avance del hito">
+              {summary.stepsDone} de {summary.stepsTotal}
+            </InfoField>
+          </InfoGrid>
+        </Box>
+
         <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
         {tab === PENDING_TABS.PENDING ? (

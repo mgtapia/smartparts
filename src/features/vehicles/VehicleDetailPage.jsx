@@ -147,7 +147,7 @@ export default function VehicleDetailPage() {
       />
 
       <SectionPanel>
-        <PanelSection>
+        <PanelSection sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <Box
             sx={{
               width: VEHICLE_IMAGE_WIDTH,

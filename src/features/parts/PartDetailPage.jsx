@@ -291,7 +291,7 @@ export default function PartDetailPage() {
       ) : null}
 
       <SectionPanel>
-        <PanelSection>
+        <PanelSection sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
           <Box
             role="button"
             tabIndex={0}

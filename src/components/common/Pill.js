@@ -2,7 +2,11 @@ import Chip from '@mui/material/Chip'
 import { COLORS } from '@constants/colors'
 
 const TONES = {
-  neutral: { bgcolor: COLORS.bgAlt, color: COLORS.textPrimary },
+  neutral: {
+    bgcolor: COLORS.bgWarm,
+    color: COLORS.textPrimary,
+    border: `1px solid ${COLORS.borderStrong}`,
+  },
   success: { bgcolor: COLORS.infoBg, color: COLORS.successStrong },
   warning: { bgcolor: COLORS.warningBg, color: COLORS.warning },
   error: { bgcolor: COLORS.errorBg, color: COLORS.error },

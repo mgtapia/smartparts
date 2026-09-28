@@ -143,7 +143,6 @@ export default function VehicleDetailPage() {
       <PageHeader
         back={{ href: '/vehicles', label: 'Vehículos' }}
         title={vehicleLabel(vehicle)}
-        description={vehicle.model}
       />
 
       <SectionPanel>

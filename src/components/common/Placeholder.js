@@ -11,7 +11,7 @@ import { RADIUS } from '@constants/colors'
 export default function Placeholder({ title, description }) {
   return (
     <ContentWidth>
-      <PageHeader title={title} description={description} />
+      <PageHeader title={title} />
       <Box
         sx={{
           border: '1px dashed',

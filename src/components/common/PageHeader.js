@@ -15,10 +15,9 @@ import { hasSectionTabs } from '@constants/routes'
  * Encabezado de página. `back` ({ href, label }) pone una flecha de volver a la
  * izquierda del título, en la misma fila. A la derecha, separadas del título,
  * van las pestañas de la sección del menú y las `actions`. Debajo del título
- * van las migas de pan (omitidas en la página principal) y `description`, el
- * texto explicativo.
+ * van las migas de pan (omitidas en la página principal); nada más.
  */
-export default function PageHeader({ title, description, actions, back }) {
+export default function PageHeader({ title, actions, back }) {
   // Con pestañas de sección, el panel de contenido va pegado a su borde inferior.
   const attached = hasSectionTabs(usePathname())
   return (
@@ -51,11 +50,6 @@ export default function PageHeader({ title, description, actions, back }) {
           </Typography>
         </Box>
         <Breadcrumbs />
-        {description ? (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {description}
-          </Typography>
-        ) : null}
       </Box>
       <Box
         sx={{

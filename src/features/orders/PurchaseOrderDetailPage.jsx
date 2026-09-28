@@ -157,7 +157,6 @@ export default function PurchaseOrderDetailPage() {
       <PageHeader
         back={BACK}
         title={orderLabel(order)}
-        description={supplierLabel(supplier, order.supplierId)}
       />
 
       {editing?.kind === 'order' ? (

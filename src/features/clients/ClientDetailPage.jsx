@@ -134,7 +134,6 @@ export default function ClientDetailPage() {
       <PageHeader
         back={{ href: '/clients', label: 'Clientes' }}
         title={client.name}
-        description={client.rut ?? undefined}
       />
 
       {editing === 'client' ? (

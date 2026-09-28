@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
@@ -117,21 +118,23 @@ export default function ClientsPage() {
         />
       ) : null}
       <SectionPanel>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
             placeholder="Buscar por nombre, RUT o contacto…"
           />
           <ToolbarButton label="Nuevo cliente" onClick={() => setCreating(true)} />
-        </Box>
+        </Toolbar>
         <ListTable
           sortKey="clients"
           columns={COLUMNS}
           rows={filtered}
           getRowKey={({ client }) => client.id}
           getRowHref={({ client }) => `/clients/${client.id}`}
-          emptyText="Sin clientes todavía: crea el primero con Nuevo cliente."
+          emptyText={
+            search ? 'Sin resultados.' : 'Sin clientes todavía: crea el primero con Nuevo cliente.'
+          }
         />
       </SectionPanel>
     </ContentWidth>

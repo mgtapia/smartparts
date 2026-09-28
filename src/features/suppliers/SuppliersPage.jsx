@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
@@ -132,20 +133,20 @@ export default function SuppliersPage() {
     <ContentWidth>
       <PageHeader title="Proveedores" />
       <SectionPanel>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
             placeholder="Buscar por proveedor, alias o tipo…"
           />
-        </Box>
+        </Toolbar>
         <ListTable
           sortKey="suppliers"
           columns={COLUMNS}
           rows={filtered}
           getRowKey={({ supplier }) => supplier.id}
           getRowHref={({ supplier }) => `/suppliers/${supplier.id}`}
-          emptyText="Sin proveedores cargados todavía."
+          emptyText={search ? 'Sin resultados.' : 'Sin proveedores cargados todavía.'}
         />
       </SectionPanel>
     </ContentWidth>

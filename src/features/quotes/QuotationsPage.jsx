@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import FactCell from '@features/suppliers/components/FactCell'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
@@ -96,7 +97,7 @@ export default function QuotationsPage() {
           ]}
         />
 
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
@@ -139,7 +140,7 @@ export default function QuotationsPage() {
               <InfoNote paragraphs={MATRIX_HELP} />
             </>
           ) : null}
-        </Box>
+        </Toolbar>
 
         {isMatrix ? (
           <ListTable
@@ -155,7 +156,7 @@ export default function QuotationsPage() {
             rows={filteredQuotations}
             getRowKey={(q) => q.id}
             getRowHref={(q) => `/quotes/${q.id}`}
-            emptyText="Sin cotizaciones cargadas todavía."
+            emptyText={search ? 'Sin resultados.' : 'Sin cotizaciones cargadas todavía.'}
           />
         )}
       </SectionPanel>

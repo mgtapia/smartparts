@@ -16,6 +16,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Divider from '@mui/material/Divider'
 import Link from 'next/link'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import PageHeader from '@components/common/PageHeader'
 import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
@@ -289,7 +290,7 @@ export default function CatalogPage() {
             columnas). Fila 2: pastillas de filtros (referencia: Samsung.com).
             Dos filas separadas a propósito — la de arriba cambia cómo se ve
             la lista, la de abajo cambia qué incluye. */}
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
@@ -359,7 +360,7 @@ export default function CatalogPage() {
             </IconButton>
           </Tooltip>
           <InfoNote paragraphs={PVP_NOTES} />
-        </Box>
+        </Toolbar>
 
         {filtersOpen ? (
           <Box sx={{ mb: 1.5 }}>

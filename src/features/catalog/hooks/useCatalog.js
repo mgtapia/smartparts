@@ -6,7 +6,7 @@ import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { makeMatcher } from '@libs/textSearch'
-import { CODE_STATUS, CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
+import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
 import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
 import { isOffered, pricingFor, salePrice } from '@features/costing/pricingModel'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
@@ -130,10 +130,6 @@ export function useCatalog() {
   const [supplierFilters, setSupplierFilters] = usePersistentState('catalog.supplierFilters', [])
   const [quoteFilters, setQuoteFilters] = usePersistentState('catalog.quoteFilters', [])
   const [logisticsFilters, setLogisticsFilters] = usePersistentState('catalog.logisticsFilters', [])
-  const [codeStatusFilters, setCodeStatusFilters] = usePersistentState(
-    'catalog.codeStatusFilters',
-    [],
-  )
   // null = sin restringir (todavía no tocado)
   const [priceRange, setPriceRange] = usePersistentState('catalog.priceRange', null)
   const [sortField, setSortField] = usePersistentState('catalog.sortField', SORT_FIELDS.NAME)
@@ -223,7 +219,6 @@ export function useCatalog() {
     const filtered = allRows.filter((r) => {
       if (categoryFilters.length && !categoryFilters.includes(r.categoryTopPath)) return false
       if (vehicleFilters.length && !vehicleFilters.includes(r.vehicleId)) return false
-      if (codeStatusFilters.length && !codeStatusFilters.includes(r.codeStatus)) return false
       if (offerFilters.length && !r.offer.some((k) => offerFilters.includes(k))) return false
       if (supplierFilters.length && !r.suppliers.some((s) => supplierFilters.includes(s))) {
         return false
@@ -257,7 +252,6 @@ export function useCatalog() {
     search,
     categoryFilters,
     vehicleFilters,
-    codeStatusFilters,
     offerFilters,
     supplierFilters,
     quoteFilters,
@@ -275,7 +269,6 @@ export function useCatalog() {
     search,
     categoryFilters,
     vehicleFilters,
-    codeStatusFilters,
     offerFilters,
     supplierFilters,
     quoteFilters,
@@ -296,7 +289,6 @@ export function useCatalog() {
   const hasActiveFilters =
     categoryFilters.length > 0 ||
     vehicleFilters.length > 0 ||
-    codeStatusFilters.length > 0 ||
     offerFilters.length > 0 ||
     supplierFilters.length > 0 ||
     quoteFilters.length > 0 ||
@@ -306,7 +298,6 @@ export function useCatalog() {
   function clearAllFilters() {
     setCategoryFilters([])
     setVehicleFilters([])
-    setCodeStatusFilters([])
     setOfferFilters([])
     setSupplierFilters([])
     setQuoteFilters([])
@@ -329,9 +320,6 @@ export function useCatalog() {
     vehicles,
     vehicleFilters,
     toggleVehicleFilter: (id) => setVehicleFilters((prev) => toggleInList(prev, id)),
-    codeStatuses: Object.values(CODE_STATUS),
-    codeStatusFilters,
-    toggleCodeStatusFilter: (s) => setCodeStatusFilters((prev) => toggleInList(prev, s)),
     // Filtros que dependen del costo y de las cotizaciones: cada uno con sus opciones y su conteo.
     extraFilters: [
       {

@@ -10,7 +10,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import FilterChip from '@components/common/FilterChip'
 import CheckboxRow from '@components/common/CheckboxRow'
-import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 
 /**
  * Barra horizontal de filtros — un `FilterChip` por dimensión (referencia:
@@ -25,9 +24,6 @@ export default function FilterPanel({
   vehicles,
   vehicleFilters,
   toggleVehicleFilter,
-  codeStatuses,
-  codeStatusFilters,
-  toggleCodeStatusFilter,
   priceBounds,
   priceRange,
   setPriceRange,
@@ -90,19 +86,6 @@ export default function FilterPanel({
               checked={vehicleFilters.includes(v.id)}
               onChange={() => toggleVehicleFilter(v.id)}
               label={`${v.brand} ${v.shortModel}`}
-            />
-          ))}
-        </FormGroup>
-      </FilterChip>
-
-      <FilterChip label="Estado del código" activeCount={codeStatusFilters.length}>
-        <FormGroup sx={{ gap: 0.5 }}>
-          {codeStatuses.map((s) => (
-            <CheckboxRow
-              key={s}
-              checked={codeStatusFilters.includes(s)}
-              onChange={() => toggleCodeStatusFilter(s)}
-              label={CODE_STATUS_LABELS_ES[s]}
             />
           ))}
         </FormGroup>

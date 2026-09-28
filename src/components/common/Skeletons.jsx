@@ -13,7 +13,7 @@ const FIELD_VALUE = 22
 /** Encabezado de página: título y, opcionalmente, el conteo a la derecha. */
 function HeaderSkeleton({ withMeta = true }) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
       <Skeleton variant="rounded" width={TITLE_WIDTH} height={TITLE_HEIGHT} />
       {withMeta ? <Skeleton variant="rounded" width="10%" height={FIELD_LINE + 4} /> : null}
     </Box>
@@ -27,12 +27,7 @@ function RowsSkeleton({ rows }) {
       <Skeleton variant="rounded" height={FIELD_LINE} width="40%" sx={{ m: 1.5, mb: 2 }} />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {Array.from({ length: rows }, (_, i) => (
-          <Skeleton
-            key={i}
-            variant="rounded"
-            height={ROW_HEIGHT}
-            sx={{ borderRadius: `${RADIUS.inputSmall}px` }}
-          />
+          <Skeleton key={i} variant="rounded" height={ROW_HEIGHT} sx={{ borderRadius: 0 }} />
         ))}
       </Box>
     </Card>
@@ -51,7 +46,7 @@ export function ListPageSkeleton({ rows = 8 }) {
         variant="rounded"
         width={TOOLBAR_WIDTH}
         height={ROW_HEIGHT}
-        sx={{ mb: 1.5, borderRadius: `${RADIUS.pill}px` }}
+        sx={{ mb: 1.5, borderRadius: `${RADIUS.input}px` }}
       />
       <RowsSkeleton rows={rows} />
     </Box>
@@ -81,7 +76,7 @@ export function DetailPageSkeleton({ rows = 4 }) {
             variant="rounded"
             width={110}
             height={36}
-            sx={{ borderRadius: `${RADIUS.pill}px` }}
+            sx={{ borderRadius: `${RADIUS.input}px` }}
           />
         ))}
       </Box>

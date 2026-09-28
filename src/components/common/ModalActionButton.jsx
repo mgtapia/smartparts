@@ -21,7 +21,7 @@ export default function ModalActionButton({ label, onClick, kind = 'ghost' }) {
       variant={{ primary: 'contained', outlined: 'outlined', ghost: 'text' }[kind]}
       disableElevation
       sx={{
-        borderRadius: `${RADIUS.pill}px`,
+        borderRadius: `${RADIUS.input}px`,
         height: 32,
         px: 2,
         minWidth: 0,

@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ContentWidth from './ContentWidth'
 import PageHeader from './PageHeader'
+import { RADIUS } from '@constants/colors'
 
 /**
  * Placeholder de módulo — Fase 0/1. Se reemplaza por la pantalla real cuando
@@ -15,7 +16,7 @@ export default function Placeholder({ title, description }) {
         sx={{
           border: '1px dashed',
           borderColor: 'divider',
-          borderRadius: 2,
+          borderRadius: `${RADIUS.input}px`,
           p: 6,
           textAlign: 'center',
         }}

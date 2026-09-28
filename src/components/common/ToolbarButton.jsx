@@ -21,7 +21,7 @@ export default function ToolbarButton({ label, onClick, startIcon, href, disable
       startIcon={startIcon}
       disabled={disabled}
       sx={{
-        borderRadius: `${RADIUS.pill}px`,
+        borderRadius: `${RADIUS.input}px`,
         borderColor: 'divider',
         color: 'text.primary',
         fontSize: 13,

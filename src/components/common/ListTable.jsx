@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ToolbarSearch from '@components/common/ToolbarSearch'
+import { PanelContext } from '@components/layout/SectionPanel'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { makeMatcher } from '@libs/textSearch'
 import { nextSort, sortRows } from '@libs/sortRows'
@@ -60,6 +61,7 @@ export default function ListTable({
   searchPlaceholder = 'Buscar…',
   emptyText = 'Sin resultados.',
 }) {
+  const inPanel = useContext(PanelContext)
   const persistedSort = usePersistentState(`table.sort.${sortKey ?? 'off'}`, null)
   const localSort = useState(null)
   const [sort, setSort] = sortKey ? persistedSort : localSort
@@ -87,8 +89,11 @@ export default function ListTable({
     textAlign: c.align === 'right' ? 'right' : 'left',
   })
 
+  const Wrapper = inPanel ? Box : Card
   const table = (
-    <Card sx={{ p: 0.75, overflow: 'hidden' }}>
+    <Wrapper
+      {...(inPanel ? { sx: { overflow: 'hidden' } } : { sx: { p: 0.75, overflow: 'hidden' } })}
+    >
       <Box>
         <Box>
           <Box
@@ -189,7 +194,7 @@ export default function ListTable({
           </Box>
         </Box>
       </Box>
-    </Card>
+    </Wrapper>
   )
 
   if (!searchFields) return table

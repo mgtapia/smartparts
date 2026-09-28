@@ -7,8 +7,8 @@ import Typography from '@mui/material/Typography'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { findNavTrail } from '@constants/routes'
 
-/** Migas de pan: Grupo › Módulo (› página actual en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
-export default function Breadcrumbs({ current }) {
+/** Migas de pan: Grupo › Módulo (› Detalle en una ficha). Sin ruta en el menú o en la página principal no muestra nada. */
+export default function Breadcrumbs() {
   const pathname = usePathname()
   const trail = findNavTrail(pathname)
   const deeper = Boolean(trail) && pathname.replace(/\/$/, '') !== trail.item.path
@@ -17,7 +17,7 @@ export default function Breadcrumbs({ current }) {
   const crumbs = [
     trail.group ? { label: trail.group } : null,
     { label: trail.item.labelEs, href: deeper ? trail.item.path : null },
-    deeper ? { label: current || 'Detalle' } : null,
+    deeper ? { label: 'Detalle' } : null,
   ].filter(Boolean)
 
   return (

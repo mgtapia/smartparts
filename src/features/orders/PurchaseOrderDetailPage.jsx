@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import { useRouteId } from '@hooks/useRouteId'
 import { useUrlTab } from '@hooks/useUrlTab'
+import { makeMatcher } from '@libs/textSearch'
 import ContentWidth from '@components/common/ContentWidth'
 import Typography from '@mui/material/Typography'
 import PageHeader from '@components/common/PageHeader'
@@ -12,6 +13,8 @@ import PanelSection from '@components/layout/PanelSection'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
+import Toolbar from '@components/common/Toolbar'
+import ToolbarSearch from '@components/common/ToolbarSearch'
 import ToolbarButton from '@components/common/ToolbarButton'
 import InfoNote from '@components/common/InfoNote'
 import MoneyValue from '@components/common/MoneyValue'
@@ -46,6 +49,7 @@ export default function PurchaseOrderDetailPage() {
   const [tab, setTab] = useUrlTab(Object.values(PURCHASE_ORDER_TABS))
   // { kind: 'order' } | { kind: 'line', line? } | { kind: 'delete', line }
   const [editing, setEditing] = useState(null)
+  const [search, setSearch] = useState('')
 
   if (data.loading) {
     return (
@@ -75,6 +79,10 @@ export default function PurchaseOrderDetailPage() {
     )
   }
   const { order, supplier, quotation } = row
+  const matches = makeMatcher(search)
+  const filteredLines = order.lines.filter((l) =>
+    matches([partLabel(data.partsById.get(l.partId))]),
+  )
   const close = () => setEditing(null)
   const reload = () => data.reload()
   const editOrder = () => setEditing({ kind: 'order' })
@@ -154,10 +162,7 @@ export default function PurchaseOrderDetailPage() {
 
   return (
     <ContentWidth>
-      <PageHeader
-        back={BACK}
-        title={orderLabel(order)}
-      />
+      <PageHeader back={BACK} title={orderLabel(order)} />
 
       {editing?.kind === 'order' ? (
         <PurchaseOrderDialog
@@ -238,18 +243,25 @@ export default function PurchaseOrderDetailPage() {
 
         {tab === PURCHASE_ORDER_TABS.LINES ? (
           <>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+            <Toolbar>
+              <ToolbarSearch
+                value={search}
+                onChange={setSearch}
+                placeholder="Buscar por repuesto…"
+              />
               <ToolbarButton label="Agregar línea" onClick={() => setEditing({ kind: 'line' })} />
               <InfoNote title="Cómo se enlaza" paragraphs={PURCHASE_ORDER_HELP} />
-            </Box>
+            </Toolbar>
             <ListTable
               sortKey="purchase-order-lines"
-              searchFields={(l) => [partLabel(data.partsById.get(l.partId))]}
-              searchPlaceholder="Buscar por repuesto…"
               columns={columns}
-              rows={order.lines}
+              rows={filteredLines}
               getRowKey={(l) => l.id}
-              emptyText="Sin líneas: agrega los repuestos que se compran a este proveedor."
+              emptyText={
+                search
+                  ? 'Sin resultados.'
+                  : 'Sin líneas: agrega los repuestos que se compran a este proveedor.'
+              }
             />
           </>
         ) : null}

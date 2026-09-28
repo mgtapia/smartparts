@@ -200,13 +200,17 @@ export function useCatalog() {
   const effectivePriceRange = priceRange ?? priceBounds
 
   // Proveedores que dan algún PVP: los únicos por los que tiene sentido filtrar.
-  const supplierOptions = useMemo(
-    () =>
-      [...new Set(allRows.flatMap((r) => r.suppliers))]
-        .sort((a, b) => a.localeCompare(b, 'es'))
-        .map((s) => ({ value: s, label: s })),
-    [allRows],
-  )
+  const supplierOptions = useMemo(() => {
+    const nameOfAbbr = new Map(
+      (costSuppliers ?? []).map((s) => {
+        const name = supplierLabel(s, s.id)
+        return [supplierAbbr(name), name]
+      }),
+    )
+    return [...new Set(allRows.flatMap((r) => r.suppliers))]
+      .sort((a, b) => a.localeCompare(b, 'es'))
+      .map((s) => ({ value: s, label: nameOfAbbr.has(s) ? `${s} - ${nameOfAbbr.get(s)}` : s }))
+  }, [allRows, costSuppliers])
 
   const categories = getTopLevelCategories()
 

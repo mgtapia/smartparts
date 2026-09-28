@@ -168,7 +168,6 @@ export default function SupplierDetailPage() {
       <PageHeader
         back={{ href: '/suppliers', label: 'Proveedores' }}
         title={supplierLabel(supplier, supplier.id)}
-        description={supplier.name}
       />
 
       {editing?.kind === 'fact' ? (

@@ -254,7 +254,6 @@ export default function ClientOrderDetailPage() {
       <PageHeader
         back={{ href: '/orders', label: 'Órdenes' }}
         title={orderLabel(order)}
-        description={client?.name}
         actions={
           <ToolbarButton
             label={simulating ? 'Cerrar simulación' : 'Simular compra'}

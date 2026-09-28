@@ -12,7 +12,6 @@ import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import PanelSection from '@components/layout/PanelSection'
 import SectionPanel from '@components/layout/SectionPanel'
-import ToolbarButton from '@components/common/ToolbarButton'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import SourcedValueDialog from '@components/common/SourcedValueDialog'
 import InfoNote from '@components/common/InfoNote'
@@ -28,7 +27,6 @@ import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import ColumnsMenu from '@features/catalog/components/ColumnsMenu'
 import CostParametersDialog from './components/CostParametersDialog'
 import SupplierAssumptionsDialog from './components/SupplierAssumptionsDialog'
-import QualityChips from './components/QualityChips'
 import QuotationOrigin from './components/QuotationOrigin'
 import VehicleLinks from '@features/vehicles/components/VehicleLinks'
 import {
@@ -275,9 +273,6 @@ export default function QuotationDetailPage() {
       <PageHeader
         back={{ href: '/quotes', label: 'Cotizaciones' }}
         title={supplierLabel(supplier, 'Proveedor')}
-        actions={
-          <ToolbarButton label="Ficha del proveedor" href={`/suppliers/${quotation.supplierId}`} />
-        }
       />
 
       <SectionPanel>
@@ -312,8 +307,10 @@ export default function QuotationDetailPage() {
                 {quotation.currencies.join(', ')}
               </UncertainValue>
             </InfoField>
-            <InfoField label="Oferta">
-              <QualityChips quotation={quotation} />
+            <InfoField label="Proveedor">
+              <Link href={`/suppliers/${quotation.supplierId}`} style={{ color: 'inherit' }}>
+                {supplierLabel(supplier, quotation.supplierId)}
+              </Link>
             </InfoField>
             <InfoField label="Vehículos">
               <VehicleLinks vehicles={quotation.vehicles} />

@@ -50,7 +50,7 @@ export default function PageHeader({ title, description, actions, back }) {
             {title}
           </Typography>
         </Box>
-        <Breadcrumbs current={title} />
+        <Breadcrumbs />
         {description ? (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {description}

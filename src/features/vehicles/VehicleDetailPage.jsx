@@ -1,11 +1,12 @@
 'use client'
 
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
@@ -46,6 +47,11 @@ export default function VehicleDetailPage() {
           back={{ href: '/vehicles', label: 'Vehículos' }}
           title="Vehículo no encontrado"
         />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -140,70 +146,72 @@ export default function VehicleDetailPage() {
         description={vehicle.model}
       />
 
-      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <Box
-          sx={{
-            width: VEHICLE_IMAGE_WIDTH,
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {vehicle.imageUrl ? (
-            <Box
-              component="img"
-              src={vehicle.imageUrl}
-              alt={vehicleLabel(vehicle)}
-              title={vehicle.imageSource ?? undefined}
-              sx={{ width: '100%', objectFit: 'contain' }}
-            />
-          ) : (
-            <Typography variant="caption" color="error.main">
-              Sin imagen
-            </Typography>
-          )}
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <InfoGrid columns={5}>
-            <InfoField label="Marca" divided>
-              {vehicle.brand ?? '—'}
-            </InfoField>
-            <InfoField label="Origen">{vehicle.origin ?? '—'}</InfoField>
-            <InfoField label="Año">{vehicle.year ?? '—'}</InfoField>
-            <InfoField label="Repuestos">{parts.length}</InfoField>
-            <InfoField label="Cotizados">{quotedIds.size}</InfoField>
-          </InfoGrid>
-        </Box>
-      </Card>
+      <SectionPanel>
+        <PanelSection>
+          <Box
+            sx={{
+              width: VEHICLE_IMAGE_WIDTH,
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {vehicle.imageUrl ? (
+              <Box
+                component="img"
+                src={vehicle.imageUrl}
+                alt={vehicleLabel(vehicle)}
+                title={vehicle.imageSource ?? undefined}
+                sx={{ width: '100%', objectFit: 'contain' }}
+              />
+            ) : (
+              <Typography variant="caption" color="error.main">
+                Sin imagen
+              </Typography>
+            )}
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <InfoGrid columns={5}>
+              <InfoField label="Marca" divided>
+                {vehicle.brand ?? '—'}
+              </InfoField>
+              <InfoField label="Origen">{vehicle.origin ?? '—'}</InfoField>
+              <InfoField label="Año">{vehicle.year ?? '—'}</InfoField>
+              <InfoField label="Repuestos">{parts.length}</InfoField>
+              <InfoField label="Cotizados">{quotedIds.size}</InfoField>
+            </InfoGrid>
+          </Box>
+        </PanelSection>
 
-      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
+        <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
-      {tab === VEHICLE_TABS.QUOTES ? (
-        <ListTable
-          sortKey="vehicle-quotations"
-          searchFields={(q) => [q.supplier?.alias, q.supplier?.name, q.sourceFile]}
-          searchPlaceholder="Buscar por proveedor o cotización…"
-          columns={quoteColumns}
-          rows={quotations}
-          getRowKey={(q) => q.id}
-          getRowHref={(q) => `/quotes/${q.id}`}
-          emptyText="Ningún proveedor ha cotizado repuestos de este vehículo."
-        />
-      ) : null}
+        {tab === VEHICLE_TABS.QUOTES ? (
+          <ListTable
+            sortKey="vehicle-quotations"
+            searchFields={(q) => [q.supplier?.alias, q.supplier?.name, q.sourceFile]}
+            searchPlaceholder="Buscar por proveedor o cotización…"
+            columns={quoteColumns}
+            rows={quotations}
+            getRowKey={(q) => q.id}
+            getRowHref={(q) => `/quotes/${q.id}`}
+            emptyText="Ningún proveedor ha cotizado repuestos de este vehículo."
+          />
+        ) : null}
 
-      {tab === VEHICLE_TABS.PARTS ? (
-        <ListTable
-          sortKey="vehicle-parts"
-          searchFields={(p) => [p.nameEs, p.nameEn, p.code, p.category?.labelEs]}
-          searchPlaceholder="Buscar por repuesto, código o categoría…"
-          columns={partColumns}
-          rows={parts}
-          getRowKey={(p) => p.id}
-          getRowHref={(p) => `/parts/${p.id}`}
-          emptyText="Sin repuestos cargados para este vehículo."
-        />
-      ) : null}
+        {tab === VEHICLE_TABS.PARTS ? (
+          <ListTable
+            sortKey="vehicle-parts"
+            searchFields={(p) => [p.nameEs, p.nameEn, p.code, p.category?.labelEs]}
+            searchPlaceholder="Buscar por repuesto, código o categoría…"
+            columns={partColumns}
+            rows={parts}
+            getRowKey={(p) => p.id}
+            getRowHref={(p) => `/parts/${p.id}`}
+            emptyText="Sin repuestos cargados para este vehículo."
+          />
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

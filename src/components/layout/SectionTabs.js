@@ -52,6 +52,8 @@ export default function SectionTabs() {
             color: 'text.primary',
             fontWeight: 600,
             borderBottomColor: COLORS.bg,
+            cursor: 'default',
+            '&:hover': { bgcolor: COLORS.bg },
           },
         },
       }}

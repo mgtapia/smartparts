@@ -200,5 +200,11 @@ export function findNavTrail(pathname) {
   return null
 }
 
+/** ¿La ruta lleva las pestañas de su sección (y, debajo, el panel de contenido)? */
+export function hasSectionTabs(pathname) {
+  const trail = findNavTrail(pathname)
+  return Boolean(trail && trail.siblings.length >= 2)
+}
+
 export const LOGIN_PATH = '/login'
 export const DEFAULT_AUTHENTICATED_PATH = '/overview'

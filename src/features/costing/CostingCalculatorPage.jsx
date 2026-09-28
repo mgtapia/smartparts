@@ -2,10 +2,12 @@
 
 import { useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
+import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import InfoNote from '@components/common/InfoNote'
 import NumberField from '@components/common/NumberField'
@@ -76,11 +78,13 @@ function PartCalculator({ tabs }) {
   if (!part || !quote) {
     return (
       <ContentWidth>
-        <PageHeader title="Simulador" />
-        {tabs}
-        <Card sx={{ p: 2, fontSize: 13, color: 'text.secondary' }}>
-          Sin cotizaciones cargadas para calcular todavía.
-        </Card>
+        <PageHeader title="Pedido" />
+        <SectionPanel>
+          {tabs}
+          <Typography variant="body2" color="text.secondary">
+            Sin cotizaciones cargadas para calcular todavía.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -176,101 +180,103 @@ function PartCalculator({ tabs }) {
 
   return (
     <ContentWidth>
-      <PageHeader title="Simulador" />
-      {tabs}
+      <PageHeader title="Pedido" />
+      <SectionPanel>
+        {tabs}
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
-        <ToolbarSelectBox
-          label="Repuesto"
-          value={part.id}
-          onChange={calc.setPartId}
-          options={partOptions}
-        />
-        <ToolbarSelectBox
-          label="Cotización"
-          value={quote.id}
-          onChange={calc.setQuoteId}
-          options={quoteOptions}
-        />
-        <ToolbarSelectBox
-          label="Modo de envío"
-          value={assumptions.mode}
-          onChange={assumptions.setMode}
-          options={MODE_OPTIONS}
-        />
-        <CostParametersDialog
-          mode={assumptions.mode}
-          setMode={assumptions.setMode}
-          rates={assumptions.rates}
-          setRates={assumptions.setRates}
-        />
-        <SupplierAssumptionsDialog
-          supplierName={supplierLabel(quote.supplier, quote.supplierId)}
-          settings={assumptions.settingsFor(quote.supplierId)}
-          isAir={assumptions.mode === 'air'}
-          onChange={(patch) => assumptions.updateSupplier(quote.supplierId, patch)}
-        />
-        <InfoNote title="Cómo leer la calculadora" paragraphs={CALCULATOR_HELP} />
-      </Box>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
+          <ToolbarSelectBox
+            label="Repuesto"
+            value={part.id}
+            onChange={calc.setPartId}
+            options={partOptions}
+          />
+          <ToolbarSelectBox
+            label="Cotización"
+            value={quote.id}
+            onChange={calc.setQuoteId}
+            options={quoteOptions}
+          />
+          <ToolbarSelectBox
+            label="Modo de envío"
+            value={assumptions.mode}
+            onChange={assumptions.setMode}
+            options={MODE_OPTIONS}
+          />
+          <CostParametersDialog
+            mode={assumptions.mode}
+            setMode={assumptions.setMode}
+            rates={assumptions.rates}
+            setRates={assumptions.setRates}
+          />
+          <SupplierAssumptionsDialog
+            supplierName={supplierLabel(quote.supplier, quote.supplierId)}
+            settings={assumptions.settingsFor(quote.supplierId)}
+            isAir={assumptions.mode === 'air'}
+            onChange={(patch) => assumptions.updateSupplier(quote.supplierId, patch)}
+          />
+          <InfoNote title="Cómo leer la calculadora" paragraphs={CALCULATOR_HELP} />
+        </Box>
 
-      <Card sx={{ p: 2, mb: `${GRID_GAP}px` }}>
-        <InfoGrid columns={5}>
-          <InfoField label="Código">
-            <UncertainValue
-              verified={Boolean(part.code) && part.codeStatus === 'confirmed'}
-              reason={part.code ? 'Código sin confirmar' : 'Sin código'}
-            >
-              {part.code ?? 'Sin código'}
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Incoterm">
-            <UncertainValue
-              verified={quote.incotermConfirmed && Boolean(quote.incoterm)}
-              reason={quote.incoterm ? 'Incoterm sin confirmar' : 'La cotización no lo indica'}
-            >
-              {quote.incoterm ?? 'Sin definir'}
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Peso">
-            <UncertainValue verified={logisticsConfirmed} reason="Peso sin confirmar">
-              {number.format(part.weightG / 1000)} kg
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Volumen">
-            <UncertainValue verified={logisticsConfirmed} reason="Volumen sin confirmar">
-              {number.format(part.volumeCm3)} cm³
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Margen">
-            <NumberField
-              label=""
-              adornment="%"
-              value={marginBp / 100}
-              onCommit={(n) => calc.setMarginBp(n === null ? 0 : Math.round(n * 100))}
-            />
-          </InfoField>
-        </InfoGrid>
-      </Card>
+        <PanelSection>
+          <InfoGrid columns={5}>
+            <InfoField label="Código">
+              <UncertainValue
+                verified={Boolean(part.code) && part.codeStatus === 'confirmed'}
+                reason={part.code ? 'Código sin confirmar' : 'Sin código'}
+              >
+                {part.code ?? 'Sin código'}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Incoterm">
+              <UncertainValue
+                verified={quote.incotermConfirmed && Boolean(quote.incoterm)}
+                reason={quote.incoterm ? 'Incoterm sin confirmar' : 'La cotización no lo indica'}
+              >
+                {quote.incoterm ?? 'Sin definir'}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Peso">
+              <UncertainValue verified={logisticsConfirmed} reason="Peso sin confirmar">
+                {number.format(part.weightG / 1000)} kg
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Volumen">
+              <UncertainValue verified={logisticsConfirmed} reason="Volumen sin confirmar">
+                {number.format(part.volumeCm3)} cm³
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Margen">
+              <NumberField
+                label=""
+                adornment="%"
+                value={marginBp / 100}
+                onCommit={(n) => calc.setMarginBp(n === null ? 0 : Math.round(n * 100))}
+              />
+            </InfoField>
+          </InfoGrid>
+        </PanelSection>
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', flexWrap: 'wrap', mb: 1.5 }}>
-        {quantities.map((qty, i) => (
-          <Box key={i} sx={{ width: QTY_COLUMN_WIDTH }}>
-            <NumberField
-              label={`Cantidad ${i + 1}`}
-              value={qty}
-              placeholder="Unidades"
-              onCommit={(n) => setQuantity(i, n === null ? null : Math.max(1, Math.round(n)))}
-            />
-          </Box>
-        ))}
-        <ToolbarButton
-          label="Agregar cantidad"
-          startIcon={<AddIcon fontSize="small" />}
-          onClick={() => setQuantities((prev) => [...prev, null])}
-        />
-      </Box>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', flexWrap: 'wrap', mb: 1.5 }}>
+          {quantities.map((qty, i) => (
+            <Box key={i} sx={{ width: QTY_COLUMN_WIDTH }}>
+              <NumberField
+                label={`Cantidad ${i + 1}`}
+                value={qty}
+                placeholder="Unidades"
+                onCommit={(n) => setQuantity(i, n === null ? null : Math.max(1, Math.round(n)))}
+              />
+            </Box>
+          ))}
+          <ToolbarButton
+            label="Agregar cantidad"
+            startIcon={<AddIcon fontSize="small" />}
+            onClick={() => setQuantities((prev) => [...prev, null])}
+          />
+        </Box>
 
-      <ListTable columns={columns} rows={ROWS} getRowKey={(row) => row.id} />
+        <ListTable columns={columns} rows={ROWS} getRowKey={(row) => row.id} />
+      </SectionPanel>
     </ContentWidth>
   )
 }

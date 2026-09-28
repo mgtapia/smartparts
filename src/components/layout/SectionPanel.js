@@ -1,9 +1,13 @@
 'use client'
 
+import { createContext } from 'react'
 import Card from '@mui/material/Card'
 import { usePathname } from 'next/navigation'
 import { COLORS, RADIUS } from '@constants/colors'
-import { findNavTrail } from '@constants/routes'
+import { hasSectionTabs } from '@constants/routes'
+
+/** Indica a los hijos (p. ej. ListTable) que ya están dentro de un panel: no dibujan su propia tarjeta. */
+export const PanelContext = createContext(false)
 
 /**
  * Panel de contenido bajo `SectionTabs` — mismo fondo/borde/radio siempre,
@@ -13,8 +17,7 @@ import { findNavTrail } from '@constants/routes'
  * termina justo ahí y una curva dejaría un hueco bajo él.
  */
 export default function SectionPanel({ children, sx }) {
-  const trail = findNavTrail(usePathname())
-  const withTabs = Boolean(trail && trail.siblings.length >= 2 && !trail.detail)
+  const withTabs = hasSectionTabs(usePathname())
   return (
     <Card
       sx={{
@@ -28,7 +31,7 @@ export default function SectionPanel({ children, sx }) {
         ...sx,
       }}
     >
-      {children}
+      <PanelContext.Provider value>{children}</PanelContext.Provider>
     </Card>
   )
 }

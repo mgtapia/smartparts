@@ -60,13 +60,15 @@ export default function PageHeader({ title, description, actions, back }) {
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'flex-end',
-          alignSelf: 'flex-end',
-          gap: 2,
+          justifyContent: 'flex-end',
+          alignSelf: 'stretch',
+          gap: 1,
           flexShrink: 0,
         }}
       >
-        {actions ? <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box> : null}
+        {actions ? <Box sx={{ display: 'flex', gap: 1, mb: 'auto' }}>{actions}</Box> : null}
         <SectionTabs />
       </Box>
     </Box>

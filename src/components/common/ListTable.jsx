@@ -151,9 +151,19 @@ export default function ListTable({
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             {visible.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-                {emptyText}
-              </Typography>
+              <Box
+                sx={{
+                  height: 120,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  {emptyText}
+                </Typography>
+              </Box>
             ) : (
               visible.map((row) => {
                 const href = getRowHref?.(row)

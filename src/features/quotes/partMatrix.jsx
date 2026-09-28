@@ -72,7 +72,7 @@ function valueOf(line, metric, costCtx) {
  * proveedor. Cada celda es UN valor: el más barato que ese proveedor ofrece
  * dentro de la calidad elegida (si hay varias variantes, también el más
  * barato). Los repuestos sin oferta de la calidad elegida siguen apareciendo,
- * con la columna "Ofertas" en rojo — así se ve qué falta.
+ * en rojo en cada celda de proveedor — así se ve qué falta.
  */
 export function buildMatrix(lines, metric, term, quality, costCtx) {
   const matches = makeMatcher(term)
@@ -112,7 +112,7 @@ export function buildMatrix(lines, metric, term, quality, costCtx) {
     .map((row) => {
       const priced = [...row.cells.entries()].filter(([, c]) => c.micro !== null)
       const best = priced.length > 1 ? priced.sort((a, b) => a[1].micro - b[1].micro)[0][0] : null
-      return { ...row, best, offers: priced.length }
+      return { ...row, best }
     })
 
   const columns = [
@@ -175,18 +175,6 @@ export function buildMatrix(lines, metric, term, quality, costCtx) {
         )
       },
     })),
-    {
-      id: 'offers',
-      label: 'Ofertas',
-      width: 70,
-      align: 'right',
-      tooltip: 'Proveedores con precio para este repuesto en la calidad elegida.',
-      render: (r) => (
-        <UncertainValue verified={r.offers > 0} reason="Sin oferta de esta calidad">
-          {r.offers}
-        </UncertainValue>
-      ),
-    },
   ]
 
   return { suppliers, rows, columns }

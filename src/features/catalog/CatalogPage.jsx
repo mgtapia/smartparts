@@ -56,7 +56,7 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-const COL_WIDTH = { vehicle: 130, category: 110, code: 140, baseline: 90, pvp: 110, supplier: 90 }
+const COL_WIDTH = { vehicle: 130, category: 120, code: 140, baseline: 130, pvp: 140, supplier: 110 }
 const REPUESTO_MIN_WIDTH = 220
 
 const CODE_STATUS_ICON = {
@@ -121,7 +121,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
         variant="body2"
         sx={{
           fontSize: 13,
-          flex: `2 1 ${REPUESTO_MIN_WIDTH}px`,
+          flex: `1 1 ${REPUESTO_MIN_WIDTH}px`,
           minWidth: 0,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -423,7 +423,7 @@ export default function CatalogPage() {
                   variant="overline"
                   color="text.secondary"
                   sx={{
-                    flex: `2 1 ${REPUESTO_MIN_WIDTH}px`,
+                    flex: `1 1 ${REPUESTO_MIN_WIDTH}px`,
                     minWidth: 0,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

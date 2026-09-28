@@ -29,7 +29,6 @@ import { seaFormatSuffix } from '@features/costing/partCostsModel'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
-import { RADIUS } from '@constants/colors'
 import { usePersistentState, SET_STORAGE } from '@hooks/usePersistentState'
 import { useCatalog, SORT_FIELDS, SORT_FIELD_LABELS_ES, CURRENCIES } from './hooks/useCatalog'
 import FilterPanel from './components/FilterPanel'
@@ -112,7 +111,6 @@ function CatalogRow({ r, isColumnVisible, currency }) {
         gap: 2,
         height: 44,
         px: 1.5,
-        borderRadius: `${RADIUS.inputSmall}px`,
         textDecoration: 'none',
         color: 'inherit',
         bgcolor: 'transparent',
@@ -566,7 +564,6 @@ export default function CatalogPage() {
                             height: 44,
                             px: 1.5,
                             mb: '2px',
-                            borderRadius: `${RADIUS.inputSmall}px`,
                             bgcolor: 'action.selected',
                           }}
                         >

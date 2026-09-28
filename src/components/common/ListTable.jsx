@@ -12,7 +12,6 @@ import ToolbarSearch from '@components/common/ToolbarSearch'
 import { usePersistentState } from '@hooks/usePersistentState'
 import { makeMatcher } from '@libs/textSearch'
 import { nextSort, sortRows } from '@libs/sortRows'
-import { RADIUS } from '@constants/colors'
 
 const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
 
@@ -171,7 +170,6 @@ export default function ListTable({
                       gap: 2,
                       height: 44,
                       px: 1.5,
-                      borderRadius: `${RADIUS.inputSmall}px`,
                       textDecoration: 'none',
                       color: 'inherit',
                       bgcolor: getRowKey(row) === selectedKey ? 'action.selected' : 'transparent',

@@ -2,6 +2,7 @@
 
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { ErrorState } from '@components/common/AsyncState'
@@ -31,21 +32,23 @@ export default function VehiclesPage() {
   return (
     <ContentWidth>
       <PageHeader title="Vehículos" />
-      {rows.length === 0 ? (
-        <Typography color="text.secondary">Sin vehículos cargados todavía.</Typography>
-      ) : (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-            gap: px(GRID_GAP),
-          }}
-        >
-          {rows.map((row) => (
-            <VehicleCard key={row.vehicle.id} row={row} />
-          ))}
-        </Box>
-      )}
+      <SectionPanel>
+        {rows.length === 0 ? (
+          <Typography color="text.secondary">Sin vehículos cargados todavía.</Typography>
+        ) : (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+              gap: px(GRID_GAP),
+            }}
+          >
+            {rows.map((row) => (
+              <VehicleCard key={row.vehicle.id} row={row} />
+            ))}
+          </Box>
+        )}
+      </SectionPanel>
     </ContentWidth>
   )
 }

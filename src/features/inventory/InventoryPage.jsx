@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ToolbarSearch from '@components/common/ToolbarSearch'
 import { makeMatcher } from '@libs/textSearch'
@@ -103,22 +104,24 @@ export default function InventoryPage() {
           onClose={() => setDialog(null)}
         />
       ) : null}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre, código o ubicación…"
+      <SectionPanel>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nombre, código o ubicación…"
+          />
+          <ToolbarButton label="Agregar stock" onClick={() => setDialog(true)} />
+        </Box>
+        <ListTable
+          sortKey="inventory"
+          columns={COLUMNS}
+          rows={filtered}
+          getRowKey={({ entry }) => entry.id}
+          onRowClick={(row) => setDialog(row)}
+          emptyText="Sin stock cargado todavía: agrega el primero con Agregar stock."
         />
-        <ToolbarButton label="Agregar stock" onClick={() => setDialog(true)} />
-      </Box>
-      <ListTable
-        sortKey="inventory"
-        columns={COLUMNS}
-        rows={filtered}
-        getRowKey={({ entry }) => entry.id}
-        onRowClick={(row) => setDialog(row)}
-        emptyText="Sin stock cargado todavía: agrega el primero con Agregar stock."
-      />
+      </SectionPanel>
     </ContentWidth>
   )
 }

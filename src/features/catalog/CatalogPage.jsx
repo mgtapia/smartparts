@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
+import SectionPanel from '@components/layout/SectionPanel'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -405,7 +405,7 @@ export default function CatalogPage() {
         </Box>
       ) : null}
 
-      <Card sx={{ p: 0.75, overflow: 'hidden' }}>
+      <SectionPanel sx={{ p: 0.75, overflow: 'hidden' }}>
         {/* Header y filas comparten este mismo contenedor con scroll — así
             scrollean horizontal juntos como una sola tabla si hay muchas
             columnas visibles, en vez de desbordar el ancho de la página. */}
@@ -596,7 +596,7 @@ export default function CatalogPage() {
             </Box>
           </Box>
         </Box>
-      </Card>
+      </SectionPanel>
 
       {pageCount > 1 ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>

@@ -7,6 +7,7 @@ import Tooltip from '@mui/material/Tooltip'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
@@ -137,28 +138,30 @@ export default function PendingPage() {
         </InfoGrid>
       </Card>
 
-      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
+      <SectionPanel>
+        <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
-      {tab === PENDING_TABS.PENDING ? (
-        <ListTable
-          sortKey="pending"
-          columns={pendingColumns}
-          rows={pending}
-          getRowKey={(p) => p.id}
-          getRowHref={(p) => p.href}
-          emptyText="Sin pendientes por confirmar."
-        />
-      ) : null}
+        {tab === PENDING_TABS.PENDING ? (
+          <ListTable
+            sortKey="pending"
+            columns={pendingColumns}
+            rows={pending}
+            getRowKey={(p) => p.id}
+            getRowHref={(p) => p.href}
+            emptyText="Sin pendientes por confirmar."
+          />
+        ) : null}
 
-      {tab === PENDING_TABS.MILESTONE ? (
-        <ListTable
-          sortKey="milestones"
-          columns={milestoneColumns}
-          rows={steps}
-          getRowKey={(s) => s.id}
-          getRowHref={(s) => s.href}
-        />
-      ) : null}
+        {tab === PENDING_TABS.MILESTONE ? (
+          <ListTable
+            sortKey="milestones"
+            columns={milestoneColumns}
+            rows={steps}
+            getRowKey={(s) => s.id}
+            getRowHref={(s) => s.href}
+          />
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

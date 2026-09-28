@@ -21,7 +21,7 @@ export default function PageHeader({ title, description, actions, back }) {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        mb: 3,
+        mb: 2,
         gap: 2,
       }}
     >

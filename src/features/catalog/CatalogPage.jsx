@@ -228,9 +228,6 @@ export default function CatalogPage() {
     vehicles,
     vehicleFilters,
     toggleVehicleFilter,
-    codeStatuses,
-    codeStatusFilters,
-    toggleCodeStatusFilter,
     priceBounds,
     priceRange,
     setPriceRange,
@@ -393,9 +390,6 @@ export default function CatalogPage() {
               vehicles={vehicles}
               vehicleFilters={vehicleFilters}
               toggleVehicleFilter={toggleVehicleFilter}
-              codeStatuses={codeStatuses}
-              codeStatusFilters={codeStatusFilters}
-              toggleCodeStatusFilter={toggleCodeStatusFilter}
               extraFilters={extraFilters}
               priceBounds={priceBounds}
               priceRange={priceRange}

@@ -56,7 +56,7 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-const COL_WIDTH = { vehicle: 130, category: 120, code: 140, baseline: 130, pvp: 140, supplier: 110 }
+const COL_WIDTH = { vehicle: 110, category: 105, code: 130, baseline: 100, pvp: 100, supplier: 130 }
 const REPUESTO_MIN_WIDTH = 220
 
 const CODE_STATUS_ICON = {
@@ -84,7 +84,7 @@ function PvpCell({ pvp, currency }) {
   return (
     <Box
       sx={{
-        flex: `1 1 ${COL_WIDTH.pvp}px`,
+        flex: `0 0 ${COL_WIDTH.pvp}px`,
         textAlign: 'right',
         fontSize: 13,
         color: WORTH_COLOR[pvp.worthIt] ?? 'text.secondary',
@@ -135,7 +135,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           variant="caption"
           color="text.secondary"
           sx={{
-            flex: `1 1 ${COL_WIDTH.vehicle}px`,
+            flex: `0 0 ${COL_WIDTH.vehicle}px`,
             minWidth: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -151,7 +151,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
           variant="caption"
           color="text.secondary"
           sx={{
-            flex: `1 1 ${COL_WIDTH.category}px`,
+            flex: `0 0 ${COL_WIDTH.category}px`,
             minWidth: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -168,7 +168,7 @@ function CatalogRow({ r, isColumnVisible, currency }) {
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
-            flex: `1 1 ${COL_WIDTH.code}px`,
+            flex: `0 0 ${COL_WIDTH.code}px`,
             minWidth: 0,
           }}
         >
@@ -191,13 +191,13 @@ function CatalogRow({ r, isColumnVisible, currency }) {
       {isColumnVisible('baseline') ? (
         <MoneyValue
           money={currency === CURRENCIES.USD ? r.baselinePriceUsd : r.baselinePriceClp}
-          sx={{ flex: `1 1 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
+          sx={{ flex: `0 0 ${COL_WIDTH.baseline}px`, textAlign: 'right', fontSize: 13 }}
         />
       ) : null}
       {isColumnVisible('pvpAir') ? <PvpCell pvp={r.pvpAir} currency={currency} /> : null}
       {isColumnVisible('pvpSea') ? <PvpCell pvp={r.pvpSea} currency={currency} /> : null}
       {isColumnVisible('supplier') ? (
-        <Box sx={{ flex: `1 1 ${COL_WIDTH.supplier}px`, minWidth: 0, display: 'flex', gap: 0.5 }}>
+        <Box sx={{ flex: `0 0 ${COL_WIDTH.supplier}px`, minWidth: 0, display: 'flex', gap: 0.5 }}>
           {[...new Set([r.pvpAir.supplier, r.pvpSea.supplier].filter(Boolean))].map((abbr) => (
             <Pill key={abbr} label={abbr} />
           ))}
@@ -438,7 +438,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.vehicle}px`,
+                      flex: `0 0 ${COL_WIDTH.vehicle}px`,
                       lineHeight: 1,
                       minWidth: 0,
                       overflow: 'hidden',
@@ -455,7 +455,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.category}px`,
+                      flex: `0 0 ${COL_WIDTH.category}px`,
                       lineHeight: 1,
                       minWidth: 0,
                       overflow: 'hidden',
@@ -472,7 +472,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.code}px`,
+                      flex: `0 0 ${COL_WIDTH.code}px`,
                       minWidth: 0,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -488,7 +488,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.baseline}px`,
+                      flex: `0 0 ${COL_WIDTH.baseline}px`,
                       lineHeight: 1,
                       minWidth: 0,
                       overflow: 'hidden',
@@ -505,7 +505,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.pvp}px`,
+                      flex: `0 0 ${COL_WIDTH.pvp}px`,
                       lineHeight: 1,
                       minWidth: 0,
                       overflow: 'hidden',
@@ -522,7 +522,7 @@ export default function CatalogPage() {
                     variant="overline"
                     color="text.secondary"
                     sx={{
-                      flex: `1 1 ${COL_WIDTH.pvp}px`,
+                      flex: `0 0 ${COL_WIDTH.pvp}px`,
                       lineHeight: 1,
                       minWidth: 0,
                       overflow: 'hidden',
@@ -538,7 +538,7 @@ export default function CatalogPage() {
                   <Typography
                     variant="overline"
                     color="text.secondary"
-                    sx={{ flex: `1 1 ${COL_WIDTH.supplier}px`, lineHeight: 1 }}
+                    sx={{ flex: `0 0 ${COL_WIDTH.supplier}px`, lineHeight: 1 }}
                   >
                     Proveedor
                   </Typography>

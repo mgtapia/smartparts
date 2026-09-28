@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -6,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Breadcrumbs from '@components/layout/Breadcrumbs'
 import SectionTabs from '@components/layout/SectionTabs'
+import { findNavTrail } from '@constants/routes'
 
 /**
  * Encabezado de página. `back` ({ href, label }) pone una flecha de volver a la
@@ -15,17 +19,20 @@ import SectionTabs from '@components/layout/SectionTabs'
  * texto explicativo.
  */
 export default function PageHeader({ title, description, actions, back }) {
+  const trail = findNavTrail(usePathname())
+  // Con pestañas sobre un panel de lista, el panel va pegado al borde inferior de las pestañas.
+  const attached = Boolean(trail && trail.siblings.length >= 2 && !trail.detail)
   return (
     <Box
       sx={{
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        mb: 2,
+        mb: attached ? 0 : 2,
         gap: 2,
       }}
     >
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, pb: attached ? 2 : 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           {back ? (
             <Tooltip title={back.label}>
@@ -51,7 +58,9 @@ export default function PageHeader({ title, description, actions, back }) {
           </Typography>
         ) : null}
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', alignSelf: 'flex-end', gap: 2, flexShrink: 0 }}
+      >
         <SectionTabs />
         {actions ? <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box> : null}
       </Box>

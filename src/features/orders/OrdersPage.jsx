@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
@@ -269,7 +270,7 @@ export default function OrdersPage() {
       <SectionPanel>
         <ViewTabs value={view} onChange={changeView} tabs={ORDER_VIEW_TABS} />
 
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
@@ -290,7 +291,7 @@ export default function OrdersPage() {
             title="Cómo leer esta lista"
             paragraphs={isClients ? CLIENT_ORDER_HELP : PURCHASE_ORDER_HELP}
           />
-        </Box>
+        </Toolbar>
 
         {isClients ? (
           <ListTable
@@ -299,7 +300,7 @@ export default function OrdersPage() {
             rows={clientRows}
             getRowKey={({ order }) => order.id}
             getRowHref={({ order }) => `/client-orders/${order.id}`}
-            emptyText="Sin OC de clientes todavía."
+            emptyText={search ? 'Sin resultados.' : 'Sin OC de clientes todavía.'}
           />
         ) : (
           <ListTable
@@ -308,7 +309,7 @@ export default function OrdersPage() {
             rows={purchaseRows}
             getRowKey={({ order }) => order.id}
             getRowHref={({ order }) => `/purchase-orders/${order.id}`}
-            emptyText="Sin OC a proveedores todavía."
+            emptyText={search ? 'Sin resultados.' : 'Sin OC a proveedores todavía.'}
           />
         )}
       </SectionPanel>

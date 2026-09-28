@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
+import Toolbar from '@components/common/Toolbar'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
@@ -105,21 +106,25 @@ export default function InventoryPage() {
         />
       ) : null}
       <SectionPanel>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+        <Toolbar>
           <ToolbarSearch
             value={search}
             onChange={setSearch}
             placeholder="Buscar por nombre, código o ubicación…"
           />
           <ToolbarButton label="Agregar stock" onClick={() => setDialog(true)} />
-        </Box>
+        </Toolbar>
         <ListTable
           sortKey="inventory"
           columns={COLUMNS}
           rows={filtered}
           getRowKey={({ entry }) => entry.id}
           onRowClick={(row) => setDialog(row)}
-          emptyText="Sin stock cargado todavía: agrega el primero con Agregar stock."
+          emptyText={
+            search
+              ? 'Sin resultados.'
+              : 'Sin stock cargado todavía: agrega el primero con Agregar stock.'
+          }
         />
       </SectionPanel>
     </ContentWidth>

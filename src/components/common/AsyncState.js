@@ -10,7 +10,7 @@ export function LoadingState() {
   )
 }
 
-export function ErrorState({ message = 'No se pudo cargar la información desde Firestore.' }) {
+export function ErrorState({ message = 'No se pudo cargar la información. Reintenta.' }) {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="body2" color="error.main">

@@ -5,12 +5,13 @@ import { confirmQuotationFields } from '@libs/repos/quotesRepo'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
 import Collapse from '@mui/material/Collapse'
 import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ToolbarButton from '@components/common/ToolbarButton'
 import { InfoGrid, InfoField } from '@components/common/InfoGrid'
 import SourcedValueDialog from '@components/common/SourcedValueDialog'
@@ -131,6 +132,11 @@ export default function QuotationDetailPage() {
           back={{ href: '/quotes', label: 'Cotizaciones' }}
           title="Cotización no encontrada"
         />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -269,146 +275,147 @@ export default function QuotationDetailPage() {
       <PageHeader
         back={{ href: '/quotes', label: 'Cotizaciones' }}
         title={supplierLabel(supplier, 'Proveedor')}
-        description={quotation.sourceFile ?? 'Sin archivo de origen'}
         actions={
           <ToolbarButton label="Ficha del proveedor" href={`/suppliers/${quotation.supplierId}`} />
         }
       />
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid>
-          <InfoField label="Incoterm" onEdit={() => setEditing(FIELDS.incoterm)}>
-            <UncertainValue
-              verified={quotation.incotermConfirmed && quotation.incoterms.length > 0}
-              reason={
-                quotation.incoterms.length > 0
-                  ? 'Incoterm sin confirmar por escrito'
-                  : 'La cotización no indica Incoterm'
+      <SectionPanel>
+        <PanelSection>
+          <InfoGrid>
+            <InfoField label="Incoterm" onEdit={() => setEditing(FIELDS.incoterm)}>
+              <UncertainValue
+                verified={quotation.incotermConfirmed && quotation.incoterms.length > 0}
+                reason={
+                  quotation.incoterms.length > 0
+                    ? 'Incoterm sin confirmar por escrito'
+                    : 'La cotización no indica Incoterm'
+                }
+              >
+                {quotation.incoterms.join(', ') || 'Sin definir'}
+              </UncertainValue>
+            </InfoField>
+            <InfoField
+              label="Origen"
+              // Solo se edita si la cotización nombra su propio lugar; si no, es la ubicación del proveedor.
+              onEdit={
+                quotation.incotermPlaces.length > 0 ? () => setEditing(FIELDS.place) : undefined
               }
             >
-              {quotation.incoterms.join(', ') || 'Sin definir'}
-            </UncertainValue>
-          </InfoField>
-          <InfoField
-            label="Origen"
-            // Solo se edita si la cotización nombra su propio lugar; si no, es la ubicación del proveedor.
-            onEdit={
-              quotation.incotermPlaces.length > 0 ? () => setEditing(FIELDS.place) : undefined
-            }
-          >
-            <QuotationOrigin quotation={quotation} />
-          </InfoField>
-          <InfoField label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
-            <UncertainValue
-              verified={quotation.currencyConfirmed}
-              reason="Moneda sin confirmar por el proveedor"
-            >
-              {quotation.currencies.join(', ')}
-            </UncertainValue>
-          </InfoField>
-          <InfoField label="Oferta">
-            <QualityChips quotation={quotation} />
-          </InfoField>
-          <InfoField label="Vehículos">
-            <VehicleLinks vehicles={quotation.vehicles} />
-          </InfoField>
-          <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
-        </InfoGrid>
-      </Card>
+              <QuotationOrigin quotation={quotation} />
+            </InfoField>
+            <InfoField label="Moneda" onEdit={() => setEditing(FIELDS.currency)}>
+              <UncertainValue
+                verified={quotation.currencyConfirmed}
+                reason="Moneda sin confirmar por el proveedor"
+              >
+                {quotation.currencies.join(', ')}
+              </UncertainValue>
+            </InfoField>
+            <InfoField label="Oferta">
+              <QualityChips quotation={quotation} />
+            </InfoField>
+            <InfoField label="Vehículos">
+              <VehicleLinks vehicles={quotation.vehicles} />
+            </InfoField>
+            <InfoField label="Fecha">{formatDate(quotation.capturedAt)}</InfoField>
+          </InfoGrid>
+        </PanelSection>
 
-      {editing ? (
-        <SourcedValueDialog
-          title={`Confirmar ${editing.label}`}
-          label={editing.label}
-          initial={editing.current(quotation)}
-          options={editing.options}
-          onClose={() => setEditing(null)}
-          onSave={async (value, source) => {
-            await confirmQuotationFields(
-              quotation.lines.map((l) => l.quote),
-              { [editing.key]: value },
-              source,
-            )
-            reload()
-          }}
-        />
-      ) : null}
+        {editing ? (
+          <SourcedValueDialog
+            title={`Confirmar ${editing.label}`}
+            label={editing.label}
+            initial={editing.current(quotation)}
+            options={editing.options}
+            onClose={() => setEditing(null)}
+            onSave={async (value, source) => {
+              await confirmQuotationFields(
+                quotation.lines.map((l) => l.quote),
+                { [editing.key]: value },
+                source,
+              )
+              reload()
+            }}
+          />
+        ) : null}
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-        <ToolbarSearch
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por pieza, código, categoría o calidad…"
-        />
-        <ToolbarSelectBox
-          label="Modo de transporte"
-          value={mode}
-          onChange={assumptions.setMode}
-          options={MODE_OPTIONS}
-        />
-        <CostParametersDialog
-          mode={mode}
-          setMode={assumptions.setMode}
-          rates={rates}
-          setRates={assumptions.setRates}
-        />
-        <SupplierAssumptionsDialog
-          supplierName={supplierLabel(supplier, quotation.supplierId)}
-          settings={settingsFor(quotation.supplierId)}
-          isAir={mode === 'air'}
-          onChange={(patch) => assumptions.updateSupplier(quotation.supplierId, patch)}
-        />
-        <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />
-        <InfoNote paragraphs={DETAIL_HELP} />
-      </Box>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+          <ToolbarSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por pieza, código, categoría o calidad…"
+          />
+          <ToolbarSelectBox
+            label="Modo de transporte"
+            value={mode}
+            onChange={assumptions.setMode}
+            options={MODE_OPTIONS}
+          />
+          <CostParametersDialog
+            mode={mode}
+            setMode={assumptions.setMode}
+            rates={rates}
+            setRates={assumptions.setRates}
+          />
+          <SupplierAssumptionsDialog
+            supplierName={supplierLabel(supplier, quotation.supplierId)}
+            settings={settingsFor(quotation.supplierId)}
+            isAir={mode === 'air'}
+            onChange={(patch) => assumptions.updateSupplier(quotation.supplierId, patch)}
+          />
+          <ColumnsMenu hiddenColumns={hidden} onToggle={toggleColumn} columns={COLUMN_CHOICES} />
+          <InfoNote paragraphs={DETAIL_HELP} />
+        </Box>
 
-      <Box sx={{ mb: 2 }}>
-        <ListTable
-          sortKey="quotation-lines"
-          columns={columns}
-          rows={rows}
-          getRowKey={({ line }) => line.quote.id}
-        />
-      </Box>
+        <Box sx={{ mb: 2 }}>
+          <ListTable
+            sortKey="quotation-lines"
+            columns={columns}
+            rows={rows}
+            getRowKey={({ line }) => line.quote.id}
+          />
+        </Box>
 
-      {sample ? (
-        <Card sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="subtitle1">Cálculo</Typography>
-            <Button size="small" onClick={() => setCalcOpen((v) => !v)}>
-              {calcOpen ? 'Ocultar' : 'Ver cálculo'}
-            </Button>
-          </Box>
-          <Collapse in={calcOpen}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mt: 0.5, mb: 1.5 }}
-            >
-              Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas son
-              las mismas para todas. Rojo = todavía no verificado.
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {sample.cost.components.map((c) => (
-                <Box key={c.code}>
-                  <Typography variant="body2" sx={{ fontSize: 13 }}>
-                    <UncertainValue verified={c.verified} reason={c.reasonEs}>
-                      {c.labelEs}
-                    </UncertainValue>
-                    {' — '}
-                    {c.formulaEs}
-                  </Typography>
-                  {c.reasonEs ? (
-                    <Typography variant="caption" color="error.main">
-                      Sin verificar: {c.reasonEs}
-                    </Typography>
-                  ) : null}
-                </Box>
-              ))}
+        {sample ? (
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1">Cálculo</Typography>
+              <Button size="small" onClick={() => setCalcOpen((v) => !v)}>
+                {calcOpen ? 'Ocultar' : 'Ver cálculo'}
+              </Button>
             </Box>
-          </Collapse>
-        </Card>
-      ) : null}
+            <Collapse in={calcOpen}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mt: 0.5, mb: 1.5 }}
+              >
+                Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas
+                son las mismas para todas. Rojo = todavía no verificado.
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {sample.cost.components.map((c) => (
+                  <Box key={c.code}>
+                    <Typography variant="body2" sx={{ fontSize: 13 }}>
+                      <UncertainValue verified={c.verified} reason={c.reasonEs}>
+                        {c.labelEs}
+                      </UncertainValue>
+                      {' — '}
+                      {c.formulaEs}
+                    </Typography>
+                    {c.reasonEs ? (
+                      <Typography variant="caption" color="error.main">
+                        Sin verificar: {c.reasonEs}
+                      </Typography>
+                    ) : null}
+                  </Box>
+                ))}
+              </Box>
+            </Collapse>
+          </Box>
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

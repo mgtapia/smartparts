@@ -5,6 +5,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import SectionTitle from '@components/common/SectionTitle'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
@@ -206,88 +207,98 @@ export default function AirTrialPage() {
         actions={<InfoNote title="Cómo se calcula" paragraphs={headerNotes} />}
       />
 
-      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
+      <SectionPanel>
+        <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
-      {tab === TRIAL_TABS.PLAN ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' },
-              gap: 1.5,
-            }}
-          >
-            {OPTIONS.map((opt) => (
-              <PlanCard key={opt} option={opt} data={data} />
-            ))}
+        {tab === TRIAL_TABS.PLAN ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' },
+                gap: 1.5,
+              }}
+            >
+              {OPTIONS.map((opt) => (
+                <PlanCard key={opt} option={opt} data={data} />
+              ))}
+            </Box>
           </Box>
-        </Box>
-      ) : null}
+        ) : null}
 
-      {tab === TRIAL_TABS.PURCHASE ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <ToolbarSelectBox
-              label="Opción"
-              value={option}
-              onChange={setOption}
-              options={OPTION_OPTIONS}
+        {tab === TRIAL_TABS.PURCHASE ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <ToolbarSelectBox
+                label="Opción"
+                value={option}
+                onChange={setOption}
+                options={OPTION_OPTIONS}
+              />
+            </Box>
+            <ListTable
+              sortKey="trial-purchase"
+              searchFields={(i) => [i.name, abbr(i.supplierId), i.quality]}
+              searchPlaceholder="Buscar por repuesto, proveedor o calidad…"
+              columns={purchaseColumns}
+              rows={purchase}
+              getRowKey={(i) => i.partId}
+              emptyText="Sin repuestos."
             />
           </Box>
+        ) : null}
+
+        {tab === TRIAL_TABS.CALCULATION ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <ToolbarSelectBox
+                label="Opción"
+                value={option}
+                onChange={setOption}
+                options={OPTION_OPTIONS}
+              />
+            </Box>
+            <CalculationSteps key={option} option={option} data={data} />
+          </Box>
+        ) : null}
+
+        {tab === TRIAL_TABS.SENSITIVITY ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box>
+              <SectionTitle
+                title="Qué volar"
+                description="Cuánto ganamos según qué repuestos se compran por avión."
+              />
+              <ListTable columns={casesColumns} rows={CASES} getRowKey={(c) => c} />
+            </Box>
+            <Box>
+              <SectionTitle
+                title="Recomendación"
+                description="Si cambia un supuesto, qué proveedor conviene y cuánto ganamos."
+              />
+              <ListTable
+                columns={scenarioColumns}
+                rows={data.scenarios}
+                getRowKey={(sc) => sc.key}
+              />
+            </Box>
+          </Box>
+        ) : null}
+
+        {tab === TRIAL_TABS.EXCLUDED ? <ExcludedParts logistics={data.logistics} /> : null}
+
+        {tab === TRIAL_TABS.ANOMALIES ? (
+          <AnomalyGroups anomalies={data.anomalies} suppliers={data.suppliers} />
+        ) : null}
+
+        {tab === TRIAL_TABS.MISSING ? (
           <ListTable
-            sortKey="trial-purchase"
-            searchFields={(i) => [i.name, abbr(i.supplierId), i.quality]}
-            searchPlaceholder="Buscar por repuesto, proveedor o calidad…"
-            columns={purchaseColumns}
-            rows={purchase}
-            getRowKey={(i) => i.partId}
-            emptyText="Sin repuestos."
+            columns={missingColumns}
+            rows={data.missingData}
+            getRowKey={(m) => m.titleEs}
           />
-        </Box>
-      ) : null}
-
-      {tab === TRIAL_TABS.CALCULATION ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <ToolbarSelectBox
-              label="Opción"
-              value={option}
-              onChange={setOption}
-              options={OPTION_OPTIONS}
-            />
-          </Box>
-          <CalculationSteps key={option} option={option} data={data} />
-        </Box>
-      ) : null}
-
-      {tab === TRIAL_TABS.SENSITIVITY ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box>
-            <SectionTitle
-              title="Qué volar"
-              description="Cuánto ganamos según qué repuestos se compran por avión."
-            />
-            <ListTable columns={casesColumns} rows={CASES} getRowKey={(c) => c} />
-          </Box>
-          <Box>
-            <SectionTitle
-              title="Recomendación"
-              description="Si cambia un supuesto, qué proveedor conviene y cuánto ganamos."
-            />
-            <ListTable columns={scenarioColumns} rows={data.scenarios} getRowKey={(sc) => sc.key} />
-          </Box>
-        </Box>
-      ) : null}
-
-      {tab === TRIAL_TABS.EXCLUDED ? <ExcludedParts logistics={data.logistics} /> : null}
-
-      {tab === TRIAL_TABS.ANOMALIES ? (
-        <AnomalyGroups anomalies={data.anomalies} suppliers={data.suppliers} />
-      ) : null}
-
-      {tab === TRIAL_TABS.MISSING ? (
-        <ListTable columns={missingColumns} rows={data.missingData} getRowKey={(m) => m.titleEs} />
-      ) : null}
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

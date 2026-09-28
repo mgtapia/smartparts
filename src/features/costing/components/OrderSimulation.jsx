@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import SectionPanel from '@components/layout/SectionPanel'
 import InfoNote from '@components/common/InfoNote'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import QuantitiesEditor from './QuantitiesEditor'
@@ -49,49 +50,51 @@ export default function OrderSimulation({ tabs }) {
 
   return (
     <ContentWidth>
-      <PageHeader title="Simulador" />
-      {tabs}
+      <PageHeader title="Pedido" />
+      <SectionPanel>
+        {tabs}
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
-        <ToolbarSelectBox
-          label="Vehículo"
-          value={sim.vehicleId ?? ''}
-          onChange={sim.setVehicleId}
-          options={sim.vehicles.map((v) => ({ value: v.id, label: vehicleLabel(v.vehicle) }))}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1.5 }}>
+          <ToolbarSelectBox
+            label="Vehículo"
+            value={sim.vehicleId ?? ''}
+            onChange={sim.setVehicleId}
+            options={sim.vehicles.map((v) => ({ value: v.id, label: vehicleLabel(v.vehicle) }))}
+          />
+          <ToolbarSelectBox
+            label="Cantidades"
+            value={sim.quantitySource}
+            onChange={sim.setQuantitySource}
+            options={QUANTITY_OPTIONS}
+          />
+          <CostParametersDialog
+            mode={assumptions.mode}
+            setMode={assumptions.setMode}
+            rates={assumptions.rates}
+            setRates={assumptions.setRates}
+          />
+          <InfoNote paragraphs={ORDER_HELP} />
+        </Box>
+
+        <QuantitiesEditor
+          rows={sim.quantityRows}
+          onChange={sim.setQuantity}
+          onReset={sim.resetQuantities}
         />
-        <ToolbarSelectBox
-          label="Cantidades"
-          value={sim.quantitySource}
-          onChange={sim.setQuantitySource}
-          options={QUANTITY_OPTIONS}
+
+        <CustomScenarioEditor
+          custom={sim.custom}
+          onChange={sim.setCustom}
+          suppliers={sim.supplierOptions}
         />
-        <CostParametersDialog
-          mode={assumptions.mode}
-          setMode={assumptions.setMode}
-          rates={assumptions.rates}
-          setRates={assumptions.setRates}
+
+        <SimulationResults
+          simulation={simulation}
+          scenario={scenario}
+          onSelectScenario={sim.setScenarioId}
+          lookup={lookup}
         />
-        <InfoNote paragraphs={ORDER_HELP} />
-      </Box>
-
-      <QuantitiesEditor
-        rows={sim.quantityRows}
-        onChange={sim.setQuantity}
-        onReset={sim.resetQuantities}
-      />
-
-      <CustomScenarioEditor
-        custom={sim.custom}
-        onChange={sim.setCustom}
-        suppliers={sim.supplierOptions}
-      />
-
-      <SimulationResults
-        simulation={simulation}
-        scenario={scenario}
-        onSelectScenario={sim.setScenarioId}
-        lookup={lookup}
-      />
+      </SectionPanel>
     </ContentWidth>
   )
 }

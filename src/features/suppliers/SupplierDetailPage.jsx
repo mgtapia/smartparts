@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import UncertainValue from '@components/common/UncertainValue'
@@ -63,6 +64,11 @@ export default function SupplierDetailPage() {
           back={{ href: '/suppliers', label: 'Proveedores' }}
           title="Proveedor no encontrado"
         />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -192,94 +198,96 @@ export default function SupplierDetailPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={5}>
-          {factField('type')}
-          {factField('formF')}
-          {factField('location')}
-          <InfoField label="Cotizaciones">{quotations.length}</InfoField>
-          <InfoField label="Repuestos">{partCount}</InfoField>
-        </InfoGrid>
-      </Card>
-
-      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
-
-      {tab === SUPPLIER_TABS.QUOTES ? (
-        <ListTable
-          sortKey="supplier-quotations"
-          searchFields={(q) => [q.sourceFile, ...q.incoterms, ...q.currencies]}
-          searchPlaceholder="Buscar por cotización, incoterm o moneda…"
-          columns={quoteColumns}
-          rows={quotations}
-          getRowKey={(q) => q.id}
-          getRowHref={(q) => `/quotes/${q.id}`}
-          emptyText="Sin cotizaciones cargadas."
-        />
-      ) : null}
-
-      {tab === SUPPLIER_TABS.IDENTITY ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={3}>{IDENTITY_FIELDS.map(textField)}</InfoGrid>
-          <InfoGrid columns={3}>{factField('founded')}</InfoGrid>
-          <InfoGrid columns={3}>
-            <InfoField label="País">
-              {labelOf(COUNTRY_LABELS_ES, supplier.country) ?? '—'}
-            </InfoField>
-            <InfoField label="Plataforma">
-              {labelOf(PLATFORM_LABELS_ES, supplier.platform) ?? '—'}
-            </InfoField>
-            <InfoField label="Enlace">
-              {supplier.platform_url ? (
-                <Box
-                  component="a"
-                  href={supplier.platform_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  sx={{ color: 'inherit', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                  {supplier.platform_url}
-                </Box>
-              ) : (
-                '—'
-              )}
-            </InfoField>
+      <SectionPanel>
+        <PanelSection>
+          <InfoGrid columns={5}>
+            {factField('type')}
+            {factField('formF')}
+            {factField('location')}
+            <InfoField label="Cotizaciones">{quotations.length}</InfoField>
+            <InfoField label="Repuestos">{partCount}</InfoField>
           </InfoGrid>
-        </Card>
-      ) : null}
+        </PanelSection>
 
-      {tab === SUPPLIER_TABS.CONTACT ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={4}>{CONTACT_FIELDS.slice(0, 4).map(textField)}</InfoGrid>
-          <InfoGrid columns={4}>{CONTACT_FIELDS.slice(4).map(textField)}</InfoGrid>
-        </Card>
-      ) : null}
+        <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
-      {tab === SUPPLIER_TABS.TERMS ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={4}>
-            {['moq', 'payment', 'leadTime', 'license'].map(factField)}
-          </InfoGrid>
-          <InfoGrid columns={4}>
-            {['port', 'airport', 'portDistanceKm', 'airportDistanceKm'].map(factField)}
-          </InfoGrid>
-        </Card>
-      ) : null}
+        {tab === SUPPLIER_TABS.QUOTES ? (
+          <ListTable
+            sortKey="supplier-quotations"
+            searchFields={(q) => [q.sourceFile, ...q.incoterms, ...q.currencies]}
+            searchPlaceholder="Buscar por cotización, incoterm o moneda…"
+            columns={quoteColumns}
+            rows={quotations}
+            getRowKey={(q) => q.id}
+            getRowHref={(q) => `/quotes/${q.id}`}
+            emptyText="Sin cotizaciones cargadas."
+          />
+        ) : null}
 
-      {tab === SUPPLIER_TABS.DECLARATIONS ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {declarations.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              Sin declaraciones registradas.
-            </Typography>
-          ) : (
-            declarations.map((text) => (
-              <Typography key={text} variant="body2" color="error.main" sx={{ fontSize: 13 }}>
-                {text}
+        {tab === SUPPLIER_TABS.IDENTITY ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid columns={3}>{IDENTITY_FIELDS.map(textField)}</InfoGrid>
+            <InfoGrid columns={3}>{factField('founded')}</InfoGrid>
+            <InfoGrid columns={3}>
+              <InfoField label="País">
+                {labelOf(COUNTRY_LABELS_ES, supplier.country) ?? '—'}
+              </InfoField>
+              <InfoField label="Plataforma">
+                {labelOf(PLATFORM_LABELS_ES, supplier.platform) ?? '—'}
+              </InfoField>
+              <InfoField label="Enlace">
+                {supplier.platform_url ? (
+                  <Box
+                    component="a"
+                    href={supplier.platform_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={{ color: 'inherit', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {supplier.platform_url}
+                  </Box>
+                ) : (
+                  '—'
+                )}
+              </InfoField>
+            </InfoGrid>
+          </Box>
+        ) : null}
+
+        {tab === SUPPLIER_TABS.CONTACT ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid columns={4}>{CONTACT_FIELDS.slice(0, 4).map(textField)}</InfoGrid>
+            <InfoGrid columns={4}>{CONTACT_FIELDS.slice(4).map(textField)}</InfoGrid>
+          </Box>
+        ) : null}
+
+        {tab === SUPPLIER_TABS.TERMS ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid columns={4}>
+              {['moq', 'payment', 'leadTime', 'license'].map(factField)}
+            </InfoGrid>
+            <InfoGrid columns={4}>
+              {['port', 'airport', 'portDistanceKm', 'airportDistanceKm'].map(factField)}
+            </InfoGrid>
+          </Box>
+        ) : null}
+
+        {tab === SUPPLIER_TABS.DECLARATIONS ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {declarations.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                Sin declaraciones registradas.
               </Typography>
-            ))
-          )}
-        </Card>
-      ) : null}
+            ) : (
+              declarations.map((text) => (
+                <Typography key={text} variant="body2" color="error.main" sx={{ fontSize: 13 }}>
+                  {text}
+                </Typography>
+              ))
+            )}
+          </Box>
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

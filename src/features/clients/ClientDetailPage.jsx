@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import { useRouteId } from '@hooks/useRouteId'
 import { useUrlTab } from '@hooks/useUrlTab'
 import ContentWidth from '@components/common/ContentWidth'
+import Typography from '@mui/material/Typography'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import ToolbarButton from '@components/common/ToolbarButton'
@@ -115,6 +117,11 @@ export default function ClientDetailPage() {
     return (
       <ContentWidth>
         <PageHeader back={{ href: '/clients', label: 'Clientes' }} title="Cliente no encontrado" />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -145,72 +152,74 @@ export default function ClientDetailPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={5}>
-          <InfoField label="RUT" onEdit={editClient}>
-            {client.rut ?? missing('RUT sin registrar')}
-          </InfoField>
-          <InfoField label="Contacto" onEdit={editClient}>
-            {client.contact.person ?? missing('Contacto sin registrar')}
-          </InfoField>
-          <InfoField label="Correo" onEdit={editClient}>
-            {client.contact.email ?? missing('Correo sin registrar')}
-          </InfoField>
-          <InfoField label="OC">{orders.length}</InfoField>
-          <InfoField label="Vigentes">{openCount}</InfoField>
-        </InfoGrid>
-      </Card>
-
-      <ViewTabs value={tab} onChange={setTab} tabs={CLIENT_TAB_LIST} />
-
-      {tab === CLIENT_TABS.ORDERS ? (
-        <>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-            <ToolbarButton label="Nueva OC" onClick={() => setEditing('order')} />
-          </Box>
-          <ListTable
-            sortKey="client-detail-orders"
-            searchFields={({ order }) => [
-              order.number,
-              orderLabel(order),
-              CLIENT_ORDER_STATUS_LABELS_ES[order.status],
-            ]}
-            searchPlaceholder="Buscar por OC o estado…"
-            columns={ORDER_COLUMNS}
-            rows={orders}
-            getRowKey={({ order }) => order.id}
-            getRowHref={({ order }) => `/client-orders/${order.id}`}
-            emptyText="Sin OC de este cliente todavía."
-          />
-        </>
-      ) : null}
-
-      {tab === CLIENT_TABS.DATA ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={3}>
-            <InfoField label="Razón social" onEdit={editClient}>
-              {client.name}
-            </InfoField>
+      <SectionPanel>
+        <PanelSection>
+          <InfoGrid columns={5}>
             <InfoField label="RUT" onEdit={editClient}>
               {client.rut ?? missing('RUT sin registrar')}
             </InfoField>
-            <InfoField label="Teléfono" onEdit={editClient}>
-              {client.contact.phone ?? missing('Teléfono sin registrar')}
-            </InfoField>
-          </InfoGrid>
-          <InfoGrid columns={3}>
             <InfoField label="Contacto" onEdit={editClient}>
               {client.contact.person ?? missing('Contacto sin registrar')}
             </InfoField>
             <InfoField label="Correo" onEdit={editClient}>
               {client.contact.email ?? missing('Correo sin registrar')}
             </InfoField>
-            <InfoField label="Notas" onEdit={editClient}>
-              {client.notes ?? '—'}
-            </InfoField>
+            <InfoField label="OC">{orders.length}</InfoField>
+            <InfoField label="Vigentes">{openCount}</InfoField>
           </InfoGrid>
-        </Card>
-      ) : null}
+        </PanelSection>
+
+        <ViewTabs value={tab} onChange={setTab} tabs={CLIENT_TAB_LIST} />
+
+        {tab === CLIENT_TABS.ORDERS ? (
+          <>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+              <ToolbarButton label="Nueva OC" onClick={() => setEditing('order')} />
+            </Box>
+            <ListTable
+              sortKey="client-detail-orders"
+              searchFields={({ order }) => [
+                order.number,
+                orderLabel(order),
+                CLIENT_ORDER_STATUS_LABELS_ES[order.status],
+              ]}
+              searchPlaceholder="Buscar por OC o estado…"
+              columns={ORDER_COLUMNS}
+              rows={orders}
+              getRowKey={({ order }) => order.id}
+              getRowHref={({ order }) => `/client-orders/${order.id}`}
+              emptyText="Sin OC de este cliente todavía."
+            />
+          </>
+        ) : null}
+
+        {tab === CLIENT_TABS.DATA ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid columns={3}>
+              <InfoField label="Razón social" onEdit={editClient}>
+                {client.name}
+              </InfoField>
+              <InfoField label="RUT" onEdit={editClient}>
+                {client.rut ?? missing('RUT sin registrar')}
+              </InfoField>
+              <InfoField label="Teléfono" onEdit={editClient}>
+                {client.contact.phone ?? missing('Teléfono sin registrar')}
+              </InfoField>
+            </InfoGrid>
+            <InfoGrid columns={3}>
+              <InfoField label="Contacto" onEdit={editClient}>
+                {client.contact.person ?? missing('Contacto sin registrar')}
+              </InfoField>
+              <InfoField label="Correo" onEdit={editClient}>
+                {client.contact.email ?? missing('Correo sin registrar')}
+              </InfoField>
+              <InfoField label="Notas" onEdit={editClient}>
+                {client.notes ?? '—'}
+              </InfoField>
+            </InfoGrid>
+          </Box>
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

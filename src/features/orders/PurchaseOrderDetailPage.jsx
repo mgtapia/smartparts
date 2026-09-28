@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import { useRouteId } from '@hooks/useRouteId'
 import { useUrlTab } from '@hooks/useUrlTab'
 import ContentWidth from '@components/common/ContentWidth'
+import Typography from '@mui/material/Typography'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import ToolbarButton from '@components/common/ToolbarButton'
@@ -64,6 +66,11 @@ export default function PurchaseOrderDetailPage() {
     return (
       <ContentWidth>
         <PageHeader back={BACK} title="OC no encontrada" />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -186,82 +193,88 @@ export default function PurchaseOrderDetailPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5 }}>
-        <InfoGrid columns={6}>
-          <InfoField label="Proveedor">
-            <Box component={Link} href={`/suppliers/${order.supplierId}`} sx={{ color: 'inherit' }}>
-              {supplierLabel(supplier, order.supplierId)}
-            </Box>
-          </InfoField>
-          <InfoField label="Cotización" onEdit={editOrder}>
-            {quotation ? (
-              <Box component={Link} href={`/quotes/${quotation.id}`} sx={{ color: 'inherit' }}>
-                {quotation.sourceFile ?? 'Ver cotización'}
+      <SectionPanel>
+        <PanelSection>
+          <InfoGrid columns={6}>
+            <InfoField label="Proveedor">
+              <Box
+                component={Link}
+                href={`/suppliers/${order.supplierId}`}
+                sx={{ color: 'inherit' }}
+              >
+                {supplierLabel(supplier, order.supplierId)}
               </Box>
-            ) : (
-              'Sin cotización'
-            )}
-          </InfoField>
-          <InfoField label="Fecha" onEdit={editOrder}>
-            {order.date ? formatIsoDate(order.date) : 'Sin fecha'}
-          </InfoField>
-          <InfoField label="Estado" onEdit={editOrder}>
-            {PURCHASE_ORDER_STATUS_LABELS_ES[order.status] ?? order.status}
-          </InfoField>
-          <InfoField label="Incoterm" onEdit={editOrder}>
-            {order.incoterm ? (
-              [order.incoterm, order.incotermPlace].filter(Boolean).join(' ')
-            ) : (
-              <UncertainValue verified={false} reason="La OC no indica Incoterm">
-                Sin definir
-              </UncertainValue>
-            )}
-          </InfoField>
-          <InfoField label="Total">
-            <TotalValue total={row.total} missingPrice={row.missingPrice} />
-          </InfoField>
-        </InfoGrid>
-      </Card>
-
-      <ViewTabs value={tab} onChange={setTab} tabs={PURCHASE_ORDER_TAB_LIST} />
-
-      {tab === PURCHASE_ORDER_TABS.LINES ? (
-        <>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
-            <ToolbarButton label="Agregar línea" onClick={() => setEditing({ kind: 'line' })} />
-            <InfoNote title="Cómo se enlaza" paragraphs={PURCHASE_ORDER_HELP} />
-          </Box>
-          <ListTable
-            sortKey="purchase-order-lines"
-            searchFields={(l) => [partLabel(data.partsById.get(l.partId))]}
-            searchPlaceholder="Buscar por repuesto…"
-            columns={columns}
-            rows={order.lines}
-            getRowKey={(l) => l.id}
-            emptyText="Sin líneas: agrega los repuestos que se compran a este proveedor."
-          />
-        </>
-      ) : null}
-
-      {tab === PURCHASE_ORDER_TABS.DATA ? (
-        <Card sx={{ p: 2 }}>
-          <InfoGrid columns={3}>
-            <InfoField label="N.º OC" onEdit={editOrder}>
-              {order.number ?? (
-                <UncertainValue verified={false} reason="La OC no tiene número">
-                  Sin dato
+            </InfoField>
+            <InfoField label="Cotización" onEdit={editOrder}>
+              {quotation ? (
+                <Box component={Link} href={`/quotes/${quotation.id}`} sx={{ color: 'inherit' }}>
+                  {quotation.sourceFile ?? 'Ver cotización'}
+                </Box>
+              ) : (
+                'Sin cotización'
+              )}
+            </InfoField>
+            <InfoField label="Fecha" onEdit={editOrder}>
+              {order.date ? formatIsoDate(order.date) : 'Sin fecha'}
+            </InfoField>
+            <InfoField label="Estado" onEdit={editOrder}>
+              {PURCHASE_ORDER_STATUS_LABELS_ES[order.status] ?? order.status}
+            </InfoField>
+            <InfoField label="Incoterm" onEdit={editOrder}>
+              {order.incoterm ? (
+                [order.incoterm, order.incotermPlace].filter(Boolean).join(' ')
+              ) : (
+                <UncertainValue verified={false} reason="La OC no indica Incoterm">
+                  Sin definir
                 </UncertainValue>
               )}
             </InfoField>
-            <InfoField label="Moneda" onEdit={editOrder}>
-              {order.currency}
-            </InfoField>
-            <InfoField label="Notas" onEdit={editOrder}>
-              {order.notes ?? '—'}
+            <InfoField label="Total">
+              <TotalValue total={row.total} missingPrice={row.missingPrice} />
             </InfoField>
           </InfoGrid>
-        </Card>
-      ) : null}
+        </PanelSection>
+
+        <ViewTabs value={tab} onChange={setTab} tabs={PURCHASE_ORDER_TAB_LIST} />
+
+        {tab === PURCHASE_ORDER_TABS.LINES ? (
+          <>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1.5 }}>
+              <ToolbarButton label="Agregar línea" onClick={() => setEditing({ kind: 'line' })} />
+              <InfoNote title="Cómo se enlaza" paragraphs={PURCHASE_ORDER_HELP} />
+            </Box>
+            <ListTable
+              sortKey="purchase-order-lines"
+              searchFields={(l) => [partLabel(data.partsById.get(l.partId))]}
+              searchPlaceholder="Buscar por repuesto…"
+              columns={columns}
+              rows={order.lines}
+              getRowKey={(l) => l.id}
+              emptyText="Sin líneas: agrega los repuestos que se compran a este proveedor."
+            />
+          </>
+        ) : null}
+
+        {tab === PURCHASE_ORDER_TABS.DATA ? (
+          <Box>
+            <InfoGrid columns={3}>
+              <InfoField label="N.º OC" onEdit={editOrder}>
+                {order.number ?? (
+                  <UncertainValue verified={false} reason="La OC no tiene número">
+                    Sin dato
+                  </UncertainValue>
+                )}
+              </InfoField>
+              <InfoField label="Moneda" onEdit={editOrder}>
+                {order.currency}
+              </InfoField>
+              <InfoField label="Notas" onEdit={editOrder}>
+                {order.notes ?? '—'}
+              </InfoField>
+            </InfoGrid>
+          </Box>
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

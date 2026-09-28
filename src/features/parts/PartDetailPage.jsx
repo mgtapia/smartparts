@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
+import PanelSection from '@components/layout/PanelSection'
+import SectionPanel from '@components/layout/SectionPanel'
 import { vehicleLabel } from '@features/vehicles/constants'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
@@ -110,6 +111,11 @@ export default function PartDetailPage() {
     return (
       <ContentWidth>
         <PageHeader back={{ href: '/catalog', label: 'Catálogo' }} title="Repuesto no encontrado" />
+        <SectionPanel>
+          <Typography variant="body2" color="text.secondary">
+            No existe o fue eliminado. Vuelve a la lista con la flecha de arriba.
+          </Typography>
+        </SectionPanel>
       </ContentWidth>
     )
   }
@@ -283,194 +289,199 @@ export default function PartDetailPage() {
         />
       ) : null}
 
-      <Card sx={{ p: 2, mb: 1.5, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-        <Box
-          role="button"
-          tabIndex={0}
-          aria-label="Cargar imagen"
-          onClick={() => setEditing(EDIT.IMAGE)}
-          onKeyDown={(e) => e.key === 'Enter' && setEditing(EDIT.IMAGE)}
-          sx={{
-            width: PART_IMAGE_SIZE,
-            height: PART_IMAGE_SIZE,
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            borderRadius: 1,
-            overflow: 'hidden',
-            bgcolor: 'brand.bodyBg',
-          }}
-        >
-          {image?.dataUrl ? (
-            <Box
-              component="img"
-              src={image.dataUrl}
-              alt={part.nameEs}
-              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          ) : (
-            <ImageOutlinedIcon aria-label="Sin imagen" sx={{ color: 'text.disabled' }} />
-          )}
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <InfoGrid columns={5}>
-            <InfoField label="Código" divided onEdit={() => setEditing(EDIT.CODE)}>
-              <UncertainValue
-                verified={part.codeStatus === 'confirmed'}
-                reason="Código sin confirmar con una fuente citable"
-              >
-                <Box component="span" sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}>
-                  {part.code ?? 'Sin código'}
-                </Box>
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Vehículo">{vehicleLabel(part.vehicle) || '—'}</InfoField>
-            <InfoField label="Precio REF" hint="Lo que el cliente paga hoy por este repuesto.">
-              <MoneyValue money={part.baselinePrice} />
-            </InfoField>
-            {costField(COST_MODES.AIR, 'Costo aéreo')}
-            {costField(COST_MODES.SEA, `Costo marítimo${seaFormatSuffix(partCosts.seaFormat)}`)}
-          </InfoGrid>
-        </Box>
-      </Card>
+      <SectionPanel>
+        <PanelSection>
+          <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Cargar imagen"
+            onClick={() => setEditing(EDIT.IMAGE)}
+            onKeyDown={(e) => e.key === 'Enter' && setEditing(EDIT.IMAGE)}
+            sx={{
+              width: PART_IMAGE_SIZE,
+              height: PART_IMAGE_SIZE,
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderRadius: 1,
+              overflow: 'hidden',
+              bgcolor: 'brand.bodyBg',
+            }}
+          >
+            {image?.dataUrl ? (
+              <Box
+                component="img"
+                src={image.dataUrl}
+                alt={part.nameEs}
+                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <ImageOutlinedIcon aria-label="Sin imagen" sx={{ color: 'text.disabled' }} />
+            )}
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <InfoGrid columns={5}>
+              <InfoField label="Código" divided onEdit={() => setEditing(EDIT.CODE)}>
+                <UncertainValue
+                  verified={part.codeStatus === 'confirmed'}
+                  reason="Código sin confirmar con una fuente citable"
+                >
+                  <Box
+                    component="span"
+                    sx={{ fontFamily: '"Roboto Mono", monospace', fontSize: 12 }}
+                  >
+                    {part.code ?? 'Sin código'}
+                  </Box>
+                </UncertainValue>
+              </InfoField>
+              <InfoField label="Vehículo">{vehicleLabel(part.vehicle) || '—'}</InfoField>
+              <InfoField label="Precio REF" hint="Lo que el cliente paga hoy por este repuesto.">
+                <MoneyValue money={part.baselinePrice} />
+              </InfoField>
+              {costField(COST_MODES.AIR, 'Costo aéreo')}
+              {costField(COST_MODES.SEA, `Costo marítimo${seaFormatSuffix(partCosts.seaFormat)}`)}
+            </InfoGrid>
+          </Box>
+        </PanelSection>
 
-      <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
+        <ViewTabs value={tab} onChange={setTab} tabs={TAB_LIST} />
 
-      {tab === PART_TABS.QUOTES ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box>
-            <ToolbarSelectBox
-              label="Modo de transporte"
-              value={mode}
-              onChange={assumptions.setMode}
-              options={MODE_OPTIONS}
+        {tab === PART_TABS.QUOTES ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box>
+              <ToolbarSelectBox
+                label="Modo de transporte"
+                value={mode}
+                onChange={assumptions.setMode}
+                options={MODE_OPTIONS}
+              />
+            </Box>
+            <ListTable
+              sortKey="part-quotes"
+              columns={quoteColumns}
+              rows={rows}
+              getRowKey={({ quote }) => quote.id}
+              getRowHref={({ quote }) => `/quotes/${quote.quotationId}`}
+              emptyText="Sin cotizaciones todavía."
             />
           </Box>
-          <ListTable
-            sortKey="part-quotes"
-            columns={quoteColumns}
-            rows={rows}
-            getRowKey={({ quote }) => quote.id}
-            getRowHref={({ quote }) => `/quotes/${quote.quotationId}`}
-            emptyText="Sin cotizaciones todavía."
-          />
-        </Box>
-      ) : null}
+        ) : null}
 
-      {tab === PART_TABS.RECOMMENDATIONS ? <PartRecommendations part={part} /> : null}
+        {tab === PART_TABS.RECOMMENDATIONS ? <PartRecommendations part={part} /> : null}
 
-      {tab === PART_TABS.IDENTITY ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={3}>
-            <InfoField label="Español">{part.nameEs}</InfoField>
-            <InfoField label="Inglés" onEdit={() => setEditing(EDIT.NAMES)}>
-              {part.nameEn ?? (
-                <UncertainValue verified={false} reason="Sin traducción cargada">
-                  Sin dato
-                </UncertainValue>
-              )}
-            </InfoField>
-            <InfoField label="Chino" onEdit={() => setEditing(EDIT.NAMES)}>
-              {part.nameZh ?? (
-                <UncertainValue verified={false} reason="Sin traducción cargada">
-                  Sin dato
-                </UncertainValue>
-              )}
-            </InfoField>
-          </InfoGrid>
-          <InfoGrid columns={3}>
-            <InfoField label="Vehículo">
-              {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
-            </InfoField>
-            <InfoField label="Categoría">{part.category?.labelEs ?? part.categoryPath}</InfoField>
-            <InfoField label="Fuente del código">
-              {part.codeSource ?? (
-                <UncertainValue verified={false} reason="El código no tiene fuente registrada">
-                  Sin fuente
-                </UncertainValue>
-              )}
-            </InfoField>
-          </InfoGrid>
-          {part.sourcingNote ? (
-            <InfoGrid>
-              <InfoField label="Nota del código">{part.sourcingNote}</InfoField>
+        {tab === PART_TABS.IDENTITY ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid columns={3}>
+              <InfoField label="Español">{part.nameEs}</InfoField>
+              <InfoField label="Inglés" onEdit={() => setEditing(EDIT.NAMES)}>
+                {part.nameEn ?? (
+                  <UncertainValue verified={false} reason="Sin traducción cargada">
+                    Sin dato
+                  </UncertainValue>
+                )}
+              </InfoField>
+              <InfoField label="Chino" onEdit={() => setEditing(EDIT.NAMES)}>
+                {part.nameZh ?? (
+                  <UncertainValue verified={false} reason="Sin traducción cargada">
+                    Sin dato
+                  </UncertainValue>
+                )}
+              </InfoField>
             </InfoGrid>
-          ) : null}
-        </Card>
-      ) : null}
+            <InfoGrid columns={3}>
+              <InfoField label="Vehículo">
+                {`${part.vehicle?.brand ?? ''} ${part.vehicle?.model ?? ''}`.trim() || '—'}
+              </InfoField>
+              <InfoField label="Categoría">{part.category?.labelEs ?? part.categoryPath}</InfoField>
+              <InfoField label="Fuente del código">
+                {part.codeSource ?? (
+                  <UncertainValue verified={false} reason="El código no tiene fuente registrada">
+                    Sin fuente
+                  </UncertainValue>
+                )}
+              </InfoField>
+            </InfoGrid>
+            {part.sourcingNote ? (
+              <InfoGrid>
+                <InfoField label="Nota del código">{part.sourcingNote}</InfoField>
+              </InfoGrid>
+            ) : null}
+          </Box>
+        ) : null}
 
-      {tab === PART_TABS.LOGISTICS ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid columns={5}>
-            <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
-              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
-                {formatKg(part.weightG)}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Volumen" onEdit={() => setEditing(EDIT.LOGISTICS)}>
-              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
-                {formatVolume(part.volumeCm3)}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Estado">
-              <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
-                {LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Fuente">
-              {part.logisticsSource ?? (
-                <UncertainValue
-                  verified={false}
-                  reason="Sin fuente: estimación por nombre de pieza"
-                >
-                  Sin fuente
-                </UncertainValue>
-              )}
-            </InfoField>
-            <InfoField label="Mercancía peligrosa">
-              {part.dgProfile ? (
-                `UN ${part.dgProfile.unNumber}`
-              ) : (
-                <UncertainValue
-                  verified={false}
-                  reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
-                >
-                  Sin clasificar
-                </UncertainValue>
-              )}
-            </InfoField>
-          </InfoGrid>
-          {part.logisticsNote ? (
+        {tab === PART_TABS.LOGISTICS ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <InfoGrid columns={5}>
-              <InfoField label="Nota">{part.logisticsNote}</InfoField>
-            </InfoGrid>
-          ) : null}
-        </Card>
-      ) : null}
-
-      {tab === PART_TABS.CUSTOMS ? (
-        <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <InfoGrid>
-            <InfoField label="Partida HS" onEdit={() => setEditing(EDIT.CUSTOMS)}>
-              <UncertainValue
-                verified={Boolean(part.hsCode && part.hsCodeSource)}
-                reason="Sin partida confirmada con el agente de aduanas"
-              >
-                {part.hsCode ?? 'Sin dato'}
-              </UncertainValue>
-            </InfoField>
-            <InfoField label="Fuente">
-              {part.hsCodeSource ?? (
-                <UncertainValue verified={false} reason="Sin fuente registrada">
-                  Sin fuente
+              <InfoField label="Peso" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+                <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                  {formatKg(part.weightG)}
                 </UncertainValue>
-              )}
-            </InfoField>
-          </InfoGrid>
-        </Card>
-      ) : null}
+              </InfoField>
+              <InfoField label="Volumen" onEdit={() => setEditing(EDIT.LOGISTICS)}>
+                <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                  {formatVolume(part.volumeCm3)}
+                </UncertainValue>
+              </InfoField>
+              <InfoField label="Estado">
+                <UncertainValue verified={logisticsConfirmed} reason={logisticsReason}>
+                  {LOGISTICS_STATUS_LABELS_ES[part.logisticsStatus]}
+                </UncertainValue>
+              </InfoField>
+              <InfoField label="Fuente">
+                {part.logisticsSource ?? (
+                  <UncertainValue
+                    verified={false}
+                    reason="Sin fuente: estimación por nombre de pieza"
+                  >
+                    Sin fuente
+                  </UncertainValue>
+                )}
+              </InfoField>
+              <InfoField label="Mercancía peligrosa">
+                {part.dgProfile ? (
+                  `UN ${part.dgProfile.unNumber}`
+                ) : (
+                  <UncertainValue
+                    verified={false}
+                    reason="Falta clasificar si lleva batería de litio u otra mercancía peligrosa"
+                  >
+                    Sin clasificar
+                  </UncertainValue>
+                )}
+              </InfoField>
+            </InfoGrid>
+            {part.logisticsNote ? (
+              <InfoGrid columns={5}>
+                <InfoField label="Nota">{part.logisticsNote}</InfoField>
+              </InfoGrid>
+            ) : null}
+          </Box>
+        ) : null}
+
+        {tab === PART_TABS.CUSTOMS ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <InfoGrid>
+              <InfoField label="Partida HS" onEdit={() => setEditing(EDIT.CUSTOMS)}>
+                <UncertainValue
+                  verified={Boolean(part.hsCode && part.hsCodeSource)}
+                  reason="Sin partida confirmada con el agente de aduanas"
+                >
+                  {part.hsCode ?? 'Sin dato'}
+                </UncertainValue>
+              </InfoField>
+              <InfoField label="Fuente">
+                {part.hsCodeSource ?? (
+                  <UncertainValue verified={false} reason="Sin fuente registrada">
+                    Sin fuente
+                  </UncertainValue>
+                )}
+              </InfoField>
+            </InfoGrid>
+          </Box>
+        ) : null}
+      </SectionPanel>
     </ContentWidth>
   )
 }

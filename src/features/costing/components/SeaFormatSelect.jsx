@@ -20,7 +20,7 @@ export default function SeaFormatSelect() {
   const options = [
     {
       value: SEA_FORMAT_FROM_SETTINGS,
-      label: `Según Ajustes: ${labelOf(settingsFormat)}`,
+      label: `Usar el de Ajustes (${shortOf(settingsFormat)})`,
       shortLabel: `Ajustes: ${shortOf(settingsFormat)}`,
     },
     ...SEA_FORMATS.map((f) => ({ value: f.value, label: labelOf(f.value), shortLabel: f.labelEs })),

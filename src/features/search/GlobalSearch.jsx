@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
 import { useOrders } from '@features/orders/hooks/useOrders'
+import { RADIUS } from '@constants/colors'
 import { SEARCH_MAX_WIDTH } from '@constants/layout'
 import { buildSearchItems, searchItems } from './searchModel'
 
@@ -117,7 +118,7 @@ export default function GlobalSearch() {
             sx={{
               '& .MuiOutlinedInput-root': {
                 height: 40,
-                borderRadius: 2,
+                borderRadius: `${RADIUS.input}px`,
                 color: 'common.white',
                 bgcolor: 'rgba(255,255,255,0.1)',
                 '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },

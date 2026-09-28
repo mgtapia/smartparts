@@ -24,7 +24,6 @@ import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
-import { seaFormatSuffix } from '@features/costing/partCostsModel'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { ErrorState } from '@components/common/AsyncState'
 import { ListPageSkeleton } from '@components/common/Skeletons'
@@ -55,7 +54,7 @@ const GROUP_KEY_GETTERS = {
 // fila puntual (ej. "Repuesto" corto le robaba espacio a Descripción EN/ZH,
 // que quedaban apretadas). "Repuesto" es la única que se estira con lo que
 // sobra, como columna principal.
-const COL_WIDTH = { vehicle: 110, category: 105, code: 130, baseline: 100, pvp: 100, supplier: 130 }
+const COL_WIDTH = { vehicle: 110, category: 95, code: 108, baseline: 100, pvp: 120, supplier: 96 }
 const REPUESTO_MIN_WIDTH = 220
 
 const CODE_STATUS_ICON = {
@@ -236,7 +235,6 @@ export default function CatalogPage() {
     setSortDir,
     currency,
     setCurrency,
-    seaFormat,
     extraFilters,
     loading,
     error,
@@ -528,7 +526,7 @@ export default function CatalogPage() {
                       textAlign: 'right',
                     }}
                   >
-                    {`PVP marítimo${seaFormatSuffix(seaFormat)}`}
+                    PVP marítimo
                   </Typography>
                 ) : null}
                 {isColumnVisible('supplier') ? (

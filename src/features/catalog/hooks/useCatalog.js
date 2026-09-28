@@ -6,7 +6,6 @@ import { getTopLevelCategories, getCategory } from '@mocks/categories'
 import { listVehicles } from '@libs/repos/vehiclesRepo'
 import { clpToUsd } from '@libs/fx'
 import { makeMatcher } from '@libs/textSearch'
-import { CONFIRMED_LOGISTICS_STATUSES } from '@constants/enums'
 import { SELECTIONS, bestOf } from '@features/costing/partCostsModel'
 import { isOffered, pricingFor, salePrice } from '@features/costing/pricingModel'
 import { usePartCosts } from '@features/costing/hooks/usePartCosts'
@@ -129,7 +128,6 @@ export function useCatalog() {
   const [offerFilters, setOfferFilters] = usePersistentState('catalog.offerFilters', [])
   const [supplierFilters, setSupplierFilters] = usePersistentState('catalog.supplierFilters', [])
   const [quoteFilters, setQuoteFilters] = usePersistentState('catalog.quoteFilters', [])
-  const [logisticsFilters, setLogisticsFilters] = usePersistentState('catalog.logisticsFilters', [])
   // null = sin restringir (todavía no tocado)
   const [priceRange, setPriceRange] = usePersistentState('catalog.priceRange', null)
   const [sortField, setSortField] = usePersistentState('catalog.sortField', SORT_FIELDS.NAME)
@@ -187,7 +185,6 @@ export function useCatalog() {
         offer: offerOf(pvpAir, pvpSea),
         suppliers: [...new Set([pvpAir.supplier, pvpSea.supplier].filter(Boolean))],
         quoteCount: p.quotes?.length ?? 0,
-        logisticsConfirmed: CONFIRMED_LOGISTICS_STATUSES.includes(p.logisticsStatus),
       }
     })
   }, [partsData, costs, costSuppliers, toClp, rates, fx])
@@ -226,12 +223,6 @@ export function useCatalog() {
       if (quoteFilters.length && !quoteFilters.includes(r.quoteCount > 0 ? 'quoted' : 'unquoted')) {
         return false
       }
-      if (
-        logisticsFilters.length &&
-        !logisticsFilters.includes(r.logisticsConfirmed ? 'confirmed' : 'unconfirmed')
-      ) {
-        return false
-      }
       const baselineUsd = r.baselinePriceUsd.amount / 100
       if (baselineUsd < minPrice || baselineUsd > maxPrice) return false
       return matches([
@@ -255,7 +246,6 @@ export function useCatalog() {
     offerFilters,
     supplierFilters,
     quoteFilters,
-    logisticsFilters,
     effectivePriceRange,
     sortField,
     sortDir,
@@ -272,7 +262,6 @@ export function useCatalog() {
     offerFilters,
     supplierFilters,
     quoteFilters,
-    logisticsFilters,
     effectivePriceRange,
     sortField,
     sortDir,
@@ -292,7 +281,6 @@ export function useCatalog() {
     offerFilters.length > 0 ||
     supplierFilters.length > 0 ||
     quoteFilters.length > 0 ||
-    logisticsFilters.length > 0 ||
     (priceRange !== null && (priceRange[0] !== priceBounds[0] || priceRange[1] !== priceBounds[1]))
 
   function clearAllFilters() {
@@ -301,7 +289,6 @@ export function useCatalog() {
     setOfferFilters([])
     setSupplierFilters([])
     setQuoteFilters([])
-    setLogisticsFilters([])
     setPriceRange(null)
   }
 
@@ -325,7 +312,9 @@ export function useCatalog() {
       {
         key: 'offer',
         label: 'Se ofrece',
-        options: Object.values(OFFER).map((value) => ({ value, label: OFFER_LABELS_ES[value] })),
+        options: Object.values(OFFER)
+          .filter((value) => value !== OFFER.NO_COST)
+          .map((value) => ({ value, label: OFFER_LABELS_ES[value] })),
         selected: offerFilters,
         toggle: (v) => setOfferFilters((prev) => toggleInList(prev, v)),
       },
@@ -345,16 +334,6 @@ export function useCatalog() {
         ],
         selected: quoteFilters,
         toggle: (v) => setQuoteFilters((prev) => toggleInList(prev, v)),
-      },
-      {
-        key: 'logistics',
-        label: 'Peso y volumen',
-        options: [
-          { value: 'confirmed', label: 'Confirmados' },
-          { value: 'unconfirmed', label: 'Sin confirmar' },
-        ],
-        selected: logisticsFilters,
-        toggle: (v) => setLogisticsFilters((prev) => toggleInList(prev, v)),
       },
     ],
     priceBounds,

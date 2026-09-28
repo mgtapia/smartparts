@@ -24,7 +24,6 @@ import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
 import MoneyValue from '@components/common/MoneyValue'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
-import SeaFormatSelect from '@features/costing/components/SeaFormatSelect'
 import { seaFormatSuffix } from '@features/costing/partCostsModel'
 import { CODE_STATUS_LABELS_ES } from '@constants/enums'
 import { ErrorState } from '@components/common/AsyncState'
@@ -341,8 +340,6 @@ export default function CatalogPage() {
             onChange={setGroupBy}
             options={GROUP_OPTIONS}
           />
-
-          <SeaFormatSelect />
 
           <ToolbarSelectBox
             label="Moneda"

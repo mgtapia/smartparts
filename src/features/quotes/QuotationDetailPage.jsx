@@ -4,7 +4,9 @@ import { useMemo, useState } from 'react'
 import { confirmQuotationFields } from '@libs/repos/quotesRepo'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
+import Collapse from '@mui/material/Collapse'
 import Typography from '@mui/material/Typography'
 import { useRouteId } from '@hooks/useRouteId'
 import ContentWidth from '@components/common/ContentWidth'
@@ -83,6 +85,7 @@ export default function QuotationDetailPage() {
     })
 
   const [editing, setEditing] = useState(null)
+  const [calcOpen, setCalcOpen] = useState(false)
 
   const quotation = quotations.find((q) => q.id === quotationId) ?? null
 
@@ -370,31 +373,40 @@ export default function QuotationDetailPage() {
 
       {sample ? (
         <Card sx={{ p: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-            Cálculo
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-            Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas son
-            las mismas para todas. Rojo = todavía no verificado.
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {sample.cost.components.map((c) => (
-              <Box key={c.code}>
-                <Typography variant="body2" sx={{ fontSize: 13 }}>
-                  <UncertainValue verified={c.verified} reason={c.reasonEs}>
-                    {c.labelEs}
-                  </UncertainValue>
-                  {' — '}
-                  {c.formulaEs}
-                </Typography>
-                {c.reasonEs ? (
-                  <Typography variant="caption" color="error.main">
-                    Sin verificar: {c.reasonEs}
-                  </Typography>
-                ) : null}
-              </Box>
-            ))}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="subtitle1">Cálculo</Typography>
+            <Button size="small" onClick={() => setCalcOpen((v) => !v)}>
+              {calcOpen ? 'Ocultar' : 'Ver cálculo'}
+            </Button>
           </Box>
+          <Collapse in={calcOpen}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mt: 0.5, mb: 1.5 }}
+            >
+              Por unidad. Ejemplo con la primera línea ({sample.line.part.nameEs}); las fórmulas son
+              las mismas para todas. Rojo = todavía no verificado.
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {sample.cost.components.map((c) => (
+                <Box key={c.code}>
+                  <Typography variant="body2" sx={{ fontSize: 13 }}>
+                    <UncertainValue verified={c.verified} reason={c.reasonEs}>
+                      {c.labelEs}
+                    </UncertainValue>
+                    {' — '}
+                    {c.formulaEs}
+                  </Typography>
+                  {c.reasonEs ? (
+                    <Typography variant="caption" color="error.main">
+                      Sin verificar: {c.reasonEs}
+                    </Typography>
+                  ) : null}
+                </Box>
+              ))}
+            </Box>
+          </Collapse>
         </Card>
       ) : null}
     </ContentWidth>

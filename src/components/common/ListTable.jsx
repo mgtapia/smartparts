@@ -18,7 +18,7 @@ const MAIN_BASIS = 220 // px — la columna principal es la única que se estira
 
 /**
  * Tabla de listas con el mismo diseño que el catálogo: encabezado en
- * `overline`, filas de 44 px sobre `brand.bodyBg`, texto a 13 px y sin
+ * `overline`, filas de 44 px transparentes (oscurecen solo al pasar el mouse), texto a 13 px y sin
  * negritas y columnas de ancho base fijo salvo la primera (principal). Nunca
  * hace scroll horizontal ni pasa del ancho de la pantalla: si falta espacio,
  * las columnas se achican y el texto se corta con puntos suspensivos.
@@ -174,7 +174,7 @@ export default function ListTable({
                       borderRadius: `${RADIUS.inputSmall}px`,
                       textDecoration: 'none',
                       color: 'inherit',
-                      bgcolor: getRowKey(row) === selectedKey ? 'action.selected' : 'brand.bodyBg',
+                      bgcolor: getRowKey(row) === selectedKey ? 'action.selected' : 'transparent',
                       cursor: onRowClick ? 'pointer' : undefined,
                       '&:hover': { bgcolor: 'action.hover' },
                     }}

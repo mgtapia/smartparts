@@ -269,7 +269,7 @@ export default function PurchaseOrderDetailPage() {
         {tab === PURCHASE_ORDER_TABS.DATA ? (
           <Box>
             <InfoGrid columns={3}>
-              <InfoField label="N.º OC" onEdit={editOrder}>
+              <InfoField label="Número" onEdit={editOrder}>
                 {order.number ?? (
                   <UncertainValue verified={false} reason="La OC no tiene número">
                     Sin dato

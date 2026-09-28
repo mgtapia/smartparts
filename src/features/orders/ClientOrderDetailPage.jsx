@@ -368,7 +368,7 @@ export default function ClientOrderDetailPage() {
         {!simulating && tab === CLIENT_ORDER_TABS.DATA ? (
           <Box>
             <InfoGrid columns={3}>
-              <InfoField label="N.º OC" onEdit={editOrder}>
+              <InfoField label="Número" onEdit={editOrder}>
                 {order.number ?? (
                   <UncertainValue verified={false} reason="El número de OC del cliente falta">
                     Sin dato

@@ -16,5 +16,16 @@ const TONES = {
 /** Badge pequeño para estados de dominio (code_status, demand_scale, part_type…). */
 export default function Pill({ label, tone = 'neutral' }) {
   const style = TONES[tone] || TONES.neutral
-  return <Chip label={label} size="small" sx={{ ...style, fontWeight: 600 }} />
+  return (
+    <Chip
+      label={label}
+      size="small"
+      sx={{
+        ...style,
+        fontWeight: 600,
+        justifyContent: 'center',
+        '& .MuiChip-label': { px: 1, lineHeight: 1, textAlign: 'center' },
+      }}
+    />
+  )
 }

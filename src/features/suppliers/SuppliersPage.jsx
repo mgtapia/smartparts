@@ -42,14 +42,6 @@ const COLUMNS = [
     render: ({ supplier }) => <FactCell supplier={supplier} factKey="formF" />,
   },
   {
-    id: 'quotes',
-    label: 'Cotizaciones',
-    sortValue: ({ quotations }) => quotations.length,
-    width: 100,
-    align: 'right',
-    render: ({ quotations }) => quotations.length,
-  },
-  {
     id: 'parts',
     label: 'Repuestos',
     sortValue: ({ partCount }) => partCount,

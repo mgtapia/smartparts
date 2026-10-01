@@ -101,6 +101,13 @@ export const NAV_ENTRIES = Object.freeze([
         icon: 'Flight',
         implemented: true,
       },
+      {
+        key: 'full-shipment',
+        path: '/full-shipment',
+        labelEs: 'Carga completa',
+        icon: 'DirectionsBoat',
+        implemented: true,
+      },
     ],
   },
   {

@@ -20,7 +20,7 @@ import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { downloadCsv } from '@libs/csv'
-import { TIER_LABELS_ES } from '@features/costing/pricingModel'
+import { TIER_LABELS_ES, isOffered } from '@features/costing/pricingModel'
 import AnomalyGroups from '@features/trial/components/AnomalyGroups'
 import { formatClp, formatClpMillions } from '@features/trial/constants'
 import { SHIPMENT_OPTIONS, SHIPMENT_OPTION_LABELS_ES } from './fullShipmentModel'
@@ -118,9 +118,9 @@ export default function FullShipmentPage() {
       render: (i) => (i.sale.tier ? TIER_LABELS_ES[i.sale.tier] : '—'),
     },
   ]
-  const purchase = [...result.items].sort(
-    (x, y) => (y.unitBaselineClp ?? 0) * y.qty - (x.unitBaselineClp ?? 0) * x.qty,
-  )
+  const purchase = result.items
+    .filter((i) => isOffered(i.sale.tier))
+    .sort((x, y) => (y.unitBaselineClp ?? 0) * y.qty - (x.unitBaselineClp ?? 0) * x.qty)
 
   const downloadPurchaseCsv = () => {
     downloadCsv(

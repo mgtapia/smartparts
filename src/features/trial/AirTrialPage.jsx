@@ -21,7 +21,7 @@ import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { downloadCsv } from '@libs/csv'
 import { OPTIONS } from './airTrialModel'
-import { TIER_LABELS_ES } from '@features/costing/pricingModel'
+import { TIER_LABELS_ES, isOffered } from '@features/costing/pricingModel'
 import {
   CASE_LABELS_ES,
   OPTION_LABELS_ES,
@@ -141,9 +141,9 @@ export default function AirTrialPage() {
       render: (i) => TIER_LABELS_ES[i.sale.tier],
     },
   ]
-  const purchase = [...planOf(option).items].sort(
-    (x, y) => y.unitBaselineClp * y.qty - x.unitBaselineClp * x.qty,
-  )
+  const purchase = planOf(option)
+    .items.filter((i) => isOffered(i.sale.tier))
+    .sort((x, y) => y.unitBaselineClp * y.qty - x.unitBaselineClp * x.qty)
 
   const downloadPurchaseCsv = () => {
     downloadCsv(

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import DownloadIcon from '@mui/icons-material/Download'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
@@ -260,7 +259,6 @@ export default function FullShipmentPage() {
               />
               <ToolbarButton
                 label="Descargar CSV"
-                startIcon={<DownloadIcon fontSize="small" />}
                 onClick={downloadPurchaseCsv}
                 disabled={!purchase.length}
               />

@@ -121,6 +121,38 @@ export default function FullShipmentPage() {
     .filter((i) => isOffered(i.sale.tier))
     .sort((x, y) => (y.unitBaselineClp ?? 0) * y.qty - (x.unitBaselineClp ?? 0) * x.qty)
 
+  const calcColumns = [
+    { id: 'label', label: 'Paso', render: (r) => r.labelEs },
+    { id: 'value', label: 'Monto', align: 'right', render: (r) => red(formatClp(r.valueClp)) },
+  ]
+  const calcRows = result.items.length
+    ? [
+        { labelEs: 'Compra al proveedor (FOB)', valueClp: result.totals.goodsClp },
+        { labelEs: 'Flete FCL', valueClp: result.totals.freightClp },
+        { labelEs: 'Seguro', valueClp: result.totals.insuranceClp },
+        { labelEs: 'CIF', valueClp: result.totals.cifClp },
+        { labelEs: 'Arancel', valueClp: result.totals.dutyClp },
+        { labelEs: 'Agente de aduanas y gastos en Chile', valueClp: result.totals.chileClp },
+        { labelEs: 'Costo puesto en Chile', valueClp: result.totals.costClp },
+      ]
+    : []
+
+  const sensitivityColumns = [
+    { id: 'label', label: 'Si…', render: (s) => s.labelEs },
+    {
+      id: 'cost',
+      label: 'Costo puesto en Chile',
+      align: 'right',
+      render: (s) => (s.costClp == null ? '—' : red(formatClp(s.costClp))),
+    },
+    {
+      id: 'profit',
+      label: 'Utilidad',
+      align: 'right',
+      render: (s) => (s.profitClp == null ? '—' : red(formatClpMillions(s.profitClp))),
+    },
+  ]
+
   const downloadPurchaseCsv = () => {
     downloadCsv(
       `carga-completa-${option}.csv`,
@@ -271,6 +303,55 @@ export default function FullShipmentPage() {
               rows={purchase}
               getRowKey={(i) => i.partId}
               emptyText="Sin repuestos costeables en esta opción."
+            />
+          </Box>
+        ) : null}
+
+        {tab === FULL_SHIPMENT_TABS.CALCULATION ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Toolbar>
+              <ToolbarSelectBox
+                label="Contenedor"
+                value={mode}
+                onChange={setMode}
+                options={CONTAINER_OPTIONS}
+              />
+              <ToolbarSelectBox
+                label="Opción"
+                value={option}
+                onChange={setOption}
+                options={SHIPMENT_OPTIONS.map((o) => ({
+                  value: o,
+                  label: SHIPMENT_OPTION_LABELS_ES[o],
+                }))}
+              />
+            </Toolbar>
+            {result.items.length ? (
+              <ListTable
+                columns={calcColumns}
+                rows={calcRows}
+                getRowKey={(r) => r.labelEs}
+                emptyText="Sin cálculo."
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Sin oferta costeable en esta opción.
+              </Typography>
+            )}
+          </Box>
+        ) : null}
+
+        {tab === FULL_SHIPMENT_TABS.SENSITIVITY ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Cómo cambia el costo puesto en Chile y la utilidad de la opción &quot;Más barato&quot;
+              si el flete por contenedor sale distinto al de referencia — el supuesto más volátil
+              del cálculo.
+            </Typography>
+            <ListTable
+              columns={sensitivityColumns}
+              rows={data.freightScenarios}
+              getRowKey={(s) => s.key}
             />
           </Box>
         ) : null}

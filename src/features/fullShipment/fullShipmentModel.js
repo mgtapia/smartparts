@@ -7,10 +7,28 @@
 import { planPurchase } from '@core/costing/purchasePlan'
 import { toUsdMicro, usdMicroToClp } from '@libs/fx'
 import { salePrice } from '@features/costing/pricingModel'
-import { QUALITY_ES, supplierAbbr } from '@features/trial/airTrialModel'
 
 export const SHIPMENT_OPTIONS = ['original', 'cheapest']
 export const SHIPMENT_OPTION_LABELS_ES = { original: 'Original', cheapest: 'Más barato' }
+export const QUALITY_ES = { original: 'OEM', alternative: 'AFM' }
+
+/** La tarifa de flete por contenedor es el supuesto más volátil del cálculo. */
+export const FREIGHT_SENSITIVITY = [
+  { key: 'rate_lo', labelEs: 'El flete sale 30 % más barato', rateBp: 7000 },
+  { key: 'base', labelEs: 'Con la tarifa actual', rateBp: 10000 },
+  { key: 'rate_hi', labelEs: 'El flete sale 30 % más caro', rateBp: 13000 },
+]
+
+/** Sigla para las tablas: "XM Industrial" ya empieza con la suya; el resto, las iniciales. */
+function supplierAbbr(name) {
+  const first = name.split(' ')[0]
+  if (/^[A-Z]{2,4}$/.test(first)) return first
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+}
 
 /** Un precio es atípico si pasa de 3 veces la mediana entre proveedores o queda bajo un tercio. */
 const OUTLIER_FACTOR = 3
@@ -147,17 +165,26 @@ export function buildFullShipment({
   }))
 
   // Una oferta por línea de cotización real (sin las inferidas: son del lado opuesto de la pieza).
+  // `toUsdMicro` solo entiende USD y CNY: una cotización en otra moneda (o mal cargada) se omite
+  // en vez de romper toda la página — no es un dato que se pueda costear todavía.
   const allOffers = []
   for (const p of usableParts) {
     for (const q of p.quotes ?? []) {
-      if (q.inferred || !q.currency || !nameOf.has(q.supplierId) || !q.incoterm) continue
+      if (q.inferred || !q.currency || !nameOf.has(q.supplierId) || !q.incoterm || !q.price)
+        continue
+      let priceUsdMicro
+      try {
+        priceUsdMicro = toUsdMicro(q.price, fx)
+      } catch {
+        continue
+      }
       allOffers.push({
         offerId: q.id,
         partId: p.id,
         supplierId: q.supplierId,
         quality: q.partType,
         qualityConfirmed: q.partTypeConfirmed,
-        priceUsdMicro: toUsdMicro(q.price, fx),
+        priceUsdMicro,
         unitPrice: { amount: q.price.amount, currency: q.currency, scale: q.price.scale },
         incoterm: q.incoterm,
       })
@@ -181,7 +208,7 @@ export function buildFullShipment({
     }
   })
 
-  function runOption(option) {
+  function runOption(option, assumptions = rates) {
     const optOffers =
       option === 'original' ? offers.filter((o) => o.quality === 'original') : offers
     const offerById = new Map(optOffers.map((o) => [o.offerId, o]))
@@ -198,7 +225,7 @@ export function buildFullShipment({
       offers: planOffers,
       suppliers: planSuppliers,
       mode,
-      assumptions: rates,
+      assumptions,
       params,
       fx,
     })
@@ -254,11 +281,30 @@ export function buildFullShipment({
 
   const results = Object.fromEntries(SHIPMENT_OPTIONS.map((opt) => [opt, runOption(opt)]))
 
+  // Sensibilidad: la cantidad ya es la real estimada (no tiene sentido "probar con menos"), así
+  // que acá solo se mueve la tarifa de flete por contenedor — el supuesto más volátil de todos
+  // (ver FCL_SOURCES en src/mocks/costParams.js) — sobre la opción "Más barato".
+  const freightScenarios = FREIGHT_SENSITIVITY.map(({ key, labelEs, rateBp }) => {
+    const scaledRates = {
+      ...rates,
+      fclContainers: {
+        ...rates.fclContainers,
+        [mode]: {
+          ...rates.fclContainers[mode],
+          freightCents: Math.round((rates.fclContainers[mode].freightCents * rateBp) / 10000),
+        },
+      },
+    }
+    const r = runOption('cheapest', scaledRates)
+    return { key, labelEs, costClp: r.totals?.costClp ?? null, profitClp: r.profitClp ?? null }
+  })
+
   return {
     partCount: usableParts.length,
     mode,
     suppliers: suppliers.map((s) => ({ id: s.id, name: nameOf.get(s.id), abbr: abbrOf.get(s.id) })),
     results,
+    freightScenarios,
     anomalies,
     suspectOfferCount: suspect.size,
   }

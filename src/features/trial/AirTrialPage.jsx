@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import DownloadIcon from '@mui/icons-material/Download'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
@@ -267,11 +266,7 @@ export default function AirTrialPage() {
                 onChange={setOption}
                 options={OPTION_OPTIONS}
               />
-              <ToolbarButton
-                label="Descargar CSV"
-                startIcon={<DownloadIcon fontSize="small" />}
-                onClick={downloadPurchaseCsv}
-              />
+              <ToolbarButton label="Descargar CSV" onClick={downloadPurchaseCsv} />
             </Toolbar>
             <ListTable
               sortKey="trial-purchase"

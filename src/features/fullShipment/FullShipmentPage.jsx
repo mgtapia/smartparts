@@ -22,7 +22,12 @@ import { downloadCsv } from '@libs/csv'
 import { TIER_LABELS_ES, isOffered } from '@features/costing/pricingModel'
 import AnomalyGroups from '@features/trial/components/AnomalyGroups'
 import { formatClp, formatClpMillions } from '@features/trial/constants'
-import { SHIPMENT_OPTIONS, SHIPMENT_OPTION_LABELS_ES } from './fullShipmentModel'
+import {
+  SHIPMENT_OPTIONS,
+  SHIPMENT_OPTION_LABELS_ES,
+  SUPPLIER_MODES,
+  SUPPLIER_MODE_LABELS_ES,
+} from './fullShipmentModel'
 import { useFullShipment } from './hooks/useFullShipment'
 import { FULL_SHIPMENT_TABS, TAB_LIST, CONTAINER_OPTIONS, RED_REASON } from './constants'
 
@@ -32,9 +37,15 @@ const red = (children) => (
   </UncertainValue>
 )
 
+const SUPPLIER_MODE_OPTIONS = SUPPLIER_MODES.map((m) => ({
+  value: m,
+  label: SUPPLIER_MODE_LABELS_ES[m],
+}))
+
 export default function FullShipmentPage() {
   const [mode, setMode] = useState(CONTAINER_OPTIONS[0].value)
-  const { data, loading, error } = useFullShipment(mode)
+  const [supplierMode, setSupplierMode] = useState(SUPPLIER_MODES[0])
+  const { data, loading, error } = useFullShipment(mode, supplierMode)
   const [tab, setTab] = useUrlTab(Object.values(FULL_SHIPMENT_TABS))
   const [option, setOption] = useState(SHIPMENT_OPTIONS[0])
 
@@ -198,6 +209,12 @@ export default function FullShipmentPage() {
                 onChange={setMode}
                 options={CONTAINER_OPTIONS}
               />
+              <ToolbarSelectBox
+                label="Proveedores"
+                value={supplierMode}
+                onChange={setSupplierMode}
+                options={SUPPLIER_MODE_OPTIONS}
+              />
             </Toolbar>
             <Box
               sx={{
@@ -289,6 +306,12 @@ export default function FullShipmentPage() {
                   label: SHIPMENT_OPTION_LABELS_ES[o],
                 }))}
               />
+              <ToolbarSelectBox
+                label="Proveedores"
+                value={supplierMode}
+                onChange={setSupplierMode}
+                options={SUPPLIER_MODE_OPTIONS}
+              />
               <ToolbarButton
                 label="Descargar CSV"
                 onClick={downloadPurchaseCsv}
@@ -324,6 +347,12 @@ export default function FullShipmentPage() {
                   value: o,
                   label: SHIPMENT_OPTION_LABELS_ES[o],
                 }))}
+              />
+              <ToolbarSelectBox
+                label="Proveedores"
+                value={supplierMode}
+                onChange={setSupplierMode}
+                options={SUPPLIER_MODE_OPTIONS}
               />
             </Toolbar>
             {result.items.length ? (

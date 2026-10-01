@@ -12,8 +12,9 @@ import { buildFullShipment } from '../fullShipmentModel'
  * la Calculadora y la Compra de prueba, pero con la distancia al puerto (no al aeropuerto) de
  * cada proveedor, sin importar el modo que haya quedado elegido en otras pantallas.
  * @param {'sea_fcl_20'|'sea_fcl_40hq'} mode
+ * @param {'single'|'multiple'} [supplierMode]
  */
-export function useFullShipment(mode) {
+export function useFullShipment(mode, supplierMode) {
   const parts = useCachedQuery('parts', listParts)
   const suppliers = useCachedQuery('suppliers', listSuppliers)
   const sourcing = useSourcingVehicle()
@@ -37,6 +38,7 @@ export function useFullShipment(mode) {
           fx,
           pricing,
           mode,
+          supplierMode,
         }),
         buildError: null,
       }
@@ -58,6 +60,7 @@ export function useFullShipment(mode) {
     pricing,
     fx,
     mode,
+    supplierMode,
   ])
 
   return { data, loading, error: error || buildError }

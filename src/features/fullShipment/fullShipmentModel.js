@@ -12,6 +12,19 @@ export const SHIPMENT_OPTIONS = ['original', 'cheapest']
 export const SHIPMENT_OPTION_LABELS_ES = { original: 'Original', cheapest: 'Más barato' }
 export const QUALITY_ES = { original: 'OEM', alternative: 'AFM' }
 
+/** Un solo proveedor (sin los gastos fijos de sumar otro) o la mejor combinación, aunque sea de varios. */
+export const SUPPLIER_MODES = ['single', 'multiple']
+export const SUPPLIER_MODE_LABELS_ES = { single: 'Proveedor único', multiple: 'Varios proveedores' }
+
+/** Gana el que cubre más repuestos; a igual cobertura, el más barato puesto en Chile. */
+function betterScenario(a, b) {
+  if (!b) return true
+  if (a.coveredPartIds.length !== b.coveredPartIds.length) {
+    return a.coveredPartIds.length > b.coveredPartIds.length
+  }
+  return (a.cost.totals.landedNet ?? Infinity) < (b.cost.totals.landedNet ?? Infinity)
+}
+
 /** La tarifa de flete por contenedor es el supuesto más volátil del cálculo. */
 export const FREIGHT_SENSITIVITY = [
   { key: 'rate_lo', labelEs: 'El flete sale 30 % más barato', rateBp: 7000 },
@@ -140,6 +153,8 @@ function detectAnomalies({ offers, parts, suppliers }) {
  * @param {any} input.fx
  * @param {{ minMarginBp: number, maxSavingOemBp: number, maxSavingAltBp: number, minSavingBp: number }} input.pricing
  * @param {'sea_fcl_20'|'sea_fcl_40hq'} input.mode
+ * @param {'single'|'multiple'} [input.supplierMode]  'single': el mejor proveedor solo, sin sumar
+ *   los gastos fijos de combinar otro. 'multiple' (por defecto): la mejor combinación, sea de uno o varios.
  */
 export function buildFullShipment({
   parts,
@@ -150,6 +165,7 @@ export function buildFullShipment({
   fx,
   pricing,
   mode,
+  supplierMode = 'multiple',
 }) {
   const partById = new Map(parts.map((p) => [p.id, p]))
   const nameOf = new Map(suppliers.map((s) => [s.id, s.alias || s.name]))
@@ -229,7 +245,12 @@ export function buildFullShipment({
       params,
       fx,
     })
-    const best = scenarios.find((s) => s.kind === 'best')
+    const best =
+      supplierMode === 'single'
+        ? scenarios
+            .filter((s) => s.kind === 'single')
+            .reduce((acc, s) => (betterScenario(s, acc) ? s : acc), null)
+        : scenarios.find((s) => s.kind === 'best')
     if (blockers.length > 0 || !best) {
       return { blockers, best: null, items: [] }
     }

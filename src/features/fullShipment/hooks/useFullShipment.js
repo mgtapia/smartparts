@@ -24,18 +24,28 @@ export function useFullShipment(mode) {
 
   const pricing = useMemo(() => pricingFor(rates, 'sea'), [rates])
 
-  const data = useMemo(() => {
-    if (loading || error || !sourcing.vehicleId) return null
-    return buildFullShipment({
-      parts: (parts.data ?? []).filter((p) => p.vehicleId === sourcing.vehicleId),
-      suppliers: suppliers.data ?? [],
-      settingsFor: settingsForSea,
-      rates,
-      params,
-      fx,
-      pricing,
-      mode,
-    })
+  const { data, buildError } = useMemo(() => {
+    if (loading || error || !sourcing.vehicleId) return { data: null, buildError: null }
+    try {
+      return {
+        data: buildFullShipment({
+          parts: (parts.data ?? []).filter((p) => p.vehicleId === sourcing.vehicleId),
+          suppliers: suppliers.data ?? [],
+          settingsFor: settingsForSea,
+          rates,
+          params,
+          fx,
+          pricing,
+          mode,
+        }),
+        buildError: null,
+      }
+    } catch (err) {
+      // No debería pasar con datos válidos — si pasa, se ve en la consola y la página muestra un
+      // error en vez de quedar en blanco.
+      console.error('useFullShipment: buildFullShipment falló', err)
+      return { data: null, buildError: err }
+    }
   }, [
     loading,
     error,
@@ -50,5 +60,5 @@ export function useFullShipment(mode) {
     mode,
   ])
 
-  return { data, loading, error }
+  return { data, loading, error: error || buildError }
 }

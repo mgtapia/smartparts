@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import DownloadIcon from '@mui/icons-material/Download'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
@@ -11,11 +12,14 @@ import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import InfoNote from '@components/common/InfoNote'
 import Pill from '@components/common/Pill'
+import Toolbar from '@components/common/Toolbar'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
+import ToolbarButton from '@components/common/ToolbarButton'
 import UncertainValue from '@components/common/UncertainValue'
 import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
+import { downloadCsv } from '@libs/csv'
 import { OPTIONS } from './airTrialModel'
 import { TIER_LABELS_ES } from '@features/costing/pricingModel'
 import {
@@ -141,6 +145,34 @@ export default function AirTrialPage() {
     (x, y) => y.unitBaselineClp * y.qty - x.unitBaselineClp * x.qty,
   )
 
+  const downloadPurchaseCsv = () => {
+    downloadCsv(
+      `compra-de-prueba-${option}.csv`,
+      [
+        'Repuesto',
+        'Proveedor',
+        'Calidad',
+        'Cantidad',
+        'Costo aéreo (CLP)',
+        'PVP neto (CLP)',
+        'Precio REF (CLP)',
+        'Ahorro (CLP)',
+        'Tramo',
+      ],
+      purchase.map((i) => [
+        i.name,
+        abbr(i.supplierId),
+        i.quality,
+        i.qty,
+        Math.round(i.fullUnitCostClp),
+        Math.round(i.sale.priceClp),
+        Math.round(i.unitBaselineClp),
+        Math.round(i.unitBaselineClp - i.sale.priceClp),
+        TIER_LABELS_ES[i.sale.tier],
+      ]),
+    )
+  }
+
   const casesColumns = [
     { id: 'case', label: 'Qué se compra', render: (c) => CASE_LABELS_ES[c] },
     ...OPTIONS.flatMap((opt) => [
@@ -228,14 +260,19 @@ export default function AirTrialPage() {
 
         {tab === TRIAL_TABS.PURCHASE ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Toolbar>
               <ToolbarSelectBox
                 label="Opción"
                 value={option}
                 onChange={setOption}
                 options={OPTION_OPTIONS}
               />
-            </Box>
+              <ToolbarButton
+                label="Descargar CSV"
+                startIcon={<DownloadIcon fontSize="small" />}
+                onClick={downloadPurchaseCsv}
+              />
+            </Toolbar>
             <ListTable
               sortKey="trial-purchase"
               searchFields={(i) => [i.name, abbr(i.supplierId), i.quality]}

@@ -5,7 +5,7 @@ import { listSuppliers } from '@libs/repos/suppliersRepo'
 import { useCostAssumptions } from '@features/quotes/hooks/useCostAssumptions'
 import { useSourcingVehicle } from '@features/vehicles/hooks/useSourcingVehicle'
 import { pricingFor } from '@features/costing/pricingModel'
-import { buildFullShipment } from '../fullShipmentModel'
+import { buildFullShipment } from '@features/costing/fullShipmentModel'
 
 /**
  * Análisis de la carga completa por FCL del vehículo en sourcing: mismos supuestos de costo que

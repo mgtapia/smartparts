@@ -108,6 +108,13 @@ export const NAV_ENTRIES = Object.freeze([
         icon: 'DirectionsBoat',
         implemented: true,
       },
+      {
+        key: 'price-review',
+        path: '/price-review',
+        labelEs: 'Precios consolidados',
+        icon: 'RequestQuote',
+        implemented: true,
+      },
     ],
   },
   {

@@ -13,9 +13,11 @@ import { hasSectionTabs } from '@constants/routes'
 
 /**
  * Encabezado de página. `back` ({ href, label }) pone una flecha de volver a la
- * izquierda del título, en la misma fila. A la derecha, separadas del título,
- * van las pestañas de la sección del menú y las `actions`. Debajo del título
- * van las migas de pan (omitidas en la página principal); nada más.
+ * izquierda del título; `actions` va pegado al título, en la misma fila (nunca
+ * en una fila aparte: antes vivía en una columna propia junto a las pestañas
+ * de sección y su alto empujaba todo el encabezado hacia abajo). A la derecha
+ * van las pestañas de la sección del menú, ancladas al borde inferior. Debajo
+ * del título van las migas de pan (omitidas en la página principal); nada más.
  */
 export default function PageHeader({ title, actions, back }) {
   // Con pestañas de sección, el panel de contenido va pegado a su borde inferior.
@@ -48,21 +50,19 @@ export default function PageHeader({ title, actions, back }) {
           <Typography variant="h5" component="h1">
             {title}
           </Typography>
+          {actions}
         </Box>
         <Breadcrumbs />
       </Box>
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
           alignSelf: 'stretch',
-          gap: 1,
           flexShrink: 0,
         }}
       >
-        {actions ? <Box sx={{ display: 'flex', gap: 1, mb: 'auto' }}>{actions}</Box> : null}
         <SectionTabs />
       </Box>
     </Box>

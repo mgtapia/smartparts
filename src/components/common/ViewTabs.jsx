@@ -30,7 +30,6 @@ export default function ViewTabs({ value, onChange, tabs }) {
             height: '100%',
             borderRadius: `${RADIUS.pill}px`,
             bgcolor: 'background.paper',
-            boxShadow: 1,
           },
         },
       }}

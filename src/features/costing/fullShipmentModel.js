@@ -1,10 +1,14 @@
-// Carga completa por contenedor (FCL): el mismo tipo de análisis que la Compra de prueba
-// (src/features/trial/airTrialModel.js), pero con las cantidades reales que estima la demanda
-// de Tucar (`quantityEstimated` de cada repuesto) en vez de 1 unidad por línea, y costeando con
-// el motor de contenedor completo (`planPurchase`/`costShipment`) en vez de un prorrateo manual
-// de gastos por embarque — ese motor ya resuelve cuántos contenedores hacen falta para el pedido
-// consolidado. Función pura: recibe repuestos, proveedores y supuestos, y devuelve el análisis.
+// Costeo de un pedido completo (cantidades reales, no 1 unidad como la Compra de prueba) entre
+// varios proveedores a la vez, en cualquier modo de envío (aéreo o marítimo FCL — `costShipment`
+// ya resuelve ambos; en FCL además cuántos contenedores hacen falta). Función pura: recibe
+// repuestos, proveedores y supuestos, y devuelve el análisis.
+//
+// Vive en `features/costing` (no en `features/fullShipment`, que es solo la página de Carga
+// completa) porque también lo usa `features/priceReview` — importar el módulo de una página desde
+// otra ya causó una pantalla en blanco en producción (ver STATUS.md): un módulo compartido entre
+// páginas va en una carpeta neutral, no en la carpeta de la página "dueña" original.
 import { planPurchase } from '@core/costing/purchasePlan'
+import { isFclMode } from '@core/costing/containers'
 import { toUsdMicro, usdMicroToClp } from '@libs/fx'
 import { salePrice } from '@features/costing/pricingModel'
 
@@ -317,22 +321,25 @@ export function buildFullShipment({
   const results = Object.fromEntries(SHIPMENT_OPTIONS.map((opt) => [opt, runOption(opt)]))
 
   // Sensibilidad: la cantidad ya es la real estimada (no tiene sentido "probar con menos"), así
-  // que acá solo se mueve la tarifa de flete por contenedor — el supuesto más volátil de todos
-  // (ver FCL_SOURCES en src/mocks/costParams.js) — sobre la opción "Más barato".
-  const freightScenarios = FREIGHT_SENSITIVITY.map(({ key, labelEs, rateBp }) => {
-    const scaledRates = {
-      ...rates,
-      fclContainers: {
-        ...rates.fclContainers,
-        [mode]: {
-          ...rates.fclContainers[mode],
-          freightCents: Math.round((rates.fclContainers[mode].freightCents * rateBp) / 10000),
-        },
-      },
-    }
-    const r = runOption('cheapest', scaledRates)
-    return { key, labelEs, costClp: r.totals?.costClp ?? null, profitClp: r.profitClp ?? null }
-  })
+  // que acá solo se mueve la tarifa de flete — el supuesto más volátil de todos (ver FCL_SOURCES
+  // en src/mocks/costParams.js) — sobre la opción "Más barato". Solo tiene sentido en FCL (flete
+  // por contenedor); en otros modos (ej. 'air', reusado por la tabla de precios) se omite.
+  const freightScenarios = isFclMode(mode)
+    ? FREIGHT_SENSITIVITY.map(({ key, labelEs, rateBp }) => {
+        const scaledRates = {
+          ...rates,
+          fclContainers: {
+            ...rates.fclContainers,
+            [mode]: {
+              ...rates.fclContainers[mode],
+              freightCents: Math.round((rates.fclContainers[mode].freightCents * rateBp) / 10000),
+            },
+          },
+        }
+        const r = runOption('cheapest', scaledRates)
+        return { key, labelEs, costClp: r.totals?.costClp ?? null, profitClp: r.profitClp ?? null }
+      })
+    : []
 
   return {
     partCount: usableParts.length,

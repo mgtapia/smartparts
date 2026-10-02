@@ -30,7 +30,7 @@ import {
   SUPPLIER_MODES,
   SUPPLIER_MODE_LABELS_ES,
   hasPriceGap,
-} from './fullShipmentModel'
+} from '@features/costing/fullShipmentModel'
 import { useFullShipment } from './hooks/useFullShipment'
 import { FULL_SHIPMENT_TABS, TAB_LIST, CONTAINER_OPTIONS, RED_REASON } from './constants'
 

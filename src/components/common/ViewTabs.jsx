@@ -42,6 +42,8 @@ export default function ViewTabs({ value, onChange, tabs }) {
         p: 0.5,
         bgcolor: 'brand.bodyBg',
         borderRadius: `${RADIUS.pill}px`,
+        border: 1,
+        borderColor: 'divider',
         '& .MuiTabs-indicator': { transition: 'left 200ms, width 200ms' },
       }}
     >

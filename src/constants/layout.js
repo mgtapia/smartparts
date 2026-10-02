@@ -1,5 +1,5 @@
 // Constantes de layout — ver .agent/DESIGN.md §Layout de anchos / Espaciado de grids.
-// Máx. 2 anchos de contenido: fijo (MAX_WIDTH) y completo. No inventar otros.
+// Un único ancho de contenido (MAX_WIDTH) en todas las vistas. No inventar otro.
 
 export const MAX_WIDTH = 1180
 export const TOOLTIP_MAX_WIDTH = 260 // ancho máximo de un tooltip: por sobre esto el texto pasa a otra línea

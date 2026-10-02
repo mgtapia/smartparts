@@ -282,7 +282,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <ContentWidth full>
+    <ContentWidth>
       <PageHeader title="Repuestos" />
 
       <SectionPanel>

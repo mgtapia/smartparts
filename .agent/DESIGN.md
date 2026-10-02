@@ -78,7 +78,7 @@ Mismo patrón de `AppRail` que yonder (columna izquierda, flyout al hover), sin 
 
 ## Layout de anchos
 
-Igual regla que yonder: **máx. 2 tipos**. Ancho fijo (contenido de página, formularios, fichas) y ancho completo (catálogo/repuestos con filtros + data grid). La columna central de las vistas full-width igual respeta un `maxWidth` de lectura para los bloques de texto/resumen.
+**Un único ancho máximo en toda la plataforma** (`MAX_WIDTH`, `ContentWidth`), sin excepción — decisión del usuario, 2026-10-02: ninguna vista queda a ancho completo, ni siquiera el catálogo. `ContentWidth` ya no acepta `full`.
 
 ## Espaciado de grids
 

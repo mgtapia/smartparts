@@ -33,7 +33,10 @@ export default function AppTopBar({ expanded, onToggleMenu }) {
         <IconButton
           onClick={onToggleMenu}
           aria-label={expanded ? 'Contraer menú' : 'Expandir menú'}
-          sx={{ color: 'common.white' }}
+          // Mismo tamaño y centrado que el botón de cada ítem del rail (ver `rowSx` en
+          // AppRail): con el mismo padding de la barra a la izquierda (px: 1.5 acá arriba),
+          // los íconos quedan alineados entre la barra y el rail.
+          sx={{ width: 44, height: 44, p: 0, color: 'common.white' }}
         >
           {expanded ? <MenuOpenIcon /> : <MenuIcon />}
         </IconButton>

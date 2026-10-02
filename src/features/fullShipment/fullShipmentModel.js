@@ -12,6 +12,18 @@ export const SHIPMENT_OPTIONS = ['original', 'cheapest']
 export const SHIPMENT_OPTION_LABELS_ES = { original: 'Original', cheapest: 'Más barato' }
 export const QUALITY_ES = { original: 'OEM', alternative: 'AFM' }
 
+// Repuestos que se omiten del cálculo: el código viene sin verificar de la planilla del cliente y
+// un proveedor ya lo rechazó como inexistente en el sistema de Dongfeng (2026-09-21) — la
+// cotización que tenemos probablemente es de otra pieza, no de esta. Ver sourcing_note de la
+// ficha. Se excluye acá (no se borra el dato) hasta confirmar el código real.
+const EXCLUDED_CODES = new Set(['2844105', '2844206'])
+
+/** Si el PVP es más de esto veces el costo, probablemente el precio REF está mal o no es la misma pieza. */
+export const PRICE_GAP_FACTOR = 5
+/** @param {{ unitCostClp: number, sale: { priceClp: number } }} item */
+export const hasPriceGap = (item) =>
+  item.unitCostClp > 0 && item.sale.priceClp / item.unitCostClp >= PRICE_GAP_FACTOR
+
 /** Un solo proveedor (sin los gastos fijos de sumar otro) o la mejor combinación, aunque sea de varios. */
 export const SUPPLIER_MODES = ['single', 'multiple']
 export const SUPPLIER_MODE_LABELS_ES = { single: 'Proveedor único', multiple: 'Varios proveedores' }
@@ -171,7 +183,9 @@ export function buildFullShipment({
   const nameOf = new Map(suppliers.map((s) => [s.id, s.alias || s.name]))
   const abbrOf = new Map([...nameOf].map(([id, name]) => [id, supplierAbbr(name)]))
 
-  const usableParts = parts.filter((p) => p.weightG > 0 && p.volumeCm3 > 0)
+  const usableParts = parts.filter(
+    (p) => p.weightG > 0 && p.volumeCm3 > 0 && !EXCLUDED_CODES.has(p.code),
+  )
   const planParts = usableParts.map((p) => ({
     partId: p.id,
     qty: Math.max(1, Math.round(p.quantityEstimated ?? 1)),

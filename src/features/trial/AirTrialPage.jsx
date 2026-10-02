@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
@@ -19,7 +20,7 @@ import { ErrorState } from '@components/common/AsyncState'
 import { DetailPageSkeleton } from '@components/common/Skeletons'
 import { useUrlTab } from '@hooks/useUrlTab'
 import { downloadCsv } from '@libs/csv'
-import { OPTIONS } from './airTrialModel'
+import { OPTIONS, hasPriceGap } from './airTrialModel'
 import { TIER_LABELS_ES, isOffered } from '@features/costing/pricingModel'
 import {
   CASE_LABELS_ES,
@@ -136,8 +137,19 @@ export default function AirTrialPage() {
     {
       id: 'tier',
       label: 'Tramo',
-      width: 120,
-      render: (i) => TIER_LABELS_ES[i.sale.tier],
+      width: 150,
+      render: (i) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {TIER_LABELS_ES[i.sale.tier]}
+          {hasPriceGap(i) ? (
+            <Tooltip title="El PVP es 5 veces o más el costo: el precio de referencia puede estar mal o ser de otra pieza.">
+              <span>
+                <Pill label="Revisar REF" tone="warning" />
+              </span>
+            </Tooltip>
+          ) : null}
+        </Box>
+      ),
     },
   ]
   const purchase = planOf(option)

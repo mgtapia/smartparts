@@ -4,12 +4,14 @@ import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
 import ContentWidth from '@components/common/ContentWidth'
 import PageHeader from '@components/common/PageHeader'
 import SectionPanel from '@components/layout/SectionPanel'
 import ListTable from '@components/common/ListTable'
 import ViewTabs from '@components/common/ViewTabs'
 import InfoNote from '@components/common/InfoNote'
+import Pill from '@components/common/Pill'
 import Toolbar from '@components/common/Toolbar'
 import ToolbarSelectBox from '@components/common/ToolbarSelectBox'
 import ToolbarButton from '@components/common/ToolbarButton'
@@ -27,6 +29,7 @@ import {
   SHIPMENT_OPTION_LABELS_ES,
   SUPPLIER_MODES,
   SUPPLIER_MODE_LABELS_ES,
+  hasPriceGap,
 } from './fullShipmentModel'
 import { useFullShipment } from './hooks/useFullShipment'
 import { FULL_SHIPMENT_TABS, TAB_LIST, CONTAINER_OPTIONS, RED_REASON } from './constants'
@@ -124,8 +127,19 @@ export default function FullShipmentPage() {
     {
       id: 'tier',
       label: 'Tramo',
-      width: 120,
-      render: (i) => (i.sale.tier ? TIER_LABELS_ES[i.sale.tier] : '—'),
+      width: 150,
+      render: (i) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {i.sale.tier ? TIER_LABELS_ES[i.sale.tier] : '—'}
+          {hasPriceGap(i) ? (
+            <Tooltip title="El PVP es 5 veces o más el costo: el precio de referencia puede estar mal o ser de otra pieza.">
+              <span>
+                <Pill label="Revisar REF" tone="warning" />
+              </span>
+            </Tooltip>
+          ) : null}
+        </Box>
+      ),
     },
   ]
   const purchase = result.items

@@ -24,6 +24,20 @@ const MAX_COMBO = 2
 export const OPTIONS = ['original', 'cheapest']
 export const QUALITY_ES = { original: 'OEM', alternative: 'AFM' }
 
+// Repuestos que se omiten del cálculo: el código viene sin verificar de la planilla del cliente y
+// un proveedor ya lo rechazó como inexistente en el sistema de Dongfeng (2026-09-21) — la
+// cotización que tenemos probablemente es de otra pieza, no de esta. Ver sourcing_note de la
+// ficha. Se excluye acá (no se borra el dato) hasta confirmar el código real.
+const EXCLUDED_CODES = new Set(['2844105', '2844206'])
+
+/** Si el PVP es más de esto veces el costo, probablemente el precio REF está mal o no es la misma pieza. */
+export const PRICE_GAP_FACTOR = 5
+/** @param {{ fullUnitCostClp?: number, unitCostClp?: number, sale: { priceClp: number } }} item */
+export const hasPriceGap = (item) => {
+  const cost = item.fullUnitCostClp ?? item.unitCostClp
+  return cost > 0 && item.sale.priceClp / cost >= PRICE_GAP_FACTOR
+}
+
 /** Escenarios de sensibilidad: se cambia un supuesto a la vez, en basis points sobre el valor base. */
 export const SCENARIOS = [
   { key: 'base', labelEs: 'Con los datos actuales', rateBp: 10000, volBp: 10000, qtyBp: 10000 },
@@ -139,7 +153,16 @@ export function supplierAbbr(name) {
  * @param {{ minMarginBp: number, maxSavingOemBp: number, maxSavingAltBp: number, minSavingBp: number }} input.pricing
  *   Fórmula de precio de venta (ver `salePrice`): margen mínimo aéreo y ahorros máximo y mínimo del cliente.
  */
-export function buildAirTrial({ parts, suppliers, settingsFor, rates, params, fx, pricing }) {
+export function buildAirTrial({
+  parts: allParts,
+  suppliers,
+  settingsFor,
+  rates,
+  params,
+  fx,
+  pricing,
+}) {
+  const parts = allParts.filter((p) => !EXCLUDED_CODES.has(p.code))
   const partById = new Map(parts.map((p) => [p.id, p]))
   const nameOf = new Map(suppliers.map((s) => [s.id, s.alias || s.name]))
   const abbrOf = new Map([...nameOf].map(([id, name]) => [id, supplierAbbr(name)]))
